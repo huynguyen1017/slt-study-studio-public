@@ -1,0 +1,55 @@
+{
+  "simulator": "ngspice 47",
+  "test_type": "ideal transmission line transient analysis",
+  "cases": [
+    {
+      "id": "high_200",
+      "samples": 1514,
+      "sha256_netlist": "5d44012c991b2da8ab53a960d21772a65e0744a78022e2c3dd3bbd02bc7199ce",
+      "sha256_raw_data": "63f0993d6e345bfd672ba3744dbd7570a97e5a9aa9f20dbb050fffebbb877bc3",
+      "ngspice_completed": true
+    },
+    {
+      "id": "high_slow",
+      "samples": 1514,
+      "sha256_netlist": "c1c2f3a195028f0a1185d889ba6085e71230722065c5e7e4a4fee5f367743e60",
+      "sha256_raw_data": "9e63fa4ba02211fe904fd3419addf52609fdf83c1d277de82431903aa38234a7",
+      "ngspice_completed": true
+    },
+    {
+      "id": "low_10",
+      "samples": 1514,
+      "sha256_netlist": "072cc7cf9dfcd632576790d22f8e2d4d6a169589b338e744c9b31a9670224808",
+      "sha256_raw_data": "e3497d9bd8eed86015f482a9bf0cb8de50c556473150de3e6f37411fd0275f60",
+      "ngspice_completed": true
+    },
+    {
+      "id": "matched_50",
+      "samples": 1514,
+      "sha256_netlist": "1f8313051a5f379695e7522c57233c0e72624ff2291100ca43f54c118e5c0e91",
+      "sha256_raw_data": "628d25a947eafe141d9f65421e86192f300acacf3365e6670f27dabfbf8f054a",
+      "ngspice_completed": true
+    },
+    {
+      "id": "open_1meg",
+      "samples": 1514,
+      "sha256_netlist": "81968fdafdf94bce96a7c4bee2593d9a6007922538b3cc0311e640acef1906ba",
+      "sha256_raw_data": "c1ea2e18e415f38ef2ccf55d07bba1cbaebce8fa7f13789817e715d85f486ed8",
+      "ngspice_completed": true
+    },
+    {
+      "id": "package_ring",
+      "samples": 1790,
+      "sha256_netlist": "96c0e1e58ff5139a5f78eef63ca521957b9ee831f88ed82bb1e190abbbdea1b5",
+      "sha256_raw_data": "ad3ab2386501e8971cb4dfeb2caf2566f9db7ab71c76995827f6b8a7c2bf0b87",
+      "ngspice_completed": true
+    },
+    {
+      "id": "short_1",
+      "samples": 1514,
+      "sha256_netlist": "86b28c3cf7466805b98f059c89ccf5b95be3e3cceb6f4453f0ab86cbf16330a8",
+      "sha256_raw_data": "ea637c7084bd426dcebebbd9b80dfea610f0b9a7d99b6386cbd2fdd50458c114",
+      "ngspice_completed": true
+    }
+  ]
+}

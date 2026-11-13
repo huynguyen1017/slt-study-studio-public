@@ -22,3 +22,23 @@ Each of the 100 public cards opens a three-page, responsive engineering-notebook
 Vector illustrations are interactive/browser-rendered and remain readable when scrolling horizontally on phones. They are **not hardware captures** and are not presented as measured validation results.
 
 The separate graded-lab questions (7 labs / 26 steps) and the adjustable waveform lab are still active, with their original logic preserved. Existing browser progress remains in its same localStorage namespace. Expanded public excerpts were editorially checked for cut-off sentence fragments.
+
+## Circuit-simulator waveform flashcard (ngspice-47)
+
+The first Signal Integrity flashcard, **Page 2 · Deep Dive**, now includes an
+interactive oscilloscope-like viewer based on actual ngspice-47 transient output.
+
+- Select among 7 completed simulation runs and compare the source, transmitter,
+  and receiver voltages.
+- Move a cursor to inspect time and voltage, replay, zoom, pan, toggle traces,
+  download CSV, and open a reproducible source netlist.
+- Answer 4 stepwise questions about reflection coefficient, first arrival,
+  package parasitics, and the meaning of a matched load.
+- Incorrect choices reveal hints and allow retries. The original 7 guided
+  labs / 26 steps and the original reset waveform lab remain unchanged.
+
+The ngspice model uses a 50-ohm ideal transmission line with 1-ns propagation delay.
+It is an illustrative *circuit simulation*, not a measurement of a physical board.
+Synopsys VCS, HSPICE and Verdi were not used or independently verified for these
+waveforms. GitHub Pages serves precomputed samples, not an on-demand ngspice backend.
+See simulation/README.md and simulation/verification_manifest.json for details.

@@ -1,0 +1,18 @@
+* ngspice-47 teaching model; illustrative package parasitics
+Vstep vs 0 PULSE(0 1 1n 0.10n 0.10n 60n 120n)
+Rdriver vs tx 20
+Tpcb tx 0 near 0 Z0=50 TD=1n
+Rpkg near nmid 0.3
+Lpkg nmid rx 8n
+Cpin rx 0 3p
+Rload rx 0 200
+.tran 0.01n 15n 0 0.01n
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+run
+wrdata package_ring.dat v(vs) v(tx) v(rx)
+quit
+.endc
+.end

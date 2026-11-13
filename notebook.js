@@ -208,6 +208,10 @@ function renderPage(c,page){
  if(p===1)content='<div class="ink-section"><h4>① Technical diagram · illustrated concept</h4>'+graphic+'<p class="ink-caption">'+E(v.caption)+'</p></div>'+
  equations(type)+'<div class="ink-section"><h4>② Deep technical explanation</h4>'+paragraphs(s.deep||s.core)+'</div>'+
  '<div class="ink-highlighter"><b>Connect the equation / mechanism:</b> '+E(insight(type,p))+'</div>';
+ if(p===1 && type==="si")content='<div class="ink-section"><h4>① Actual ngspice-simulated waveform experiment</h4>'+
+ (window.renderSpiceScope?window.renderSpiceScope():'<p>SPICE waveform data unavailable.</p>')+'</div>'+
+ equations(type)+'<div class="ink-section"><h4>② Explain the circuit behavior</h4>'+paragraphs(s.deep||s.core)+'</div>'+
+ '<div class="ink-highlighter"><b>What is verified:</b> The seven traces are reproducible ngspice model outputs. They are not measured hardware signals and have not been verified with Synopsys or Verdi.</div>';
  if(p===2)content='<div class="ink-section"><h4>① Follow the evidence · step by step</h4><ol class="ink-steps">'+stepList(s.steps||s.core)+'</ol></div>'+
  '<div class="ink-section"><h4>② What the bench / debug workflow looks like</h4>'+graphic+'<p class="ink-caption">'+E(v.caption)+'</p></div>'+
  '<div class="ink-highlighter"><b>Before claiming PASS:</b> '+E(insight(type,p))+'</div>'+
@@ -233,6 +237,7 @@ window.wireStudyNotebook=(c)=>{
  const root=document.querySelector(".notebook-view");if(!root)return;
  const render=(p)=>{
  currentPage=Math.max(0,Math.min(2,p));const sc=root.querySelector("#notebookPage");sc.innerHTML=renderPage(c,currentPage);
+ if(currentPage===1 && classify(c)==="si" && window.mountSpiceScope)window.mountSpiceScope(sc.querySelector(".si-studio"));
  root.querySelectorAll("[data-note-page]").forEach(el=>{let active=Number(el.dataset.notePage)===currentPage;el.classList.toggle("active",active);el.setAttribute("aria-selected",String(active))});
  root.querySelectorAll("[data-note-mode]").forEach(btn=>btn.onclick=e=>{e.stopPropagation();document.querySelector('[data-mode="'+btn.dataset.noteMode+'"]')?.click()});
  root.querySelector("#notePrev").disabled=currentPage===0;root.querySelector("#noteNext").disabled=currentPage===2;

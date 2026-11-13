@@ -1,0 +1,16 @@
+* Educational 50-ohm lossless transmission line, ngspice-47
+* Case: Near-open load 1 MΩ  Series driver resistance = 20 ohm ; load = 1Meg ohm
+Vstep vs 0 PULSE(0 1 1n 0.10n 0.10n 60n 120n)
+Rdriver vs tx 20
+Tpcb tx 0 rx 0 Z0=50 TD=1n
+Rload rx 0 1Meg
+.tran 0.01n 15n 0 0.01n
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+run
+wrdata open_1meg.dat v(vs) v(tx) v(rx)
+quit
+.endc
+.end
