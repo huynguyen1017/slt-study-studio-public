@@ -1,0 +1,18 @@
+* SLT educational PCB circuit: transient analysis
+* Source=0.8 V, added series R=0 ohm, L=10nH, C=2pF, MOS switch enabled=0
+Vsrc vs 0 PULSE(0 0.8 1n 0.10n 0.10n 40n 80n)
+Rdriver vs tx 20
+Rseries tx p 0.1
+Ltrace p rx 10n
+Cload rx 0 2p
+Rload rx 0 200
+Vgate gate 0 DC 0
+.tran 0.02n 16n 0 0.02n
+.control
+set wr_singlescale
+set wr_vecnames
+run
+wrdata b04.dat v(vs) v(tx) v(p) v(rx) v(gate) i(Ltrace)
+quit
+.endc
+.end

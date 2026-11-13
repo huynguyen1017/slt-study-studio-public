@@ -42,3 +42,24 @@ It is an illustrative *circuit simulation*, not a measurement of a physical boar
 Synopsys VCS, HSPICE and Verdi were not used or independently verified for these
 waveforms. GitHub Pages serves precomputed samples, not an on-demand ngspice backend.
 See simulation/README.md and simulation/verification_manifest.json for details.
+
+## Component and board-level interactive SPICE lab
+
+Signal Integrity flashcard, Page 2 (Deep Dive) now includes a new
+component-and-board lab below the existing waveform viewer. It includes:
+
+- Connected source, 20Ω driver, bypass/33Ω series resistor, 1/10nH
+  trace inductance, 2/30pF shunt capacitor, 200Ω load and optional NMOS.
+- 48 independently computed ngspice-47 model runs, selectable by
+  0.8/1.2/1.8V source, R, L, C and MOSFET branch.
+- Node voltage colors and readings linked to the waveform time cursor;
+  source, TX, RX, gate and trace-current waveforms.
+- Derived component voltage drops, charge, energy and resistor power.
+- Four guided component-selection quiz questions with hints and retries.
+- Reproducible circuit netlists, raw data, and hash verification under
+  simulation/board.
+
+The public static app switches between **completed** ngspice simulations,
+rather than executing ngspice on demand in the browser. It does not
+claim to simulate measured physical boards or Synopsys/Verdi output.
+Original flashcards, seven guided labs, and original waveform mode remain.

@@ -20,6 +20,7 @@ return '<section id="siStudio" class="si-studio"><div class="si-label">NGSPICE 4
 '<div class="si-timebar"><label>Cursor: <b id="siTimeLabel">2.30 ns</b></label><input type="range" min="0" max="15" step=".01" value="2.3" id="siTime"></div>'+
 '<div class="si-values">'+["Source","Transmitter","Receiver","Receiver peak","DC expected","Load Γ"].map(function(n,i){return '<div><small>'+n+'</small><strong id="siV'+i+'">—</strong></div>'}).join("")+'</div>'+
 '<div class="si-circuit">1 V step (t=1 ns) &nbsp;→&nbsp; Rsrc=20 Ω &nbsp;→&nbsp; line Z₀=50 Ω (TD=1 ns) &nbsp;→&nbsp; <strong id="siLoad">load</strong></div>'+
+'<div id="siBoardPlaceholder">'+(window.renderBoardLab?window.renderBoardLab():'')+'</div>'+
 '<p id="siFinding" class="si-finding"></p><div class="si-math">ΓL=(RL−Z₀)/(RL+Z₀) &nbsp; | &nbsp; Vlaunch=Z₀/(Rsrc+Z₀) &nbsp; | &nbsp; Vfirst=Vlaunch(1+ΓL)</div>'+
 '<div class="si-evidence"><button id="siCSV">Download waveform CSV</button><a id="siNetlist" target="_blank" rel="noopener">Read reproducible netlist</a><a href="simulation/README.md" target="_blank" rel="noopener">Simulation methods</a></div>'+
 '<div class="si-quiz"><div class="si-label">LEARN WITH GUIDED REATTEMPTS</div><span id="siCount">Question 1 / 4</span><h5 id="siQuestion"></h5><div id="siOptions"></div><p id="siFeedback" aria-live="polite"></p><button id="siHint">Give me a hint</button><button id="siNext" disabled>Next step →</button></div>'+
@@ -70,7 +71,7 @@ window.mountSpiceScope=function(root){
    s+='<line x1="'+x+'" x2="'+x+'" y1="'+sy+'" y2="'+ey+'" stroke="#ffe89f" stroke-dasharray="7 5" stroke-width="2"/>';
    for(var j=0;j<3;j++)if(st.channels[j])s+='<circle cx="'+x+'" cy="'+Y(p[j+1])+'" r="5" fill="'+colors[j]+'" stroke="white"/>';
   }
-  $("#siPlot").innerHTML=s;readout();
+  $("#siPlot").innerHTML=s;readout();root.dispatchEvent(new CustomEvent("slt:scope-time",{detail:{time:st.time}}));
  }
  function seek(t){st.time=Math.max(0,Math.min(15,t));draw()}
  function windowTo(a,b){var w=Math.max(1,Math.min(15,b-a)),left=Math.max(0,Math.min(15-w,a));st.start=left;st.end=left+w;draw()}
@@ -117,6 +118,6 @@ window.mountSpiceScope=function(root){
   if(st.step<3){st.step++;question()}else{$("#siQuestion").textContent="Completed: you can interpret the simulated reflection waveforms.";
   $("#siOptions").innerHTML="";$("#siFeedback").className="correct";$("#siFeedback").textContent="Revisit the seven cases and explain each physical assumption.";$("#siNext").disabled=true;}
  };
- draw();question();
+ draw();question();if(window.mountBoardLab)window.mountBoardLab(root.querySelector("#boardLab"),function(){return st.time});
 };
 })();

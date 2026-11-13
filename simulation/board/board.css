@@ -1,0 +1,55 @@
+.bl-root{border:1px solid #a7c9c4;border-radius:14px;background:#f2faf7;color:#173a48;margin:18px 0;padding:16px;font:500 14px/1.55 system-ui,sans-serif}
+.bl-root *{box-sizing:border-box}
+.bl-root h4{font:850 clamp(19px,2.6vw,26px)/1.25 system-ui,sans-serif!important;color:#164e55!important;text-decoration:none!important;margin:6px 0 10px!important}
+.bl-root p{font:500 13px/1.6 system-ui,sans-serif!important}
+.bl-kicker{font:850 11px system-ui,sans-serif;letter-spacing:.05em;color:#21805a}
+.bl-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:16px 0}
+.bl-choices label{font:750 11px/1.6 system-ui,sans-serif;color:#31545e}
+.bl-choices select{display:block;width:100%;border:1px solid #88acb0;border-radius:8px;min-height:42px;padding:7px;background:#fff;color:#1b3c50;font:700 13px system-ui,sans-serif}
+.bl-explanation{background:#fff9dc;color:#4c4c2d;border:1px solid #d9c789;padding:13px;border-radius:8px;margin:8px 0 14px;font:600 12px/1.75 system-ui,sans-serif}
+.bl-board-scroll,.bl-chart-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:13px;background:#133c39;margin:12px 0;overscroll-behavior-x:contain}
+.bl-board-scroll svg{width:100%;height:auto;display:block;font-family:system-ui,sans-serif}
+.bl-plot-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;color:#224963;font:800 13px system-ui,sans-serif;margin:16px 0 4px}
+.bl-plot-head strong{color:#a0425b}
+.bl-chart-scroll{background:#0c1932}
+.bl-chart-scroll svg{display:block;width:100%;height:auto}
+.bl-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.bl-metrics>div{background:#fff;border:1px solid #bdd7d5;border-radius:9px;padding:10px;min-width:0}
+.bl-metrics small{display:block;color:#5d7b82;font:650 11px/1.4 system-ui,sans-serif}
+.bl-metrics b{display:block;font:800 clamp(12px,1.6vw,18px)/1.4 ui-monospace,monospace;color:#174d69;overflow-wrap:anywhere;margin-top:3px}
+.bl-notes{border-left:4px solid #76a9ac;background:#fff;padding:12px 15px;border-radius:6px;margin-top:14px}
+.bl-notes h5{font:850 15px/1.5 system-ui,sans-serif;color:#265e62;margin:0 0 8px}
+.bl-actions{display:flex;flex-wrap:wrap;gap:15px;align-items:center;margin-top:15px}
+.bl-actions a{font:750 12px system-ui,sans-serif;color:#205f80;text-decoration:underline}
+.bl-actions button{font:750 12px system-ui,sans-serif;background:#e9fff5;border:1px solid #88bbb3;padding:9px 12px;min-height:44px;border-radius:8px;color:#176d55}
+.bl-provenance{font-size:11px!important;color:#667d7c;border-top:1px solid #cfddda;margin:15px 0 0!important;padding-top:12px}
+@media(max-width:750px){
+.bl-root{padding:10px;margin:12px 0}
+.bl-choices{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.bl-choices label{font-size:11px}
+.bl-board-scroll svg{width:850px;max-width:none}
+.bl-chart-scroll svg{width:780px;max-width:none}
+.bl-board-scroll:after,.bl-chart-scroll:after{display:block;content:"← Swipe horizontally for the full circuit / waveform →";font:650 11px/1.5 system-ui,sans-serif;color:#f1f6e1;padding:6px;text-align:center}
+.bl-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+.bl-actions{gap:12px}
+}
+.bl-quiz{background:#f7f3ff;border:2px solid #b6a4d1;border-radius:10px;padding:13px;margin:16px 0}
+.bl-quiz h5{font:850 16px/1.5 system-ui,sans-serif;color:#523c79;margin:10px 0}
+.bl-quiz #blQuizProgress{font:750 11px system-ui,sans-serif;color:#73529b;margin:8px 0}
+.bl-quiz #blQuizChoices{display:grid;gap:8px}
+.bl-quiz button{min-height:43px;border:1px solid #a2a0c4;border-radius:8px;padding:10px 13px;background:#fff;color:#3c3763;font:750 12px/1.4 system-ui,sans-serif;text-align:left;cursor:pointer}
+.bl-quiz button.wrong{background:#fff0ed;border-color:#cb6e79}
+.bl-quiz button.right{background:#e0faeb;border-color:#60b48b}
+.bl-quiz #blQuizFeedback{min-height:25px;color:#a34c58;font:700 12px/1.6 system-ui,sans-serif}
+.bl-quiz #blQuizFeedback.correct{color:#287b54}
+.bl-quiz-actions{display:flex;gap:9px;flex-wrap:wrap}
+.bl-quiz-actions #blNext{background:#5144a0;color:#fff}
+.bl-quiz-actions #blNext:disabled{opacity:.44}
+.bl-component-readouts{background:#fff;margin:14px 0;padding:12px;border:1px solid #c8d8d2;border-radius:9px}
+.bl-component-readouts h5{font:850 15px/1.5 system-ui,sans-serif;margin:0 0 9px;color:#1b6370}
+.bl-table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.bl-component-readouts table{border-collapse:collapse;font:650 12px/1.55 system-ui,sans-serif;color:#244a55;width:100%;min-width:520px}
+.bl-component-readouts th,.bl-component-readouts td{border-bottom:1px solid #d9e5e3;padding:9px 7px;text-align:left}
+.bl-component-readouts th{background:#ecf7f5;color:#215961;font-weight:850}
+.bl-component-readouts td:nth-child(3){white-space:nowrap;color:#166a86;font-family:ui-monospace,monospace;font-weight:850}
+.bl-root .bl-tiny{font-size:10px!important;color:#697a7e;margin:8px 0 0}
