@@ -80,9 +80,9 @@ function layout(){
  '<label>Receiver capacitor<select id="blC"><option value="2">2 pF</option><option value="30" selected>30 pF</option></select></label>'+
  '<label>Switching transistor<select id="blMos"><option value="false">No NMOS</option><option value="true" selected>Fit NMOS pull-down</option></select></label></div>'+
  '<div class="bl-explanation" id="blNarrative" role="status"></div>'+
- '<div class="bl-board-scroll"><div id="blBoardDrawing"></div></div>'+
+ '<div id="blMobileCircuit" class="slt-mobile-board"></div><div class="bl-board-scroll"><div id="blBoardDrawing"></div></div>'+
  '<div class="bl-plot-head"><b>Calculated board-node waveforms</b><span>Cursor linked to upper waveform: <strong id="blNow">2.30 ns</strong></span></div>'+
- '<div class="bl-chart-scroll"><svg viewBox="0 0 1050 460" id="blWavePlot" role="img" aria-label="ngspice board node voltages MOSFET gate timing and branch current"></svg></div>'+
+ '<div id="blWaveMobile" class="slt-mobile-plot"></div><div class="bl-chart-scroll"><svg viewBox="0 0 1050 460" id="blWavePlot" role="img" aria-label="ngspice board node voltages MOSFET gate timing and branch current"></svg></div>'+
  '<div class="bl-metrics"><div><small>CH1 source</small><b id="blValVS">—</b></div><div><small>CH2 transmitter</small><b id="blValTX">—</b></div><div><small>CH3 receiver</small><b id="blValRX">—</b></div><div><small>Gate drive</small><b id="blValGate">—</b></div><div><small>Trace current</small><b id="blValI">—</b></div><div><small>Rdriver drop</small><b id="blValDrop">—</b></div></div>'+
   '<div class="bl-component-readouts"><h5>Component measurements at this exact cursor time</h5><div class="bl-table-scroll"><table><thead><tr><th>Component</th><th>Relationship</th><th>Computed value</th><th>Meaning</th></tr></thead><tbody>'+
  '<tr><td>Rdriver 20 Ω</td><td>'+(window.studyMath?window.studyMath('V_source − V_TX'): 'Vsource − VTX')+'</td><td id="blDriverDrop">—</td><td>Drive-stage voltage loss</td></tr>'+
@@ -159,7 +159,7 @@ function init(root,getTime){
   $("#blLoadI").textContent=(z[4]/200*1000).toFixed(4)+" mA";
   $("#blSeriesP").textContent=(i*i*(run.series_r||0.1)*1000).toFixed(5)+" mW";
 
-  $("#blBoardDrawing").innerHTML=schematic(run,z);
+  $("#blBoardDrawing").innerHTML=schematic(run,z);if(window.sltMobileBoard)window.sltMobileBoard(run,z,root,latest);
  }
  var checks=[
   ["At 8 ns, the NMOS gate rises to 3.3 V. Why can RX fall?",["The 200 Ω resistor disappears","The turned-on NMOS creates a new current path to ground","The source automatically falls to zero","The copper trace changes length"],1,"Look at the MOSFET drain and source connections.","A turned-on low-side NMOS conducts from RX toward ground. The receiver voltage depends on the resulting current and series resistances."],
@@ -192,6 +192,7 @@ function init(root,getTime){
  function redraw(){readout();voltageLines()}
  function controls(){match();explanation();redraw()}
  ["#blSupply","#blSeries","#blL","#blC","#blMos"].forEach(function(sel){$(sel).onchange=controls});
+ var mobilePlot=root.querySelector("#blWaveMobile");if(mobilePlot)mobilePlot.addEventListener("pointerdown",function(e){var svg=mobilePlot.querySelector("svg");if(!svg)return;var b=svg.getBoundingClientRect(),x=(e.clientX-b.left)*360/b.width;if(x>=48&&x<=338){var t=(x-48)/290*16,inp=root.closest("#siStudio").querySelector("#siTime");inp.value=t;inp.dispatchEvent(new Event("input",{bubbles:true}));}});
  root.closest("#siStudio").addEventListener("slt:scope-time",function(ev){latest=Math.min(16,Math.max(0,Number(ev.detail.time)));redraw()});
  $("#blQuizChoices").onclick=function(e){
    var btn=e.target.closest("[data-bl-answer]");if(!btn||solved)return;

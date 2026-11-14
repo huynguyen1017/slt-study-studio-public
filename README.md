@@ -86,3 +86,41 @@ or simulate electrothermal failure. See simulation/faults/README.md.
 
 The public flashcard content, the seven original graded labs and the
 separate original waveform-practice mode are preserved.
+
+
+## Public release: offline + interactive electrical consequences
+
+The public site contains the original 100 cards, seven original graded labs,
+the waveform and board-level ngspice exercises, plus these additions:
+
+- **16 distinct interactive quiz-choice effects** (4 questions × 4 choices).
+  Each reveals a physical mechanism or misconception. Spark/heat imagery is
+  restricted to the clearly identified separate 12V/near-short fault example,
+  whose electrical power is simulated but thermal/smoke effects are hypothetical.
+- **Phone-fit analog plots and board diagram**: compact 360-unit SVG layouts
+  on portrait phones, with synchronized time cursor and component readings.
+  Original higher-detail SVGs remain visible on larger screens; no 850px forced
+  scroll width on phone displays.
+- **Offline-first install**: PWA manifest plus same-origin service worker
+  caching 90 HTML/CSS/JS/image/netlist assets. After the first successful online
+  visit, core cards, labs, simulations and mathematical formatting are available
+  offline. Storage policies vary by browser. No external API results are
+  required to operate the core practice experience.
+- **Privacy-first learning agents**: an on-device, rules-based concept coach,
+  a connectivity monitor with offline/degraded status, and an optional online
+  research assistant. The research assistant searches Wikipedia and OpenAlex
+  on demand, with opt-in 25-second rotation. No paid AI API or embedded
+  secret credentials are required; the coach is not represented as a cloud LLM.
+- **3D cards and local study notes**: flip, next/previous, shuffle,
+  15-second opt-in autoplay, Again/Good/Easy review scheduling, custom cards
+  saved to browser storage, and JSON backup. The separate pasted 645-card
+  catalog was a reference; only the 100 reviewed public cards already in this
+  repository were reused, not fabricated or silently bulk-imported.
+- **University resources**: direct links to official SFSU ENGR 852,
+  Berkeley EECS 151, MIT 6.5910 (former 6.375), Stanford EE 271 pages.
+- **Public-brand/tracking audit**: no assistant-branded labels, referral
+  parameters, credential files or private work folders in the shipped site.
+
+The 8789 local developer/VCD studio was inspected only as a *read-only*
+reference for time-based signal inspection. Nothing in that site's code or
+runtime was changed, stopped, overwritten or deployed.

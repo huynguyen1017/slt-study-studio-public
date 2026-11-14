@@ -1,0 +1,112 @@
+/* Offline-first public educational materials; no private data or cross-origin caches. */
+const CACHE = 'slt-study-studio-v6';
+const CORE = [
+  "./",
+  "./index.html",
+  "./style.css",
+  "./notebook.css",
+  "./app.js",
+  "./cards.js",
+  "./labs.js",
+  "./notebook.js",
+  "./study_agents.js",
+  "./study_agents.css",
+  "./manifest.webmanifest",
+  "./studio-icon.svg",
+  "./simulation/scope_pro.js",
+  "./simulation/answer_fx.js",
+  "./simulation/si_scope.js",
+  "./simulation/si_spice_data.js",
+  "./simulation/math_format.js",
+  "./simulation/mobile_fit.js",
+  "./simulation/si_scope.css",
+  "./simulation/experience.css",
+  "./simulation/math.css",
+  "./simulation/scope_pro.css",
+  "./simulation/board/board.js",
+  "./simulation/board/board_data.js",
+  "./simulation/board/board.css",
+  "./simulation/faults/fault_data.js",
+  "./simulation/faults/fault_lab.js",
+  "./simulation/faults/fault.css",
+  "./figures/startup_channels.png",
+  "./figures/clock_zoom.png",
+  "./simulation/package_ring.cir",
+  "./simulation/low_10.cir",
+  "./simulation/open_1meg.cir",
+  "./simulation/high_slow.cir",
+  "./simulation/short_1.cir",
+  "./simulation/high_200.cir",
+  "./simulation/matched_50.cir",
+  "./simulation/faults/short_5v.cir",
+  "./simulation/faults/high_12v_normal_load.cir",
+  "./simulation/faults/short_1v2.cir",
+  "./simulation/faults/overload_12v.cir",
+  "./simulation/faults/nominal_1v2.cir",
+  "./simulation/board/b05.cir",
+  "./simulation/board/b11.cir",
+  "./simulation/board/b39.cir",
+  "./simulation/board/b38.cir",
+  "./simulation/board/b10.cir",
+  "./simulation/board/b04.cir",
+  "./simulation/board/b12.cir",
+  "./simulation/board/b06.cir",
+  "./simulation/board/b07.cir",
+  "./simulation/board/b13.cir",
+  "./simulation/board/b17.cir",
+  "./simulation/board/b03.cir",
+  "./simulation/board/b02.cir",
+  "./simulation/board/b16.cir",
+  "./simulation/board/b28.cir",
+  "./simulation/board/b00.cir",
+  "./simulation/board/b14.cir",
+  "./simulation/board/b15.cir",
+  "./simulation/board/b01.cir",
+  "./simulation/board/b29.cir",
+  "./simulation/board/b47.cir",
+  "./simulation/board/b46.cir",
+  "./simulation/board/b44.cir",
+  "./simulation/board/b45.cir",
+  "./simulation/board/b41.cir",
+  "./simulation/board/b40.cir",
+  "./simulation/board/b42.cir",
+  "./simulation/board/b43.cir",
+  "./simulation/board/b24.cir",
+  "./simulation/board/b30.cir",
+  "./simulation/board/b18.cir",
+  "./simulation/board/b19.cir",
+  "./simulation/board/b31.cir",
+  "./simulation/board/b25.cir",
+  "./simulation/board/b33.cir",
+  "./simulation/board/b27.cir",
+  "./simulation/board/b26.cir",
+  "./simulation/board/b32.cir",
+  "./simulation/board/b36.cir",
+  "./simulation/board/b22.cir",
+  "./simulation/board/b23.cir",
+  "./simulation/board/b37.cir",
+  "./simulation/board/b09.cir",
+  "./simulation/board/b21.cir",
+  "./simulation/board/b35.cir",
+  "./simulation/board/b34.cir",
+  "./simulation/board/b20.cir",
+  "./simulation/board/b08.cir"
+];
+self.addEventListener('install',event=>{
+ event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()));
+});
+self.addEventListener('activate',event=>{
+ event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('slt-study-studio-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+});
+self.addEventListener('fetch',event=>{
+ const request=event.request;
+ if(request.method!=='GET')return;
+ const url=new URL(request.url);
+ if(url.origin!==self.location.origin)return;
+ if(url.searchParams.has('healthcheck'))return;
+ if(request.mode==='navigate'){
+  event.respondWith(fetch(request).then(response=>{if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put('./index.html',copy));}return response;}).catch(()=>caches.match('./index.html')));
+  return;
+ }
+ event.respondWith(caches.match(request,{ignoreSearch:true}).then(found=>found||fetch(request).then(response=>{if(response.ok){const clone=response.clone();caches.open(CACHE).then(cache=>cache.put(request,clone));}return response;})));
+});

@@ -16,7 +16,7 @@ return '<section id="siStudio" class="si-studio"><div class="si-label">NGSPICE 4
 '<div class="si-tools"><label>Choose a completed simulation <select id="siCase">'+runs.map(function(r){return '<option value="'+E(r.id)+'">'+E(r.label)+'</option>'}).join("")+'</select></label>'+
 '<div class="si-toolbuttons"><button id="siPlay">▶ Replay</button><button id="siPlus">Zoom +</button><button id="siMinus">Zoom −</button><button id="siLeft">← Pan</button><button id="siRight">Pan →</button><button id="siFit">Fit</button></div></div>'+
 '<div class="si-legend">'+["Source V(vs)","Transmitter V(tx)","Receiver V(rx)"].map(function(n,i){return '<label><input data-si-ch="'+i+'" type="checkbox" checked><i style="background:'+colors[i]+'"></i>'+n+'</label>'}).join("")+'</div>'+
-'<div class="si-screen"><div class="si-screenbar">Transient voltage · V vs ns <span id="siViewWindow">0–15 ns</span></div><svg id="siPlot" viewBox="0 0 1040 410" role="img" aria-label="ngspice source transmitter and receiver voltage graph"></svg><div class="si-screenfoot">Tap or drag to inspect values at the exact cursor time. Zoom and pan to inspect reflected waves.</div></div>'+
+'<div class="si-screen"><div class="si-screenbar">Transient voltage · V vs ns <span id="siViewWindow">0–15 ns</span></div><div id="siMobilePlot" class="slt-mobile-plot" aria-label="Fit to screen oscilloscope"></div><svg id="siPlot" viewBox="0 0 1040 410" role="img" aria-label="ngspice source transmitter and receiver voltage graph"></svg><div class="si-screenfoot">Tap or drag to inspect values at the exact cursor time. Zoom and pan to inspect reflected waves.</div></div>'+
 (window.renderScopePro?window.renderScopePro():'')+'<div class="si-timebar"><label>Cursor: <b id="siTimeLabel">2.30 ns</b></label><input type="range" min="0" max="15" step=".01" value="2.3" id="siTime"></div>'+
 '<div class="si-values">'+["Source","Transmitter","Receiver","Receiver peak","DC expected","Load Γ"].map(function(n,i){return '<div><small>'+n+'</small><strong id="siV'+i+'">—</strong></div>'}).join("")+'</div>'+
 '<div class="si-circuit">1 V step (t=1 ns) &nbsp;→&nbsp; Rsrc=20 Ω &nbsp;→&nbsp; line Z₀=50 Ω (TD=1 ns) &nbsp;→&nbsp; <strong id="siLoad">load</strong></div>'+
@@ -71,7 +71,7 @@ window.mountSpiceScope=function(root){
    s+='<line x1="'+x+'" x2="'+x+'" y1="'+sy+'" y2="'+ey+'" stroke="#ffe89f" stroke-dasharray="7 5" stroke-width="2"/>';
    for(var j=0;j<3;j++)if(st.channels[j])s+='<circle cx="'+x+'" cy="'+Y(p[j+1])+'" r="5" fill="'+colors[j]+'" stroke="white"/>';
   }
-  $("#siPlot").innerHTML=s;readout();root.dispatchEvent(new CustomEvent("slt:scope-time",{detail:{time:st.time}}));root.dispatchEvent(new CustomEvent("slt:scope-redraw",{detail:{run:st.run.id,start:st.start,end:st.end,time:st.time}}));
+  $("#siPlot").innerHTML=s;readout();if(window.sltMobileScope)window.sltMobileScope(run,st,root);root.dispatchEvent(new CustomEvent("slt:scope-time",{detail:{time:st.time}}));root.dispatchEvent(new CustomEvent("slt:scope-redraw",{detail:{run:st.run.id,start:st.start,end:st.end,time:st.time}}));
  }
  function seek(t){st.time=Math.max(0,Math.min(15,t));draw()}
  function windowTo(a,b){var w=Math.max(1,Math.min(15,b-a)),left=Math.max(0,Math.min(15-w,a));st.start=left;st.end=left+w;draw()}
@@ -90,6 +90,7 @@ window.mountSpiceScope=function(root){
   function play(now){if(!st.playing)return;var val=first+2*(now-t0)/1000;if(val>=st.end){stop();seek(st.end);return}seek(val);st.raf=requestAnimationFrame(play)}
   st.raf=requestAnimationFrame(play);
  };
+ var mobile=root.querySelector("#siMobilePlot"); if(mobile)mobile.addEventListener("pointerdown",function(e){var svg=mobile.querySelector("svg");if(!svg)return;var box=svg.getBoundingClientRect();var vx=(e.clientX-box.left)*360/box.width;if(vx>=45&&vx<=345){stop();seek(st.start+(vx-45)/300*(st.end-st.start));}});
  var svg=$("#siPlot");
  function move(e){var rect=svg.getBoundingClientRect(),x=(e.clientX-rect.left)*1040/rect.width;if(x>=90&&x<=1014)seek(st.start+(x-90)/(1014-90)*(st.end-st.start))}
  svg.addEventListener("pointerdown",function(e){stop();svg.setPointerCapture(e.pointerId);move(e)});

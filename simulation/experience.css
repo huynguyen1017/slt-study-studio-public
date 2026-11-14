@@ -1,0 +1,46 @@
+/* Accessible circuit effects; each question/choice has a distinct semantic motion. */
+.fx-stage{margin:14px 0;border:1px solid #bcd0d0;border-radius:12px;padding:12px;background:#f2fcfb;overflow:hidden}
+.fx-title{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:0 0 8px}
+.fx-title span{font:850 10px/1.3 system-ui;color:#367c74;letter-spacing:.08em}.fx-title strong{font:850 15px/1.35 system-ui;color:#21455b}
+.fx-svg{display:block;width:100%;height:auto;max-height:275px}
+.fx-stage .fx-explain{color:#275d65;font:700 13px/1.55 system-ui;margin:9px 0 3px}
+.fx-disclaimer{font:600 10px/1.5 system-ui!important;color:#627778!important;margin:5px 0!important}
+.fx-wrong{background:#fff8ef;border-color:#e9c4a7}
+.fx-wrong .fx-title span{color:#a56032}
+.fx-flow{animation:fxFlow 1.4s linear infinite}
+.fx-dashed{animation:fxBlink 1.5s ease-in-out infinite}
+.fx-alert{transform-origin:566px 143px;animation:fxPulse 1.4s ease-in-out infinite}
+.fx-hot{animation:fxHeat 1.4s ease-in-out infinite}
+.fx-sparks{animation:fxBlink .7s steps(2) infinite}
+.fx-probe{animation:fxProbe 1.4s ease-in-out infinite}
+.fx-stage{animation:fxEnter .28s ease both}
+@keyframes fxFlow{to{stroke-dashoffset:-54}}
+@keyframes fxBlink{50%{opacity:.17}}
+@keyframes fxPulse{50%{opacity:.35;transform:scale(1.09)}}
+@keyframes fxHeat{50%{fill:#fda456}}
+@keyframes fxProbe{50%{transform:translate(-6px,6px)}}
+@keyframes fxEnter{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+/* Responsive SVG, never force 850px on the device viewport. */
+.slt-mobile-plot,.slt-mobile-board{display:none}
+@media(max-width:700px){
+ .bl-board-scroll,.bl-chart-scroll{display:none!important}
+ .slt-mobile-plot,.slt-mobile-board{display:block!important;width:100%;max-width:100%;overflow:hidden;border-radius:12px;margin:9px auto;background:#102b36}
+ .slt-mobile-plot svg,.slt-mobile-board svg{display:block;width:100%;height:auto;max-width:100%}
+ .si-screen #siPlot{display:none}
+ .si-screen #siMobilePlot{display:block!important}
+ .si-screen .si-screenbar{font-size:12px}
+ .bl-root,.si-studio,.notebook-paper{min-width:0;max-width:100%;overflow-wrap:anywhere}
+ .scope-pro-metrics,.si-values,.bl-metrics{min-width:0}
+ #wave{overflow:hidden!important}
+ #wave svg{min-width:0!important;width:100%;height:auto}
+ .fx-stage{padding:7px}.fx-title strong{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){.fx-stage,.fx-flow,.fx-dashed,.fx-alert,.fx-hot,.fx-sparks,.fx-probe{animation:none!important;transition:none!important}}
+
+.fx-mobile-scene{display:none}
+@media(max-width:700px){
+ .fx-svg{display:none!important}
+ .fx-mobile-scene{display:block!important;width:100%}
+ .fx-mobile-scene svg{display:block;width:100%;height:auto}
+ .fx-mobile-scene text{font-family:system-ui,sans-serif}
+}
