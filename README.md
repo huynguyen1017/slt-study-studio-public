@@ -124,3 +124,27 @@ the waveform and board-level ngspice exercises, plus these additions:
 The 8789 local developer/VCD studio was inspected only as a *read-only*
 reference for time-based signal inspection. Nothing in that site's code or
 runtime was changed, stopped, overwritten or deployed.
+
+
+## Professional four-channel waveform console (2026-11)
+
+The original phone-fit waveform and SPICE labs remain available.
+A newly integrated, independently calibrated, four-channel instrument
+console is now shown on every flashcard's Deep Dive page, at every
+step in all seven graded Guided Labs, and alongside the interactive
+reset-sequencing Waveform Lab. It supports trigger, time/div,
+run/stop/single, zoom, interactive A/B cursors, annotated events,
+min/max/peak-to-peak readouts and responsive mobile channel views.
+
+The signal profile changes with the question: electrical rail,
+I2C, DRAM, PCIe, RTL bus, setup/hold, clock, UART boot, differential
+signaling, transmission-line reflection, serial link, and
+diagnostic/debug event timeline all use different labeled signals.
+Stored ngspice samples are identified separately from synthetic
+educational traces. See simulation/INSTRUMENT_METHOD.md for
+measurement limitations, provenance and channel interpretation.
+
+An uploaded confidential oscilloscope deck served solely as private
+design reference for the look and interpretation of instrument
+controls. No confidential screenshot, board identifier, test command,
+or measured numeric values was published.

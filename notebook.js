@@ -214,6 +214,7 @@ function renderPage(c,page){
  (window.renderSpiceScope?window.renderSpiceScope():'<p>SPICE waveform data unavailable.</p>')+'</div>'+
  equations(type)+'<div class="ink-section"><h4>② Explain the circuit behavior</h4>'+paragraphs(s.deep||s.core)+'</div>'+
  '<div class="ink-highlighter"><b>What is verified:</b> The seven traces are reproducible ngspice model outputs. They are not measured hardware signals and have not been verified with Synopsys or Verdi.</div>';
+ if(p===1 && window.renderInstrumentConsole)content='<div class="ix-deepdive"><div class="ink-section"><h4>Professional instrument analysis · interactive</h4><p class="ink-caption">Instrument-style learning environment. Signal types, units, triggers, and measured values are labeled per concept; the provenance label distinguishes SPICE output from teaching models.</p></div>'+window.renderInstrumentConsole()+'</div>'+content;
  if(p===2)content='<div class="ink-section"><h4>① Follow the evidence · step by step</h4><ol class="ink-steps">'+stepList(s.steps||s.core)+'</ol></div>'+
  '<div class="ink-section"><h4>② What the bench / debug workflow looks like</h4>'+graphic+'<p class="ink-caption">'+E(v.caption)+'</p></div>'+
  '<div class="ink-highlighter"><b>Before claiming PASS:</b> '+smart(insight(type,p))+'</div>'+
@@ -240,6 +241,14 @@ window.wireStudyNotebook=(c)=>{
  const render=(p)=>{
  currentPage=Math.max(0,Math.min(2,p));const sc=root.querySelector("#notebookPage");sc.innerHTML=renderPage(c,currentPage);
  if(currentPage===1 && classify(c)==="si" && window.mountSpiceScope)window.mountSpiceScope(sc.querySelector(".si-studio"));
+ if(currentPage===1 && window.mountInstrumentConsole){
+ const panel=sc.querySelector("[data-instrument]");
+ window.mountInstrumentConsole(panel,{kind:"card",card:c,caseId:sc.querySelector("#siCase")?.value});
+ const select=sc.querySelector("#siCase");
+ if(select)select.addEventListener("change",()=>window.mountInstrumentConsole(panel,{kind:"card",card:c,caseId:select.value}));
+ }
+
+
  root.querySelectorAll("[data-note-page]").forEach(el=>{let active=Number(el.dataset.notePage)===currentPage;el.classList.toggle("active",active);el.setAttribute("aria-selected",String(active))});
  root.querySelectorAll("[data-note-mode]").forEach(btn=>btn.onclick=e=>{e.stopPropagation();document.querySelector('[data-mode="'+btn.dataset.noteMode+'"]')?.click()});
  root.querySelector("#notePrev").disabled=currentPage===0;root.querySelector("#noteNext").disabled=currentPage===2;
