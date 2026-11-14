@@ -81,8 +81,8 @@ function layout(){
  '<label>Switching transistor<select id="blMos"><option value="false">No NMOS</option><option value="true" selected>Fit NMOS pull-down</option></select></label></div>'+
  '<div class="bl-explanation" id="blNarrative" role="status"></div>'+
  '<div id="blMobileCircuit" class="slt-mobile-board"></div><div class="bl-board-scroll"><div id="blBoardDrawing"></div></div>'+
- '<div class="bl-plot-head"><b>Calculated board-node waveforms</b><span>Cursor linked to upper waveform: <strong id="blNow">2.30 ns</strong></span></div>'+
- '<div id="blWaveMobile" class="slt-mobile-plot"></div><div class="bl-chart-scroll"><svg viewBox="0 0 1050 460" id="blWavePlot" role="img" aria-label="ngspice board node voltages MOSFET gate timing and branch current"></svg></div>'+
+ '<div class="bl-plot-head"><b>Professional board-level oscilloscope · selected SPICE run</b><span>Cursor linked to upper waveform: <strong id="blNow">2.30 ns</strong></span></div>'+
+ '<div id="blProScope" aria-label="Interactive professional board oscilloscope"></div>'+
  '<div class="bl-metrics"><div><small>CH1 source</small><b id="blValVS">—</b></div><div><small>CH2 transmitter</small><b id="blValTX">—</b></div><div><small>CH3 receiver</small><b id="blValRX">—</b></div><div><small>Gate drive</small><b id="blValGate">—</b></div><div><small>Trace current</small><b id="blValI">—</b></div><div><small>Rdriver drop</small><b id="blValDrop">—</b></div></div>'+
   '<div class="bl-component-readouts"><h5>Component measurements at this exact cursor time</h5><div class="bl-table-scroll"><table><thead><tr><th>Component</th><th>Relationship</th><th>Computed value</th><th>Meaning</th></tr></thead><tbody>'+
  '<tr><td>Rdriver 20 Ω</td><td>'+(window.studyMath?window.studyMath('V_source − V_TX'): 'Vsource − VTX')+'</td><td id="blDriverDrop">—</td><td>Drive-stage voltage loss</td></tr>'+
@@ -116,32 +116,13 @@ function init(root,getTime){
   return a[lo];
  }
  function voltageLines(){
-  var svg=$("#blWavePlot"),rows=run.samples,x0=82,x1=1022;
-  var X=function(t){return x0+t/16*(x1-x0)};
-  var MAX=Math.max(2.0,run.supply*1.25),Y=function(v){return 265-v/MAX*218};
-  var F=function(z){return Number(z).toFixed(2)};
-  var out='<rect width="1050" height="460" fill="#0c1932"/>';
-  for(var y=0;y<=MAX+.001;y+=.4)out+='<path d="M'+x0+' '+Y(y)+' H'+x1+'" stroke="#385371" stroke-dasharray="5 6"/>'+
-   '<text x="72" y="'+(Y(y)+5)+'" text-anchor="end" fill="#b4d7e9" font-size="13">'+y.toFixed(1)+' V</text>';
-  for(var t=0;t<=16;t+=2)out+='<path d="M'+X(t)+' 38 V403" stroke="#203956" />'+
-   '<text x="'+X(t)+'" y="428" fill="#b4d7e9" text-anchor="middle" font-size="13">'+t+' ns</text>';
-  var defs=[{i:1,color:"#70aeff",label:"Source"},{i:2,color:"#f1ce69",label:"TX"},{i:4,color:"#f37692",label:"RX"}];
-  for(var z of defs)out+='<path d="'+rows.map(function(a,i){return (i?"L":"M")+F(X(a[0]))+" "+F(Y(a[z.i]))}).join(" ")+
-   '" fill="none" stroke="'+z.color+'" stroke-width="3"/>';
-  // Separate bottom panel with shared time axis, gate on left and branch current as normalized right axis.
-  var minI=Math.min.apply(null,rows.map(function(x){return x[6]}));
-  var maxI=Math.max.apply(null,rows.map(function(x){return x[6]})),rangeI=Math.max(5,maxI-minI);
-  var G=function(v){return 391-v/3.3*67},I=function(ma){return 393-((ma-minI)/rangeI)*65};
-  out+='<path d="M'+x0+' 283 H'+x1+'" stroke="#60748c" stroke-width="1.5"/>'+
-   '<text x="90" y="305" fill="#cae3f2" font-size="14">Gate 0–3.3 V / Itrace '+minI.toFixed(1)+'–'+maxI.toFixed(1)+' mA</text>';
-  out+='<path d="'+rows.map(function(a,i){return (i?"L":"M")+F(X(a[0]))+" "+F(G(a[5]))}).join(" ")+
-   '" stroke="#ab91ff" fill="none" stroke-width="2.3"/>';
-  out+='<path d="'+rows.map(function(a,i){return (i?"L":"M")+F(X(a[0]))+" "+F(I(a[6]))}).join(" ")+
-   '" stroke="#59d8b5" fill="none" stroke-width="2.3"/>';
-  var x=X(latest);
-  out+='<path d="M'+x+' 35 V403" stroke="#ffed9f" stroke-width="2.2" stroke-dasharray="7 6"/>'+
-   '<text x="1030" y="20" fill="#cfe8f6" text-anchor="end" font-size="15">SOURCE · TX · RX / GATE · ITRACE</text>';
-  svg.innerHTML=out;
+  if(!window.renderBoardScope)return;
+  window.renderBoardScope($("#blProScope"),run,latest,{
+   onSeek:function(t){
+    var input=root.closest("#siStudio").querySelector("#siTime");
+    if(input){input.value=t;input.dispatchEvent(new Event("input",{bubbles:true}));}
+   }
+  });
  }
  function readout(){
   if(!run)return;var z=nearest(),v=function(k){return z[k].toFixed(3)+" V"};
@@ -192,7 +173,7 @@ function init(root,getTime){
  function redraw(){readout();voltageLines()}
  function controls(){match();explanation();redraw()}
  ["#blSupply","#blSeries","#blL","#blC","#blMos"].forEach(function(sel){$(sel).onchange=controls});
- var mobilePlot=root.querySelector("#blWaveMobile");if(mobilePlot)mobilePlot.addEventListener("pointerdown",function(e){var svg=mobilePlot.querySelector("svg");if(!svg)return;var b=svg.getBoundingClientRect(),x=(e.clientX-b.left)*360/b.width;if(x>=48&&x<=338){var t=(x-48)/290*16,inp=root.closest("#siStudio").querySelector("#siTime");inp.value=t;inp.dispatchEvent(new Event("input",{bubbles:true}));}});
+
  root.closest("#siStudio").addEventListener("slt:scope-time",function(ev){latest=Math.min(16,Math.max(0,Number(ev.detail.time)));redraw()});
  $("#blQuizChoices").onclick=function(e){
    var btn=e.target.closest("[data-bl-answer]");if(!btn||solved)return;
