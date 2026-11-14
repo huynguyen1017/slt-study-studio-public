@@ -85,20 +85,20 @@ function layout(){
  '<div class="bl-chart-scroll"><svg viewBox="0 0 1050 460" id="blWavePlot" role="img" aria-label="ngspice board node voltages MOSFET gate timing and branch current"></svg></div>'+
  '<div class="bl-metrics"><div><small>CH1 source</small><b id="blValVS">—</b></div><div><small>CH2 transmitter</small><b id="blValTX">—</b></div><div><small>CH3 receiver</small><b id="blValRX">—</b></div><div><small>Gate drive</small><b id="blValGate">—</b></div><div><small>Trace current</small><b id="blValI">—</b></div><div><small>Rdriver drop</small><b id="blValDrop">—</b></div></div>'+
   '<div class="bl-component-readouts"><h5>Component measurements at this exact cursor time</h5><div class="bl-table-scroll"><table><thead><tr><th>Component</th><th>Relationship</th><th>Computed value</th><th>Meaning</th></tr></thead><tbody>'+
- '<tr><td>Rdriver 20 Ω</td><td>Vsource − VTX</td><td id="blDriverDrop">—</td><td>Drive-stage voltage loss</td></tr>'+
- '<tr><td>Added series R</td><td>VTX − VbeforeL</td><td id="blExtraDrop">—</td><td>Added resistance / jumper drop</td></tr>'+
- '<tr><td>Trace inductor</td><td>VbeforeL − VRX</td><td id="blInductorV">—</td><td>Inductive voltage, L·dI/dt</td></tr>'+
- '<tr><td>Inductor energy</td><td>½·L·I²</td><td id="blInductorE">—</td><td>Stored magnetic energy</td></tr>'+
- '<tr><td>Capacitor charge</td><td>C·VRX</td><td id="blCapCharge">—</td><td>Stored electrical charge</td></tr>'+
- '<tr><td>Capacitor energy</td><td>½·C·V²</td><td id="blCapEnergy">—</td><td>Stored electric energy</td></tr>'+
- '<tr><td>200 Ω receiver load</td><td>VRX / 200</td><td id="blLoadI">—</td><td>Current returned to ground</td></tr>'+
- '<tr><td>Added resistor power</td><td>Itrace²·Radd</td><td id="blSeriesP">—</td><td>Instantaneous heat rate (model)</td></tr>'+
+ '<tr><td>Rdriver 20 Ω</td><td>'+(window.studyMath?window.studyMath('V_source − V_TX'): 'Vsource − VTX')+'</td><td id="blDriverDrop">—</td><td>Drive-stage voltage loss</td></tr>'+
+ '<tr><td>Added series R</td><td>'+(window.studyMath?window.studyMath('V_TX − V_beforeL'): 'VTX − VbeforeL')+'</td><td id="blExtraDrop">—</td><td>Added resistance / jumper drop</td></tr>'+
+ '<tr><td>Trace inductor</td><td>'+(window.studyMath?window.studyMath('V_beforeL − V_RX'): 'VbeforeL − VRX')+'</td><td id="blInductorV">—</td><td>Inductive voltage, L·dI/dt</td></tr>'+
+ '<tr><td>Inductor energy</td><td>'+(window.studyMath?window.studyMath('0.5×L×I^2'): '½·L·I²')+'</td><td id="blInductorE">—</td><td>Stored magnetic energy</td></tr>'+
+ '<tr><td>Capacitor charge</td><td>'+(window.studyMath?window.studyMath('C×V_RX'): 'C·VRX')+'</td><td id="blCapCharge">—</td><td>Stored electrical charge</td></tr>'+
+ '<tr><td>Capacitor energy</td><td>'+(window.studyMath?window.studyMath('0.5×C×V^2'): '½·C·V²')+'</td><td id="blCapEnergy">—</td><td>Stored electric energy</td></tr>'+
+ '<tr><td>200 Ω receiver load</td><td>'+(window.studyMath?window.studyMath('V_RX / 200'): 'VRX / 200')+'</td><td id="blLoadI">—</td><td>Current returned to ground</td></tr>'+
+ '<tr><td>Added resistor power</td><td>'+(window.studyMath?window.studyMath('I_trace^2×R_add'): 'Itrace²·Radd')+'</td><td id="blSeriesP">—</td><td>Instantaneous heat rate (model)</td></tr>'+
  '</tbody></table></div><p class="bl-tiny">The voltage and branch current originate from ngspice samples. Values derived with the stated formulas are calculated from those samples, not separately measured with hardware instruments. No thermal model is included.</p></div>'+
  '<div class="bl-notes"><h5>How to choose a component (and what can go wrong)</h5><p><strong>Resistor:</strong> limits current or provides damping, but may slow an edge and reduce receiver voltage. <strong>Inductor:</strong> models trace/package inductance; larger L resists rapid current changes and can resonate with C. <strong>Capacitor:</strong> loads the edge and stores charge; it can smooth a supply but a signal-line capacitor may worsen rise time. <strong>MOSFET:</strong> an active switched pull-down, not a voltage regulator; when its gate rises at 8 ns it can pull the receiver down. Do not add any part based on voltage alone: identify the actual fault, permitted limits and pin connections first.</p></div>'+
  '<div class="bl-actions"><a id="blCircuit" target="_blank" rel="noopener">Open exact ngspice circuit</a><a href="simulation/board/verification.json" target="_blank" rel="noopener">48-run evidence</a><button type="button" id="blCSV">Export this board waveform</button></div>'+
 
- '<div class="bl-quiz"><span class="bl-kicker">COMPONENT DECISIONS · GUIDED PRACTICE</span><div id="blQuizProgress"></div><h5 id="blQuizQuestion"></h5><div id="blQuizChoices"></div><p id="blQuizFeedback" role="status" aria-live="polite"></p><div class="bl-quiz-actions"><button type="button" id="blHint">Hint</button><button type="button" id="blNext" disabled>Next step →</button></div></div>'+
- '<p class="bl-provenance">SYNCHRONIZED EDUCATIONAL MODELS: The upper 50 Ω transmission-line plot and this lower board circuit are two <b>different</b> ngspice networks. Their time cursors are shared for comparison; their voltages do not represent the same physical nodes. The drawing is illustrative PCB-like wiring, not a fabricated or routed board or a measured oscilloscope trace.</p></section>';
+ '<div class="bl-quiz"><span class="bl-kicker">COMPONENT DECISIONS · GUIDED PRACTICE</span><div id="blQuizProgress"></div><h5 id="blQuizQuestion"></h5><div id="blQuizChoices"></div>'+(window.renderAnswerConsequence?window.renderAnswerConsequence():'')+'<p id="blQuizFeedback" role="status" aria-live="polite"></p><div class="bl-quiz-actions"><button type="button" id="blHint">Hint</button><button type="button" id="blNext" disabled>Next step →</button></div></div>'+
+ (window.renderFaultExplorer?window.renderFaultExplorer():'')+'<p class="bl-provenance">SYNCHRONIZED EDUCATIONAL MODELS: The upper 50 Ω transmission-line plot and this lower board circuit are two <b>different</b> ngspice networks. Their time cursors are shared for comparison; their voltages do not represent the same physical nodes. The drawing is illustrative PCB-like wiring, not a fabricated or routed board or a measured oscilloscope trace.</p></section>';
 }
 function init(root,getTime){
  if(!root||!data.length)return;
@@ -174,6 +174,7 @@ function init(root,getTime){
    $("#blQuizQuestion").textContent=q[0];
    $("#blQuizChoices").innerHTML=q[1].map(function(v,i){return '<button type="button" data-bl-answer="'+i+'">'+String.fromCharCode(65+i)+". "+E(v)+'</button>'}).join("");
    $("#blQuizFeedback").textContent="";$("#blQuizFeedback").className="";
+   if(window.resetAnswerConsequence)window.resetAnswerConsequence(root);
    $("#blNext").disabled=true;
    $("#blNext").textContent=step===checks.length-1?"Finish lab":"Next step →";
  }
@@ -196,10 +197,10 @@ function init(root,getTime){
    var btn=e.target.closest("[data-bl-answer]");if(!btn||solved)return;
    var q=checks[step],selected=Number(btn.dataset.blAnswer);attempts++;
    if(selected!==q[2]){
-     btn.classList.add("wrong");$("#blQuizFeedback").textContent="Not quite. "+(attempts===1?q[3]:q[4])+" Try again.";
+     btn.classList.add("wrong");if(window.showAnswerConsequence)window.showAnswerConsequence(root,step,selected,false);$("#blQuizFeedback").textContent="Not quite. "+(attempts===1?q[3]:q[4])+" Try again.";
      return;
    }
-   btn.classList.add("right");solved=true;
+   btn.classList.add("right");solved=true;if(window.showAnswerConsequence)window.showAnswerConsequence(root,step,selected,true);
    root.querySelectorAll("[data-bl-answer]").forEach(function(x){x.disabled=true});
    $("#blQuizFeedback").textContent="Correct. "+q[4];$("#blQuizFeedback").className="correct";
    $("#blNext").disabled=false;
@@ -220,7 +221,7 @@ function init(root,getTime){
   a.href=url;a.download=run.id+"_board_ngspice.csv";a.click();setTimeout(function(){URL.revokeObjectURL(url)},1200);
  };
  latest=typeof getTime==="function"?getTime():2.3;
- controls();showCheck();
+ controls();showCheck();if(window.mountFaultExplorer)window.mountFaultExplorer(root.querySelector("#faultExplorer"));
 }
 window.renderBoardLab=layout;
 window.mountBoardLab=init;

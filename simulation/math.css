@@ -1,0 +1,14 @@
+/* Native MathML: semantic equations, not improvised text strings */
+math.math-inline{display:inline-math;display:inline;margin:0 .12em;vertical-align:middle;font-family:serif;font-size:1.12em;color:#203b73}
+math.math-display{display:block;overflow-x:auto;max-width:100%;padding:.25em 0;font-family:serif;font-size:clamp(1.06rem,2vw,1.46rem);color:#293a72}
+math mfrac{padding:.12em}
+math mi{font-style:italic}
+.math-panel{display:flex;flex-wrap:wrap;justify-content:space-evenly;gap:15px;align-items:center;padding:13px 14px!important}
+.math-panel math{min-width:170px;flex:1}
+.ink-equation{align-items:center;justify-items:center}
+.ink-equation strong{width:100%;text-align:center}
+.ink-equation math{font-size:clamp(1.06rem,2vw,1.3rem)}
+.ink-paragraph math{font-size:1.1em}
+.bl-component-readouts table math{font-size:1.08em;white-space:nowrap}
+.ink-sheet math{line-height:1.4}
+@media(max-width:700px){.math-panel{display:grid;grid-template-columns:1fr}.math-panel math{min-width:0}.ink-equation math{font-size:1.15rem}}

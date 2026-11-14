@@ -63,3 +63,26 @@ The public static app switches between **completed** ngspice simulations,
 rather than executing ngspice on demand in the browser. It does not
 claim to simulate measured physical boards or Synopsys/Verdi output.
 Original flashcards, seven guided labs, and original waveform mode remain.
+
+## Math, diagnostic quiz, instrument cursors and fault injection
+
+The first Signal Integrity Deep Dive now includes native MathML
+equations (structured fractions, subscripts, superscripts), dual
+instrument-style cursors (A/B, difference in time and voltage),
+event annotations, and a more detailed scope readout. The VCD studio
+on the user's local port 8789 was consulted for the methodology of
+time-indexed signal inspection, cursor, zoom/pan, and event tracking.
+
+Correct and incorrect selections in the component quiz now highlight
+the actual connected source, resistor, load or NMOS branch and explain
+the associated physical behavior. A wrong click cannot burn hardware.
+
+The separate Fault-Injection Explorer exposes five independently
+completed ngspice-47 circuits under normal/shorted conditions. Their
+voltage/current and resistor power are computed electrically. A
+clearly labeled first-order thermal estimate can animate an assumed
+overheating risk for severe overload. It does not claim a real fire
+or simulate electrothermal failure. See simulation/faults/README.md.
+
+The public flashcard content, the seven original graded labs and the
+separate original waveform-practice mode are preserved.

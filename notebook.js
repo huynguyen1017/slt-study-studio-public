@@ -5,6 +5,8 @@
 (()=>{
 const E=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let currentPage=0;
+const smart=s=>window.studyMathText?window.studyMathText(s):E(s);
+const formula=s=>window.studyMath?window.studyMath(s,true):E(s);
 const lines=(s)=>String(s||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
 const colour={ink:"#24365c",blue:"#2155ae",red:"#bf3646",green:"#23805b",purple:"#7841b3",paper:"#fffdf6"};
 function block(x,y,w,h,words,tone="blue",fs=18){
@@ -160,11 +162,11 @@ function getSections(answer){
  }
  return {core:between(a,b),deep:between(b,c),steps:between(c,-1),raw};
 }
-function paragraphs(v){return lines(v).map(x=>'<p class="ink-paragraph">'+E(x)+'</p>').join("")}
+function paragraphs(v){return lines(v).map(x=>'<p class="ink-paragraph">'+smart(x)+'</p>').join("")}
 function stepList(v){
  const raw=lines(v);
  const steps=raw.map(l=>l.replace(/^\s*(?:\d+[\.\)]\s*|[-•]\s*)/,"")).filter(Boolean);
- return steps.map((l,i)=>'<li><span class="ink-stepnum">Step '+(i+1)+'</span><div>'+E(l)+'</div></li>').join("");
+ return steps.map((l,i)=>'<li><span class="ink-stepnum">Step '+(i+1)+'</span><div>'+smart(l)+'</div></li>').join("");
 }
 function insight(type,page){
  const notes={
@@ -194,7 +196,7 @@ function equations(type){
  };
  const arr=groups[type]||[];
  if(!arr.length)return "";
- return '<div class="ink-equations" aria-label="Reference equations and engineering relations">'+arr.map(([k,v])=>'<div class="ink-equation"><small>'+E(k)+'</small><strong>'+E(v)+'</strong></div>').join("")+'</div>';
+ return '<div class="ink-equations" aria-label="Reference equations and engineering relations">'+arr.map(([k,v])=>'<div class="ink-equation"><small>'+E(k)+'</small><strong>'+formula(v)+'</strong></div>').join("")+'</div>';
 }
 function renderPage(c,page){
  const s=getSections(c.answer);const type=classify(c),v=diagram(type,page),p=page;
@@ -204,17 +206,17 @@ function renderPage(c,page){
  let content="";
  if(p===0)content='<div class="ink-section"><h4>① What I would say · short answer</h4>'+paragraphs(s.core)+'</div>'+
  '<div class="ink-section"><h4>② See the signal path</h4>'+graphic+'<p class="ink-caption">'+E(v.caption)+'</p></div>'+
- '<div class="ink-highlighter"><b>Remember:</b> '+E(insight(type,p))+'</div>';
+ '<div class="ink-highlighter"><b>Remember:</b> '+smart(insight(type,p))+'</div>';
  if(p===1)content='<div class="ink-section"><h4>① Technical diagram · illustrated concept</h4>'+graphic+'<p class="ink-caption">'+E(v.caption)+'</p></div>'+
  equations(type)+'<div class="ink-section"><h4>② Deep technical explanation</h4>'+paragraphs(s.deep||s.core)+'</div>'+
- '<div class="ink-highlighter"><b>Connect the equation / mechanism:</b> '+E(insight(type,p))+'</div>';
+ '<div class="ink-highlighter"><b>Connect the equation / mechanism:</b> '+smart(insight(type,p))+'</div>';
  if(p===1 && type==="si")content='<div class="ink-section"><h4>① Actual ngspice-simulated waveform experiment</h4>'+
  (window.renderSpiceScope?window.renderSpiceScope():'<p>SPICE waveform data unavailable.</p>')+'</div>'+
  equations(type)+'<div class="ink-section"><h4>② Explain the circuit behavior</h4>'+paragraphs(s.deep||s.core)+'</div>'+
  '<div class="ink-highlighter"><b>What is verified:</b> The seven traces are reproducible ngspice model outputs. They are not measured hardware signals and have not been verified with Synopsys or Verdi.</div>';
  if(p===2)content='<div class="ink-section"><h4>① Follow the evidence · step by step</h4><ol class="ink-steps">'+stepList(s.steps||s.core)+'</ol></div>'+
  '<div class="ink-section"><h4>② What the bench / debug workflow looks like</h4>'+graphic+'<p class="ink-caption">'+E(v.caption)+'</p></div>'+
- '<div class="ink-highlighter"><b>Before claiming PASS:</b> '+E(insight(type,p))+'</div>'+
+ '<div class="ink-highlighter"><b>Before claiming PASS:</b> '+smart(insight(type,p))+'</div>'+
  '<div class="ink-question ink-selfcheck"><b>Teach it back:</b> What would you measure first, what would the result prove, and what would remain unverified?</div>'+
  '<div class="ink-lab-links"><button type="button" data-note-mode="labs" class="primary">Practice a graded lab →</button>'+
  ((type==="clock"||type==="reset"||type==="power"||type==="si")?'<button type="button" data-note-mode="waves" class="outline">Try interactive waveforms ∿</button>':'')+'</div>';

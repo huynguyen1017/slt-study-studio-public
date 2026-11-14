@@ -1,0 +1,57 @@
+[
+  {
+    "id": "nominal_1v2",
+    "supply": 1.2,
+    "load_ohm": 200.0,
+    "i_steady_a": 0.0047431,
+    "resistor_power_w": 0.000742,
+    "resistor_peak_w": 0.011373,
+    "netlist": "simulation/faults/nominal_1v2.cir",
+    "raw_sha256": "37dff94a1701655cdc241ae9bc7f4d28015f3902432d264a5f30779eebf8af68",
+    "circuit_sha256": "b7a3b89e418a3efb8cd32f5d5d3c19aa05ac500e6ba93d34d6a69cfca8e65f65"
+  },
+  {
+    "id": "short_1v2",
+    "supply": 1.2,
+    "load_ohm": 0.1,
+    "i_steady_a": 0.0225989,
+    "resistor_power_w": 0.016853,
+    "resistor_peak_w": 0.016853,
+    "netlist": "simulation/faults/short_1v2.cir",
+    "raw_sha256": "697e90a87721cb7262526ab5d60c878d696535dc94f030f265fadccb4414c265",
+    "circuit_sha256": "5eaf5001a2f7d43ca33034a4a4bf5bb61aada6047723ef4f0b8a4d2d294d7854"
+  },
+  {
+    "id": "short_5v",
+    "supply": 5.0,
+    "load_ohm": 0.1,
+    "i_steady_a": 0.094162,
+    "resistor_power_w": 0.292594,
+    "resistor_peak_w": 0.292594,
+    "netlist": "simulation/faults/short_5v.cir",
+    "raw_sha256": "7ab8cdaf9a0cee1a6c0cf9f9171f8fdd2396defceb6c75b1f37505524fc17d95",
+    "circuit_sha256": "78f1436d55b3b61b7d035e8e2039a8ca5709f41bd97b153fb0f2bb2a976e64c5"
+  },
+  {
+    "id": "overload_12v",
+    "supply": 12.0,
+    "load_ohm": 0.1,
+    "i_steady_a": 0.2259887,
+    "resistor_power_w": 1.685339,
+    "resistor_peak_w": 1.685339,
+    "netlist": "simulation/faults/overload_12v.cir",
+    "raw_sha256": "a8b90c6370f0ef0029fc526cd157a9854e077546902f6fc304d2753df4a2185f",
+    "circuit_sha256": "6c3394ae0c52c82ee0d8fb7ebd95afdd87845bbd3317eb962ed3531d0ef60b08"
+  },
+  {
+    "id": "high_12v_normal_load",
+    "supply": 12.0,
+    "load_ohm": 200.0,
+    "i_steady_a": 0.0474311,
+    "resistor_power_w": 0.07424,
+    "resistor_peak_w": 1.13734,
+    "netlist": "simulation/faults/high_12v_normal_load.cir",
+    "raw_sha256": "e6ce4c267995ff0046d04703ca72fec3ed4ddf3e0a8c5e810022674c2f7ae46b",
+    "circuit_sha256": "6d8e9236a4b471e113d8d5a26f9184d6d87c96d5a9d297f7a3cae9157bbc4f42"
+  }
+]

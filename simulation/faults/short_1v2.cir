@@ -1,0 +1,17 @@
+* Fault injection educational hypothetical: model not physical board
+* short_1v2 input=1.2 V, Rdriver 20 ohm, Radded 33 ohm, load 0.1 ohm
+Vstep vs 0 PULSE(0 1.2 1n 0.1n 0.1n 45n 90n)
+Rdriver vs tx 20
+Radded tx p 33
+Ltrace p rx 10n
+Cpin rx 0 30p
+Rload rx 0 0.1
+.tran 0.02n 16n 0 0.02n
+.control
+set wr_singlescale
+set wr_vecnames
+run
+wrdata short_1v2.dat v(vs) v(tx) v(p) v(rx) i(Ltrace)
+quit
+.endc
+.end

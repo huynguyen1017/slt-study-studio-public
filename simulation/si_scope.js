@@ -17,11 +17,11 @@ return '<section id="siStudio" class="si-studio"><div class="si-label">NGSPICE 4
 '<div class="si-toolbuttons"><button id="siPlay">▶ Replay</button><button id="siPlus">Zoom +</button><button id="siMinus">Zoom −</button><button id="siLeft">← Pan</button><button id="siRight">Pan →</button><button id="siFit">Fit</button></div></div>'+
 '<div class="si-legend">'+["Source V(vs)","Transmitter V(tx)","Receiver V(rx)"].map(function(n,i){return '<label><input data-si-ch="'+i+'" type="checkbox" checked><i style="background:'+colors[i]+'"></i>'+n+'</label>'}).join("")+'</div>'+
 '<div class="si-screen"><div class="si-screenbar">Transient voltage · V vs ns <span id="siViewWindow">0–15 ns</span></div><svg id="siPlot" viewBox="0 0 1040 410" role="img" aria-label="ngspice source transmitter and receiver voltage graph"></svg><div class="si-screenfoot">Tap or drag to inspect values at the exact cursor time. Zoom and pan to inspect reflected waves.</div></div>'+
-'<div class="si-timebar"><label>Cursor: <b id="siTimeLabel">2.30 ns</b></label><input type="range" min="0" max="15" step=".01" value="2.3" id="siTime"></div>'+
+(window.renderScopePro?window.renderScopePro():'')+'<div class="si-timebar"><label>Cursor: <b id="siTimeLabel">2.30 ns</b></label><input type="range" min="0" max="15" step=".01" value="2.3" id="siTime"></div>'+
 '<div class="si-values">'+["Source","Transmitter","Receiver","Receiver peak","DC expected","Load Γ"].map(function(n,i){return '<div><small>'+n+'</small><strong id="siV'+i+'">—</strong></div>'}).join("")+'</div>'+
 '<div class="si-circuit">1 V step (t=1 ns) &nbsp;→&nbsp; Rsrc=20 Ω &nbsp;→&nbsp; line Z₀=50 Ω (TD=1 ns) &nbsp;→&nbsp; <strong id="siLoad">load</strong></div>'+
 '<div id="siBoardPlaceholder">'+(window.renderBoardLab?window.renderBoardLab():'')+'</div>'+
-'<p id="siFinding" class="si-finding"></p><div class="si-math">ΓL=(RL−Z₀)/(RL+Z₀) &nbsp; | &nbsp; Vlaunch=Z₀/(Rsrc+Z₀) &nbsp; | &nbsp; Vfirst=Vlaunch(1+ΓL)</div>'+
+'<p id="siFinding" class="si-finding"></p><div class="si-math math-panel">'+(window.studyMath?['Γ_L = (R_L − Z₀)/(R_L + Z₀)','V_launch = Z₀/(R_src + Z₀)','V_first = V_launch×(1 + Γ_L)'].map(function(v){return window.studyMath(v,true)}).join(''):'ΓL=(RL-Z0)/(RL+Z0)')+'</div>'+
 '<div class="si-evidence"><button id="siCSV">Download waveform CSV</button><a id="siNetlist" target="_blank" rel="noopener">Read reproducible netlist</a><a href="simulation/README.md" target="_blank" rel="noopener">Simulation methods</a></div>'+
 '<div class="si-quiz"><div class="si-label">LEARN WITH GUIDED REATTEMPTS</div><span id="siCount">Question 1 / 4</span><h5 id="siQuestion"></h5><div id="siOptions"></div><p id="siFeedback" aria-live="polite"></p><button id="siHint">Give me a hint</button><button id="siNext" disabled>Next step →</button></div>'+
 '<p class="si-caveat">Selecting a scenario replays stored samples from a different ngspice transient run. No cloud solver is running when you click. Lossless transmission lines and optional lumped L/C simplify real hardware; no actual board, Synopsys verification, eye compliance, or physical sign-off is claimed.</p></section>';
@@ -71,7 +71,7 @@ window.mountSpiceScope=function(root){
    s+='<line x1="'+x+'" x2="'+x+'" y1="'+sy+'" y2="'+ey+'" stroke="#ffe89f" stroke-dasharray="7 5" stroke-width="2"/>';
    for(var j=0;j<3;j++)if(st.channels[j])s+='<circle cx="'+x+'" cy="'+Y(p[j+1])+'" r="5" fill="'+colors[j]+'" stroke="white"/>';
   }
-  $("#siPlot").innerHTML=s;readout();root.dispatchEvent(new CustomEvent("slt:scope-time",{detail:{time:st.time}}));
+  $("#siPlot").innerHTML=s;readout();root.dispatchEvent(new CustomEvent("slt:scope-time",{detail:{time:st.time}}));root.dispatchEvent(new CustomEvent("slt:scope-redraw",{detail:{run:st.run.id,start:st.start,end:st.end,time:st.time}}));
  }
  function seek(t){st.time=Math.max(0,Math.min(15,t));draw()}
  function windowTo(a,b){var w=Math.max(1,Math.min(15,b-a)),left=Math.max(0,Math.min(15-w,a));st.start=left;st.end=left+w;draw()}
@@ -118,6 +118,6 @@ window.mountSpiceScope=function(root){
   if(st.step<3){st.step++;question()}else{$("#siQuestion").textContent="Completed: you can interpret the simulated reflection waveforms.";
   $("#siOptions").innerHTML="";$("#siFeedback").className="correct";$("#siFeedback").textContent="Revisit the seven cases and explain each physical assumption.";$("#siNext").disabled=true;}
  };
- draw();question();if(window.mountBoardLab)window.mountBoardLab(root.querySelector("#boardLab"),function(){return st.time});
+ draw();question();if(window.mountBoardLab)window.mountBoardLab(root.querySelector("#boardLab"),function(){return st.time});if(window.mountScopePro)window.mountScopePro(root);
 };
 })();
