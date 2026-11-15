@@ -166,3 +166,9 @@
 .bs-table-scroll table{min-width:470px}
 @media(max-width:800px){.bs-analysis-plots{grid-template-columns:1fr}}
 @media(max-width:480px){.bs-analysis{padding:9px}.bs-analysis-controls label{flex:1 1 125px}.bs-analysis-controls button{flex:1 1 132px}.bs-analysis-results{font-size:11px}}
+
+.bs-linktools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}
+.bs-linktools button{background:#1b514b;color:#e7fff8;border:1px solid #5bdab6;border-radius:6px;padding:8px 10px;min-height:36px;cursor:pointer;font:750 10.5px ui-monospace,monospace}
+.bs-linktools button[aria-pressed="false"]{background:#243b52;border-color:#7696b0}
+.bs-linktools span{color:#c3dbed;font:650 10px/1.5 system-ui}
+.bs-ab-window,.bs-ab-point{pointer-events:none}
