@@ -161,3 +161,7 @@
 .notebook-classic .ink-lab-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:19px}
 .notebook-classic .ink-lab-links button{font-family:system-ui,sans-serif;font-size:13px;min-height:48px}
 @media(max-width:640px){.notebook-book{padding:8px}.notebook-tab{font-size:11px}.notebook-classic .ink-sheet{padding:22px 12px 20px 34px}.notebook-classic .ink-page-heading{font-size:10px}.notebook-classic .ink-title{font-size:24px}.notebook-classic .ink-question{font-size:16px}.notebook-classic .ink-section h4{font-size:19px}.notebook-classic .ink-diagram-scroll>.ink-figure{min-width:620px;width:620px}}
+
+.notebook-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 1px 12px}
+.notebook-kicker{color:#933f57;font:850 12px/1.4 system-ui;letter-spacing:.085em}
+.notebook-topic{color:#6237a3;background:#f0e6fb;border-radius:99px;padding:6px 10px;font:750 11px system-ui}
