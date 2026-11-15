@@ -63,7 +63,7 @@ assert.throws(bad,/No scalar or vector/);
    await page.locator('#rtlVcdSvg [data-vcd-marker="A"]').first().waitFor({state:'attached'});
    assert.equal(await page.locator('#rtlVcdAB tbody tr').count(),4,'4 native VCD signal rows');
    assert.match(await page.locator('#rtlVcdSvg').textContent(),/0x|1|0/);
-   assert.match(await page.locator('#rtlVcdNotice').innerText(),/source transitions/);
+   assert.match(await page.locator('#rtlVcdNotice').textContent(),/source transitions/);
    if(width===1280){
     const board=page.locator('#bsLinkB');
     if(await board.count()){
