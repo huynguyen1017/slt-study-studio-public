@@ -42,8 +42,7 @@ function renderFourChannelScope(d,power,a,b){
   const y=16+k*92,amp=power?vals[k]:0,top=y+16,bot=y+72;
   svg+='<rect x="6" y="'+y+'" width="836" height="83" rx="5" fill="#112a40"/>';
   svg+='<text x="12" y="'+(y+20)+'" fill="'+colors[k]+'" font-size="12" font-weight="800">'+labels[k]+'</text><text x="12" y="'+(y+45)+'" fill="#c5e0ee" font-size="10">'+f(amp,3)+' V</text>';
-  svg+='<path d="M130 '+bot+' H'+x(100)+' V'+top+' H807" fill="none" stroke="'+colors[k]+'" stroke-width="2.5"/>';
-  if(!power)svg+='<path d="M130 '+bot+' H807" fill="none" stroke="'+colors[k]+'" stroke-width="2.7"/>';
+  svg+=power?'<path d="M130 '+bot+' H'+x(100)+' V'+top+' H807" fill="none" stroke="'+colors[k]+'" stroke-width="2.5"/>':'<path d="M130 '+bot+' H807" fill="none" stroke="'+colors[k]+'" stroke-width="2.7"/>';
   for(const [t,tag,c] of [[a,"A","#ffe19a"],[b,"B","#79f1d5"]]){
    const xx=x(t),yy=power&&t>=100?top:bot;
    svg+='<circle data-aca-marker="'+tag+'" data-ch="'+k+'" cx="'+xx+'" cy="'+yy+'" r="4.5" fill="'+c+'" stroke="#051420" stroke-width="1.5"/>';
@@ -70,7 +69,7 @@ function markup(){return '<div class="aca-frame"><div class="aca-head"><b>VIRTUA
  '<section data-aca-panel="circuit"><div class="aca-card"><h3>TECH 60 Lab 7 · series / parallel resistors</h3><p>Connect the six required jumper paths before enabling the simulated source. Resistance readings are predicted from the circuit equations, not copied from the original report.</p>'+
  '<div class="aca-forms"><label>Vs [V]<input id="acaV" type="number" value="9" min="0" max="24" step=".1"></label><label>R1 [Ω]<input id="acaR1" type="number" value="330" min="1"></label><label>R2 [Ω]<input id="acaR2" type="number" value="1000" min="1"></label><label>R3 [Ω]<input id="acaR3" type="number" value="470" min="1"></label><label>R4 [Ω]<input id="acaR4" type="number" value="220" min="1"></label></div>'+
  '<div id="acaDrawing" class="aca-svg"></div>'+
- '<div class="aca-scope"><h4>Four-channel oscilloscope probe exercise · ideal source step</h4><p>CH1 source / CH2 node A / CH3 node B / CH4 parallel voltage. This is an ideal resistor-network calculation, not a measured 1 GHz signal or a physically characterized transient.</p><div class="aca-form-ranges"><label>A marker [ns] <input id="acaScopeA" type="range" min="0" max="1000" value="180"></label><label>B marker [ns] <input id="acaScopeB" type="range" min="0" max="1000" value="560"></label></div><div id="acaScopeChart" class="aca-svg"></div><div id="acaScopeStats" role="status"></div><button id="acaScopeExport">Export four-channel CSV</button></div><div class="aca-forms"><label>Jumper A<select id="acaWireA"></select></label><label>Jumper B<select id="acaWireB"></select></label><button id="acaConnect">Connect wire</button><button id="acaAutoWire">Load reference wiring</button><button id="acaResetWire">Remove wires</button><button id="acaPower">Power ON/OFF</button></div>'+
+ '<div class="aca-scope"><h4>Four-channel oscilloscope probe exercise · ideal source step</h4><p>CH1 source / CH2 node A / CH3 node B / CH4 parallel voltage. This is an ideal resistor-network calculation, not a measured 1 GHz signal or a physically characterized transient.</p><div class="aca-form-ranges"><label>A marker [ns] <input id="acaScopeA" type="range" min="0" max="1000" value="180"></label><label>B marker [ns] <input id="acaScopeB" type="range" min="0" max="1000" value="560"></label><label><input id="acaScopeLink" type="checkbox" checked> Link B to A</label></div><div id="acaScopeChart" class="aca-svg"></div><div id="acaScopeStats" role="status"></div><button id="acaScopeExport">Export four-channel CSV</button></div><div class="aca-forms"><label>Jumper A<select id="acaWireA"></select></label><label>Jumper B<select id="acaWireB"></select></label><button id="acaConnect">Connect wire</button><button id="acaAutoWire">Load reference wiring</button><button id="acaResetWire">Remove wires</button><button id="acaPower">Power ON/OFF</button></div>'+
  '<div id="acaWireItems" class="aca-wire-items"></div><p id="acaWireMessage" role="status"></p>'+
  '<div class="aca-columns"><div class="aca-card"><h4>Probe placement / DMM</h4><p>CH1 source, CH2 node A, CH3 node B, CH4 voltage across R2/R3.</p><div class="aca-forms"><label>Probe positive<select id="acaPlus"></select></label><label>Probe negative<select id="acaMinus"></select></label></div><div id="acaMeter"></div><div id="acaValues"></div></div><div class="aca-card"><h4>Step-by-step equations</h4><div id="acaEquations"></div><button id="acaCsv">Download calculated node CSV</button></div></div></div>'+
  '<div class="aca-card"><h3>Physics 2B · 4.5 V low-voltage RC experiment</h3><p>Model τ = RC using the manual’s 150 Ω resistor and 1.0 F capacitor. The higher-voltage classroom exercises are not physical build instructions.</p>'+
@@ -109,7 +108,15 @@ function mount(root){
  $("#acaResetWire").onclick=()=>{wires=[];power=false;updateCircuit()};
  $("#acaPower").onclick=()=>{if(valid())power=!power;updateCircuit()};
  $("#acaWireItems").onclick=ev=>{const b=ev.target.closest("[data-remove]");if(!b)return;wires.splice(Number(b.dataset.remove),1);updateCircuit()};
- for(const n of ["acaScopeA","acaScopeB"])$("#"+n).oninput=updateCircuit;
+ let scopeGap=380;
+ $("#acaScopeA").oninput=()=>{
+  if($("#acaScopeLink").checked){
+   const t=Number($("#acaScopeA").value);$("#acaScopeB").value=String(limit(t+scopeGap,0,1000));
+  }
+  updateCircuit();
+ };
+ $("#acaScopeB").oninput=()=>{scopeGap=Number($("#acaScopeB").value)-Number($("#acaScopeA").value);updateCircuit()};
+ $("#acaScopeLink").onchange=()=>{scopeGap=Number($("#acaScopeB").value)-Number($("#acaScopeA").value);updateCircuit()};
  $("#acaScopeExport").onclick=()=>{
   const d=ckt();if(!d)return;let out="time_ns,CH1_Vsource_V,CH2_NodeA_V,CH3_NodeB_V,CH4_Vparallel_V\n";
   for(let i=0;i<=100;i++){const v=power&&i>=10?[d.V,d.node1,d.node2,d.vp]:[0,0,0,0];out+=[i*10,...v].join(",")+"\n"}
