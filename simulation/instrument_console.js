@@ -470,7 +470,7 @@ function markup(){
    '<button type="button" id="ixDlSet" style="background:#243952;color:#fff;border:1px solid #597698;border-radius:5px;padding:6px 9px;font:700 10.5px system-ui;cursor:pointer">⬇ Export .set</button>'+
    '<label style="background:#1c2e44;color:#cfe4fa;border:1px solid #526e8e;border-radius:5px;padding:5px 8px;font:700 10.5px system-ui;cursor:pointer">⬆ Import CSV<input type="file" id="ixUpCsv" accept=".csv,.txt" hidden></label>'+
   '</div><table><thead><tr><th>Channel</th><th>Min</th><th>Max</th><th>Pk–Pk</th><th>RMS</th></tr></thead><tbody id="ixMeasures"></tbody></table></section>'+
-  '<section><h5>CURSORS / EVENT MARKERS (DRAG A / B)</h5><div class="ix-cursors"><label>Cursor A <span id="ixALabel">—</span><input type="range" id="ixA" min="0" max="100" step=".1" value="25"></label><label>Cursor B <span id="ixBLabel">—</span><input type="range" id="ixB" min="0" max="100" step=".1" value="60"></label></div><table><thead><tr><th>Marker</th><th>Time</th><th>Δt (B−A)</th><th>1 / |Δt|</th></tr></thead><tbody id="ixMarkerRows"></tbody></table><div id="ixAtCursor"></div></section></div>'+
+  '<section><h5>CURSORS / EVENT MARKERS (DRAG A / B)</h5><div class="ix-linked-tools"><button id="ixLinkB" type="button" aria-pressed="true">🔗 Link B to A: ON</button><button id="ixNextAB" type="button">↦ Next event</button><span id="ixLinkHint">B follows A at selected Δt</span></div><div class="ix-cursors"><label>Cursor A <span id="ixALabel">—</span><input type="range" id="ixA" min="0" max="100" step=".1" value="25"></label><label>Cursor B <span id="ixBLabel">—</span><input type="range" id="ixB" min="0" max="100" step=".1" value="60"></label></div><table><thead><tr><th>Marker</th><th>Time</th><th>Δt (B−A)</th><th>1 / |Δt|</th></tr></thead><tbody id="ixMarkerRows"></tbody></table><div id="ixCursorSummary" role="status" aria-live="polite"></div><div id="ixAtCursor"></div></section></div>'+
   '<div class="ix-lesson"><strong id="ixWhy">ANALYZE THE FIRST ABNORMAL EVENT</strong><p id="ixExplain"></p><ol><li>Use the top Keysight Infiniium menus (Setup, Trigger, Measure, Math, Analyze) just like a real bench scope.</li><li>Toggle 🔴 Faulty Capture vs 🟢 Fixed Capture and Save R1 to overlay before/after improvements directly on the grid.</li><li>Move the Rail Voltage and R/L/C controls below the scope to see wires, shunts, capacitors, and traces react in real time.</li></ol></div>'+
   '<div class="ix-notice" id="ixNotice">Interactive Keysight Infiniium style learning bench. Stored ngspice / synthetic traces are clearly labeled; no real lab instrument hardware is remotely driven.</div></section>';
 }
@@ -484,7 +484,7 @@ function mount(root,ctx={}){
  const state={
   captureMode:"fault", // "fault" | "fixed"
   presetId:"active",
-  a:0,b:0,left:0,right:100,
+  a:0,b:0,left:0,right:100,linkedB:true,gap:0,
   active:[true,true,true,true],
   vGain:[1,1,1,1],
   vOffset:[0,0,0,0],
@@ -501,7 +501,7 @@ function mount(root,ctx={}){
  function syncDefBounds(resetWindow=true){
   const T=activeDef.T;
   if(resetWindow){
-   state.left=0;state.right=T;state.a=T*0.22;state.b=T*0.62;
+   state.left=0;state.right=T;state.a=T*0.22;state.gap=T*0.18;state.b=state.a+state.gap;state.linkedB=true;
   }
   const sigs=currentSignals();
   const s0=sigs[state.trigger]||sigs[0];
@@ -541,6 +541,13 @@ function mount(root,ctx={}){
    val-=avg;
   }
   return val+state.vOffset[j];
+ }
+ function syncB(){if(state.linkedB)state.b=clamp(state.a+state.gap,0,activeDef.T);}
+ function setA(t){state.a=clamp(t,0,activeDef.T);syncB();}
+ function formatChannel(v,ch){
+  if(ch.type==="digital")return v>=.5?"1":"0";
+  if(ch.type==="bus"){const width=/16BIT|\[15:0\]/i.test(ch.name)||ch.max>255?4:2;return "0x"+Math.max(0,Math.round(v)).toString(16).toUpperCase().padStart(width,"0");}
+  return fmt(v,ch.unit);
  }
  function timeText(t){
   const off=activeDef.t0||0;
@@ -814,9 +821,16 @@ function mount(root,ctx={}){
 
   const delta=state.b-state.a,sc=TIME_SCALE[activeDef.unit]||1e-9,freq=Math.abs(delta)>1e-9?1/(Math.abs(delta)*sc):0;
   $("#ixALabel").textContent=timeText(state.a);$("#ixBLabel").textContent=timeText(state.b);
+  $("#ixLinkB").setAttribute("aria-pressed",String(state.linkedB));
+  $("#ixLinkB").textContent=state.linkedB?"🔗 Link B to A: ON":"Unlink B: OFF";
+  $("#ixLinkHint").textContent=state.linkedB?"B tracks A by Δt "+delta.toFixed(2)+" "+activeDef.unit:"A/B independent; both read all 4 channels";
   $("#ixA").value=state.a;$("#ixB").value=state.b;
   $("#ixMarkerRows").innerHTML='<tr><td>M1 / A</td><td>'+timeText(state.a)+'</td><td rowspan="2">'+delta.toFixed(2)+' '+activeDef.unit+'</td><td rowspan="2">'+formatFreq(freq)+'</td></tr><tr><td>M2 / B</td><td>'+timeText(state.b)+'</td></tr>';
-  $("#ixAtCursor").innerHTML='<div style="font:700 10px ui-monospace,monospace;color:#b5c9e0;margin-top:6px">At A: '+sigs.map((s,j)=>'<span style="color:'+colors[j]+'">CH'+(j+1)+' '+fmt(signalNum(state.a,j),s.unit)+'</span>').join(" · ")+'</div>';
+  $("#ixCursorSummary").textContent="A "+timeText(state.a)+" → B "+timeText(state.b)+" · Δt "+delta.toFixed(3)+" "+activeDef.unit+" · 1/|Δt| "+formatFreq(freq);
+  $("#ixAtCursor").innerHTML='<div class="ix-ab-detail"><table><thead><tr><th>Channel</th><th>A · '+timeText(state.a)+'</th><th>B · '+timeText(state.b)+'</th><th>Δ (B−A)</th></tr></thead><tbody>'+
+   sigs.map((ch,j)=>'<tr><th style="color:'+colors[j]+'">CH'+(j+1)+' '+esc(ch.name)+'</th><td>'+esc(formatChannel(signalNum(state.a,j),ch))+'</td><td>'+esc(formatChannel(signalNum(state.b,j),ch))+'</td><td>'+
+    (ch.type==="digital"?((signalNum(state.a,j)>=.5?1:0)+" → "+(signalNum(state.b,j)>=.5?1:0)):ch.type==="bus"?(esc(formatChannel(signalNum(state.a,j),ch))+" → "+esc(formatChannel(signalNum(state.b,j),ch))):fmt(signalNum(state.b,j)-signalNum(state.a,j),ch.unit))+
+    '</td></tr>').join("")+'</tbody></table></div>';
  }
 
  // Keysight Infiniium Menubar drawers
@@ -908,7 +922,7 @@ function mount(root,ctx={}){
   if(act.startsWith("trig-")){state.trigType=act.slice(5);$("#ixTrigType").value=state.trigType;}
   if(act==="center-trig"){$("#ixCenter").click();}
   if(act==="force-trig"){state.cleared=false;state.reveal=null;}
-  if(act==="snap-cursors"){const e0=activeDef.events[0]?.t||activeDef.T*0.2;state.a=e0;state.b=clamp(e0+activeDef.T*0.2,0,activeDef.T);}
+  if(act==="snap-cursors"){const e0=activeDef.events[0]?.t||activeDef.T*0.2;state.gap=activeDef.T*.2;setA(e0);}
   if(act==="mode-fault"){state.captureMode="fault";}
   if(act==="mode-fixed"){state.captureMode="fixed";}
   if(act==="save-r1"){$("#ixSaveRef").click();}
@@ -943,24 +957,24 @@ function mount(root,ctx={}){
 
  const stop=()=>{state.running=false;state.reveal=null;cancelAnimationFrame(state.raf);draw();};
  $("#ixRun").onclick=()=>{
-  stop();state.cleared=false;state.running=true;state.reveal=0;state.a=0;
+  stop();state.cleared=false;state.running=true;state.reveal=0;setA(0);
   const start=performance.now(),dur=6500,T=activeDef.T;
   function frame(now){
    if(!state.running)return;
    const f=clamp((now-start)/dur,0,1);
-   state.a=T*f;state.reveal=state.a;draw();
+   setA(T*f);state.reveal=state.a;draw();
    if(f>=1){state.running=false;state.reveal=null;draw();return;}
    state.raf=requestAnimationFrame(frame);
   }
   state.raf=requestAnimationFrame(frame);
  };
  $("#ixStop").onclick=stop;
- $("#ixSingle").onclick=()=>{stop();state.cleared=false;state.a=triggerTime();state.b=clamp(state.a+activeDef.T/10,0,activeDef.T);draw();};
+ $("#ixSingle").onclick=()=>{stop();state.cleared=false;state.gap=activeDef.T/10;setA(triggerTime());draw();};
  $("#ixClear").onclick=()=>{stop();state.cleared=true;draw();};
  $("#ixAuto").onclick=()=>{stop();state.cleared=false;state.vGain=[1,1,1,1];state.vOffset=[0,0,0,0];syncDefBounds(true);draw();};
  $("#ixZoomIn").onclick=()=>{stop();const w=(state.right-state.left)*0.5,m=(state.left+state.right)/2,nw=clamp(w,activeDef.T/25,activeDef.T);state.left=clamp(m-nw/2,0,activeDef.T-nw);state.right=state.left+nw;draw();};
  $("#ixZoomOut").onclick=()=>{stop();const w=(state.right-state.left)*2,m=(state.left+state.right)/2,nw=clamp(w,activeDef.T/25,activeDef.T);state.left=clamp(m-nw/2,0,activeDef.T-nw);state.right=state.left+nw;draw();};
- $("#ixCenter").onclick=()=>{stop();const m=triggerTime(),w=state.right-state.left;state.left=clamp(m-w/2,0,activeDef.T-w);state.right=state.left+w;state.a=m;draw();};
+ $("#ixCenter").onclick=()=>{stop();const m=triggerTime(),w=state.right-state.left;state.left=clamp(m-w/2,0,activeDef.T-w);state.right=state.left+w;setA(m);draw();};
  $("#ixTrigger").onchange=e=>{state.trigger=Number(e.target.value);draw();};
  $("#ixTrigType").onchange=e=>{state.trigType=e.target.value;draw();};
  $("#ixSlope").onchange=e=>{state.slope=e.target.value;draw();};
@@ -976,15 +990,17 @@ function mount(root,ctx={}){
   $("#ixSaveRef").textContent=state.showRef?"Hide R1 Compare":"Save R1 Compare";
   draw();
  };
- $("#ixA").oninput=e=>{stop();state.a=Number(e.target.value);draw();};
- $("#ixB").oninput=e=>{stop();state.b=Number(e.target.value);draw();};
+ $("#ixA").oninput=e=>{stop();setA(Number(e.target.value));draw();};
+ $("#ixB").oninput=e=>{stop();state.b=clamp(Number(e.target.value),0,activeDef.T);state.gap=state.b-state.a;draw();};
+ $("#ixLinkB").onclick=()=>{state.linkedB=!state.linkedB;if(state.linkedB)state.gap=state.b-state.a;draw();};
+ $("#ixNextAB").onclick=()=>{stop();const e=activeDef.events.find(e=>e.t>state.a+1e-5)||activeDef.events[0];if(e)setA(e.t);draw();};
  $("#ixChannels").onclick=e=>{const b=e.target.closest("[data-ix-ch]");if(!b)return;state.active[+b.dataset.ixCh]=!state.active[+b.dataset.ixCh];draw();};
  $("#ixChannels").onchange=e=>{
   const g=e.target.closest("[data-ix-gain]"),c=e.target.closest("[data-ix-coup]");
   if(g){state.vGain[+g.dataset.ixGain]=Number(g.value);draw();}
   if(c){state.coupling[+c.dataset.ixCoup]=c.value;draw();}
  };
- $("#ixEvents").onclick=e=>{const b=e.target.closest("[data-ix-event]");if(!b)return;const ev=activeDef.events[+b.dataset.ixEvent];state.a=ev.t;state.b=clamp(ev.t+activeDef.T/10,0,activeDef.T);$("#ixExplain").textContent=ev.reason+" "+activeDef.lesson;draw();};
+ $("#ixEvents").onclick=e=>{const b=e.target.closest("[data-ix-event]");if(!b)return;const ev=activeDef.events[+b.dataset.ixEvent];state.gap=activeDef.T/10;setA(ev.t);$("#ixExplain").textContent=ev.reason+" "+activeDef.lesson;draw();};
 
  // Physical board reactor sliders below scope
  $("#ksVoltSlider").oninput=e=>{state.vScale=Number(e.target.value);$("#ksVoltVal").textContent=state.vScale.toFixed(2)+"×";draw();};
