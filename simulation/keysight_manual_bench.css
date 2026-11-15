@@ -1,5 +1,4 @@
-
-/* v14 functional, manual-referenced oscilloscope skills panel */
+/* v15 functional, manual-referenced Keysight oscilloscope & interactive probe-selection bench */
 .km-bench{background:#081a2d;color:#e3f1fd;border:2px solid #355b81;border-radius:12px;padding:14px;margin:14px 0;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;max-width:100%}
 .km-heading{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid #2d4965}
 .km-heading b{color:#a7f3df;font:850 13px/1.5 ui-monospace,monospace}
@@ -11,11 +10,34 @@
 .km-equipment p,.km-manual p{color:#c4dbed;font:600 11.5px/1.7 system-ui}
 .km-warning{border-left:3px solid #efbd77;padding:8px;background:#453222}
 .km-manual a{color:#92d8ff}
+
+/* Interactive Probe Point & Selection Studio */
+.km-probe-studio{background:#0c2338;border:1.5px solid #2f6185;border-radius:10px;padding:11px;margin:12px 0}
+.km-probe-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.km-probe-head b{color:#86f3d3;font:800 12px ui-monospace,monospace}
+.km-probe-head span{color:#b6d5ea;font:600 11px system-ui}
+.km-probe-layout{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;align-items:stretch}
+.km-board-map-wrap{background:#071b16;border:1px solid #2b6352;border-radius:8px;overflow:hidden;display:flex;align-items:center}
+.km-board-map-wrap svg{display:block;width:100%;height:auto}
+.km-probe-table-wrap{margin:0}
+.km-probe-table-wrap select{background:#153048;color:#ecf6ff;border:1px solid #507699;border-radius:5px;padding:5px;font:600 10.5px system-ui;max-width:190px}
+.km-probe-row-active{background:rgba(107,225,193,.1)}
+.km-pbadge{display:inline-block;padding:3px 7px;border-radius:999px;font:750 10px ui-monospace,monospace}
+.km-pbadge-ok{background:#124535;color:#8ff2cb;border:1px solid #2e9e75}
+.km-pbadge-warn{background:#4b3516;color:#fbd585;border:1px solid #c98e32}
+.km-pbadge-err{background:#521822;color:#ffb4be;border:1px solid #db4c63}
+.km-probe-diag{margin-top:9px;padding:8px 11px;border-radius:7px;font:700 11.5px/1.5 system-ui}
+.km-probe-diag.is-ok{background:#0f3930;border:1px solid #2ea37e;color:#b4fae0}
+.km-probe-diag.is-warn{background:#433015;border:1px solid #d49635;color:#ffe2a8}
+.km-probe-diag.is-err{background:#4d1520;border:1px solid #e04f67;color:#ffd0d6}
+
 .km-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
 .km-controls fieldset{min-width:0;border:1px solid #355c7a;border-radius:9px;padding:9px;display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.km-util-fieldset{grid-column:1 / -1}
 .km-controls legend{color:#6be1c1;padding:2px 7px;font:800 12px ui-monospace,monospace}
 .km-controls label{display:flex;flex-direction:column;gap:5px;color:#d4e5f5;font:650 10.5px system-ui}
 .km-controls select,.km-controls input{font:650 11px system-ui;min-width:0;width:100%;box-sizing:border-box;padding:8px 5px;background:#19344d;color:#edf7ff;border:1px solid #5a7b98;border-radius:5px}
+.km-mini-btn{padding:6px 8px!important;min-height:33px!important;font-size:10.5px!important}
 .km-actions{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
 .km-load-label{display:inline-flex;align-items:center;position:relative}
 .km-load-label input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
@@ -29,5 +51,9 @@
 .km-table-scroller table{width:100%;min-width:620px;border-collapse:collapse;font:650 10.5px/1.4 ui-monospace,monospace}
 .km-table-scroller th,.km-table-scroller td{border:1px solid #37516a;padding:8px;text-align:left;white-space:nowrap}
 .km-table-scroller th{background:#1c3e58;color:#c9e9ff}
-.km-math{padding:13px;border-radius:7px;background:#14354d;border-left:4px solid #75deb8;color:#ddffef;font:700 12px/1.55 ui-monospace,monospace}
+.km-math-card{background:#112e45;border:1px solid #366385;border-left:4px solid #75deb8;border-radius:8px;padding:10px 13px;margin-top:8px}
+.km-math-formula{background:#f7fbff;border-radius:6px;padding:6px 10px;margin-bottom:8px;overflow-x:auto}
+.km-math{color:#ddffef;font:700 12px/1.55 ui-monospace,monospace}
+
+@media(max-width:900px){.km-probe-layout{grid-template-columns:1fr}}
 @media(max-width:760px){.km-controls{grid-template-columns:1fr}.km-bench{padding:8px}.km-controls fieldset{grid-template-columns:repeat(2,minmax(0,1fr))}.km-viewport svg{min-width:830px}.km-ab label{flex:1 1 150px}.km-actions button{flex:1 1 120px}}

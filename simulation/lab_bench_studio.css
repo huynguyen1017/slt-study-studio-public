@@ -1,0 +1,36 @@
+/* Coursework Breadboard Simulator + Keysight Bench + 7-Step Live Lab Report Studio (v15) */
+.lb-studio{background:#f8fbff;border:2px solid #9ab8dc;border-radius:12px;padding:14px;margin:14px 0;color:#142844;font-family:system-ui,-apple-system,sans-serif;max-width:100%;overflow:hidden}
+.lb-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;padding-bottom:10px;border-bottom:2px solid #cbdcf0}
+.lb-head b{color:#0e3d7a;font:850 13px ui-monospace,monospace}
+.lb-head p{margin:4px 0 0;color:#355175;font:600 11.5px/1.45 system-ui}
+.lb-preset-lbl{display:flex;flex-direction:column;gap:4px;font:750 11px system-ui;color:#1b457b;min-width:250px;max-width:100%}
+.lb-preset-lbl select{background:#fff;color:#0f2847;border:1.5px solid #7ca1cc;border-radius:7px;padding:7px 9px;font:650 11.5px system-ui;max-width:100%}
+
+.lb-controls-bar{display:flex;flex-wrap:wrap;gap:10px;padding:10px;background:#eef5fd;border:1px solid #c3d7ee;border-radius:9px;margin:11px 0}
+.lb-controls-bar label{display:flex;flex-direction:column;gap:4px;font:750 11px system-ui;color:#163d70;min-width:130px;flex:1 1 135px}
+.lb-controls-bar input,.lb-controls-bar select{background:#fff;border:1px solid #8eb1d8;border-radius:6px;padding:6px 8px;font:650 12px system-ui;color:#0e2542}
+
+.lb-bench-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:12px;margin:10px 0;align-items:start}
+.lb-svg-card{background:#0b1726;border:1.5px solid #2b4e75;border-radius:10px;overflow:hidden}
+.lb-svg-card svg{display:block;width:100%;height:auto}
+.lb-summary-card{display:grid;gap:8px}
+.lb-live-summary{background:#e7f7ef;border:1.5px solid #5ac18e;border-radius:8px;padding:9px 11px;font:750 12px/1.5 ui-monospace,monospace;color:#094d32}
+
+.lb-report-builder{background:#ffffff;border:1.5px solid #9ab8dc;border-radius:10px;padding:12px;margin-top:12px}
+.lb-report-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding-bottom:8px;border-bottom:1px dashed #c2d5ea;margin-bottom:10px}
+.lb-report-head b{color:#0f3e7d;font:850 12.5px ui-monospace,monospace}
+.lb-report-actions{display:flex;flex-wrap:wrap;gap:6px}
+.lb-report-actions button{border:1px solid #82a7d1;background:#eef5fd;color:#103e78;border-radius:7px;padding:7px 11px;font:750 11.5px system-ui;cursor:pointer}
+.lb-btn-pri{background:#0f4c9a!important;border-color:#0f4c9a!important;color:#fff!important}
+
+.lb-report-steps{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.lb-rstep{display:flex;flex-direction:column;gap:4px}
+.lb-rstep.lb-wide{grid-column:1 / -1}
+.lb-rstep label{font:800 11px ui-monospace,monospace;color:#1d4a84}
+.lb-rstep input,.lb-rstep select,.lb-rstep textarea{border:1px solid #adc6e3;border-radius:6px;padding:7px 9px;font:550 12.5px/1.45 system-ui,sans-serif;color:#112642;background:#fbfdff;width:100%;box-sizing:border-box}
+
+@media(max-width:900px){
+ .lb-bench-grid{grid-template-columns:1fr}
+ .lb-report-steps{grid-template-columns:1fr}
+ .lb-studio{padding:10px}
+}

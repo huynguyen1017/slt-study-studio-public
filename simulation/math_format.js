@@ -1,47 +1,129 @@
 "use strict";
-/* Native MathML renderer. No external JS, fonts, CDN, or math image assets. */
+/* Native MathML renderer + ENGR 852 HW1/HW2 Stacked Equation Block Formatter.
+   No external JS, fonts, CDN, or math image assets. */
 (function(){
 const enc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const subs={"₀":"0","₁":"1","₂":"2","₃":"3","₄":"4","₅":"5","₆":"6","₇":"7","₈":"8","₉":"9"};
-const pat=/[A-Za-zΓγΔδθτπΩΣ]+(?:_[A-Za-z0-9]+)*[₀₁₂₃₄₅₆₇₈₉]*|\d+(?:\.\d+)?|[ΓγΔδθτπΩΣ]|[₀₁₂₃₄₅₆₇₈₉]+|[=≈≥≤<>+\-−*/×·^()√]|./gu;
-function tokens(src){
- return (String(src).match(pat)||[]).map(t=>t.trim()).filter(Boolean);
+const pat=/[A-Za-zΓγΔδθτπΩΣλφωμ]+(?:_[A-Za-z0-9₀₁₂₃₄₅₆₇₈₉]+)*[₀₁₂₃₄₅₆₇₈₉]*|\d+(?:\.\d+)?|[ΓγΔδθτπΩΣλφωμ∫ln]+|[₀₁₂₃₄₅₆₇₈₉]+|[=≈≥≤≠<>+\-−*/×·^()√→⇒\|]|./gu;
+
+function normalizeFormula(src){
+ let s=String(src??"").trim();
+ s=s
+  .replace(/\bGamma_L\b|\bGammaL\b/g,"Γ_L")
+  .replace(/\bGamma_S\b|\bGammaS\b/g,"Γ_S")
+  .replace(/\bGamma\b/g,"Γ")
+  .replace(/\bDelta_V\b|\bDeltaV\b/g,"ΔV")
+  .replace(/\bDelta_I\b|\bDeltaI\b/g,"ΔI")
+  .replace(/\bDelta_t\b|\bDeltat\b/g,"Δt")
+  .replace(/\bDelta_f\b|\bDeltaf\b/g,"Δf")
+  .replace(/\bDelta\b/g,"Δ")
+  .replace(/\bomega_0\b|\bomega0\b/g,"ω₀")
+  .replace(/\bomega\b/g,"ω")
+  .replace(/\btau\b/g,"τ")
+  .replace(/\bpi\b/g,"π")
+  .replace(/\btheta\b/g,"θ")
+  .replace(/\bsigma\b/g,"σ")
+  .replace(/\bMOhm\b/g,"MΩ")
+  .replace(/\bkOhm\b/g,"kΩ")
+  .replace(/\bmOhm\b/g,"mΩ")
+  .replace(/\bOhm\b/g,"Ω")
+  .replace(/\buF\b/g,"μF")
+  .replace(/\buH\b/g,"μH")
+  .replace(/\buA\b/g,"μA")
+  .replace(/\bus\b/g,"μs")
+  .replace(/\buJ\b/g,"μJ")
+  .replace(/\bZ0\b/g,"Z₀")
+  .replace(/\bf0\b/g,"f₀")
+  .replace(/\bV0\b/g,"V₀")
+  .replace(/\bR1\b/g,"R₁")
+  .replace(/\bR2\b/g,"R₂")
+  .replace(/\bR3\b/g,"R₃")
+  .replace(/\bR4\b/g,"R₄")
+  .replace(/\bRT\b/g,"R_T")
+  .replace(/\bR23\b/g,"R₂₃")
+  .replace(/\bl_crit\b/g,"ℓ_crit")
+  .replace(/\bsqrt\s*\(/g,"√(")
+  .replace(/<=/g,"≤")
+  .replace(/>=/g,"≥")
+  .replace(/!=/g,"≠")
+  .replace(/~=/g,"≈")
+  .replace(/=>/g,"⇒")
+  .replace(/->/g,"→");
+ return s;
 }
+
+function tokens(src){
+ return (normalizeFormula(src).match(pat)||[]).map(t=>t.trim()).filter(Boolean);
+}
+
 function mi(s){
  if(/^\d+(?:\.\d+)?$/.test(s))return "<mn>"+enc(s)+"</mn>";
- if(s.startsWith("√"))return "<mo>"+enc(s)+"</mo>";
+ if(s==="√"||s==="∫")return "<mo>"+enc(s)+"</mo>";
+ if(s==="ln"||s==="log"||s==="sin"||s==="cos"||s==="max"||s==="min")return '<mi mathvariant="normal">'+enc(s)+"</mi>";
  let base=s,under="";
- if(s.includes("_")){let n=s.indexOf("_");base=s.slice(0,n);under=s.slice(n+1)}
- else {let m=s.match(/^([A-Za-zΓγΩ]+)([₀₁₂₃₄₅₆₇₈₉]+)$/u);if(m){base=m[1];under=[...m[2]].map(x=>subs[x]).join("")}}
+ if(s.includes("_")){
+  let n=s.indexOf("_");
+  base=s.slice(0,n);
+  under=s.slice(n+1);
+ }else{
+  let m=s.match(/^([A-Za-zΓγΔδθτπΩΣω]+)([₀₁₂₃₄₅₆₇₈₉]+)$/u);
+  if(m){base=m[1];under=[...m[2]].map(x=>subs[x]).join("");}
+ }
+ if(under.includes("_")){
+  under=under.replace(/_/g,",");
+ }
  const root="<mi>"+enc(base)+"</mi>";
  return under?"<msub>"+root+"<mtext>"+enc(under)+"</mtext></msub>":root;
 }
+
+function stripOuterParens(xml){
+ const prefix="<mrow><mo>(</mo>";
+ const suffix="<mo>)</mo></mrow>";
+ if(xml.startsWith(prefix)&&xml.endsWith(suffix)){
+  // Ensure the leading '(' matches the trailing ')' rather than closing earlier
+  const inner=xml.slice(prefix.length,xml.length-suffix.length);
+  let depth=0,balanced=true;
+  const tok=inner.match(/<mo>\(<\/mo>|<mo>\)<\/mo>/g)||[];
+  for(let i=0;i<tok.length;i++){
+   depth+=tok[i]==="<mo>(</mo>"?1:-1;
+   if(depth<0){balanced=false;break;}
+  }
+  if(balanced&&depth===0)return inner.includes("<mrow>")?inner:"<mrow>"+inner+"</mrow>";
+ }
+ return xml;
+}
+
 function build(src){
  const a=tokens(src);
  let i=0;
  function prim(){
   let t=a[i++];if(t===undefined)return "<mrow/>";
   if(t==="("){
-    let inner=cmp();
-    if(a[i]===")")i++;
-    return "<mrow><mo>(</mo>"+inner+"<mo>)</mo></mrow>";
+   let inner=cmp();
+   if(a[i]===")")i++;
+   return "<mrow><mo>(</mo>"+inner+"<mo>)</mo></mrow>";
   }
-  if(t==="√")return "<msqrt>"+prim()+"</msqrt>";
+  if(t==="√")return "<msqrt>"+stripOuterParens(prim())+"</msqrt>";
+  if(t==="∫")return "<mrow><mo>∫</mo>"+prim()+"</mrow>";
   if(t==="-"||t==="−")return "<mrow><mo>−</mo>"+prim()+"</mrow>";
   if(t==="+")return prim();
-  if(/^[A-Za-zΓγΔδΩΣ]/u.test(t)||/^\d/.test(t))return mi(t);
+  if(/^[A-Za-zΓγΔδθτπΩΣλφωμℓ]/u.test(t)||/^\d/.test(t))return mi(t);
   return "<mo>"+enc(t)+"</mo>";
  }
  function pow(){
   let v=prim();
-  while(a[i]==="^"){i++;v="<msup>"+v+prim()+"</msup>"}
+  while(a[i]==="^"){i++;v="<msup>"+v+stripOuterParens(prim())+"</msup>";}
   return v;
  }
  function mult(){
   let v=pow();
   while(["/","*","×","·"].includes(a[i])){
    let op=a[i++],next=pow();
-   v=op==="/"?"<mfrac>"+v+next+"</mfrac>":"<mrow>"+v+"<mo>"+(op==="*"||op==="×"?"×":"·")+"</mo>"+next+"</mrow>";
+   if(op==="/"){
+    v="<mfrac>"+stripOuterParens(v)+stripOuterParens(next)+"</mfrac>";
+   }else{
+    v="<mrow>"+v+"<mo>"+(op==="*"||op==="×"?"×":"·")+"</mo>"+next+"</mrow>";
+   }
   }
   return v;
  }
@@ -54,7 +136,7 @@ function build(src){
  }
  function cmp(){
   let v=add();
-  while(["=","≈","≥","≤","<",">"].includes(a[i])){
+  while(["=","≈","≥","≤","≠","<",">","→","⇒"].includes(a[i])){
    let op=a[i++];v="<mrow>"+v+"<mo>"+enc(op)+"</mo>"+add()+"</mrow>";
   }
   return v;
@@ -63,27 +145,91 @@ function build(src){
  while(i<a.length)body+="<mo>"+enc(a[i++])+"</mo>";
  return body;
 }
+
 function render(src,display=false){
  return '<math xmlns="http://www.w3.org/1998/Math/MathML" display="'+(display?"block":"inline")+'" class="math-'+(display?"display":"inline")+'" aria-label="'+enc(src)+'">'+build(src)+'</math>';
 }
+
+function deriveWorkedExample(eqString,noteString){
+ const s=(eqString+" "+noteString).toLowerCase();
+ if(/gamma_l|gamma|refl/.test(s))return {
+  sub:"For Z₀ = 50 Ω and Open load (Z_L → ∞): Γ_L = +1.0 → V_refl = +1.0 × V_inc (doubles at RX!). For Matched Z_L = 50 Ω: Γ_L = (50 − 50)/(50 + 50) = 0.",
+  box:"Matched Z_L = 50 Ω ⇒ Γ_L = 0, V_refl = 0 V"
+ };
+ if(/f_knee|l_crit|t_rise/.test(s))return {
+  sub:"Example: t_rise = 0.35 ns, FR-4 v_p = 15 cm/ns → f_knee = 0.5 / 0.35 ns = 1.43 GHz; l_crit = (0.35 × 15) / 4 = 1.31 cm.",
+  box:"Trace > l_crit ⇒ Distributed Transmission Line (Treat as Z₀)"
+ };
+ if(/v_l|di\/dt|droop/.test(s))return {
+  sub:"Example: L_pkg = 0.5 nH, ΔI = 12 A in Δt = 4 ns → V_L = 0.5 nH × (12 A / 4 ns) = 1.5 V transient drop if un-decoupled.",
+  box:"Keep dI/dt bounded & L_loop minimal via on-die/BGA decaps"
+ };
+ if(/t_clk|t_setup|t_hold|t_cq|slack/.test(s))return {
+  sub:"HW2 Check: t_CQ,min = 300 ps, t_MUX,min = 30 ps vs t_hold,max + t_skew = 400 + 750 = 1150 ps → Slack = 330 − 1150 = −820 ps.",
+  box:"Hold is a SAME-EDGE race ⇒ Slowing f_clk cannot fix it; insert delay buffers!"
+ };
+ if(/r_t|r23|r1|voltage divider|ohm/.test(s))return {
+  sub:"Tech 60 Lab 7: R₂₃ = (1000 × 470)/(1000 + 470) = 319.73 Ω → R_T = 330 + 319.73 + 220 = 869.73 Ω → I_T = 9 V / 869.73 Ω = 10.35 mA.",
+  box:"R_T = 869.73 Ω · I_T = 10.35 mA (Breadboard Error: 1.26%)"
+ };
+ if(/rc|0\.693|half/.test(s))return {
+  sub:"Phys 2B: R_eq = R₁ ∥ R_DVM = 22 MΩ ∥ 10 MΩ = 6.875 MΩ, C = 0.47 μF → τ = R_eq × C = 3.23 s → t_1/2 = 0.693 × 3.23 s = 2.24 s.",
+  box:"Include 10 MΩ DVM loading in R_eq whenever measuring high-Z RC!"
+ };
+ if(/v_diff|r_sense|shunt|power/.test(s))return {
+  sub:"Keysight 1169B + N7020A: V_diff = 55 mV across R_sense = 5 mΩ → I = 55 mV / 5 mΩ = 11.0 A; @ V_rail = 0.88 V → P = 9.68 W.",
+  box:"I(t) = V_diff(t) / R_sense · P(t) = V_CH2(t) × I(t)"
+ };
+ return null;
+}
+
+function stripNotesParentheses(raw){
+ // Split clean formula parts before trailing prose annotations like "(10-90%)" when appropriate
+ const cleaned=String(raw||"").replace(/\s*\(10[-–]90%\)/g,"").trim();
+ return cleaned;
+}
+
+function renderEquationCard(eqString,noteString,card){
+ const rawParts=String(eqString||"").split(/\s*\|\s*/).map(x=>x.trim()).filter(Boolean);
+ const eqBlocks=rawParts.map(part=>{
+  const expr=stripNotesParentheses(part);
+  // If expression has trailing descriptive words after comma/prose, split cleanly
+  const mML=render(expr,true);
+  return '<div class="hw-eq-item">'+mML+'<div class="hw-eq-ascii-fallback" aria-hidden="true">'+enc(part)+'</div></div>';
+ }).join("");
+ const derived=deriveWorkedExample(eqString,noteString);
+ return '<div class="hw-eq-wrap">'+
+  '<div class="hw-eq-head"><span>Σ SYMBOLIC EQUATION · STACKED MATHML</span><small>ENGR 852 Notebook Typesetting</small></div>'+
+  '<div class="hw-eq-grid">'+eqBlocks+'</div>'+
+  (noteString?'<div class="hw-eq-sub"><strong>Meaning & Boundary:</strong> '+textMath(noteString)+'</div>':'')+
+  (derived?'<div class="hw-eq-step"><strong>Substitution Example:</strong> '+textMath(derived.sub)+'</div><div class="hw-eq-verdict">✓ '+textMath(derived.box)+'</div>':'')+
+ '</div>';
+}
+
 const patterns=[
- [/f_knee\s*≈\s*0\.5\s*\/\s*t_rise/g,"f_knee ≈ 0.5/t_rise"],
- [/Γ\s*=\s*\(Z_L\s*[−-]\s*Z₀\)\s*\/\s*\(Z_L\s*\+\s*Z₀\)/g,"Γ = (Z_L − Z₀)/(Z_L + Z₀)"],
- [/V_L\s*=\s*L\s*[·×]\s*dI\s*\/\s*dt/g,"V_L = L·dI/dt"],
+ [/Gamma_L\s*=\s*\(Z_L\s*[−-]\s*Z0\)\s*\/\s*\(Z_L\s*\+\s*Z0\)/g,"Γ_L = (Z_L − Z₀)/(Z_L + Z₀)"],
+ [/Gamma_L\s*=\s*\(Z_L\s*[−-]\s*Z₀\)\s*\/\s*\(Z_L\s*\+\s*Z₀\)/g,"Γ_L = (Z_L − Z₀)/(Z_L + Z₀)"],
+ [/Γ_?L?\s*=\s*\(Z_L\s*[−-]\s*Z₀\)\s*\/\s*\(Z_L\s*\+\s*Z₀\)/g,"Γ = (Z_L − Z₀)/(Z_L + Z₀)"],
+ [/V_refl\s*=\s*Gamma_L\s*\*\s*V_inc/g,"V_refl = Γ_L × V_inc"],
+ [/f_knee\s*[≈=]\s*0\.5\s*\/\s*t_rise/g,"f_knee ≈ 0.5/t_rise"],
+ [/l_crit\s*=\s*\(t_rise\s*\*\s*v_p\)\s*\/\s*4/g,"ℓ_crit = (t_rise × v_p)/4"],
+ [/V_L\s*=\s*L\s*[·×*]\s*dI\s*\/\s*dt/g,"V_L = L·dI/dt"],
  [/V_diff\s*=\s*V_P\s*[−-]\s*V_N/g,"V_diff = V_P − V_N"],
- [/T_clk\s*≥\s*T_clk_to_Q\s*\+\s*T_comb_max\s*\+\s*t_su\s*[−-]\s*T_skew/g,"T_clk ≥ T_clk_to_Q + T_comb_max + t_su − T_skew"],
- [/T_clk_to_Q\s*\+\s*T_comb_min\s*≥\s*t_h\s*\+\s*T_skew/g,"T_clk_to_Q + T_comb_min ≥ t_h + T_skew"],
- [/P\(t\)\s*=\s*V\(t\)\s*×\s*\(V_sense\(t\)\s*\/\s*R_sense\)/g,"P(t) = V(t) × (V_sense(t)/R_sense)"],
+ [/T_clk\s*[≥>]=?\s*T_clk_to_Q\s*\+\s*T_comb_max\s*\+\s*t_su\s*[−-]\s*T_skew/g,"T_clk ≥ T_clk_to_Q + T_comb_max + t_su − T_skew"],
+ [/T_clk_to_Q\s*\+\s*T_comb_min\s*[≥>]=?\s*t_h\s*\+\s*T_skew/g,"T_clk_to_Q + T_comb_min ≥ t_h + T_skew"],
+ [/P\(t\)\s*=\s*V\(t\)\s*[×*]\s*\(V_sense\(t\)\s*\/\s*R_sense\)/g,"P(t) = V(t) × (V_sense(t)/R_sense)"],
  [/P\(t\)\s*=\s*V\(t\)\s*[×*]\s*I\(t\)/g,"P(t) = V(t) × I(t)"],
  [/I\s*=\s*V_sense\s*\/\s*R_sense/g,"I = V_sense/R_sense"],
+ [/I\s*=\s*Vsense\s*\/\s*Rsense/g,"I = V_sense/R_sense"],
+ [/I_T\s*=\s*V_s\s*\/\s*R_T/g,"I_T = V_s/R_T"],
  [/P\s*=\s*V\s*[×*]\s*I\b/g,"P = V×I"],
  [/f0\s*=\s*1\s*\/\s*T\b/g,"f₀ = 1/T"],
  [/f\s*=\s*1\s*\/\s*T\b/g,"f = 1/T"],
- [/tRC\s*≥\s*tRAS\s*\+\s*tRP/g,"tRC ≥ tRAS+tRP"],
- [/V_L\s*=\s*L\s*·\s*dI\/dt/g,"V_L = L·dI/dt"],
+ [/tRC\s*≥\s*tRAS\s*\+\s*tRP/g,"t_RC ≥ t_RAS+t_RP"],
  [/ΓL\s*=\s*\(RL\s*[−-]\s*Z₀\)\s*\/\s*\(RL\s*\+\s*Z₀\)/g,"Γ_L = (R_L − Z₀)/(R_L + Z₀)"],
  [/Vlaunch\s*=\s*Z₀\s*\/\s*\(Rsrc\s*\+\s*Z₀\)/g,"V_launch = Z₀/(R_src + Z₀)"],
  [/Vfirst\s*=\s*Vlaunch\s*\(1\s*\+\s*ΓL\)/g,"V_first = V_launch×(1 + Γ_L)"],
+ [/t_1\/2\s*=\s*0\.693\s*[×*·]\s*R_eq\s*[×*·]\s*C/g,"t_½ = 0.693×R_eq×C"],
  [/½\s*·?\s*L\s*·?\s*I(?:²|\^2)/g,"0.5×L×I^2"],
  [/½\s*·?\s*C\s*·?\s*V(?:²|\^2)/g,"0.5×C×V^2"],
  [/Itrace(?:²|\^2)\s*·\s*Radd/g,"I_trace^2×R_add"],
@@ -93,18 +239,26 @@ const patterns=[
  [/VTX\s*[−-]\s*VbeforeL/g,"V_TX − V_beforeL"],
  [/VbeforeL\s*[−-]\s*VRX/g,"V_beforeL − V_RX"]
 ];
+
 function textMath(s){
  s=String(s??"");
  let matches=[];
  for(let [regex,formula] of patterns){
-  regex.lastIndex=0;for(const m of s.matchAll(regex))matches.push({start:m.index,end:m.index+m[0].length,formula});
+  regex.lastIndex=0;
+  for(const m of s.matchAll(regex))matches.push({start:m.index,end:m.index+m[0].length,formula});
  }
  matches.sort((a,b)=>a.start-b.start || b.end-a.end);
  let out="",end=0;
- for(const m of matches){if(m.start<end)continue;out+=enc(s.slice(end,m.start))+render(m.formula);end=m.end}
+ for(const m of matches){
+  if(m.start<end)continue;
+  out+=enc(s.slice(end,m.start))+render(m.formula);
+  end=m.end;
+ }
  return out+enc(s.slice(end));
 }
+
 window.studyMath=render;
 window.studyMathText=textMath;
+window.studyMathEquationCard=renderEquationCard;
 window.studyMathPatterns=patterns.length;
 })();

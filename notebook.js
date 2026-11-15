@@ -85,28 +85,29 @@ function renderCustomDiagram(c, page){
 let currentPage = 0;
 let currentSubTab = 'all';
 
+const smart = s => window.studyMathText ? window.studyMathText(s) : esc(s);
+
 function renderMathSection(c, s){
  const dd = c.deepDive || {};
  const eqHtml = (dd.equations || []).map(e => `
   <div class="formula-card">
-   <strong>Fundamental Equation / Constraint</strong>
-   <code>${esc(e.eq)}</code>
-   <div class="formula-note">${esc(e.note)}</div>
+   <strong>Fundamental Equation / Constraint · ENGR 852 Stacked Formula</strong>
+   ${window.studyMathEquationCard ? window.studyMathEquationCard(e.eq, e.note, c) : `<code>${esc(e.eq)}</code><div class="formula-note">${smart(e.note)}</div>`}
   </div>`).join('');
  const proofHtml = (dd.proofSteps || []).length ? `
   <div class="ink-section">
    <h4>Step-by-Step Mechanism & Verification Proof</h4>
-   <ul class="proof-list">${dd.proofSteps.map((st, idx)=>`<li><span>${idx+1}</span><div>${esc(st)}</div></li>`).join('')}</ul>
+   <ul class="proof-list">${dd.proofSteps.map((st, idx)=>`<li><span>${idx+1}</span><div>${smart(st)}</div></li>`).join('')}</ul>
   </div>` : '';
  return `
   <div class="ink-section">
    <h4>Deep Technical Mechanism</h4>
-   <div class="ink-body">${esc(s.deep || s.core)}</div>
+   <div class="ink-body">${smart(s.deep || s.core)}</div>
   </div>
   ${eqHtml}
   ${proofHtml}
-  ${dd.trapAlert ? `<div class="trap-card"><strong>⚠ Common Trap / Misconception Alert</strong>${esc(dd.trapAlert)}</div>` : ''}
-  ${dd.goldenRule ? `<div class="rule-card"><strong>✔ Golden Engineering Rule</strong>${esc(dd.goldenRule)}</div>` : ''}
+  ${dd.trapAlert ? `<div class="trap-card"><strong>⚠ Common Trap / Misconception Alert</strong>${smart(dd.trapAlert)}</div>` : ''}
+  ${dd.goldenRule ? `<div class="rule-card"><strong>✔ Golden Engineering Rule</strong>${smart(dd.goldenRule)}</div>` : ''}
  `;
 }
 
@@ -119,25 +120,28 @@ function renderSchemAndTable(c){
    <div class="nb-table-scroll" tabindex="0" role="region" aria-label="${esc(t.title || 'Verification comparison table')}">
     <table class="nb-table">
      <thead><tr>${t.headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
-     <tbody>${t.rows.map(row=>`<tr>${row.map(cell=>`<td>${esc(cell)}</td>`).join('')}</tr>`).join('')}</tbody>
+     <tbody>${t.rows.map(row=>`<tr>${row.map(cell=>`<td>${smart(cell)}</td>`).join('')}</tr>`).join('')}</tbody>
     </table>
    </div>
   </div>` : '';
  return renderCustomDiagram(c, 1) + tblHtml;
 }
 
-function renderCodeSection(c){
+function renderCodeSection(c, includeIde=true){
  const cd = c.deepDive?.code || {};
- return `
-  <div class="pseudo-box">
+ const methodHtml = window.renderDetailedCodeMethodology
+  ? window.renderDetailedCodeMethodology(c)
+  : `
+  <div class="pseudo-box cm-pseudo-box">
    <strong>1. Pseudocode (Algorithm & Bench Flow)</strong>
    <pre>${esc(cd.pseudo || '// Verify preconditions -> acquire signal -> assert margins -> cleanup')}</pre>
   </div>
-  <div class="code-box">
+  <div class="code-box cm-code-box">
    <div class="code-box-head"><span>2. Line-by-Line Commented ${esc(cd.lang || 'Implementation')}</span><span>${esc(c.id)}</span></div>
    <pre><code>${formatCodeLines(cd.code || '# No snippet')}</code></pre>
-  </div>
- `;
+  </div>`;
+ const ideHtml = (includeIde && window.renderIdeStudio) ? window.renderIdeStudio(c) : '';
+ return methodHtml + ideHtml;
 }
 
 function renderMiniAndQuiz(c){
@@ -193,8 +197,9 @@ function renderPage(c, page){
    ['all', 'All Sections'],
    ['math', '2A · Math & Mechanism'],
    ['schem', '2B · Schematic & Table'],
-   ['code', '2C · Code & Pseudocode'],
+   ['code', '2C · Code, Pseudocode & IDE'],
    ['scope', '2D · Scope & Board Lab'],
+   ['lab_ide', '2F · Breadboard & Lab Report'],
    ['quiz', '2E · Mini-Cards & Quiz']
   ];
   const subBar = `<div class="dd-subtabs" role="tablist" aria-label="Deep dive exploration sections">` +
@@ -206,22 +211,24 @@ function renderPage(c, page){
    : '';
   const scopeHtml = spiceSection + (window.renderInstrumentConsole ? `<div class="ix-deepdive">${window.renderInstrumentConsole()}</div>` : '')+
     (window.renderDigitalVcdLab ? window.renderDigitalVcdLab() : '');
+  const labHtml = window.renderLabBenchStudio ? window.renderLabBenchStudio() : '';
 
   const show = key => currentSubTab === 'all' || currentSubTab === key;
   content = subBar +
    `<div class="dd-panel" data-dd-panel="math" ${show('math')?'':'hidden'}>${renderMathSection(c, s)}</div>` +
    `<div class="dd-panel" data-dd-panel="schem" ${show('schem')?'':'hidden'}>${renderSchemAndTable(c)}</div>` +
-   `<div class="dd-panel" data-dd-panel="code" ${show('code')?'':'hidden'}>${renderCodeSection(c)}</div>` +
+   `<div class="dd-panel" data-dd-panel="code" ${show('code')?'':'hidden'}>${renderCodeSection(c, true)}</div>` +
    `<div class="dd-panel" data-dd-panel="scope" ${show('scope')?'':'hidden'}>${scopeHtml}</div>` +
+   `<div class="dd-panel" data-dd-panel="lab_ide" ${show('lab_ide')?'':'hidden'}>${labHtml}</div>` +
    `<div class="dd-panel" data-dd-panel="quiz" ${show('quiz')?'':'hidden'}>${renderMiniAndQuiz(c)}</div>`;
  }else{
   content = `
    <div class="ink-section"><h4>Baby-Step Debug / Lab Verification Workflow</h4>
-    <ol class="nb-steps">${s.steps.map((st,i)=>`<li><b>${i+1}</b><span>${esc(st)}</span></li>`).join('')}</ol>
+    <ol class="nb-steps">${s.steps.map((st,i)=>`<li><b>${i+1}</b><span>${smart(st)}</span></li>`).join('')}</ol>
    </div>
    ${renderCustomDiagram(c, 2)}
-   ${renderCodeSection(c)}
-   ${dd.goldenRule ? `<div class="rule-card"><strong>✔ Verification Checklist Takeaway</strong>${esc(dd.goldenRule)}</div>` : ''}
+   ${renderCodeSection(c, false)}
+   ${dd.goldenRule ? `<div class="rule-card"><strong>✔ Verification Checklist Takeaway</strong>${smart(dd.goldenRule)}</div>` : ''}
   `;
  }
 
@@ -273,12 +280,15 @@ window.wireStudyNotebook = function(c){
  }
 
  const mountWidgets = () => {
+  if(window.mountDetailedCodeMethodology)window.mountDetailedCodeMethodology(host);
   if(currentPage === 1){
    if(classify(c) === 'si' && window.mountSpiceScope){
     window.mountSpiceScope(host.querySelector('.si-studio'));
    }
    const vcdHost=host.querySelector('[data-vcd-lab]');
    if(vcdHost&&window.mountDigitalVcdLab)window.mountDigitalVcdLab(vcdHost);
+   if(window.mountIdeStudio)window.mountIdeStudio(host, {kind:'card', card:c});
+   if(window.mountLabBenchStudio)window.mountLabBenchStudio(host);
    const panel = host.querySelector('[data-instrument]');
    if(panel && window.mountInstrumentConsole){
     window.mountInstrumentConsole(panel, {kind:'card', card:c, caseId:host.querySelector('#siCase')?.value});

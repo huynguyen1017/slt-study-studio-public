@@ -1,0 +1,68 @@
+/* Step-by-Step 5-Part Code Methodology + Multi-Language Terminal IDE + STM32CubeMX Pin Configurator (v15) */
+.cm-studio{display:grid;gap:12px;margin:10px 0}
+.cm-sig-box{background:#eff6ff;border:1.5px solid #93c5fd;border-left:5px solid #1d4ed8;border-radius:10px;padding:11px 13px}
+.cm-badge-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.cm-badge-row span{font:800 11px ui-monospace,monospace;letter-spacing:.05em;color:#1e40af}
+.cm-badge-row small{font:750 11.5px ui-monospace,monospace;background:#dbeafe;color:#1e3a8a;padding:3px 8px;border-radius:6px;border:1px solid #93c5fd}
+.cm-problem-text{margin:4px 0 8px;font:650 13.5px/1.55 system-ui,sans-serif;color:#0f274a}
+.cm-switch-pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cm-pill-label{font:700 11px system-ui,sans-serif;color:#334e73}
+.cm-tab-btn{border:1px solid #93c5fd;background:#fff;color:#1e40af;border-radius:999px;padding:5px 11px;font:700 11.5px system-ui,sans-serif;cursor:pointer}
+.cm-tab-btn.active{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+.cm-section-card,.cm-trace-box{background:#fff;border:1px solid #bfd1e5;border-radius:10px;padding:10px 12px;margin:8px 0}
+.cm-section-card strong,.cm-trace-box strong,.cm-bug-box strong{display:block;font:800 11.5px ui-monospace,monospace;letter-spacing:.04em;color:#134284;margin-bottom:6px;text-transform:uppercase}
+.cm-bug-box{background:#fef2f2;border:1px solid #fca5a5;border-left:4px solid #dc2626;border-radius:9px;padding:10px 12px;margin:8px 0;font:600 12.5px/1.55 system-ui,sans-serif;color:#7f1d1d}
+.cm-bug-box ul{margin:4px 0 0;padding-left:18px}
+.cm-complexity{margin-top:8px;padding:7px 10px;background:#ecfdf5;border:1px solid #86efac;border-radius:7px;font:650 12.5px/1.5 system-ui,sans-serif;color:#065f46}
+
+/* IDE + STM32CubeMX Pinout Container */
+.ide-studio{background:#0b1726;color:#e2efff;border:2px solid #2b4c73;border-radius:12px;padding:14px;margin:14px 0;font-family:system-ui,-apple-system,sans-serif;max-width:100%;overflow:hidden}
+.ide-top-bar{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;padding-bottom:10px;border-bottom:1px solid #244365}
+.ide-top-bar b{color:#7ef4d4;font:850 13px ui-monospace,monospace}
+.ide-top-bar p{margin:4px 0 0;color:#b4cce3;font:600 11.5px/1.45 system-ui}
+.ide-preset-lbl{display:flex;flex-direction:column;gap:4px;font:700 11px system-ui;color:#cde4ff;min-width:240px;max-width:100%}
+.ide-preset-lbl select{background:#162c46;color:#f0f8ff;border:1px solid #48739c;border-radius:6px;padding:7px 8px;font:650 11.5px system-ui;max-width:100%}
+
+.ide-lang-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:11px 0}
+.ide-lang-btn{background:#14283f;color:#b8d4f0;border:1px solid #35587c;border-radius:8px;padding:8px 12px;font:750 12px ui-monospace,monospace;cursor:pointer}
+.ide-lang-btn[aria-selected="true"]{background:#1959b0;border-color:#60a5fa;color:#fff;box-shadow:0 3px 10px rgba(37,99,235,.3)}
+
+.ide-cubemx{background:#0f2036;border:1px solid #2c5178;border-radius:10px;padding:10px;margin:10px 0}
+.ide-cubemx-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;align-items:start}
+.ide-pin-svg-wrap{background:#091524;border:1px solid #25486c;border-radius:8px;overflow:hidden}
+.ide-pin-svg-wrap svg{display:block;width:100%;height:auto}
+.ide-pin-inspector{background:#152c49;border-left:4px solid #38bdf8;border-radius:6px;padding:7px 10px;font:650 12px/1.45 system-ui;color:#dff2ff;margin-bottom:8px}
+.ide-pin-inspector code{background:#0b1726;padding:2px 6px;border-radius:4px;color:#7ef4d4}
+.ide-pin-table{min-width:440px;background:#0e1d30;color:#dcecff}
+.ide-pin-table thead th{background:#193454;color:#bae6fd}
+.ide-pin-table tbody tr:nth-child(even){background:#13263d}
+.ide-pin-table tbody td{border-top:1px solid #264566}
+.ide-pin-sel{background:rgba(250,204,21,.12)!important}
+.ide-pin-pick{background:#1d4ed8;color:#fff;border:0;border-radius:5px;padding:4px 8px;font:800 11px ui-monospace,monospace;cursor:pointer}
+.ide-pin-tog{border:1px solid #4ade80;border-radius:999px;padding:3px 9px;font:800 10px ui-monospace,monospace;cursor:pointer}
+.ide-pin-tog.is-on{background:#065f46;color:#a7f3d0;border-color:#10b981}
+.ide-pin-tog.is-off{background:#334155;color:#cbd5e1;border-color:#64748b}
+.ide-actions-row{margin-top:8px}
+.ide-actions-row button,.ide-toolbar button{border-radius:7px;padding:8px 11px;font:750 11.5px system-ui;cursor:pointer;border:1px solid #48739c;color:#f0f8ff;background:#193554}
+.ide-btn-run{background:#15803d!important;border-color:#22c55e!important}
+.ide-btn-bug{background:#991b1b!important;border-color:#ef4444!important}
+.ide-btn-fix{background:#1d4ed8!important;border-color:#60a5fa!important}
+
+.ide-workspace{margin-top:10px;display:grid;gap:8px}
+.ide-lib-banner{background:#132a44;border:1px solid #355d87;border-radius:7px;padding:7px 10px;font:700 11.5px ui-monospace,monospace;color:#93e5d0}
+.ide-toolbar{display:flex;flex-wrap:wrap;gap:7px}
+.ide-editor-label{font:750 11px ui-monospace,monospace;color:#9ec5ea}
+.ide-editor{width:100%;box-sizing:border-box;background:#07101c;color:#e6f2ff;border:1.5px solid #2e557d;border-radius:8px;padding:10px 12px;font:550 12.2px/1.55 ui-monospace,SFMono-Regular,monospace;resize:vertical}
+.ide-terminals{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ide-term-pane{border-radius:8px;overflow:hidden;border:1px solid #2b4c73;background:#050c15}
+.ide-term-pane.is-err.has-err{border-color:#ef4444;background:#1d0a0f}
+.ide-term-head{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#13273e;font:800 10.5px ui-monospace,monospace;color:#bae6fd}
+.ide-term-pane.is-err.has-err .ide-term-head{background:#521720;color:#fecaca}
+.ide-term-pre{margin:0;padding:9px 11px;min-height:92px;max-height:210px;overflow:auto;font:550 11.5px/1.5 ui-monospace,SFMono-Regular,monospace;color:#a7f3d0;white-space:pre-wrap}
+.ide-term-pane.is-err .ide-term-pre{color:#fecaca}
+
+@media(max-width:860px){
+ .ide-cubemx-grid{grid-template-columns:1fr}
+ .ide-terminals{grid-template-columns:1fr}
+ .ide-studio{padding:10px}
+}

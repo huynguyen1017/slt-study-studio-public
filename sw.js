@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v14-keysight-surfer';
+const CACHE = 'slt-study-studio-v14-keysight-surfer-r2';
 const CORE = [
   "./",
   "./index.html",
@@ -21,6 +21,11 @@ const CORE = [
   "./simulation/instrument_console.css",
   "./simulation/rtl_vcd_lab.js",
   "./simulation/rtl_vcd_lab.css",
+  "./simulation/code_methodology.js",
+  "./simulation/stm32_ide_studio.js",
+  "./simulation/stm32_ide_studio.css",
+  "./simulation/lab_bench_studio.js",
+  "./simulation/lab_bench_studio.css",
   "./simulation/answer_fx.js",
   "./simulation/si_scope.js",
   "./simulation/si_spice_data.js",

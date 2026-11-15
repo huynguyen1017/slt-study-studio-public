@@ -1,14 +1,34 @@
-/* Native MathML: semantic equations, not improvised text strings */
-math.math-inline{display:inline-math;display:inline;margin:0 .12em;vertical-align:middle;font-family:serif;font-size:1.12em;color:#203b73}
-math.math-display{display:block;overflow-x:auto;max-width:100%;padding:.25em 0;font-family:serif;font-size:clamp(1.06rem,2vw,1.46rem);color:#293a72}
-math mfrac{padding:.12em}
+/* Native MathML + ENGR 852 HW1/HW2 Stacked Equation Cards */
+math.math-inline{display:inline-math;display:inline;margin:0 .12em;vertical-align:middle;font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:1.12em;color:#1b3b75}
+math.math-display{display:block;overflow-x:auto;max-width:100%;padding:.28em 0;font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:clamp(1.12rem,2.1vw,1.52rem);color:#142d5e}
+math mfrac{padding:.14em .08em}
+math mfrac > *:first-child{padding-bottom:.08em}
+math mfrac > *:last-child{padding-top:.08em}
 math mi{font-style:italic}
 .math-panel{display:flex;flex-wrap:wrap;justify-content:space-evenly;gap:15px;align-items:center;padding:13px 14px!important}
 .math-panel math{min-width:170px;flex:1}
 .ink-equation{align-items:center;justify-items:center}
 .ink-equation strong{width:100%;text-align:center}
-.ink-equation math{font-size:clamp(1.06rem,2vw,1.3rem)}
-.ink-paragraph math{font-size:1.1em}
+.ink-equation math{font-size:clamp(1.08rem,2vw,1.34rem)}
+.ink-paragraph math,.proof-list math,.ink-body math{font-size:1.08em}
 .bl-component-readouts table math{font-size:1.08em;white-space:nowrap}
-.ink-sheet math{line-height:1.4}
-@media(max-width:700px){.math-panel{display:grid;grid-template-columns:1fr}.math-panel math{min-width:0}.ink-equation math{font-size:1.15rem}}
+.ink-sheet math{line-height:1.45}
+
+/* ENGR 852 Stacked Formula Derivation Card inside Deep Dive */
+.hw-eq-wrap{background:#fffef9;border:1.5px solid #aac1de;border-left:4px solid #1652a3;border-radius:10px;padding:10px 12px;margin:8px 0;box-shadow:0 3px 10px rgba(15,40,80,.05)}
+.hw-eq-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font:800 10.5px ui-monospace,monospace;letter-spacing:.05em;color:#144991;border-bottom:1px dashed #c4d5e9;padding-bottom:6px;margin-bottom:8px}
+.hw-eq-head small{font:650 10.5px system-ui,sans-serif;color:#526d8f;text-transform:none;letter-spacing:0}
+.hw-eq-grid{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}
+.hw-eq-item{flex:1 1 220px;background:linear-gradient(180deg,#f7faff,#eef4fc);border:1px solid #cdddf1;border-radius:8px;padding:9px 12px;text-align:center;overflow-x:auto}
+.hw-eq-item math{margin:0 auto}
+.hw-eq-ascii-fallback{margin-top:4px;font:600 10.5px ui-monospace,monospace;color:#597396;opacity:.85}
+.hw-eq-sub{margin-top:8px;font:600 12.5px/1.55 system-ui,sans-serif;color:#1f385c;background:#f4f8fe;border-radius:6px;padding:6px 9px}
+.hw-eq-step{margin-top:6px;font:600 12.5px/1.55 system-ui,sans-serif;color:#273b56;background:#fff8eb;border:1px solid #efd5a1;border-radius:6px;padding:6px 9px}
+.hw-eq-verdict{margin-top:6px;display:inline-block;font:750 12.5px/1.45 system-ui,sans-serif;color:#8c1d18;background:#fff4f3;border:3px double #c93b32;border-radius:6px;padding:5px 10px}
+
+@media(max-width:700px){
+ .math-panel{display:grid;grid-template-columns:1fr}
+ .math-panel math{min-width:0}
+ .ink-equation math{font-size:1.15rem}
+ .hw-eq-grid{flex-direction:column}
+}
