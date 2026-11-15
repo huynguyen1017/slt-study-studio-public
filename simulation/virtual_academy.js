@@ -20,14 +20,14 @@ function download(name,text,type){const url=URL.createObjectURL(new Blob([text],
 function svgCircuit(d,wiring,powered){
  let s='<svg viewBox="0 0 850 310" role="img" aria-label="Series-parallel resistor circuit schematic with source, resistors and junctions"><rect width="850" height="310" rx="12" fill="#fffefa" stroke="#c7d6e5"/>';
  const color=powered?"#188969":"#7890aa";
- const segments=[[55,105,155,105],[230,105,305,105],[305,105,305,164],[305,105,305,226],[305,164,430,164],[305,226,430,226],[430,164,540,164],[430,226,540,226],[540,164,540,260],[540,260,655,260],[655,260,655,105],[655,105,720,105],[55,105,55,260],[55,260,655,260]];
+ const segments=[[60,94,160,94],[251,94,300,94],[300,94,300,151],[300,151,353,151],[445,151,560,151],[300,151,300,221],[300,221,353,221],[445,221,560,221],[560,151,560,221],[560,221,560,281],[560,281,600,281],[691,281,740,281],[740,281,740,304],[740,304,60,304],[60,304,60,205],[60,165,60,94]];
  segments.forEach(q=>s+='<path d="M'+q[0]+' '+q[1]+' L'+q[2]+' '+q[3]+'" stroke="'+color+'" stroke-width="3" fill="none"/>');
  const res=(x,y,name,val)=>'<rect x="'+x+'" y="'+y+'" width="91" height="31" fill="#ffedc1" rx="5" stroke="#a77b28" stroke-width="2"/><text x="'+(x+45)+'" y="'+(y+20)+'" font-size="12" fill="#624210" font-weight="bold" text-anchor="middle">'+name+' '+f(val,0)+' Ω</text>';
- s+=res(155,89,"R1",d.R1)+res(348,148,"R2",d.R2)+res(348,210,"R3",d.R3)+res(666,128,"R4",d.R4);
- s+='<rect x="15" y="166" width="93" height="35" rx="6" fill="#dbeafe" stroke="#4977b9"/><text x="61" y="188" fill="#17467d" font-size="16" text-anchor="middle">'+f(d.V,1)+' V</text>';
- s+='<text x="11" y="93" fill="#277b62" font-size="12">+ Vsource</text><text x="15" y="278" fill="#53677f" font-size="12">GROUND</text>';
- for(const [x,y,label] of [[55,105,"SOURCE"],[305,105,"A"],[540,260,"B"],[55,260,"0V"]])s+='<circle cx="'+x+'" cy="'+y+'" r="6" fill="#d65962" stroke="white" stroke-width="2"/><text x="'+(x+8)+'" y="'+(y-9)+'" fill="#405a79" font-size="12">'+label+'</text>';
- s+='<text x="425" y="292" fill="#5d7792" font-size="12" text-anchor="middle">'+(powered?"POWERED · validated jumper network":"SUPPLY OFF · attach six jumpers")+'</text></svg>';
+ s+=res(160,78,"R1",d.R1)+res(353,135,"R2",d.R2)+res(353,205,"R3",d.R3)+res(600,265,"R4",d.R4);
+ s+='<rect x="15" y="165" width="93" height="40" rx="6" fill="#dbeafe" stroke="#4977b9"/><text x="61" y="190" fill="#17467d" font-size="16" text-anchor="middle">'+f(d.V,1)+' V</text>';
+ s+='<text x="11" y="83" fill="#277b62" font-size="12">+ Vsource</text><text x="15" y="302" fill="#53677f" font-size="12">GROUND</text>';
+ for(const [x,y,label] of [[60,94,"SOURCE"],[300,151,"A"],[560,221,"B"],[60,304,"0V"]])s+='<circle cx="'+x+'" cy="'+y+'" r="6" fill="#d65962" stroke="white" stroke-width="2"/><text x="'+(x+8)+'" y="'+(y-9)+'" fill="#405a79" font-size="12">'+label+'</text>';
+ s+='<text x="425" y="293" fill="#5d7792" font-size="12" text-anchor="middle">'+(powered?"POWERED · validated jumper network":"SUPPLY OFF · attach six jumpers")+'</text></svg>';
  s+='<svg viewBox="0 0 850 135" aria-label="Breadboard holes and manually connected jumper leads" role="img"><rect width="850" height="135" rx="9" fill="#e9edf5" stroke="#c5cdd9"/>';
  for(let i=0;i<5;i++)for(let j=0;j<29;j++)s+='<circle cx="'+(21+j*28)+'" cy="'+(14+i*20)+'" r="3.2" fill="#91a8bd"/>';
  wiring.forEach((w,i)=>{const x=30+i*115,y=15+(i%3)*20;s+='<path d="M'+x+' '+y+' Q'+(x+39)+' '+(y-17)+' '+(x+83)+' '+y+'" stroke="'+["#d85b52","#45a874","#e3ab3a","#8b72dc"][i%4]+'" stroke-width="4" fill="none"/>'});
