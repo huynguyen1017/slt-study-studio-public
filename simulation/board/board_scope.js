@@ -115,6 +115,110 @@ function crossingAt(rows,col,level,dir){
  }
  return null;
 }
+// Triggering is computed from sample crossings, not from the educational event labels.
+function thresholdCrossings(rows,run,ch,level,edge,holdoff){
+ const found=[];let last=-Infinity;
+ for(let i=1;i<rows.length;i++){
+  const a=rows[i-1],b=rows[i],va=value(a,ch,run),vb=value(b,ch,run);
+  const hit=edge==="fall"?(va>level&&vb<=level):(va<level&&vb>=level);
+  if(!hit||Math.abs(vb-va)<1e-14)continue;
+  const fraction=clamp((level-va)/(vb-va),0,1);
+  const t=a[0]+(b[0]-a[0])*fraction;
+  if(t-last>=holdoff){found.push(t);last=t}
+ }
+ return found;
+}
+function clipRows(rows,left,right){
+ const a=segment(rows,left,right).filter(r=>r[0]>=left&&r[0]<=right);
+ return a.length?a:rows;
+}
+function toCSV(rows,run){
+ const header=["time_ns","Vsrc_V","Vtx_V","Vrx_V","Vgate_V","Itrace_mA","Pseries_mW"];
+ return ["# ngspice stored numerical circuit simulation; not oscilloscope hardware capture",
+  "# Pseries is calculated from Itrace^2 * Rseries; no physical temperature model",
+  header.join(",")].concat(rows.map(r=>[r[0],...CONFIG.map((_,k)=>value(r,k,run))].join(","))).join("\n")+"\n";
+}
+function exportText(name,content,type){
+ const url=URL.createObjectURL(new Blob([content],{type}));
+ const a=document.createElement("a");a.href=url;a.download=name;
+ document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+function analyzeWave(rows,run,ch,low,high){
+ const vals=clipRows(rows,low,high),count=vals.length;
+ if(count<3||high-low<=0)return {peak:null,period:null,duty:null,rise:null,fall:null};
+ const vs=vals.map(r=>value(r,ch,run)),min=Math.min(...vs),max=Math.max(...vs),ampl=max-min;
+ if(ampl<1e-9)return {peak:max,period:null,duty:null,rise:null,fall:null};
+ const level=min+.5*ampl;
+ const rising=thresholdCrossings(vals,run,ch,level,"rise",0);
+ const falling=thresholdCrossings(vals,run,ch,level,"fall",0);
+ const periods=rising.slice(1).map((t,i)=>t-rising[i]).filter(v=>v>0);
+ const period=periods.length?periods.reduce((a,b)=>a+b,0)/periods.length:null;
+ let duty=null;
+ if(period&&rising.length){
+  const next=falling.find(t=>t>rising[0]);
+  if(next!==undefined)duty=clamp((next-rising[0])/period*100,0,100);
+ }
+ const rise10=thresholdCrossings(vals,run,ch,min+.1*ampl,"rise",0);
+ const rise90=thresholdCrossings(vals,run,ch,min+.9*ampl,"rise",0);
+ const fall90=thresholdCrossings(vals,run,ch,min+.9*ampl,"fall",0);
+ const fall10=thresholdCrossings(vals,run,ch,min+.1*ampl,"fall",0);
+ const duration=(first,second)=>first.length? (second.find(t=>t>=first[0])??null) : null;
+ const t90=duration(rise10,rise90),t10=duration(fall90,fall10);
+ return {peak:max,period,duty,rise:t90===null?null:t90-rise10[0],fall:t10===null?null:t10-fall90[0]};
+}
+function renderSpectrum(rows,run,ch,start,end){
+ const N=128,span=end-start;
+ if(span<=0||rows.length<2)return {svg:"",peak:null};
+ // Original SPICE time steps are adaptive. Interpolate to uniform time
+ // positions before the DFT; the results are limited by the selected span.
+ const sample=new Array(N);
+ let pos=1;
+ for(let i=0;i<N;i++){
+  const t=start+(i+.5)*span/N;
+  while(pos<rows.length-1&&rows[pos][0]<t)pos++;
+  const a=rows[Math.max(0,pos-1)],b=rows[pos];
+  const w=clamp((t-a[0])/Math.max(1e-12,b[0]-a[0]),0,1);
+  sample[i]=value(a,ch,run)*(1-w)+value(b,ch,run)*w;
+ }
+ const mean=sample.reduce((a,b)=>a+b,0)/N;
+ const mag=[];
+ for(let k=1;k<N/2;k++){
+  let re=0,im=0;
+  for(let n=0;n<N;n++){
+   const w=.5-.5*Math.cos(2*Math.PI*n/(N-1));
+   const x=(sample[n]-mean)*w,theta=2*Math.PI*k*n/N;
+   re+=x*Math.cos(theta);im-=x*Math.sin(theta);
+  }
+  mag.push(4*Math.hypot(re,im)/N);
+ }
+ const top=Math.max(...mag,1e-12);
+ const paths=mag.map((m,i)=>((i?"L":"M")+(65+(i/(mag.length-1))*670).toFixed(2)+" "+(174-140*m/top).toFixed(2))).join(" ");
+ const strongest=mag.indexOf(Math.max(...mag))+1;
+ const peak=strongest*1000/span;
+ const svg='<rect width="780" height="220" fill="#061323"/>'+
+  Array.from({length:6},(_,i)=>'<path d="M65 '+(34+i*28)+' H735" stroke="#29415a" stroke-dasharray="4 5"/>').join("")+
+  '<path d="'+paths+'" fill="none" stroke="#92e0fb" stroke-width="2.5"/>'+
+  '<text x="65" y="20" fill="#dcebf8" font-size="13">Magnitude / Hann window · '+CONFIG[ch].short+'</text>'+
+  '<text x="65" y="207" fill="#c6dcec" font-size="12">0 MHz</text>'+
+  '<text x="735" y="207" text-anchor="end" fill="#c6dcec" font-size="12">'+((N/2-1)*1000/span).toFixed(1)+' MHz</text>'+
+  '<text x="735" y="20" text-anchor="end" fill="#ffe1a1" font-size="12">Peak bin '+peak.toFixed(2)+' MHz</text>';
+ return {svg,peak};
+}
+function renderXY(rows,run,xch,ych,left,right){
+ const relevant=clipRows(rows,left,right),skip=Math.max(1,Math.ceil(relevant.length/650));
+ const subset=relevant.filter((_,i)=>i%skip===0),xs=subset.map(r=>value(r,xch,run)),ys=subset.map(r=>value(r,ych,run));
+ const xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys);
+ const xx=v=>60+650*(v-xmin)/Math.max(xmax-xmin,1e-9),yy=v=>174-142*(v-ymin)/Math.max(ymax-ymin,1e-9);
+ const path=subset.map((r,i)=>(i?"L":"M")+xx(xs[i]).toFixed(1)+" "+yy(ys[i]).toFixed(1)).join(" ");
+ return '<rect width="780" height="220" fill="#061323"/>'+
+  '<path d="M60 30 V174 H710" stroke="#6c87a0" stroke-width="2"/>'+
+  '<path d="'+path+'" fill="none" stroke="#f3ba7c" stroke-width="2" opacity=".95"/>'+
+  '<text x="60" y="20" fill="#c7e7fa" font-size="12">'+CONFIG[ych].short+' ('+CONFIG[ych].unit+') versus '+CONFIG[xch].short+' ('+CONFIG[xch].unit+')</text>'+
+  '<text x="60" y="205" fill="#d0dcec" font-size="12">'+xmin.toFixed(2)+'</text>'+
+  '<text x="710" y="205" text-anchor="end" fill="#d0dcec" font-size="12">'+xmax.toFixed(2)+'</text>'+
+  '<text x="56" y="35" text-anchor="end" fill="#d0dcec" font-size="11">'+ymax.toFixed(2)+'</text>';
+}
 function widget(){
  return '<section class="bs-scope" data-board-scope aria-label="Real ngspice multicycle transient waveform analyzer">'+
  '<div class="bs-bezel"><div><strong>◉ TRANSIENT ENGINEERING WORKBENCH · 6 LANES</strong><small>Oscilloscope controls · real ngspice samples · source 80 ns pulse / gate 60 ns pulse</small></div><div class="bs-status"><span id="bsState">STOP</span><span id="bsTriggerState">CH1 ↑</span><span id="bsWindow">0–240 ns</span></div></div>'+
@@ -127,7 +231,10 @@ function widget(){
  '<label>Time/div<select id="bsTimeDiv"></select></label><label>Speed<select id="bsSpeed"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>'+
  '<label>Trigger<select id="bsTrig"><option value="0">CH1 Vsrc ↑</option><option value="1">CH2 Vtx ↑</option><option value="2">CH3 Vrx ↑</option><option value="3">CH4 Gate ↑</option></select></label>'+
  '<label>Level V<input id="bsTrigLevel" type="number" step=".1" value=".5"/></label>'+
- '<button id="bsSingle" type="button">Single trigger</button><button id="bsCenter" type="button">Center trigger</button><button id="bsCompare" type="button" aria-pressed="false">Compare baseline: OFF</button><button id="bsExpand" type="button" aria-expanded="false">⛶ Full screen</button></div>'+
+ '<label>Edge<select id="bsEdge"><option value="rise">Rising ↑</option><option value="fall">Falling ↓</option></select></label>'+
+ '<label>Trigger mode<select id="bsTrigMode"><option value="auto">Auto</option><option value="normal">Normal</option><option value="single">Single</option></select></label>'+
+ '<label>Holdoff ns<input id="bsHoldoff" type="number" min="0" max="240" step=".1" value="0"/></label>'+
+ '<button id="bsSingle" type="button">Single trigger</button><button id="bsAutoset" type="button">Autoset</button><button id="bsCenter" type="button">Center trigger</button><button id="bsCompare" type="button" aria-pressed="false">Compare baseline: OFF</button><button id="bsExpand" type="button" aria-expanded="false">⛶ Full screen</button></div>'+
  '<div class="bs-channelbar" id="bsChannelbar" aria-label="Independently calibrated waveform channels"></div>'+
  '<div class="bs-screen"><div class="bs-screenhead"><span><b>CH1–CH6 · FULL-CYCLE ACQUISITION</b></span><span id="bsScreenRange">0–240 ns</span></div>'+
  '<svg id="bsLarge" role="img" tabindex="0" viewBox="0 0 1160 880" aria-label="Multicycle oscilloscope traces with annotated source rising and falling edges"></svg>'+
@@ -136,6 +243,15 @@ function widget(){
  '<div class="bs-deep"><section><div class="bs-deepheading"><strong>EDGE MICROSCOPE · REAL SAMPLE ZOOM</strong><span id="bsFocusLabel">Select an edge</span></div><svg id="bsMicroscope" viewBox="0 0 1100 280" role="img" aria-label="High-resolution sampled RX and trace-current ringing near the selected edge"></svg>'+
  '<div class="bs-physics" id="bsPhysics"></div></section><section><div class="bs-deepheading"><strong>LIVE SIGNAL → COMPONENT RESPONSE</strong></div>'+
  '<div id="bsCircuitLive" class="bs-circuit-live"></div><div id="bsExplanation" class="bs-explanation" role="status" aria-live="polite"></div></section></div>'+
+ '<div class="bs-analysis"><div class="bs-deepheading"><strong>ADVANCED INSTRUMENT ANALYSIS · STORED SIMULATION SAMPLES</strong><span>Not live hardware acquisition</span></div>'+
+ '<div class="bs-analysis-controls"><label>Analyze<select id="bsAnalysisCh"><option value="0">CH1 Source</option><option value="1">CH2 TX</option><option value="2" selected>CH3 RX</option><option value="3">CH4 Gate</option><option value="4">CH5 Current</option><option value="5">CH6 Derived power</option></select></label>'+
+ '<label>XY X-axis<select id="bsXYX"><option value="0">Vsrc</option><option value="1">Vtx</option><option value="2">Vrx</option><option value="3">Vgate</option><option value="4" selected>Itrace</option></select></label>'+
+ '<label>XY Y-axis<select id="bsXYY"><option value="0">Vsrc</option><option value="1">Vtx</option><option value="2" selected>Vrx</option><option value="3">Vgate</option><option value="4">Itrace</option></select></label>'+
+ '<button id="bsExportCSV" type="button">Export actual-sample CSV</button><button id="bsExportSVG" type="button">Export scope SVG</button></div>'+
+ '<div id="bsAdvancedMeasurements" class="bs-analysis-results"></div>'+
+ '<div class="bs-analysis-plots"><div><h5>FREQUENCY SPECTRUM · WINDOWED DFT</h5><svg id="bsSpectrum" viewBox="0 0 780 220" role="img" aria-label="Frequency spectrum computed from uniformly interpolated stored SPICE samples"></svg></div>'+
+ '<div><h5>XY CHANNEL CORRELATION</h5><svg id="bsXY" viewBox="0 0 780 220" role="img" aria-label="XY plot of two selected simulated channel values"></svg></div></div>'+
+ '<p id="bsAnalysisNote" class="bs-analysis-note"></p></div>'+
  '<div class="bs-bottom"><section><h5>MEASUREMENTS · WINDOW / ACTUAL SIMULATED VALUES</h5><table><thead><tr><th>Channel</th><th>Min</th><th>Max</th><th>Pk–Pk</th></tr></thead><tbody id="bsMetrics"></tbody></table></section>'+
  '<section><h5>CURSOR A/B · TIME-ALIGNED VOLTAGE / CURRENT / POWER</h5><div class="bs-sliders">'+
  '<label>A <b id="bsTimeA">—</b><input id="bsA" type="range"></label><label>B <b id="bsTimeB">—</b><input id="bsB" type="range"></label></div>'+
@@ -154,7 +270,7 @@ function init(host,run,time,options){
   const mode=oldmode,limit=endTime(mode);
   const state={run,runId:run.id,mode,lo:0,hi:limit,cursor:clamp(time,0,limit),
    a:clamp(time,0,limit),b:mode==="cycles"?81:8,shown:[true,true,true,true,true,false],
-   gain:[1,1,1,1,1,1],trig:0,level:run.supply*.5,
+   gain:[1,1,1,1,1,1],trig:0,level:run.supply*.5,edge:"rise",trigMode:"auto",holdoff:0,triggerStatus:"",analysisCh:2,xyX:4,xyY:2,
    speed:1,playing:false,raf:0,lastFrame:0,reveal:null,focus:null,stages:0,compare:false,options:options||{},
    eventIndex:0};
   host.__boardScope=state;
@@ -181,20 +297,20 @@ function connect(host,st){
   const Tm=T(),w=clamp(width,.5,Tm);st.lo=clamp(t-w/2,0,Tm-w);st.hi=st.lo+w;
  }
  function trigger(){
-  const sample=rows(),col=CONFIG[st.trig].index,level=st.level;
-  let old=sample[0][col];
-  for(let i=1;i<sample.length;i++){
-   let v=sample[i][col];
-   if(old<level&&v>=level)return sample[i][0];
-   old=v;
-  }
-  return events(st.run,st.mode)[0]?.t??0;
+  return thresholdCrossings(rows(),st.run,st.trig,st.level,st.edge,st.holdoff)[0]??null;
  }
  function zoom(f){stop();around((st.lo+st.hi)/2,(st.hi-st.lo)*f);paint(host,st)}
  function navigate(e){const list=events(st.run,st.mode);if(!list.length)return;st.focus=list[((e%list.length)+list.length)%list.length];st.eventIndex=list.indexOf(st.focus);st.a=st.focus.t;st.b=clamp(st.a+Math.min(4,T()/15),0,T());emit(st.focus.t)}
  $("#bsRun").onclick=()=>{
   if(st.playing){stop();paint(host,st);return}
-  st.playing=true;st.reveal=0;st.cursor=0;st.lastFrame=0;
+  const hit=trigger();
+  if(st.trigMode!=="auto"&&hit===null){
+   st.triggerStatus="WAIT · NO MATCHING "+st.edge.toUpperCase()+" EDGE";
+   st.playing=false;paint(host,st);return;
+  }
+  st.triggerStatus=hit===null?"AUTO · FREE RUN":"TRIGGERED @ "+hit.toFixed(2)+" ns";
+  const first=st.trigMode==="auto"?0:hit;
+  st.playing=true;st.reveal=first;st.cursor=first;st.lastFrame=0;
   const start=performance.now(),Tmax=T(),speed=+$("#bsSpeed").value||1;
   // Real acquisition: progressively reveal true SPICE samples, not a moving
   // cursor on a permanently drawn trace. 16 seconds for 240ns at normal speed.
@@ -204,7 +320,7 @@ function connect(host,st){
    const progress=clamp((now-start)*speed/duration,0,1);
    if(now-st.lastFrame>75||progress===1){
     st.lastFrame=now;
-    st.reveal=Tmax*progress;
+    st.reveal=first+(Tmax-first)*progress;
     st.cursor=st.reveal;
     const list=events(st.run,st.mode),past=list.filter(x=>x.t<=st.cursor);
     if(past.length)st.focus=past[past.length-1];
@@ -246,6 +362,7 @@ function connect(host,st){
   stop();st.compare=!st.compare;paint(host,st);
  };
  $("#bsMode").value=st.mode;
+ $("#bsEdge").value=st.edge;$("#bsTrigMode").value=st.trigMode;$("#bsHoldoff").value=st.holdoff;
  $("#bsMode").onchange=e=>{
   stop();st.mode=e.target.value;st.lo=0;st.hi=T();st.cursor=clamp(st.cursor,0,T());st.a=clamp(st.a,0,T());st.b=clamp(st.b,0,T());
   st.focus=events(st.run,st.mode)[0]||null;st.eventIndex=0;timeOptions();paint(host,st);
@@ -260,9 +377,27 @@ function connect(host,st){
  $("#bsSpeed").onchange=e=>{st.speed=+e.target.value};
  $("#bsTrig").onchange=e=>{st.trig=+e.target.value;paint(host,st)};
  $("#bsTrigLevel").value=st.level;
- $("#bsTrigLevel").onchange=e=>{st.level=+e.target.value;paint(host,st)};
- $("#bsSingle").onclick=()=>{stop();let t=trigger();st.a=t;st.b=clamp(t+Math.min(8,T()/10),0,T());const e=events(st.run,st.mode).find(e=>Math.abs(e.t-t)<1);if(e)st.focus=e;emit(t)};
- $("#bsCenter").onclick=()=>{stop();let t=trigger();around(t);emit(t)};
+ $("#bsTrigLevel").onchange=e=>{const n=Number(e.target.value);if(Number.isFinite(n)){st.level=n;st.triggerStatus="";paint(host,st)}};
+ $("#bsEdge").onchange=e=>{st.edge=e.target.value;st.triggerStatus="";paint(host,st)};
+ $("#bsTrigMode").onchange=e=>{st.trigMode=e.target.value;st.triggerStatus="";paint(host,st)};
+ $("#bsHoldoff").onchange=e=>{st.holdoff=clamp(Number(e.target.value)||0,0,240);e.target.value=st.holdoff;paint(host,st)};
+ $("#bsSingle").onclick=()=>{
+  stop();const t=trigger();
+  if(t===null){st.triggerStatus="NO MATCHING TRIGGER";paint(host,st);return}
+  st.triggerStatus="SINGLE CAPTURE @ "+t.toFixed(2)+" ns";
+  st.a=t;st.b=clamp(t+Math.min(8,T()/10),0,T());
+  const e=events(st.run,st.mode).find(e=>Math.abs(e.t-t)<1);if(e)st.focus=e;
+  emit(t);
+ };
+ $("#bsAutoset").onclick=()=>{
+  stop();st.mode="cycles";st.lo=0;st.hi=T();st.cursor=0;st.a=0;st.b=80;
+  st.shown=[true,true,true,true,true,false];st.gain=[1,1,1,1,1,1];
+  st.trig=0;st.level=st.run.supply*.5;st.edge="rise";st.trigMode="auto";st.holdoff=0;st.triggerStatus="";
+  $("#bsTrig").value="0";$("#bsTrigLevel").value=st.level;$("#bsEdge").value="rise";
+  $("#bsTrigMode").value="auto";$("#bsHoldoff").value=0;
+  st.focus=events(st.run,st.mode)[0]||null;timeOptions();paint(host,st);
+ };
+ $("#bsCenter").onclick=()=>{stop();const t=trigger();if(t===null){st.triggerStatus="NO MATCHING TRIGGER";paint(host,st);return}around(t);emit(t)};
  $("#bsA").oninput=e=>{const t=+e.target.value;stop();st.a=t;emit(t)};
  $("#bsB").oninput=e=>{const t=+e.target.value;stop();st.b=t;paint(host,st)};
  $("#bsChannelbar").onclick=e=>{const b=e.target.closest("[data-bs-ch]");if(!b)return;st.shown[+b.dataset.bsCh]=!st.shown[+b.dataset.bsCh];paint(host,st)};
@@ -277,6 +412,11 @@ function connect(host,st){
   const t=clamp(st.lo+(x-lo)/(hi-lo)*(st.hi-st.lo),0,T());
   stop();st.a=t;emit(t);
  }
+ $("#bsAnalysisCh").onchange=e=>{st.analysisCh=+e.target.value;paint(host,st)};
+ $("#bsXYX").onchange=e=>{st.xyX=+e.target.value;paint(host,st)};
+ $("#bsXYY").onchange=e=>{st.xyY=+e.target.value;paint(host,st)};
+ $("#bsExportCSV").onclick=()=>exportText("slt-board-"+st.run.id+"-"+st.mode+".csv",toCSV(clipRows(rows(),st.lo,st.hi),st.run),"text/csv");
+ $("#bsExportSVG").onclick=()=>exportText("slt-board-scope-"+st.run.id+".svg",'<?xml version="1.0" encoding="UTF-8"?>\n'+$("#bsLarge").outerHTML.replace("<svg ","<svg xmlns=\"http://www.w3.org/2000/svg\" "),"image/svg+xml");
  $("#bsLarge").onpointerdown=e=>pointing(e,false);
  $("#bsMobile").onpointerdown=e=>pointing(e,true);
  $("#bsLarge").onkeydown=e=>{if(["ArrowLeft","ArrowRight"].includes(e.key)){e.preventDefault();stop();emit(st.cursor+(e.key==="ArrowLeft"?-.1:.1))}};
@@ -294,8 +434,8 @@ function paint(host,st){
  const referenceRows=reference?samples(reference,st.mode):null;
 
  const allStats=rangeData(rows,st.run,st.lo,st.hi);
- $("#bsState").textContent=st.playing?"● ACQUIRING":"■ HOLD · SPICE";
- $("#bsTriggerState").textContent="TRIG CH"+(st.trig+1)+" ↑ "+st.level.toFixed(2)+" V";
+ $("#bsState").textContent=st.playing?"● ACQUIRING":st.triggerStatus||"■ HOLD · SPICE";
+ $("#bsTriggerState").textContent="TRIG CH"+(st.trig+1)+" "+(st.edge==="rise"?"↑":"↓")+" "+st.level.toFixed(2)+" V";
  $("#bsWindow").textContent=rangeFmt(st.lo,st.hi);
  $("#bsScreenRange").textContent=rangeFmt(st.lo,st.hi)+(st.mode==="cycles"?" · 80 ns source period":" · initial edge");
  $("#bsMode").value=st.mode;
@@ -397,6 +537,20 @@ function paint(host,st){
   }
   return out+'</svg>';
  }).join("");
+ const measured=analyzeWave(rows,st.run,st.analysisCh,st.lo,st.hi);
+ const formatOptional=(v,digits,unit)=>v===null?"—":v.toFixed(digits)+" "+unit;
+ $("#bsAdvancedMeasurements").textContent="CH"+(st.analysisCh+1)+" "+CONFIG[st.analysisCh].short+
+  " · Period "+formatOptional(measured.period,3,"ns")+
+  " · Frequency "+formatOptional(measured.period?1000/measured.period:null,3,"MHz")+
+  " · Duty "+formatOptional(measured.duty,1,"%")+
+  " · Rise (10–90%) "+formatOptional(measured.rise,4,"ns")+
+  " · Fall (90–10%) "+formatOptional(measured.fall,4,"ns");
+ if(!st.playing){
+  const spectrum=renderSpectrum(rows,st.run,st.analysisCh,st.lo,st.hi);
+  $("#bsSpectrum").innerHTML=spectrum.svg;
+  $("#bsXY").innerHTML=renderXY(rows,st.run,st.xyX,st.xyY,st.lo,st.hi);
+ }
+ $("#bsAnalysisNote").textContent="FFT displays an approximate windowed DFT on 128 uniformly interpolated numerical samples; bin spacing "+(1000/span).toFixed(3)+" MHz. It cannot resolve frequencies finer than the selected time window. XY uses stored numerical samples (no hardware ADC, probe calibration, or streaming).";
  $("#bsMetrics").innerHTML=CONFIG.map((c,k)=>'<tr><th style="color:'+c.color+'">'+c.short+'</th>'+
   '<td>'+fmt(allStats[k].min,c.unit)+'</td><td>'+fmt(allStats[k].max,c.unit)+'</td><td>'+fmt(allStats[k].pp,c.unit)+'</td></tr>').join("");
  $("#bsTimeA").textContent=st.a.toFixed(2)+" ns";$("#bsTimeB").textContent=st.b.toFixed(2)+" ns";
