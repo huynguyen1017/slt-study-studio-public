@@ -73,7 +73,7 @@ function markup(){
  '<button id="rtlVcdLink" type="button" aria-pressed="true">🔗 Link B: ON</button></div>'+
  '<div id="rtlVcdNotice" role="status" aria-live="polite">No trace loaded. Use a VCD file from your own simulation; screenshots alone cannot provide time-indexed signal data.</div>'+
  '<div id="rtlVcdPicker" class="rtl-vcd-picker" hidden></div>'+
- '<svg id="rtlVcdSvg" class="rtl-vcd-svg" viewBox="0 0 1120 550" role="img" aria-label="Digital timing bus lanes with synchronized A and B markers" tabindex="0"></svg>'+
+ '<div class="rtl-vcd-viewport" tabindex="0" role="region" aria-label="Scrollable digital timing diagram"><svg id="rtlVcdSvg" class="rtl-vcd-svg" viewBox="0 0 1120 550" role="img" aria-label="Digital timing bus lanes with synchronized A and B markers" tabindex="0"></svg></div>'+
  '<div id="rtlVcdAB" class="rtl-vcd-ab"></div>'+
  '<p class="rtl-vcd-note">All parsing is local to your browser; nothing is uploaded or added to this public repository. X and Z are preserved. Unlike the analog SPICE panels, these are RTL logic values, not measured voltage.</p></details>';
 }
