@@ -55,6 +55,11 @@ assert.equal(ctx.window.academyStaticDiagnostics("int main(void){ return 0; }","
    await page.locator("#acaAssign").click();
    assert.match(await page.locator("#acaAssigned").textContent(),/PC13/);
    assert.match(await page.locator("#acaPinGenerated").textContent(),/GPIO_PIN_13/);
+   await page.locator("#acaEngr844").click();
+   await page.locator("#acaQuadStep").fill("7");
+   assert.match(await page.locator("#acaQuad").textContent(),/State 7/);
+   assert.match(await page.locator("#acaAssigned").textContent(),/PA10/);
+   assert.match(await page.locator("#acaAssigned").textContent(),/PB5/);
    await page.locator("#acaSendIDE").click();
    assert.equal(await page.locator("#ideLang").inputValue(),"stm32");
    assert.match(await page.locator("#ideSource").inputValue(),/HAL_GPIO_ReadPin/);
