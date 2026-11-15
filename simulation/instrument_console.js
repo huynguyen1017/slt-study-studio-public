@@ -1033,8 +1033,8 @@ function mount(root,ctx={}){
   $("#ixSaveRef").textContent=state.showRef?"Hide R1 Compare":"Save R1 Compare";
   draw();
  };
- $("#ixA").oninput=e=>{stop();setA(Number(e.target.value));draw();};
- $("#ixB").oninput=e=>{stop();state.b=clamp(Number(e.target.value),0,activeDef.T);state.gap=state.b-state.a;draw();};
+ $("#ixA").oninput=e=>{const requested=Number(e.target.value);stop();setA(requested);draw();};
+ $("#ixB").oninput=e=>{const requested=Number(e.target.value);stop();state.b=clamp(requested,0,activeDef.T);state.gap=state.b-state.a;draw();};
  $("#ixLinkB").onclick=()=>{state.linkedB=!state.linkedB;if(state.linkedB)state.gap=state.b-state.a;draw();};
  $("#ixNextAB").onclick=()=>{stop();const e=activeDef.events.find(e=>e.t>state.a+1e-5)||activeDef.events[0];if(e)setA(e.t);draw();};
  $("#ixChannels").onclick=e=>{const b=e.target.closest("[data-ix-ch]");if(!b)return;state.active[+b.dataset.ixCh]=!state.active[+b.dataset.ixCh];draw();};
