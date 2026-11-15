@@ -148,3 +148,35 @@ An uploaded confidential oscilloscope deck served solely as private
 design reference for the look and interpretation of instrument
 controls. No confidential screenshot, board identifier, test command,
 or measured numeric values was published.
+
+## Multicycle transient oscilloscope (November 2026)
+
+The lower board-level waveform viewer now defaults to a **240 ns,
+six-channel multicycle ngspice trace** for the selected circuit.
+All 48 original selectable configurations were re-simulated with
+a pulsed 80 ns source and optional 60 ns pulsed low-side NMOS.
+Changing Rseries, L, C, Vsource, or NMOS selects its corresponding
+actual simulated trace. The original 16 ns transient can still be
+selected for single-edge examination.
+
+Playback is a progressive acquisition animation of recorded samples
+rather than a cursor gliding over a static chart. Event selection and
+the 3.6 ns edge microscope expose real SPICE-simulated ringing,
+overshoot, settling and rising/falling edges. The diagram and physical
+node readouts track the acquisition time. A baseline comparison
+option overlays a separately simulated reference circuit. Voltage,
+current, and derived resistor dissipation use different calibrated
+lanes; power is not a validated thermal failure forecast.
+
+For phone users, an **Open full screen** control displays a
+full-viewport interactive scope without making the rest of the
+notebook horizontally overflow. The companion Deep Dive voltage
+teaching model also gained three illustrative load bursts and
+progressive replay.
+
+Simulation evidence, build instructions and limitations are in
+[simulation/board/MULTICYCLE_METHOD.md](simulation/board/MULTICYCLE_METHOD.md).
+A simulated result is **not** a measured oscilloscope capture. The
+public static site uses precomputed runs rather than executing ngspice
+on users' devices. The local reference application on port 8789 was
+not changed.

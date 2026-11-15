@@ -1,258 +1,473 @@
 "use strict";
-/* High-fidelity interactive 5-lane oscilloscope for the board ngspice run.
- * Four physical-node voltage channels + an explicitly mA-valued branch-current lane.
- * Never conflate gate volts or current mA with the RX voltage axis.
- * The sample data, not a hand-drawn illustration, drives every trace and readout.
+/* Board-level oscilloscope v2.
+ * DATA PROVENANCE: 48 stored ngspice-47 runs, with 16 ns original and 240 ns
+ * multicycle transient runs. The SVG renders actual samples; no invented noise,
+ * phase, repeated copies, fake resonance or fabricated clock captures.
  */
 (function(){
-const channels=[
- {key:"SOURCE",short:"Vsrc",column:1,unit:"V",type:"Voltage rail",color:"#f6dc4a",about:"Source voltage / programmed step"},
- {key:"TX NODE",short:"Vtx",column:2,unit:"V",type:"Voltage node",color:"#60da80",about:"After 20 Ω driver"},
- {key:"RX NODE",short:"Vrx",column:4,unit:"V",type:"Voltage node",color:"#67a9f7",about:"Receiver/load voltage"},
- {key:"NMOS GATE",short:"Vg",column:5,unit:"V",type:"Control voltage",color:"#ef7cbb",about:"NMOS control gate (not a clock)"},
- {key:"TRACE CURRENT",short:"Itrace",column:6,unit:"mA",type:"Branch current",color:"#5ce5d6",about:"ngspice inductor branch current"}
+const CONFIG=[
+ {name:"SOURCE",short:"Vsrc",index:1,unit:"V",color:"#f5da49",type:"Stimulus voltage",about:"Source: 80 ns period, 40 ns high; not a clock"},
+ {name:"TX NODE",short:"Vtx",index:2,unit:"V",color:"#60e19b",type:"Driver voltage",about:"Node after 20 Ω source/driver resistance"},
+ {name:"RX NODE",short:"Vrx",index:4,unit:"V",color:"#5d9eff",type:"Receiver voltage",about:"Load voltage at 200 Ω, Cload and optional NMOS"},
+ {name:"NMOS GATE",short:"Vgate",index:5,unit:"V",color:"#ff82bc",type:"Gate-control voltage",about:"Optional 60 ns-period 3.3 V pulse"},
+ {name:"BRANCH CURRENT",short:"Itrace",index:6,unit:"mA",color:"#66e5de",type:"Inductor current",about:"Actual ngspice Ltrace branch current"},
+ {name:"SERIES LOSS",short:"Pseries",index:7,unit:"mW",color:"#ffbd72",type:"Derived heat rate",about:"Calculated Itrace² × added-series resistance; not a thermal model"}
 ];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const num=n=>Number(n).toFixed(Math.abs(n)>20?1:3);
-const phase=fn=>window.requestAnimationFrame(fn);
+const fmt=(v,u)=> (Math.abs(v)>=100?v.toFixed(1):Math.abs(v)>=1?v.toFixed(3):v.toFixed(4))+" "+u;
+function samples(run,mode){return mode==="cycles"?(window.SLT_BOARD_CYCLES?.[run.id]||run.samples):run.samples}
+function endTime(mode){return mode==="cycles"?240:16}
+function value(r,k,run){return k===5?r[6]*r[6]/1000*run.series_r:r[CONFIG[k].index]}
 function nearest(rows,t){
  let lo=0,hi=rows.length-1;
  while(lo<hi){let mid=(lo+hi)>>1;if(rows[mid][0]<t)lo=mid+1;else hi=mid}
- return lo>0&&Math.abs(rows[lo-1][0]-t)<Math.abs(rows[lo][0]-t)?rows[lo-1]:rows[lo];
+ if(lo>0&&Math.abs(rows[lo-1][0]-t)<Math.abs(rows[lo][0]-t))lo--;
+ return rows[lo];
 }
-function bounds(rows,ch,visible){
- const col=ch.column;let min=Infinity,max=-Infinity;
- for(const r of rows){if(r[0]<visible[0]||r[0]>visible[1])continue;min=Math.min(min,r[col]);max=Math.max(max,r[col])}
- if(!Number.isFinite(min)){min=Math.min(...rows.map(r=>r[col]));max=Math.max(...rows.map(r=>r[col]))}
- let pad=Math.max((max-min)*.18,ch.unit==="V"?.065:.2);
- return [min-pad,max+pad];
-}
-function metrics(rows,st){
- let stats=[];
- for(let k=0;k<channels.length;k++){
-  let a=rows.filter(r=>r[0]>=st.lo&&r[0]<=st.hi).map(r=>r[channels[k].column]);
-  if(!a.length)a=rows.map(r=>r[channels[k].column]);
-  let min=Math.min(...a),max=Math.max(...a),mean=a.reduce((x,v)=>x+v,0)/a.length;
-  stats.push({min,max,mean,pp:max-min});
+function cross(rows,col,level,minSpacing=2){
+ const result=[];let last=-1e9;
+ for(let i=1;i<rows.length;i++){
+  const a=rows[i-1],b=rows[i],p=a[col],q=b[col];
+  const rise=p<level&&q>=level,fall=p>=level&&q<level;
+  if((rise||fall)&&b[0]-last>minSpacing){
+   const f=Math.abs(q-p)>1e-12?clamp((level-p)/(q-p),0,1):1;
+   const t=a[0]+(b[0]-a[0])*f;
+   result.push({t,dir:rise?"rise":"fall",kind:col===1?"source":"gate",ch:col===1?0:3});
+   last=t;
+  }
  }
- return stats;
+ return result;
 }
-function eventsFor(run){
- const rows=run.samples;
- const srcRise=rows.find(r=>r[1]>.1*run.supply)?.[0]??1;
- const gate=run.nmos?rows.find(r=>r[0]>7.5&&r[5]>2)?.[0]:null;
- // The greatest local receiver decrease after gate turn-on; do not invent a short-circuit event.
- let low=null;
- if(gate!==null){const after=rows.filter(r=>r[0]>=gate+.15 &&r[0]<=12);if(after.length)low=after.reduce((a,r)=>r[4]<a[4]?r:a,after[0])}
- const firstRX=rows.find(r=>r[0]>=srcRise&&r[4]>.05*run.supply)?.[0]??null;
- const ev=[
-  {t:srcRise,label:"SOURCE STEP",ch:0,annotation:"Driven source transitions; inspect TX/receiver delay",narrative:"Voltage source Vsrc steps to its programmed value. This is a voltage transition, not a clock."},
-  ...(firstRX!=null?[{t:firstRX,label:"RX ARRIVAL",ch:2,annotation:"Receiver begins responding",narrative:"RX begins to rise as the circuit charges. First response depends on R, L and shunt capacitance."}]:[]),
-  ...(gate!=null?[{t:gate,label:"NMOS GATE ↑",ch:3,annotation:"Gate drive asserted (~8 ns)",narrative:"The NMOS gate rises to approximately 3.3 V, forming a low-side conduction path and changing the RX voltage and current."}]:[]),
-  ...(low&&low[0]>gate+.2?[{t:low[0],label:"RX LOWER LEVEL",ch:2,annotation:"Receiver transient after switching",narrative:"RX has responded to the added current path. Correlate gate timing and Itrace; this is a simulated response, not damage."}]:[])
- ];
- return ev;
+function events(run,mode){
+ const rows=samples(run,mode),length=endTime(mode);
+ const src=cross(rows,1,run.supply*.5);
+ const gates=run.nmos?cross(rows,5,1.65):[];
+ const all=src.concat(gates).filter(e=>e.t<=length).sort((a,b)=>a.t-b.t);
+ return all.map((e,i)=>{
+  const n=nearest(rows,clamp(e.t+.45,0,length)),before=nearest(rows,clamp(e.t-.15,0,length));
+  const drx=n[4]-before[4],di=n[6]-before[6];
+  const nm=e.kind==="source"?"SOURCE":"NMOS GATE";
+  const label=nm+" "+(e.dir==="rise"?"RISING ↑":"FALLING ↓");
+  const explanation=e.kind==="source"?
+   (e.dir==="rise"?"Voltage source steps HIGH. Driver and trace inductance control the current ramp; RX follows with RLC transient behavior.":"Voltage source steps LOW. Capacitor discharges and inductor current changes; inspect any reverse excursion or ringing."):
+   (e.dir==="rise"?"Gate rising turns on the NMOS shunt path from RX to ground. A falling RX and changed branch current are consequences of the circuit topology.":"Gate falling removes the NMOS shunt. RX can recover toward its loaded divider value, depending on the source pulse phase.");
+  return {...e,label,explanation,note:"ΔVrx over the immediate "+(.6).toFixed(1)+" ns neighborhood ≈ "+fmt(drx,"V")+"; ΔItrace ≈ "+fmt(di,"mA")};
+ });
 }
-function skeleton(){
- return '<section class="bs-scope" aria-label="Interactive five-lane board-level oscilloscope" data-board-scope>'+
- '<div class="bs-bezel"><div><strong>◉ TRANSIENT SCOPE · BOARD NODES</strong><small>Digital oscilloscope-style simulator viewer</small></div><div class="bs-status"><span id="bsState">STOP</span><span id="bsTriggerState">TRIG CH1 ↑</span><span id="bsWindow">0–16 ns</span></div></div>'+
- '<div class="bs-origin">NGSPICE-47 <b>SIMULATED / STORED DATA</b> · 48 CIRCUIT CONFIGURATIONS · NOT PHYSICAL INSTRUMENT READINGS</div>'+
- '<div class="bs-toolbar" role="group" aria-label="Waveform instrument controls">'+
- '<button type="button" id="bsRun">▶ Replay</button><button type="button" id="bsStop">■ Stop</button><button type="button" id="bsSingle">Single (event)</button>'+
- '<button type="button" id="bsFit">Fit</button><button type="button" id="bsZoomIn">＋ Zoom</button><button type="button" id="bsZoomOut">− Zoom</button><button type="button" id="bsPanLeft">← Pan</button><button type="button" id="bsPanRight">Pan →</button>'+
- '<label>Trigger source<select id="bsTrig"><option value="0">CH1 Vsrc ↑</option><option value="1">CH2 TX ↑</option><option value="2">CH3 RX ↑</option><option value="3">CH4 NMOS gate ↑</option></select></label>'+
- '<label>Trigger level<input id="bsTrigLevel" value=".5" type="number" step=".1" aria-label="Trigger threshold in volts"></label>'+
- '<label>Time/div<select id="bsTimeDiv"><option value="1.6">1.6 ns/div · Fit</option><option value=".8">0.8 ns/div</option><option value=".4">0.4 ns/div</option><option value=".2">0.2 ns/div</option></select></label>'+
- '<button type="button" id="bsCenter">Center trigger</button></div>'+
- '<div class="bs-channelbar" id="bsChannelbar" role="group" aria-label="Channel visibility and volts per division"></div>'+
- '<div class="bs-screen"><div class="bs-screenhead"><span><b>WAVEFORMS</b> · Time (ns) / separately scaled channels</span><span id="bsScreenRange">0–16 ns</span></div>'+
- '<svg id="bsLarge" viewBox="0 0 1160 770" role="img" aria-label="Oscilloscope plot of Vsource Vtransmitter Vreceiver NMOS gate voltage and trace current with event pointers and cursors" tabindex="0"></svg>'+
- '<div class="bs-mobile" id="bsMobile" aria-label="Phone-width individually labeled waveforms"></div>'+
- '<div class="bs-events" id="bsEvents"></div></div>'+
- '<div class="bs-bottom"><section class="bs-read"><h5>MEASUREMENTS · CURRENT VISIBLE WINDOW</h5><table><thead><tr><th>Channel</th><th>Min</th><th>Max</th><th>Pk–Pk</th></tr></thead><tbody id="bsMetrics"></tbody></table></section>'+
- '<section class="bs-markers"><h5>MARKERS & CURSORS · A / B</h5><div class="bs-sliders"><label>Cursor A · <b id="bsTimeA">2.30 ns</b><input id="bsA" type="range" min="0" max="16" step=".01" value="2.3"></label>'+
- '<label>Cursor B · <b id="bsTimeB">8.00 ns</b><input id="bsB" type="range" min="0" max="16" step=".01" value="8"></label></div>'+
+function rangeData(rows,run,min,max){
+ const found=rows.filter(r=>r[0]>=min&&r[0]<=max);
+ const out=found.length?found:rows;
+ return CONFIG.map((c,k)=>{
+  const vs=out.map(r=>value(r,k,run)),lo=Math.min(...vs),hi=Math.max(...vs),avg=vs.reduce((a,b)=>a+b,0)/vs.length;
+  return {min:lo,max:hi,pp:hi-lo,avg};
+ });
+}
+function bounds(rows,run,k,left,right,gain){
+ const values=rows.filter(r=>r[0]>=left&&r[0]<=right).map(r=>value(r,k,run));
+ const a=values.length?values:rows.map(r=>value(r,k,run));
+ const min=Math.min(...a),max=Math.max(...a),span=Math.max(max-min,k===5?.02:.035);
+ const mid=(min+max)/2,half=span*(.5+.18)*gain;
+ return [mid-half,mid+half];
+}
+function segment(rows,l,r){
+ const arr=[];let i=0;
+ while(i<rows.length&&rows[i][0]<l)i++;
+ if(i>0)arr.push(rows[i-1]);
+ while(i<rows.length&&rows[i][0]<=r){arr.push(rows[i]);i++}
+ if(i<rows.length)arr.push(rows[i]);
+ return arr;
+}
+function minMaxDecimate(raw,k,run,maxPoints=1100){
+ if(raw.length<=maxPoints)return raw;
+ const step=Math.ceil(raw.length/(maxPoints/2));
+ const out=[];
+ for(let start=0;start<raw.length;start+=step){
+  const end=Math.min(start+step,raw.length),bucket=raw.slice(start,end);
+  if(!bucket.length)continue;
+  let imin=0,imax=0;
+  for(let n=1;n<bucket.length;n++){
+   if(value(bucket[n],k,run)<value(bucket[imin],k,run))imin=n;
+   if(value(bucket[n],k,run)>value(bucket[imax],k,run))imax=n;
+  }
+  const pos=[imin,imax].sort((a,b)=>a-b);
+  if(!out.length||out[out.length-1]!==bucket[0])out.push(bucket[0]);
+  for(const idx of pos){if(out[out.length-1]!==bucket[idx])out.push(bucket[idx])}
+  if(out[out.length-1]!==bucket[bucket.length-1])out.push(bucket[bucket.length-1]);
+ }
+ if(out[out.length-1]!==raw[raw.length-1])out.push(raw[raw.length-1]);
+ return out;
+}
+function referenceRun(run){
+ return (window.SLT_BOARD_RUNS||[]).find(x=>
+   x.supply===run.supply&&x.nmos===run.nmos&&x.series_r===0&&
+   x.inductor_nh===1&&x.cap_pf===2
+ )||null;
+}
+function crossingAt(rows,col,level,dir){
+ for(let i=1;i<rows.length;i++){
+  const a=rows[i-1],b=rows[i];
+  if(dir==="rise"&&a[col]<level&&b[col]>=level ||
+     dir==="fall"&&a[col]>level&&b[col]<=level){
+   const f=(level-a[col])/((b[col]-a[col])||1);
+   return a[0]+(b[0]-a[0])*clamp(f,0,1);
+  }
+ }
+ return null;
+}
+function widget(){
+ return '<section class="bs-scope" data-board-scope aria-label="Real ngspice multicycle transient waveform analyzer">'+
+ '<div class="bs-bezel"><div><strong>◉ TRANSIENT ENGINEERING WORKBENCH · 6 LANES</strong><small>Oscilloscope controls · real ngspice samples · source 80 ns pulse / gate 60 ns pulse</small></div><div class="bs-status"><span id="bsState">STOP</span><span id="bsTriggerState">CH1 ↑</span><span id="bsWindow">0–240 ns</span></div></div>'+
+ '<div class="bs-origin"><b>SIMULATED — NOT MEASURED HARDWARE</b> · 48 CIRCUIT CONFIGURATIONS · 3 SOURCE PERIODS / 4 GATE PERIODS · 240 ns</div>'+
+ '<div class="bs-toolbar" aria-label="Scope playback and acquisition controls">'+
+ '<button id="bsRun" type="button">▶ Acquire / Replay</button><button id="bsStop" type="button">■ Pause</button><button id="bsStep" type="button">↦ Next event</button>'+
+ '<button id="bsFit" type="button">Full span</button><button id="bsZoomIn" type="button">＋ Zoom</button><button id="bsZoomOut" type="button">－ Zoom</button>'+
+ '<button id="bsPanLeft" type="button">← Pan</button><button id="bsPanRight" type="button">Pan →</button>'+
+ '<label>View<select id="bsMode"><option value="cycles">240 ns · complete cycles</option><option value="short">16 ns · original transient</option></select></label>'+
+ '<label>Time/div<select id="bsTimeDiv"></select></label><label>Speed<select id="bsSpeed"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>'+
+ '<label>Trigger<select id="bsTrig"><option value="0">CH1 Vsrc ↑</option><option value="1">CH2 Vtx ↑</option><option value="2">CH3 Vrx ↑</option><option value="3">CH4 Gate ↑</option></select></label>'+
+ '<label>Level V<input id="bsTrigLevel" type="number" step=".1" value=".5"/></label>'+
+ '<button id="bsSingle" type="button">Single trigger</button><button id="bsCenter" type="button">Center trigger</button><button id="bsCompare" type="button" aria-pressed="false">Compare baseline: OFF</button><button id="bsExpand" type="button" aria-expanded="false">⛶ Full screen</button></div>'+
+ '<div class="bs-channelbar" id="bsChannelbar" aria-label="Independently calibrated waveform channels"></div>'+
+ '<div class="bs-screen"><div class="bs-screenhead"><span><b>CH1–CH6 · FULL-CYCLE ACQUISITION</b></span><span id="bsScreenRange">0–240 ns</span></div>'+
+ '<svg id="bsLarge" role="img" tabindex="0" viewBox="0 0 1160 880" aria-label="Multicycle oscilloscope traces with annotated source rising and falling edges"></svg>'+
+ '<div class="bs-mobile" id="bsMobile" aria-label="Full-width stacked mobile trace plots"></div>'+
+ '<div class="bs-events" id="bsEvents" aria-label="Detected waveform edge events"></div></div>'+
+ '<div class="bs-deep"><section><div class="bs-deepheading"><strong>EDGE MICROSCOPE · REAL SAMPLE ZOOM</strong><span id="bsFocusLabel">Select an edge</span></div><svg id="bsMicroscope" viewBox="0 0 1100 280" role="img" aria-label="High-resolution sampled RX and trace-current ringing near the selected edge"></svg>'+
+ '<div class="bs-physics" id="bsPhysics"></div></section><section><div class="bs-deepheading"><strong>LIVE SIGNAL → COMPONENT RESPONSE</strong></div>'+
+ '<div id="bsCircuitLive" class="bs-circuit-live"></div><div id="bsExplanation" class="bs-explanation" role="status" aria-live="polite"></div></section></div>'+
+ '<div class="bs-bottom"><section><h5>MEASUREMENTS · WINDOW / ACTUAL SIMULATED VALUES</h5><table><thead><tr><th>Channel</th><th>Min</th><th>Max</th><th>Pk–Pk</th></tr></thead><tbody id="bsMetrics"></tbody></table></section>'+
+ '<section><h5>CURSOR A/B · TIME-ALIGNED VOLTAGE / CURRENT / POWER</h5><div class="bs-sliders">'+
+ '<label>A <b id="bsTimeA">—</b><input id="bsA" type="range"></label><label>B <b id="bsTimeB">—</b><input id="bsB" type="range"></label></div>'+
  '<div class="bs-deltas" id="bsDelta"></div><div class="bs-at" id="bsAtCursor"></div></section></div>'+
- '<div class="bs-takeaway" id="bsEventNarrative" aria-live="polite">Select an event marker to inspect what changes on the circuit and the waveforms.</div>'+
- '<div class="bs-disclaimer">CH1–CH4 are voltages measured from simulation nodes and use volts (V). The fifth lane is a simulated branch current and uses milliamperes (mA). CH4 is an NMOS gate control, <b>not a clock</b>. 1/Δt represents cursor spacing reciprocal, <b>not necessarily a signal frequency</b>.</div>'+
+ '<div class="bs-disclaimer">Source and gate pulses are <b>periodic stimuli</b>, not clocks. CH6 is a calculated electrical power, not a separate physical probe or a thermal-failure prediction. Long-run samples are newly simulated in ngspice using the original topology. Scope visual styling is educational and does not reproduce real oscilloscope firmware or certify hardware compliance.</div>'+
  '</section>';
 }
-function render(host,run,time,options){
+const rangeFmt=(a,b)=>a.toFixed(Math.abs(b-a)<4?2:1)+"–"+b.toFixed(Math.abs(b-a)<4?2:1)+" ns";
+function init(host,run,time,options){
  if(!host||!run||!run.samples?.length)return;
- const old=host.__boardScope,runChanged=!old||old.runId!==run.id;
- if(runChanged){
-  if(old?.stop)old.stop();
-  host.innerHTML=skeleton();
-  const st={
-   runId:run.id,lo:0,hi:16,a:clamp(time,0,16),b:8,cursor:clamp(time,0,16),shown:[true,true,true,true,true],
-   gains:[1,1,1,1,1],trig:0,level:.5,playing:false,raf:0,last:0,
-   lastFocus:null,events:eventsFor(run),run,options:options||{}
-  };
-  host.__boardScope=st;
-  bind(host,st);
- }else{
-  old.cursor=clamp(time,0,16);
-  old.run=run;old.options=options||old.options;
- }
- draw(host,host.__boardScope);
+ let old=host.__boardScope;
+ if(!old||old.runId!==run.id){
+  old?.stop?.();
+  const oldmode=old?.mode==="short"?"short":"cycles";
+  host.innerHTML=widget();
+  const mode=oldmode,limit=endTime(mode);
+  const state={run,runId:run.id,mode,lo:0,hi:limit,cursor:clamp(time,0,limit),
+   a:clamp(time,0,limit),b:mode==="cycles"?81:8,shown:[true,true,true,true,true,false],
+   gain:[1,1,1,1,1,1],trig:0,level:run.supply*.5,
+   speed:1,playing:false,raf:0,lastFrame:0,reveal:null,focus:null,stages:0,compare:false,options:options||{},
+   eventIndex:0};
+  host.__boardScope=state;
+  state.focus=events(run,mode)[0]||null;
+  connect(host,state);
+ }else{old.run=run;old.options=options||old.options;if(old.mode==="short"&&!old.playing)old.cursor=clamp(time,0,16)}
+ paint(host,host.__boardScope);
 }
-function bind(host,st){
+function connect(host,st){
  const $=s=>host.querySelector(s);
- function stop(){st.playing=false;window.cancelAnimationFrame(st.raf);st.raf=0}
+ const rows=()=>samples(st.run,st.mode),T=()=>endTime(st.mode);
+ function stop(){st.playing=false;window.cancelAnimationFrame(st.raf);st.raf=0;st.reveal=null}
  st.stop=stop;
- const refresh=()=>draw(host,st);
- const seek=t=>{st.cursor=clamp(t,0,16); if(typeof st.options.onSeek==="function")st.options.onSeek(st.cursor); else refresh()};
- const center=(t,w=st.hi-st.lo)=>{st.lo=clamp(t-w/2,0,16-w);st.hi=st.lo+w};
- function trigger(){
-  const rows=st.run.samples,col=channels[st.trig].column,threshold=st.level;
-  for(let i=1;i<rows.length;i++)if(rows[i-1][col]<threshold&&rows[i][col]>=threshold)return rows[i][0];
-  return st.events.find(e=>e.ch===st.trig)?.t??st.events[0]?.t??1;
+ function emit(t){
+  st.cursor=clamp(t,0,T());
+  if(st.mode==="cycles"&&st.options.onCycleSeek){
+   st.options.onCycleSeek(st.cursor,nearest(rows(),st.cursor));
+  }else if(st.mode==="short"&&st.options.onSeek){
+   st.options.onSeek(st.cursor);
+  }
+  paint(host,st);
  }
- const zoom=f=>{stop();const width=clamp((st.hi-st.lo)*f,.5,16);center((st.lo+st.hi)/2,width);refresh()};
- $("#bsRun").onclick=()=>{if(st.playing){stop();refresh();return}stop();st.playing=true;st.last=0;let first=performance.now(),start=st.cursor;function frame(t){if(!st.playing)return;if(t-st.last>65){st.last=t;seek((start+(t-first)/450)%16)}st.raf=window.requestAnimationFrame(frame)}st.raf=window.requestAnimationFrame(frame)};
- $("#bsStop").onclick=()=>{stop();refresh()};
- $("#bsSingle").onclick=()=>{stop();st.a=trigger();st.b=clamp(st.a+1.6,0,16);seek(st.a)};
- $("#bsFit").onclick=()=>{stop();st.lo=0;st.hi=16;$("#bsTimeDiv").value="1.6";refresh()};
+ function around(t,width=st.hi-st.lo){
+  const Tm=T(),w=clamp(width,.5,Tm);st.lo=clamp(t-w/2,0,Tm-w);st.hi=st.lo+w;
+ }
+ function trigger(){
+  const sample=rows(),col=CONFIG[st.trig].index,level=st.level;
+  let old=sample[0][col];
+  for(let i=1;i<sample.length;i++){
+   let v=sample[i][col];
+   if(old<level&&v>=level)return sample[i][0];
+   old=v;
+  }
+  return events(st.run,st.mode)[0]?.t??0;
+ }
+ function zoom(f){stop();around((st.lo+st.hi)/2,(st.hi-st.lo)*f);paint(host,st)}
+ function navigate(e){const list=events(st.run,st.mode);if(!list.length)return;st.focus=list[((e%list.length)+list.length)%list.length];st.eventIndex=list.indexOf(st.focus);st.a=st.focus.t;st.b=clamp(st.a+Math.min(4,T()/15),0,T());emit(st.focus.t)}
+ $("#bsRun").onclick=()=>{
+  if(st.playing){stop();paint(host,st);return}
+  st.playing=true;st.reveal=0;st.cursor=0;st.lastFrame=0;
+  const start=performance.now(),Tmax=T(),speed=+$("#bsSpeed").value||1;
+  // Real acquisition: progressively reveal true SPICE samples, not a moving
+  // cursor on a permanently drawn trace. 16 seconds for 240ns at normal speed.
+  const duration=st.mode==="cycles"?16000:6000;
+  function frame(now){
+   if(!st.playing)return;
+   const progress=clamp((now-start)*speed/duration,0,1);
+   if(now-st.lastFrame>75||progress===1){
+    st.lastFrame=now;
+    st.reveal=Tmax*progress;
+    st.cursor=st.reveal;
+    const list=events(st.run,st.mode),past=list.filter(x=>x.t<=st.cursor);
+    if(past.length)st.focus=past[past.length-1];
+    if(st.mode==="cycles"&&st.options.onCycleSeek)st.options.onCycleSeek(st.cursor,nearest(rows(),st.cursor));
+    paint(host,st);
+   }
+   if(progress>=1){st.playing=false;st.reveal=null;paint(host,st);return}
+   st.raf=requestAnimationFrame(frame);
+  }
+  st.raf=requestAnimationFrame(frame);
+ };
+ $("#bsStop").onclick=()=>{stop();paint(host,st)};
+ $("#bsStep").onclick=()=>{stop();navigate(st.eventIndex+1)};
+ $("#bsFit").onclick=()=>{stop();st.lo=0;st.hi=T();paint(host,st)};
  $("#bsZoomIn").onclick=()=>zoom(.5);
  $("#bsZoomOut").onclick=()=>zoom(2);
- $("#bsPanLeft").onclick=()=>{stop();center(clamp((st.lo+st.hi)/2-(st.hi-st.lo)*.3,(st.hi-st.lo)/2,16-(st.hi-st.lo)/2));refresh()};
- $("#bsPanRight").onclick=()=>{stop();center(clamp((st.lo+st.hi)/2+(st.hi-st.lo)*.3,(st.hi-st.lo)/2,16-(st.hi-st.lo)/2));refresh()};
- $("#bsTrig").onchange=e=>{st.trig=Number(e.target.value);refresh()};
- $("#bsTrigLevel").onchange=e=>{st.level=Number(e.target.value)||0;refresh()};
- $("#bsTimeDiv").onchange=e=>{stop();center((st.lo+st.hi)/2,Math.min(16,Number(e.target.value)*10));refresh()};
- $("#bsCenter").onclick=()=>{stop();center(trigger());seek(trigger())};
- $("#bsA").oninput=e=>{const v=Number(e.target.value);stop();st.a=v;refresh()};
- $("#bsB").oninput=e=>{const v=Number(e.target.value);stop();st.b=v;refresh()};
- $("#bsChannelbar").onclick=e=>{const b=e.target.closest("[data-bs-ch]");if(!b)return;let n=Number(b.dataset.bsCh);st.shown[n]=!st.shown[n];refresh()};
- $("#bsChannelbar").onchange=e=>{const b=e.target.closest("[data-bs-gain]");if(!b)return;st.gains[Number(b.dataset.bsGain)]=Number(b.value);refresh()};
- $("#bsEvents").onclick=e=>{const b=e.target.closest("[data-bs-event]");if(!b)return;stop();const ev=st.events[Number(b.dataset.bsEvent)];st.a=ev.t;st.lastFocus=ev;seek(ev.t)};
- function pointer(e,mobile=false){
-  let svg=mobile?e.target.closest("svg"):$("#bsLarge");
-  if(!svg)return;
-  const b=svg.getBoundingClientRect(),x=(e.clientX-b.left)*(mobile?360:1160)/b.width;
-  const start=mobile?68:134,end=mobile?343:1125;
-  if(x<start||x>end)return;
-  const t=clamp(st.lo+(x-start)/(end-start)*(st.hi-st.lo),0,16);
-  stop(); if(e.shiftKey||host.dataset.cursorTarget==="b")st.b=t;else{st.a=t;seek(t)}
-  refresh();
+ $("#bsPanLeft").onclick=()=>{stop();around((st.lo+st.hi)/2-(st.hi-st.lo)*.3);paint(host,st)};
+ $("#bsPanRight").onclick=()=>{stop();around((st.lo+st.hi)/2+(st.hi-st.lo)*.3);paint(host,st)};
+ $("#bsExpand").onclick=()=>{
+  const was=host.matches(":popover-open");
+  if(was){
+   host.hidePopover();
+   host.classList.remove("bs-fullscreen");
+   host.removeAttribute("popover");
+  }else{
+   host.setAttribute("popover","manual");
+   host.classList.add("bs-fullscreen");
+   host.showPopover();
+  }
+  $("#bsExpand").setAttribute("aria-expanded",String(!was));
+  $("#bsExpand").textContent=was?"⛶ Full screen":"✕ Close full screen";
+ };
+ host.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&host.matches(":popover-open")){
+   e.preventDefault();$("#bsExpand").click();
+  }
+ });
+ $("#bsCompare").onclick=()=>{
+  stop();st.compare=!st.compare;paint(host,st);
+ };
+ $("#bsMode").value=st.mode;
+ $("#bsMode").onchange=e=>{
+  stop();st.mode=e.target.value;st.lo=0;st.hi=T();st.cursor=clamp(st.cursor,0,T());st.a=clamp(st.a,0,T());st.b=clamp(st.b,0,T());
+  st.focus=events(st.run,st.mode)[0]||null;st.eventIndex=0;timeOptions();paint(host,st);
+ };
+ function timeOptions(){
+  const Tm=T();const choices=st.mode==="cycles"?[24,12,6,2.4,.8,.2]:[1.6,.8,.4,.2,.08];
+  $("#bsTimeDiv").innerHTML=choices.map(v=>'<option value="'+v+'">'+v+' ns/div</option>').join("");
+  $("#bsTimeDiv").value=String(choices[0]);
  }
- $("#bsLarge").onpointerdown=e=>pointer(e,false);
- $("#bsMobile").onpointerdown=e=>pointer(e,true);
- $("#bsLarge").onkeydown=e=>{if(e.key==="ArrowRight"||e.key==="ArrowLeft"){e.preventDefault();stop();seek(st.cursor+(e.key==="ArrowRight"?.1:-.1))}};
- $("#bsA").min=$("#bsB").min="0";$("#bsA").max=$("#bsB").max="16";
- $("#bsA").step=$("#bsB").step=".01";
+ timeOptions();
+ $("#bsTimeDiv").onchange=e=>{stop();around((st.lo+st.hi)/2,+e.target.value*10);paint(host,st)};
+ $("#bsSpeed").onchange=e=>{st.speed=+e.target.value};
+ $("#bsTrig").onchange=e=>{st.trig=+e.target.value;paint(host,st)};
+ $("#bsTrigLevel").value=st.level;
+ $("#bsTrigLevel").onchange=e=>{st.level=+e.target.value;paint(host,st)};
+ $("#bsSingle").onclick=()=>{stop();let t=trigger();st.a=t;st.b=clamp(t+Math.min(8,T()/10),0,T());const e=events(st.run,st.mode).find(e=>Math.abs(e.t-t)<1);if(e)st.focus=e;emit(t)};
+ $("#bsCenter").onclick=()=>{stop();let t=trigger();around(t);emit(t)};
+ $("#bsA").oninput=e=>{const t=+e.target.value;stop();st.a=t;emit(t)};
+ $("#bsB").oninput=e=>{const t=+e.target.value;stop();st.b=t;paint(host,st)};
+ $("#bsChannelbar").onclick=e=>{const b=e.target.closest("[data-bs-ch]");if(!b)return;st.shown[+b.dataset.bsCh]=!st.shown[+b.dataset.bsCh];paint(host,st)};
+ $("#bsChannelbar").onchange=e=>{const b=e.target.closest("[data-bs-gain]");if(!b)return;st.gain[+b.dataset.bsGain]=+b.value;paint(host,st)};
+ $("#bsEvents").onclick=e=>{const b=e.target.closest("[data-bs-event]");if(!b)return;stop();navigate(+b.dataset.bsEvent)};
+ function pointing(e,small){
+  const svg=small?e.target.closest("svg"):$("#bsLarge");if(!svg)return;
+  const rect=svg.getBoundingClientRect();
+  const x=(e.clientX-rect.left)/rect.width*(small?360:1160);
+  const lo=small?68:134,hi=small?343:1125;
+  if(x<lo||x>hi)return;
+  const t=clamp(st.lo+(x-lo)/(hi-lo)*(st.hi-st.lo),0,T());
+  stop();st.a=t;emit(t);
+ }
+ $("#bsLarge").onpointerdown=e=>pointing(e,false);
+ $("#bsMobile").onpointerdown=e=>pointing(e,true);
+ $("#bsLarge").onkeydown=e=>{if(["ArrowLeft","ArrowRight"].includes(e.key)){e.preventDefault();stop();emit(st.cursor+(e.key==="ArrowLeft"?-.1:.1))}};
 }
-function draw(host,st){
- const $=s=>host.querySelector(s),rows=st.run.samples;
- const span=st.hi-st.lo, X=(t,W=1160,start=134,end=1125)=>start+(t-st.lo)/span*(end-start);
- const active=st.shown;
- $("#bsState").textContent=st.playing?"▶ REPLAY":"■ STOPPED · STORED";
+function paint(host,st){
+ if(!host?.isConnected)return;
+ const $=s=>host.querySelector(s);
+ const rows=samples(st.run,st.mode), Tmax=endTime(st.mode),span=st.hi-st.lo,evs=events(st.run,st.mode),visible=st.shown;
+ const x=(t,w=1160,left=134,right=1125)=>left+(t-st.lo)/span*(right-left);
+ const ranges=CONFIG.map((_,k)=>bounds(rows,st.run,k,st.lo,st.hi,st.gain[k]));
+ const y=(v,k,top,height)=>top+height-(v-ranges[k][0])/(ranges[k][1]-ranges[k][0])*height;
+ const data=segment(rows,st.lo,st.hi);
+ const dataShown=st.reveal==null?data:data.filter(r=>r[0]<=st.reveal);
+ const reference=referenceRun(st.run);
+ const referenceRows=reference?samples(reference,st.mode):null;
+
+ const allStats=rangeData(rows,st.run,st.lo,st.hi);
+ $("#bsState").textContent=st.playing?"● ACQUIRING":"■ HOLD · SPICE";
  $("#bsTriggerState").textContent="TRIG CH"+(st.trig+1)+" ↑ "+st.level.toFixed(2)+" V";
- $("#bsWindow").textContent=st.lo.toFixed(2)+"–"+st.hi.toFixed(2)+" ns";
- $("#bsScreenRange").textContent=$("#bsWindow").textContent;
- const allStats=metrics(rows,st);
- // Each lane owns its unit range; vertical span controls only its scale, never the input sample values.
- const bases=channels.map((c,i)=>bounds(rows,c,[st.lo,st.hi]));
- const limits=bases.map(([min,max],i)=>{
-  let mid=(min+max)/2,half=Math.max(.001,(max-min)*st.gains[i]/2);
-  return [mid-half,mid+half];
- });
- const Y=(value,i,yTop,h=101)=>{const [vmin,vmax]=limits[i];return yTop+h-(value-vmin)/(vmax-vmin)*h};
- $("#bsChannelbar").innerHTML=channels.map((c,i)=>{
-  const range=limits[i],perDiv=(range[1]-range[0])/4;
-  return '<div class="bs-channel"><button type="button" data-bs-ch="'+i+'" aria-pressed="'+active[i]+'" style="--bs-color:'+c.color+'"><span>CH'+(i+1)+' · '+esc(c.short)+'</span><small>'+esc(c.type)+' · '+esc(c.unit)+'</small><b>'+num(perDiv)+' '+esc(c.unit)+'/div</b></button><label>Gain<select data-bs-gain="'+i+'" aria-label="Channel '+(i+1)+' vertical scale">'+[.5,1,2,4].map(n=>'<option value="'+n+'"'+(st.gains[i]===n?' selected':'')+'>'+n+'×</option>').join("")+'</select></label></div>';
+ $("#bsWindow").textContent=rangeFmt(st.lo,st.hi);
+ $("#bsScreenRange").textContent=rangeFmt(st.lo,st.hi)+(st.mode==="cycles"?" · 80 ns source period":" · initial edge");
+ $("#bsMode").value=st.mode;
+ $("#bsCompare").textContent=st.compare?"Compare baseline: ON":"Compare baseline: OFF";
+ $("#bsCompare").setAttribute("aria-pressed",String(st.compare));
+ $("#bsChannelbar").innerHTML=CONFIG.map((c,k)=>{
+  let per=(ranges[k][1]-ranges[k][0])/4;
+  return '<div class="bs-channel"><button data-bs-ch="'+k+'" style="--bs-color:'+c.color+'" aria-pressed="'+visible[k]+'" type="button">'+
+   '<span>CH'+(k+1)+' '+c.short+'</span><small>'+esc(c.type)+' / '+esc(c.unit)+'</small><b>'+fmt(per,c.unit)+'/div</b></button>'+
+   '<label>GAIN<select data-bs-gain="'+k+'" aria-label="CH'+(k+1)+' vertical span">'+[.5,1,2,4].map(v=>'<option value="'+v+'"'+(st.gain[k]===v?' selected':'')+'>'+v+'×</option>').join("")+'</select></label></div>';
  }).join("");
- const info=st.events;
- $("#bsEvents").innerHTML=info.map((e,i)=>'<button type="button" data-bs-event="'+i+'">◉ '+esc(e.label)+' <b>'+e.t.toFixed(2)+' ns</b></button>').join("");
- const W=1160,top=49,rowH=130,gridStart=134,gridEnd=1125,plotEnd=top+5*rowH-8;
- let svg='<rect width="1160" height="770" fill="#081323"/>';
- for(let z=0;z<=10;z++){
-  const t=st.lo+span*z/10,px=X(t);
-  svg+='<path d="M'+px+' 42 V'+plotEnd+'" stroke="#304155" stroke-width="1"/><text x="'+px+'" y="725" text-anchor="middle" fill="#c2d4e8" font-size="12">'+t.toFixed(span<4?2:1)+'</text>';
+ $("#bsEvents").innerHTML=evs.map((e,i)=>'<button type="button" data-bs-event="'+i+'" aria-pressed="'+(st.focus===e)+'">'+(e.kind==="source"?"🔌":"⚡")+' '+esc(e.label)+' · '+e.t.toFixed(2)+' ns</button>').join("");
+ const W=1160,top=46,rowHeight=118,axisStart=134,axisEnd=1125,plotEnd=top+6*rowHeight+2;
+ let svg='<rect x="0" y="0" width="1160" height="880" fill="#061323"/>';
+ for(let i=0;i<=10;i++){
+  let t=st.lo+span*i/10,px=x(t);
+  svg+='<path d="M'+px+' 40 V'+plotEnd+'" stroke="#253854" stroke-width="1"/>'+
+   '<text x="'+px+'" y="840" text-anchor="middle" fill="#d0e3f7" font-size="12">'+t.toFixed(span<8?2:1)+'</text>';
  }
- svg+='<text x="1120" y="755" fill="#e6f2ff" font-size="14" text-anchor="end">TIME (ns)</text>';
- for(let k=0;k<5;k++){
-  const c=channels[k],base=top+k*rowH,yTop=base+13,yBottom=base+117,vis=active[k];
-  svg+='<rect x="4" y="'+base+'" width="1151" height="122" rx="6" fill="'+(k%2?"#0a1b2b":"#0c2032")+'" stroke="#1a324a"/>';
-  svg+='<rect x="8" y="'+(base+7)+'" width="118" height="31" rx="5" fill="'+c.color+'" opacity=".17" stroke="'+c.color+'"/>';
-  svg+='<text x="16" y="'+(base+28)+'" fill="'+c.color+'" font-size="15" font-weight="bold">CH'+(k+1)+' '+esc(c.short)+'</text>';
-  svg+='<text x="12" y="'+(base+51)+'" fill="#c9dbee" font-size="11">'+esc(c.type.toUpperCase())+'</text>';
-  svg+='<text x="12" y="'+(base+67)+'" fill="#acc3d8" font-size="11">Unit: '+esc(c.unit)+'</text>';
-  for(let z=0;z<=4;z++){
-   const val=limits[k][1]-(limits[k][1]-limits[k][0])*z/4,y=yTop+104*z/4;
-   svg+='<path d="M'+gridStart+' '+y+' H'+gridEnd+'" stroke="#2b425b" stroke-dasharray="3 6"/>';
-   svg+='<text x="'+(gridStart-7)+'" y="'+(y+4)+'" fill="#9fbbd5" font-size="11" text-anchor="end">'+val.toFixed(Math.abs(val)>10?1:2)+'</text>';
+ svg+='<text x="1125" y="868" text-anchor="end" fill="#f0f6ff" font-size="13">TIME (ns)</text>';
+ for(let k=0;k<6;k++){
+  let c=CONFIG[k],base=top+k*rowHeight,yt=base+15,height=82;
+  svg+='<rect x="4" y="'+base+'" width="1150" height="114" rx="7" fill="'+(k%2?"#0c1e32":"#091a2d")+'" stroke="#1b324a"/>'+
+   '<rect x="7" y="'+(base+8)+'" width="118" height="27" rx="5" fill="'+c.color+'" fill-opacity=".17" stroke="'+c.color+'"/>'+
+   '<text x="12" y="'+(base+27)+'" fill="'+c.color+'" font-size="15" font-weight="bold">CH'+(k+1)+' '+c.short+'</text>'+
+   '<text x="12" y="'+(base+51)+'" fill="#c8d6e8" font-size="11">'+esc(c.type.toUpperCase().slice(0,16))+'</text>'+
+   '<text x="12" y="'+(base+69)+'" fill="#a4bdd6" font-size="11">'+esc(c.unit)+' · '+(k===5?'derived':'simulated')+'</text>';
+  for(let q=0;q<=4;q++){
+   let yy=yt+height*q/4,v=ranges[k][1]-(ranges[k][1]-ranges[k][0])*q/4;
+   svg+='<path d="M134 '+yy+' H1125" stroke="#31465c" stroke-dasharray="4 7"/>'+
+    '<text x="128" y="'+(yy+4)+'" fill="#a6c4da" text-anchor="end" font-size="10">'+v.toFixed(Math.abs(v)>10?1:2)+'</text>';
   }
-  if(!vis)continue;
-  let segment=rows.filter(r=>r[0]>=st.lo-.03&&r[0]<=st.hi+.03);
-  let path=segment.map((r,j)=>(j?"L":"M")+X(r[0]).toFixed(2)+" "+Y(r[c.column],k,yTop,104).toFixed(2)).join(" ");
-  svg+='<path d="'+path+'" fill="none" stroke="'+c.color+'" stroke-width="2.9" stroke-linejoin="round"/>';
-  // Trace point at the linked master cursor.
-  if(st.cursor>=st.lo&&st.cursor<=st.hi){
-   const px=X(st.cursor),val=nearest(rows,st.cursor)[c.column];
-   svg+='<circle cx="'+px+'" cy="'+clamp(Y(val,k,yTop,104),yTop,yTop+104)+'" r="4" fill="'+c.color+'" stroke="#fff" stroke-width="1.5"/>';
+  if(!visible[k])continue;
+  const points=minMaxDecimate(dataShown.filter(p=>p[0]>=st.lo&&p[0]<=st.hi),k,st.run,950);
+  if(points.length){
+   const path=points.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(value(r,k,st.run),k,yt,height).toFixed(2)).join(" ");
+   svg+='<path d="'+path+'" fill="none" stroke="'+c.color+'" stroke-width="2.6" stroke-linejoin="round"/>';
+  }
+  if(k===2&&st.compare&&referenceRows&&reference){
+   const refSeg=minMaxDecimate(segment(referenceRows,st.lo,Math.min(st.hi,st.reveal??st.hi)),2,reference,1000);
+   const ghost=refSeg.filter(r=>r[0]>=st.lo&&r[0]<=st.hi);
+   if(ghost.length)svg+='<path d="'+ghost.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(value(r,2,reference),k,yt,height).toFixed(2)).join(" ")+
+      '" fill="none" stroke="#f5e9b8" stroke-dasharray="7 4" stroke-width="1.8" opacity=".9"/>';
+  }
+  if(st.cursor>=st.lo&&st.cursor<=st.hi&&(st.reveal===null||st.cursor<=st.reveal)){
+   let cur=nearest(rows,st.cursor);
+   svg+='<circle cx="'+x(st.cursor)+'" cy="'+clamp(y(value(cur,k,st.run),k,yt,height),yt,yt+height)+'" r="4.5" fill="'+c.color+'" stroke="#fff" stroke-width="1.5"/>';
   }
  }
- // Two measurement cursors plus connected circuit cursor, distinct line styles.
- for(const [t,tag,c] of [[st.a,"A","#f7d578"],[st.b,"B","#76e4be"]]){
+ for(let [t,tag,c] of [[st.a,"A","#ffd57b"],[st.b,"B","#7ceacc"]]){
   if(t<st.lo||t>st.hi)continue;
-  const px=X(t);svg+='<path d="M'+px+' 43 V'+plotEnd+'" stroke="'+c+'" stroke-dasharray="7 5" stroke-width="2"/>'+
-   '<rect x="'+clamp(px-21,136,1084)+'" y="10" width="44" height="27" rx="5" fill="#263650" stroke="'+c+'"/>'+
-   '<text x="'+clamp(px,157,1106)+'" y="28" text-anchor="middle" fill="'+c+'" font-size="14" font-weight="bold">'+tag+'</text>';
+  let xx=x(t);
+  svg+='<path d="M'+xx+' 40 V'+plotEnd+'" stroke="'+c+'" stroke-width="1.6" stroke-dasharray="7 5"/>'+
+   '<rect x="'+clamp(xx-17,137,1075)+'" y="7" width="35" height="26" rx="5" fill="#293c54" stroke="'+c+'"/>'+
+   '<text x="'+clamp(xx,154,1092)+'" y="26" text-anchor="middle" fill="'+c+'" font-size="13">'+tag+'</text>';
  }
- if(st.cursor>=st.lo&&st.cursor<=st.hi){
-  let px=X(st.cursor);
-  svg+='<path d="M'+px+' 44 V'+plotEnd+'" stroke="#fff" stroke-opacity=".50" stroke-dasharray="2 7"/>';
+ // Sparse event pointers: every pulse source edge marked with rising/falling
+ // arrow on its own lane, no overlap with 80ns/60ns mixed timing.
+ let painted=0;
+ for(let i=0;i<evs.length;i++){
+  let e=evs[i];
+  if(e.t<st.lo||e.t>st.hi||(st.reveal!==null&&e.t>st.reveal)||!visible[e.ch])continue;
+  const px=x(e.t),k=e.ch,yt=top+k*rowHeight+15,py=clamp(y(value(nearest(rows,e.t),k,st.run),k,yt,82),yt,yt+82);
+  const isActive=st.focus&&Math.abs(st.focus.t-e.t)<.04&&st.focus.kind===e.kind;
+  svg+='<circle cx="'+px+'" cy="'+py+'" r="'+(isActive?6:3.8)+'" fill="'+(isActive?"#fff0ad":"#e5d7a8")+'" stroke="#1a2535" stroke-width="1.2"/>';
+  if(isActive || (span<=40&&painted<6)){
+    let lx=clamp(px+9,142,965),ly=clamp(py-13,yt+23,yt+79);
+    svg+='<path d="M'+px+' '+py+' L'+(lx+4)+' '+(ly-10)+'" stroke="#ffe3a2" stroke-width="1.5"/>'+
+     '<rect x="'+lx+'" y="'+(ly-29)+'" width="149" height="22" rx="4" fill="#293c51" stroke="#9eacbd"/>'+
+     '<text x="'+(lx+5)+'" y="'+(ly-13)+'" fill="#fff1b7" font-size="11">'+esc(e.label.slice(0,22))+'</text>';
+    painted++;
+  }
  }
- // Event arrows on exactly the appropriate simulated channel, with labels bound to recorded samples.
- info.forEach((e,i)=>{
-  if(e.t<st.lo||e.t>st.hi||!active[e.ch])return;
-  const px=X(e.t),k=e.ch,c=channels[k],yt=top+k*rowH+13,
-  val=nearest(rows,e.t)[c.column],py=clamp(Y(val,k,yt,104),yt,yt+104);
-  const labelX=clamp(px+12,155,980),labelY=clamp(py-15,yt+18,yt+99);
-  svg+='<circle cx="'+px+'" cy="'+py+'" r="6" fill="#ffef91" stroke="#111e2c" stroke-width="2"/>'+
-   '<path d="M'+(labelX+7)+' '+(labelY+4)+' L'+(px+2)+' '+(py-2)+'" stroke="#fff1b2" stroke-width="1.5" marker-end="url(#bsArrow)"/>'+
-   '<rect x="'+labelX+'" y="'+(labelY-20)+'" width="132" height="21" rx="4" fill="#29394d" stroke="#b6c28d"/>'+
-   '<text x="'+(labelX+6)+'" y="'+(labelY-6)+'" fill="#fff6ba" font-size="11">'+esc(e.label)+'</text>';
- });
- svg+='<defs><marker id="bsArrow" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6Z" fill="#fff1b2"/></marker></defs>';
+ if(st.playing&&st.reveal!==null&&st.reveal>=st.lo&&st.reveal<=st.hi){
+  const xx=x(st.reveal);
+  svg+='<path d="M'+xx+' 40 V'+plotEnd+'" stroke="#70ffa5" stroke-width="2.4" stroke-dasharray="2 4"/>'+
+   '<text x="'+clamp(xx+7,138,1025)+'" y="'+(plotEnd+18)+'" fill="#85f6b6" font-size="12">LIVE CAPTURE '+st.reveal.toFixed(2)+' ns</text>';
+ }
  $("#bsLarge").innerHTML=svg;
- // Mobile rendering uses 100% width and proper readable per-channel axes (not a hidden 780px graph).
- $("#bsMobile").innerHTML=channels.map((c,k)=>{
-  if(!st.shown[k])return"";
-  const yTop=27,ys=30,ye=123,rx=68,xx=t=>X(t,360,rx,343), yy=v=>Y(v,k,ys,88);
-  let out='<svg viewBox="0 0 360 163" role="img" aria-label="CH'+(k+1)+' '+esc(c.about)+' in '+c.unit+'"><rect width="360" height="163" fill="#0a182d"/>';
-  out+='<text x="9" y="17" fill="'+c.color+'" font-size="12">CH'+(k+1)+' · '+esc(c.short)+'</text><text x="350" y="17" text-anchor="end" fill="#cddfed" font-size="10">'+esc(c.type)+' ('+c.unit+')</text>';
-  for(let n=0;n<=3;n++){
-   let v=limits[k][1]-(limits[k][1]-limits[k][0])*n/3,y=ys+n*88/3;
-   out+='<path d="M68 '+y+' H343" stroke="#2b435b" stroke-dasharray="3 5"/><text x="62" y="'+(y+4)+'" text-anchor="end" fill="#adc9e3" font-size="10">'+v.toFixed(Math.abs(v)>10?1:2)+'</text>';
+ $("#bsMobile").innerHTML=CONFIG.map((c,k)=>{
+  if(!visible[k])return"";
+  let rx=67,xx=t=>x(t,360,rx,344),yy=v=>y(v,k,33,91);
+  let out='<svg viewBox="0 0 360 160" role="img" aria-label="CH'+(k+1)+' '+esc(c.about)+'">'+
+   '<rect width="360" height="160" fill="#091a2d"/>'+
+   '<text x="9" y="18" fill="'+c.color+'" font-size="12">CH'+(k+1)+' '+c.short+'</text>'+
+   '<text x="348" y="18" fill="#d9e9f9" font-size="10" text-anchor="end">'+esc(c.unit)+(k===5?' (derived)':'')+'</text>';
+  for(let q=0;q<=3;q++){
+   let t=st.lo+span*q/3,axis=33+91*q/3,v=ranges[k][1]-(ranges[k][1]-ranges[k][0])*q/3;
+   out+='<path d="M'+rx+' '+axis+' H344" stroke="#2c4564" stroke-dasharray="3 5"/>'+
+    '<text x="62" y="'+(axis+3)+'" text-anchor="end" fill="#bcd2e7" font-size="10">'+v.toFixed(Math.abs(v)>10?1:2)+'</text>'+
+    '<path d="M'+xx(t)+' 26 V125" stroke="#233953"/>'+
+    '<text x="'+xx(t)+'" y="143" fill="#d0e5f8" text-anchor="middle" font-size="10">'+t.toFixed(span<8?1:0)+'</text>';
   }
-  for(let z=0;z<=4;z++){const t=st.lo+span*z/4,x=xx(t);out+='<path d="M'+x+' 27 V123" stroke="#20374e"/><text x="'+x+'" y="146" text-anchor="middle" fill="#bdcee3" font-size="10">'+t.toFixed(span<4?2:0)+'</text>'}
-  const segment=rows.filter(r=>r[0]>=st.lo-.03&&r[0]<=st.hi+.03);
-  out+='<path d="'+segment.map((r,i)=>(i?'L':'M')+xx(r[0]).toFixed(2)+' '+yy(r[c.column]).toFixed(2)).join(' ')+'" fill="none" stroke="'+c.color+'" stroke-width="2.7"/>';
-  for(let [t,tag,col] of [[st.a,'A','#f7d578'],[st.b,'B','#76e4be']]){
+  let segmentRows=minMaxDecimate(dataShown.filter(r=>r[0]>=st.lo&&r[0]<=st.hi),k,st.run,520);
+  if(segmentRows.length)out+='<path d="'+segmentRows.map((r,i)=>(i?"L":"M")+xx(r[0]).toFixed(1)+" "+yy(value(r,k,st.run)).toFixed(1)).join(" ")+'" fill="none" stroke="'+c.color+'" stroke-width="2.7"/>';
+  for(let [t,tag,c] of [[st.a,"A","#ffdb8a"],[st.b,"B","#7bedd0"]]){
    if(t<st.lo||t>st.hi)continue;
-   out+='<path d="M'+xx(t)+' 25 V122" stroke="'+col+'" stroke-dasharray="6 4"/><text x="'+xx(t)+'" y="154" text-anchor="middle" fill="'+col+'" font-size="10">'+tag+'</text>';
-  }
-  for(let e of info){if(e.ch!==k||e.t<st.lo||e.t>st.hi)continue;
-   out+='<circle cx="'+xx(e.t)+'" cy="'+clamp(yy(nearest(rows,e.t)[c.column]),28,119)+'" r="4" fill="#fff0a1"/>';
+   out+='<path d="M'+xx(t)+' 27 V125" stroke="'+c+'" stroke-dasharray="5 4"/><text x="'+xx(t)+'" y="154" text-anchor="middle" fill="'+c+'" font-size="11">'+tag+'</text>';
   }
   return out+'</svg>';
  }).join("");
- $("#bsMetrics").innerHTML=channels.map((c,i)=>'<tr><th style="color:'+c.color+'">CH'+(i+1)+' '+c.short+'</th><td>'+num(allStats[i].min)+' '+c.unit+'</td><td>'+num(allStats[i].max)+' '+c.unit+'</td><td>'+num(allStats[i].pp)+' '+c.unit+'</td></tr>').join("");
- $("#bsTimeA").textContent=st.a.toFixed(2)+" ns";
- $("#bsTimeB").textContent=st.b.toFixed(2)+" ns";
- $("#bsA").value=st.a;$("#bsB").value=st.b;
- const delta=st.b-st.a,recip=delta?1000/Math.abs(delta):Infinity;
- $("#bsDelta").innerHTML='<b>Δt '+delta.toFixed(2)+' ns</b><span>1/|Δt| = '+(Number.isFinite(recip)?recip.toFixed(1)+' MHz':'—')+' (cursor reciprocal)</span>';
- const a=nearest(rows,st.a),b=nearest(rows,st.b);
- $("#bsAtCursor").innerHTML='<table><thead><tr><th>Channel</th><th>@ A</th><th>@ B</th><th>Δ(B−A)</th></tr></thead><tbody>'+
-  channels.map((c,i)=>'<tr><th style="color:'+c.color+'">'+esc(c.short)+'</th><td>'+num(a[c.column])+' '+c.unit+'</td><td>'+num(b[c.column])+' '+c.unit+'</td><td>'+num(b[c.column]-a[c.column])+' '+c.unit+'</td></tr>').join('')+
+ $("#bsMetrics").innerHTML=CONFIG.map((c,k)=>'<tr><th style="color:'+c.color+'">'+c.short+'</th>'+
+  '<td>'+fmt(allStats[k].min,c.unit)+'</td><td>'+fmt(allStats[k].max,c.unit)+'</td><td>'+fmt(allStats[k].pp,c.unit)+'</td></tr>').join("");
+ $("#bsTimeA").textContent=st.a.toFixed(2)+" ns";$("#bsTimeB").textContent=st.b.toFixed(2)+" ns";
+ for(let [id,v] of [["bsA",st.a],["bsB",st.b]]){
+  let el=$("#"+id);el.min=0;el.max=Tmax;el.step=.01;el.value=v;
+ }
+ const a=nearest(rows,st.a),b=nearest(rows,st.b),dt=st.b-st.a;
+ const reciprocal=Math.abs(dt)>1e-8?1000/Math.abs(dt):0;
+ $("#bsDelta").innerHTML='<b>Δt '+dt.toFixed(2)+' ns</b><span>1/|Δt| = '+(reciprocal?reciprocal.toFixed(2)+' MHz':'—')+' (cursor reciprocal)</span>';
+ $("#bsAtCursor").innerHTML='<table><thead><tr><th>Signal</th><th>@A</th><th>@B</th><th>Δ</th></tr></thead><tbody>'+
+  CONFIG.map((c,k)=>'<tr><th style="color:'+c.color+'">'+c.short+'</th><td>'+fmt(value(a,k,st.run),c.unit)+'</td>'+
+   '<td>'+fmt(value(b,k,st.run),c.unit)+'</td><td>'+fmt(value(b,k,st.run)-value(a,k,st.run),c.unit)+'</td></tr>').join("")+
  '</tbody></table>';
- $("#bsEventNarrative").textContent=st.lastFocus?st.lastFocus.label+" @ "+st.lastFocus.t.toFixed(2)+" ns: "+st.lastFocus.narrative:
- "Start at SOURCE STEP (~1 ns). Then inspect CH2 TX, CH3 RX, and if fitted CH4 NMOS GATE at 8 ns alongside CH5 branch current. Click labeled markers or move A/B cursors to compare.";
+ // High-resolution scope microscope: real sample values over 3 ns around the
+ // selected event; per-source multiple cycles remain visible above.
+ const focus=st.focus||evs[0]||{t:0,label:"Source step",kind:"source",dir:"rise",explanation:"Source drives RC load",note:""};
+ const zoomWidth=3.6,left=clamp(focus.t-.7,0,Tmax-zoomWidth),right=left+zoomWidth;
+ const ix=(t)=>105+(t-left)/zoomWidth*930,zy=(v,l,h,top,height)=>top+height-(v-l)/(h-l||1)*height;
+ const windowRows=segment(rows,left,right);
+ const rxrange=bounds(rows,st.run,2,left,right,1),irange=bounds(rows,st.run,4,left,right,1);
+ let mic='<rect x="0" y="0" width="1100" height="280" fill="#071a2b"/>';
+ for(let q=0;q<=6;q++){
+  let xx=105+930*q/6,tt=left+zoomWidth*q/6;
+  mic+='<path d="M'+xx+' 27 V242" stroke="#254058"/><text x="'+xx+'" y="264" fill="#bfd2e6" text-anchor="middle" font-size="12">'+tt.toFixed(2)+'</text>';
+ }
+ for(let [k,col,rr,topY] of [[2,"#5d9eff",rxrange,32],[4,"#66e5de",irange,143]]){
+  mic+='<text x="10" y="'+(topY+15)+'" fill="'+col+'" font-size="14" font-weight="bold">'+(k===2?"Vrx (V)":"Itrace (mA)")+'</text>'+
+   '<text x="99" y="'+(topY+15)+'" text-anchor="end" fill="#a7c2d8" font-size="10">'+rr[1].toFixed(2)+'</text>'+
+   '<text x="99" y="'+(topY+98)+'" text-anchor="end" fill="#a7c2d8" font-size="10">'+rr[0].toFixed(2)+'</text>'+
+   '<path d="M105 '+(topY+89)+' H1035" stroke="#334e67" stroke-dasharray="4 6"/>';
+  mic+='<path d="'+windowRows.filter(r=>r[0]>=left&&r[0]<=right).map((r,i)=>(i?'L':'M')+ix(r[0]).toFixed(2)+' '+zy(value(r,k,st.run),rr[0],rr[1],topY,88).toFixed(2)).join(' ')+'" stroke="'+col+'" stroke-width="3" fill="none"/>';
+ }
+ if(st.compare&&referenceRows&&reference){
+  const base=segment(referenceRows,left,right).filter(r=>r[0]>=left&&r[0]<=right);
+  mic+='<path d="'+base.map((r,i)=>(i?'L':'M')+ix(r[0]).toFixed(2)+' '+zy(value(r,2,reference),rxrange[0],rxrange[1],32,88).toFixed(2)).join(' ')+
+       '" stroke="#f5e9b8" stroke-width="2.2" stroke-dasharray="7 4" fill="none"/>';
+  mic+='<text x="735" y="24" fill="#f5e9b8" font-size="12">Dashed: baseline Vrx</text>';
+ }
+ const ex=ix(focus.t);
+ mic+='<path d="M'+ex+' 23 V242" stroke="#ffe29e" stroke-width="2" stroke-dasharray="6 5"/>'+
+  '<rect x="'+clamp(ex+10,106,890)+'" y="6" rx="5" width="135" height="24" fill="#203951" stroke="#ddc37b"/>'+
+  '<text x="'+clamp(ex+20,116,900)+'" y="23" fill="#fff0aa" font-size="12">'+esc(focus.label.slice(0,17))+'</text>';
+ $("#bsMicroscope").innerHTML=mic;
+ $("#bsFocusLabel").textContent=focus.label+" @ "+focus.t.toFixed(2)+" ns (3.6 ns window)";
+ const current=nearest(rows,st.cursor),sourceActive=current[1]>st.run.supply*.5,gateActive=current[5]>1.65,rx=current[4],currentM=current[6];
+ let stateText=sourceActive?"SOURCE: HIGH":"SOURCE: LOW";
+ let mosText=st.run.nmos?(gateActive?"NMOS: CONDUCTING (modeled)":"NMOS: OFF"):"NMOS: ABSENT";
+ $("#bsCircuitLive").innerHTML='<div class="bs-led '+(sourceActive?'bs-on':'')+'"><strong>Source / driver</strong><span>'+stateText+'</span><small>'+fmt(current[1],"V")+'</small></div>'+
+  '<div class="bs-wire"><span>→ Rdriver 20 Ω</span><b>→ Ltrace '+st.run.inductor_nh+' nH →</b></div>'+
+  '<div class="bs-led '+(Math.abs(rx)>.1?'bs-on':'')+'"><strong>Receiver / Cload</strong><span>RX '+fmt(rx,"V")+'</span><small>200 Ω to GND, C '+st.run.cap_pf+' pF</small></div>'+
+  '<div class="bs-led '+(gateActive?'bs-gateon':'')+'"><strong>NMOS pull-down</strong><span>'+mosText+'</span><small>Gate '+fmt(current[5],"V")+'</small></div>'+
+  '<div class="bs-led"><strong>Ltrace current</strong><span>'+fmt(currentM,"mA")+'</span><small>Rseries loss '+fmt(value(current,5,st.run),"mW")+'</small></div>';
+ $("#bsExplanation").innerHTML='<strong>'+esc(focus.label)+' @ '+focus.t.toFixed(2)+' ns</strong><p>'+esc(focus.explanation)+'</p><p>'+esc(focus.note)+
+  '</p><small>At selected cursor '+st.cursor.toFixed(2)+' ns: source '+fmt(current[1],"V")+', RX '+fmt(rx,"V")+
+  ', gate '+fmt(current[5],"V")+', trace current '+fmt(currentM,"mA")+'. Select a different edge or component setup to compare.</small>';
+ // Predictive power is calculated from I²R and does not imply visible damage.
+ const R=st.run.series_r;
+ const src10=crossingAt(rows,1,.1*st.run.supply,"rise");
+ const src90=crossingAt(rows,1,.9*st.run.supply,"rise");
+ const riseNs=(src10!==null&&src90!==null)?(src90-src10):null;
+ const idealLC=1/(2*Math.PI*Math.sqrt(st.run.inductor_nh*1e-9*st.run.cap_pf*1e-12))/1e9;
+ const baselineAt=st.compare&&referenceRows?nearest(referenceRows,st.cursor):null;
+ const comparison=baselineAt?"At "+st.cursor.toFixed(2)+" ns: ΔVrx vs baseline "+
+   fmt(current[4]-baselineAt[4],"V")+" (same supply/gate stimulus; original 1nH/2pF/0Ω network). ":"";
+ $("#bsPhysics").innerHTML='<b>RLC PHYSICS:</b> '+(st.mode==="cycles"?"80 ns source period (12.5 MHz repetition); ":"16 ns initial transient; ")+
+  (st.run.nmos?"60 ns gate period (16.67 MHz repetition); ":"No gate pulse; ")+
+  'Measured from simulator rows: source 10–90% rise '+(riseNs!==null?riseNs.toFixed(3)+' ns':'—')+
+  '; ideal undamped LC f₀≈'+idealLC.toFixed(3)+' GHz (not a measured ringing frequency). '+comparison+
+  'Rdriver 20 Ω + Rseries '+R+' Ω · L '+st.run.inductor_nh+' nH · C '+st.run.cap_pf+
+  ' pF · RX 200 Ω. Ringing and damping come from these ngspice element values. The model includes no PCB parasitic extraction or resistor thermal failure calculation.';
 }
-window.renderBoardScope=render;
-window.renderBoardScopeMarkup=skeleton;
+window.renderBoardScope=init;
+window.boardScopeGetSamples=samples;
 })();

@@ -15,13 +15,30 @@ const event=(t,label,ch,reason)=>({t,label,ch,reason});
 function profile(key,question,runId){
  const q=String(question||"").toLowerCase();
  const P=(id,title,unit,T,signals,events,lesson)=>({id,title,unit,T,signals,events,lesson});
- const rail=P("rail","Power-delivery transient / workload-step teaching model","μs",200,[
-  spec("VDD_CORE","rail","V",.92,1.27,t=>1.2-(.09*Math.exp(-(t-49)/14)*step(t,49))+.052*Math.exp(-(t-140)/11)*step(t,140)+noisy(t),"Voltage rail · differential power probe"),
-  spec("I_LOAD","current","A",0,1.5,t=>.3+.86*wave(t,48,140)+.02*Math.sin(t/8),"Load current · current probe"),
-  spec("CLK_REF","clock","logic",-.15,1.15,t=>step(t,42)*(Math.floor((t-42)/4)%2?1:0),"Clock · illustrative timing, not CPU frequency"),
-  spec("WORK_EN","digital","logic",-.15,1.15,t=>wave(t,48,140),"Workload enable · digital trigger")
- ],[event(48,"Workload starts",3,"Load-current step causes supply droop"),event(51,"Rail undershoot",0,"Measure Vmin relative to baseline"),event(140,"Workload stops",3,"Release causes positive rail overshoot")],
- "Compare load-current transitions against the rail’s undershoot and overshoot. AC-coupled ripple and DC voltage require different probe settings.");
+ // Educated circuit response (not a measured rail):
+ // 3 independent current-load pulses with load-dependent IR drop, a finite
+ // current slew and damped RLC-like oscillation at each transition.
+ const loadBursts=[[25,59],[87,124],[148,181]];
+ const currentA=t=>.18+loadBursts.reduce((v,[a,b])=>{
+  const rise=t>=a?(1-Math.exp(-(t-a)/2.8)):0;
+  const fall=t>=b?(1-Math.exp(-(t-b)/3.6)):0;
+  return v+.62*(rise-fall);
+ },0);
+ const ring=(t,edge,mag,omega=1.7,tau=5.5)=>t<edge?0:mag*Math.exp(-(t-edge)/tau)*Math.sin((t-edge)*omega);
+ const railV=t=>1.2-(currentA(t)-.18)*.085+
+  loadBursts.reduce((v,[a,b])=>v+ring(t,a,-.055)+ring(t,b,.043),0);
+ const rail=P("rail","Multiburst power-delivery / damped-transient teaching model","μs",200,[
+  spec("VDD_CORE","rail","V",1.01,1.29,t=>railV(t),"Three load pulses · IR droop + damped RLC transients (illustrative)"),
+  spec("I_LOAD","current","A",0,1.1,t=>currentA(t),"Current slew, load plateaus and release"),
+  spec("CLK_REF","clock","logic",-.15,1.15,t=>Math.floor(t/2.5)%2,"Clock reference, 5 μs period in scaled educational model"),
+  spec("WORK_EN","digital","logic",-.15,1.15,t=>loadBursts.some(([a,b])=>t>=a&&t<b)?1:0,"Three synchronized load enable intervals")
+ ],[event(25,"Burst 1 rises",3,"Current ramps up → load-induced droop and ringing"),
+    event(59,"Burst 1 falls",3,"Current ramps down → rail overshoot and damping"),
+    event(87,"Burst 2 rises",3,"Compare the second disturbance under the same source parameters"),
+    event(124,"Burst 2 falls",3,"Release edge and recovering VDD"),
+    event(148,"Burst 3 rises",3,"Third load event: correlate VDD and current"),
+    event(181,"Burst 3 falls",3,"Return to idle current and baseline rail")],
+ "Educational RLC-style voltage rail: V=1.2 V−(I−0.18 A)×0.085 Ω + damped edge response. Three current bursts show separate falling and rising load events. This is not silicon measurement or a validated PDN impedance model.");
  const reset=P("reset","Power-good / clock-lock / reset-sequencing model","ns",110,[
   spec("VDD_PG","digital","logic",-.15,1.15,t=>step(t,12),"Power-good · logic status"),
   spec("IO_PG","digital","logic",-.15,1.15,t=>step(t,28),"I/O power-good · logic status"),
@@ -64,13 +81,27 @@ function profile(key,question,runId){
   spec("UART_TX","digital","logic",-.15,1.15,t=>step(t,55)*(Math.floor((t-55)/4)%2),"Target UART activity (illustrative)")
  ],[event(8,"Adapter visible",0,"Proves only the host USB adapter enumerated"),event(23,"Target power good",1,"Target condition must be checked separately"),event(48,"Reset release",2,"Boot can begin after prerequisites"),event(55,"UART traffic",3,"Target TX activity is separate from adapter discovery")],
  "A USB adapter in lsusb is not proof that the target booted. Check measured target rail, reset and UART-TX activity.");
- const voltage=P("voltage","Sense-resistor current and instantaneous power model","μs",100,[
-  spec("V_SUPPLY","rail","V",.7,1.35,t=>1.2-.08*wave(t,35,79),"DC rail · power-probe input"),
-  spec("V_SENSE","rail","mV",0,60,t=>7+30*wave(t,35,79),"Differential shunt voltage · mV"),
-  spec("I_LOAD","current","mA",0,700,t=>70+300*wave(t,35,79),"Derived from Vsense/Rsense, assuming 0.1Ω"),
-  spec("EN","digital","logic",-.15,1.15,t=>wave(t,35,79),"Load activation trigger")
- ],[event(35,"Load enable",3,"Sense voltage rises with current"),event(79,"Load disabled",3,"Sense voltage and derived current return toward idle")],
- "Measure shunt voltage differentially, then calculate I=V_sense/R_sense and time-align V and I for power. Values are illustrative.");
+ const senseBursts=[[12,34],[48,69],[79,96]];
+ const senseA=t=>.07+senseBursts.reduce((acc,[a,b])=>{
+  const rising=t>=a?1-Math.exp(-(t-a)/1.6):0;
+  const falling=t>=b?1-Math.exp(-(t-b)/2.1):0;
+  return acc+.32*(rising-falling);
+ },0);
+ const senseI=t=>senseA(t)*1000;
+ const senseV=t=>senseI(t)*.1;
+ const senseRail=t=>1.2-(senseA(t)-.07)*.12+
+  senseBursts.reduce((acc,[a,b])=>acc+ring(t,a,-.025,3.4,3)+ring(t,b,.022,3.1,3.5),0);
+ const voltage=P("voltage","Differential current-sense / multiburst power model","μs",100,[
+  spec("V_SUPPLY","rail","V",1.10,1.25,t=>senseRail(t),"Supply droop and damped response; illustrative"),
+  spec("V_SENSE","rail","mV",0,65,t=>senseV(t),"Differential shunt drop in mV"),
+  spec("I_LOAD","current","mA",0,500,t=>senseI(t),"I(mA) = V_sense(mV) / 0.1 Ω"),
+  spec("EN","digital","logic",-.15,1.15,t=>senseBursts.some(([a,b])=>t>=a&&t<b)?1:0,"Three separate load enable intervals")
+ ],[event(12,"First current step",3,"Voltage across 0.1 Ω shunt rises with current"),
+    event(34,"First release",3,"Current and shunt drop decay together"),
+    event(48,"Second step",3,"Current response repeats with finite slew"),
+    event(69,"Second release",3,"Recovery of rail voltage"),
+    event(79,"Third step",3,"Compare load and rail across a third pulse")],
+ "Current measurement teaching model: R_sense=0.1 Ω, I=V_sense/R_sense; preserve independent mA, mV and V axes. The model is synthetic, not an exported instrument capture.");
  const rtl=P("rtl","Synchronous RTL pipeline / registered-data model","ns",100,[
   spec("CLK","clock","logic",-.15,1.15,t=>Math.floor(t/10)%2,"Clock · digital event signal"),
   spec("IN_BUS","bus","hex",0,15,t=>t<15?15:t<35?1:t<55?10:5,"Input bus · hex data words F,1,A,5"),
@@ -201,7 +232,7 @@ function mount(root,ctx={}){
  if(!root)return;
  const built=buildContext(ctx),def=built.profile,signals=def.signals;
  const $=s=>root.querySelector(s),T=def.T,unit=def.unit;
- const state={a:T*.22,b:T*.62,cursor:T*.3,left:0,right:T,active:[true,true,true,true],vGain:[1,1,1,1],trigger:0,level:.5,running:false,raf:0,frame:0};
+ const state={a:T*.22,b:T*.62,cursor:T*.3,left:0,right:T,active:[true,true,true,true],vGain:[1,1,1,1],trigger:0,level:.5,running:false,raf:0,frame:0,reveal:null,runStart:0};
  if(ctx.kind==="lab"&&Number.isInteger(ctx.step)&&def.events[ctx.step]){
    state.a=def.events[ctx.step].t;
    state.b=clamp(state.a+T/10,0,T);
@@ -254,7 +285,7 @@ function mount(root,ctx={}){
    out+='<text x="11" y="'+(yTop+49)+'" fill="#d1e3f5" font-size="11">'+esc(ch.type).toUpperCase()+' · '+esc(ch.unit)+'</text>';
    out+='<text x="11" y="'+(yTop+64)+'" fill="#9db7ce" font-size="10">'+ch.max.toFixed(1)+' / '+ch.min.toFixed(1)+'</text>';
    let path="";let n=800;
-   for(let i=0;i<=n;i++){let t=state.left+(state.right-state.left)*i/n,x=mapX(t,W,state.left,state.right,sx,ex);path+=(i?"L":"M")+x.toFixed(2)+" "+yFor(t).toFixed(2)+" ";}
+   for(let i=0;i<=n;i++){let t=state.left+(state.right-state.left)*i/n;if(state.reveal!==null&&t>state.reveal)break;let x=mapX(t,W,state.left,state.right,sx,ex);path+=(i?"L":"M")+x.toFixed(2)+" "+yFor(t).toFixed(2)+" ";}
    out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="'+(ch.type==="rail"?2.5:2.1)+'" fill="none"/>';
    if(ch.type==="bus"){
     for(let i=1;i<=8;i++){const t=state.left+(state.right-state.left)*i/9,val=Math.round(signalNum(t,j));
@@ -278,7 +309,7 @@ function mount(root,ctx={}){
    for(let i=0;i<=4;i++){let yy=28+i*25,vol=ch.max-(ch.max-ch.min)*i/4;
     out+='<path d="M80 '+yy+' H347" stroke="#2f405c" stroke-dasharray="4 5"/><text x="72" y="'+(yy+4)+'" fill="#b6cee2" text-anchor="end" font-size="11">'+vol.toFixed(Math.abs(ch.max)<5?2:0)+'</text>';}
    for(let i=0;i<=4;i++){let t=state.left+(state.right-state.left)*i/4,x=sx+(ex-sx)*i/4;out+='<path d="M'+x+' 26 V126" stroke="#243652"/><text x="'+x+'" y="142" text-anchor="middle" fill="#bfd4ee" font-size="10">'+t.toFixed(def.id==="spice"?1:0)+'</text>';}
-   let path="";for(let i=0;i<=400;i++){let t=state.left+(state.right-state.left)*i/400,x=sx+i/400*(ex-sx),y=118-signalShape(j,t)*85;path+=(i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1)+" ";}
+   let path="";for(let i=0;i<=400;i++){let t=state.left+(state.right-state.left)*i/400;if(state.reveal!==null&&t>state.reveal)break;let x=sx+i/400*(ex-sx),y=118-signalShape(j,t)*85;path+=(i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1)+" ";}
    out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.7" fill="none"/>';
    for(const [t,clr,l] of [[state.a,"#ffe08a","A"],[state.b,"#69e3be","B"]]){if(t<state.left||t>state.right)continue;const x=sx+(t-state.left)/(state.right-state.left)*(ex-sx);out+='<path d="M'+x+' 24 V128" stroke="'+clr+'" stroke-dasharray="5 4"/><text x="'+x+'" y="25" fill="'+clr+'" text-anchor="middle" font-size="11">'+l+'</text>'}
    out+='</svg>';return out;
@@ -298,8 +329,22 @@ function mount(root,ctx={}){
   state.left=clamp(m-newW/2,0,T-newW);state.right=state.left+newW;draw();
  }
  function triggerTime(){const v=signals[state.trigger],level=Number($("#ixLevel").value)||.5;let previous=signalNum(0,state.trigger);for(let i=1;i<=3000;i++){const t=T*i/3000,cur=signalNum(t,state.trigger);if(previous<level&&cur>=level)return t;previous=cur}return def.events[0]?.t||T/2;}
- const stop=()=>{state.running=false;cancelAnimationFrame(state.raf);draw()};
- $("#ixRun").onclick=()=>{stop();state.running=true;const start=performance.now(),startA=state.a;function frame(now){if(!state.running)return;state.a=(startA+(now-start)/80)%T;draw();state.raf=requestAnimationFrame(frame)}state.raf=requestAnimationFrame(frame)};
+ const stop=()=>{state.running=false;state.reveal=null;cancelAnimationFrame(state.raf);draw()};
+ $("#ixRun").onclick=()=>{
+   stop();state.running=true;state.reveal=0;state.a=0;
+   const start=performance.now(),duration=def.id==="spice"?6500:12000;
+   function frame(now){
+    if(!state.running)return;
+    const f=clamp((now-start)/duration,0,1);
+    state.a=T*f;state.reveal=state.a;
+    const past=def.events.filter(e=>e.t<=state.a);
+    if(past.length)$("#ixExplain").textContent=past[past.length-1].reason+" "+def.lesson;
+    draw();
+    if(f>=1){state.running=false;state.reveal=null;draw();return}
+    state.raf=requestAnimationFrame(frame)
+   }
+   state.raf=requestAnimationFrame(frame)
+  };
  $("#ixStop").onclick=stop;
  $("#ixSingle").onclick=()=>{stop();state.a=triggerTime();state.b=clamp(state.a+T/10,0,T);draw()};
  $("#ixAuto").onclick=()=>{stop();state.left=0;state.right=T;$("#ixDiv").value=String(T/10);draw()};

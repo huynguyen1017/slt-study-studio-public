@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v9';
+const CACHE = 'slt-study-studio-v10';
 const CORE = [
   "./",
   "./index.html",
@@ -29,6 +29,8 @@ const CORE = [
   "./simulation/board/board_scope.js",
   "./simulation/board/board_scope.css",
   "./simulation/board/board_data.js",
+  "./simulation/board/board_cycles.js",
+  "./simulation/board/board_cycles_verification.json",
   "./simulation/board/board.css",
   "./simulation/faults/fault_data.js",
   "./simulation/faults/fault_lab.js",

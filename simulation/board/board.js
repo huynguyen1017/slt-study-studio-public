@@ -110,7 +110,7 @@ function init(root,getTime){
   if(!run)throw Error("No verified simulation matching chosen component set");
  }
  function nearest(){
-  var a=run.samples,lo=0,hi=a.length-1;
+  var a=(window.SLT_BOARD_CYCLES&&root.querySelector("#blProScope")?.__boardScope?.mode==="cycles")?window.SLT_BOARD_CYCLES[run.id]:run.samples,lo=0,hi=a.length-1;
   while(lo<hi){var m=(lo+hi)>>1;if(a[m][0]<latest)lo=m+1;else hi=m}
   if(lo>0&&Math.abs(a[lo-1][0]-latest)<Math.abs(a[lo][0]-latest))lo--;
   return a[lo];
@@ -121,6 +121,12 @@ function init(root,getTime){
    onSeek:function(t){
     var input=root.closest("#siStudio").querySelector("#siTime");
     if(input){input.value=t;input.dispatchEvent(new Event("input",{bubbles:true}));}
+   },
+   onCycleSeek:function(t){
+    // A separate 240ns SPICE dataset cannot share the 0-16ns upper
+    // transmission-line cursor. Keep physical board state/readouts linked
+    // to the expanded circuit signal without altering the other network.
+    latest=t;readout();
    }
   });
  }
@@ -174,7 +180,10 @@ function init(root,getTime){
  function controls(){match();explanation();redraw()}
  ["#blSupply","#blSeries","#blL","#blC","#blMos"].forEach(function(sel){$(sel).onchange=controls});
 
- root.closest("#siStudio").addEventListener("slt:scope-time",function(ev){latest=Math.min(16,Math.max(0,Number(ev.detail.time)));redraw()});
+ root.closest("#siStudio").addEventListener("slt:scope-time",function(ev){
+  if(root.querySelector("#blProScope")?.__boardScope?.mode==="cycles")return;
+  latest=Math.min(16,Math.max(0,Number(ev.detail.time)));redraw();
+ });
  $("#blQuizChoices").onclick=function(e){
    var btn=e.target.closest("[data-bl-answer]");if(!btn||solved)return;
    var q=checks[step],selected=Number(btn.dataset.blAnswer);attempts++;

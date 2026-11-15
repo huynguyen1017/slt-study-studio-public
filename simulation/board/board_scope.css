@@ -84,3 +84,68 @@
  .bs-channelbar{gap:7px}
  .bs-channel button span{font-size:11px}
 }
+
+/* V2: physically-derived multicycle acquisition and causal training console */
+.bs-channelbar{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.bs-channel button{min-height:66px}
+.bs-screen #bsLarge{min-height:0}
+.bs-events{max-height:145px;overflow-y:auto;scrollbar-color:#506985 #122135}
+.bs-events button[aria-pressed=true]{background:#44634e;border-color:#90f3b3;color:#f7fff7}
+.bs-deep{display:grid;grid-template-columns:minmax(0,1.17fr) minmax(280px,.83fr);gap:0;background:#0e1c31;border-top:1px solid #425777}
+.bs-deep>section{min-width:0;padding:12px 13px}
+.bs-deep>section:first-child{border-right:1px solid #425777}
+.bs-deepheading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.bs-deepheading strong{font:850 12px/1.4 ui-monospace,monospace;color:#d5ebfc}
+.bs-deepheading span{font:650 10px ui-monospace,monospace;color:#92ddc8}
+.bs-deep #bsMicroscope{width:100%;max-width:100%;height:auto;display:block;border:1px solid #344960;border-radius:8px;background:#061828}
+.bs-physics{background:#22314a;color:#c8ddec;padding:9px;border:1px solid #405b76;border-radius:8px;font:600 11px/1.6 system-ui;margin-top:8px}
+.bs-physics b{color:#ffe097}
+.bs-circuit-live{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.bs-led{background:#182c42;border:1px solid #4b5b74;padding:10px;border-radius:9px;min-width:0}
+.bs-led.bs-on{border-color:#5fc891;box-shadow:inset 0 0 22px #1e7a4330}
+.bs-led.bs-gateon{border-color:#f5a773;box-shadow:inset 0 0 24px #ff962839}
+.bs-led strong{display:block;font:800 11px/1.4 system-ui;color:#bfd7ee}
+.bs-led span{display:block;font:850 12px/1.6 ui-monospace,monospace;color:#f1fbff;overflow-wrap:anywhere}
+.bs-led small{display:block;font:600 10px/1.5 system-ui;color:#adbbd5;overflow-wrap:anywhere}
+.bs-wire{display:flex;align-items:center;justify-content:space-between;gap:3px;color:#8bf0cf;font:800 10px/1.4 ui-monospace,monospace}
+.bs-wire b{font-weight:750}
+.bs-explanation{margin-top:10px;padding:12px;background:#e7f1fa;color:#213b58;border:1px solid #a5c5d8;border-radius:10px;font:650 12px/1.6 system-ui}
+.bs-explanation strong{color:#194d71}
+.bs-explanation p{margin:6px 0}
+.bs-explanation small{font-size:11px;color:#426581}
+@media(max-width:1000px){.bs-deep{grid-template-columns:1fr}.bs-deep>section:first-child{border-right:0;border-bottom:1px solid #425777}}
+@media(max-width:700px){
+.bs-channelbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+.bs-deep>section{padding:9px}
+.bs-deepheading strong{font-size:11px}
+.bs-circuit-live{grid-template-columns:1fr 1fr}
+.bs-circuit-live .bs-wire{grid-column:1/-1;padding:4px 3px}
+.bs-led{padding:8px}
+.bs-led span{font-size:11px}
+.bs-explanation{font-size:11px}
+.bs-events{max-height:200px}
+}
+/* The surrounding notebook and SI card normally clip overflowing content.
+   Permit this full-viewport board instrument to escape nested phone gutters. */
+@media(max-width:700px){
+ .si-studio:has(#blProScope),.notebook-paper:has(#blProScope){overflow:visible!important;overflow-x:visible!important}
+ #blProScope{left:50%;transform:translateX(-50%);width:calc(100vw - 24px);max-width:calc(100vw - 24px)}
+}
+/* Correct the previous nested-overflow mobile breakout: never widen the whole
+   workbook or the separate transmission-line SVG unintentionally. */
+@media(max-width:700px){
+ .si-studio:has(#blProScope){overflow:hidden!important}
+ .notebook-paper:has(#blProScope){overflow:hidden!important}
+ #blProScope:not(:popover-open){position:static;transform:none;left:auto;width:100%;max-width:100%;min-width:0}
+ #blProScope:not(:popover-open) .bs-scope{width:100%;max-width:100%;min-width:0}
+}
+#blProScope[popover].bs-fullscreen:popover-open{
+ position:fixed!important;inset:0!important;top:0!important;left:0!important;
+ right:0!important;bottom:0!important;transform:none!important;
+ width:100vw!important;max-width:100vw!important;height:100dvh!important;
+ max-height:100dvh!important;overflow:auto!important;z-index:99999!important;
+ background:#071323;padding:8px!important;margin:0!important;border:0!important;
+ overscroll-behavior:contain
+}
+#blProScope.bs-fullscreen .bs-scope{max-width:1400px;margin:0 auto}
+#bsExpand[aria-expanded=true]{background:#66411c;border-color:#ffce7e}
