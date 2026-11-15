@@ -90,7 +90,7 @@ function renderMathSection(c, s){
  const eqHtml = (dd.equations || []).map(e => `
   <div class="formula-card">
    <strong>Fundamental Equation / Constraint</strong>
-   <code>${esc(e.eq)}</code>
+   <div class="nb-typeset-equation">${window.studyMath ? window.studyMath(e.eq,true) : esc(e.eq)}</div><code class="nb-equation-source">${esc(e.eq)}</code>
    <div class="formula-note">${esc(e.note)}</div>
   </div>`).join('');
  const proofHtml = (dd.proofSteps || []).length ? `
@@ -136,6 +136,7 @@ function renderCodeSection(c){
   <div class="code-box">
    <div class="code-box-head"><span>2. Line-by-Line Commented ${esc(cd.lang || 'Implementation')}</span><span>${esc(c.id)}</span></div>
    <pre><code>${formatCodeLines(cd.code || '# No snippet')}</code></pre>
+   <details class="nb-code-guide"><summary>How to read and verify each step</summary><p>Read the requirements, list inputs and outputs, choose the right library, match each pseudocode step to implementation, test typical/boundary/error cases, then state time and space complexity. A displayed example is not proof it was compiled or executed.</p></details>
   </div>
  `;
 }
