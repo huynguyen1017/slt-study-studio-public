@@ -815,6 +815,7 @@ function mount(root,ctx={}){
  }
 
  function draw(){
+  syncB();
   const sigs=currentSignals();
   $("#ixTopic").textContent=activeDef.title;
   $("#ixOrigin").textContent=state.captureMode==="fault"?("🔴 "+activeDef.faultLabel):("🟢 "+activeDef.fixedLabel);
@@ -1070,7 +1071,7 @@ function mount(root,ctx={}){
  function seek(e,svg,mobile=false){
   const box=svg.getBoundingClientRect(),x=(e.clientX-box.left)/box.width*(mobile?360:1120),start=mobile?76:122,end=mobile?347:1092;
   if(x<start||x>end)return;
-  stop();state.a=clamp(state.left+(x-start)/(end-start)*(state.right-state.left),0,activeDef.T);draw();
+  stop();setA(state.left+(x-start)/(end-start)*(state.right-state.left));draw();
  }
  $("#ixPlot").onpointerdown=e=>seek(e,$("#ixPlot"),false);
  $("#ixMobile").onpointerdown=e=>{const svg=e.target.closest("svg");if(svg)seek(e,svg,true);};
