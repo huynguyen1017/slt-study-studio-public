@@ -673,10 +673,6 @@ function mount(root,ctx={}){
   }
   out+='<text x="1090" y="538" fill="'+txtClr+'" text-anchor="end" font-size="11.5">TIME ('+esc(activeDef.unit)+') · '+esc(activeDef.sampleRate)+' · '+esc(activeDef.memDepth)+'</text>';
 
-  // Linked cursors enclose the same physical/simulated time window on all lanes.
-  const ax=mapX(state.a,W,state.left,state.right,sx,ex),bx=mapX(state.b,W,state.left,state.right,sx,ex);
-  const xlo=clamp(Math.min(ax,bx),sx,ex),xhi=clamp(Math.max(ax,bx),sx,ex);
-  if(xhi>xlo)out+='<rect class="ix-ab-window" x="'+xlo.toFixed(1)+'" y="38" width="'+(xhi-xlo).toFixed(1)+'" height="454" fill="#65dcc1" fill-opacity=".085"/>';
   // Compute F1 Math points across N steps if enabled
   const N=win.times.length-1;
   sigs.forEach((ch,j)=>{
@@ -791,6 +787,10 @@ function mount(root,ctx={}){
    out+='<rect x="130" y="458" width="245" height="22" rx="4" fill="#2c1b47" stroke="#c58dff"/><text x="138" y="473" fill="#ebd2ff" font-size="11" font-weight="bold">F1 MATH ('+esc(state.mathMode.toUpperCase())+'): '+fMin.toFixed(2)+'..'+fMax.toFixed(2)+'</text>';
   }
 
+  // Linked cursors enclose the same physical/simulated time window on all lanes.
+  const ax=mapX(state.a,W,state.left,state.right,sx,ex),bx=mapX(state.b,W,state.left,state.right,sx,ex);
+  const xlo=clamp(Math.min(ax,bx),sx,ex),xhi=clamp(Math.max(ax,bx),sx,ex);
+  if(xhi>xlo)out+='<rect class="ix-ab-window" x="'+xlo.toFixed(1)+'" y="38" width="'+(xhi-xlo).toFixed(1)+'" height="454" fill="#65dcc1" fill-opacity=".085"/>';
   // Cursors A and B
   [state.a,state.b].forEach((t,i)=>{
    if(t<state.left||t>state.right)return;
