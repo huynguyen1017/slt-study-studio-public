@@ -51,3 +51,13 @@
 .aca-terminal-head button{margin-left:auto;padding:3px 9px;background:#2c506a;border:1px solid #567791;border-radius:5px;color:#f0f9ff}
 .aca-terminal pre{padding:14px;white-space:pre-wrap;overflow-wrap:anywhere;color:#d8f3ee;min-height:155px;margin:0;font:12px/1.6 ui-monospace,monospace}
 @media(max-width:750px){.aca-frame{padding:8px}.aca-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.aca-columns{grid-template-columns:1fr}.aca-svg svg{min-width:620px}.aca-card{padding:9px}.aca-formula math{font-size:16px}.aca-forms button{flex:1 1 115px}.aca-ide textarea{min-height:260px}}
+
+.aca-scope{margin:13px 0;padding:11px 13px;background:#edf4fc;border:1px solid #b4cddd;border-radius:10px}
+.aca-scope h4{color:#1e5b92;margin:5px 0}
+.aca-scope p{font-size:11px;color:#3c5e76}
+.aca-scope .aca-svg svg{min-width:620px}
+.aca-form-ranges{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.aca-form-ranges label{display:inline-flex;align-items:center;gap:7px;min-width:170px;font:700 11px system-ui}
+.aca-form-ranges input[type=range]{accent-color:#21866c;max-width:180px}
+#acaScopeStats{max-width:100%;overflow-x:auto;color:#25425f;font:700 11px/1.5 ui-monospace,monospace}
+.aca-scope>button{border:1px solid #5484a4;background:#2b668b;color:white;padding:9px;border-radius:7px;font:750 12px system-ui}
