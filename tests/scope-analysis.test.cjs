@@ -43,8 +43,8 @@ const html=widget();
 for(const id of ['bsEdge','bsTrigMode','bsHoldoff','bsAutoset','bsSpectrum','bsXY','bsExportCSV','bsExportSVG']){
  assert.ok(html.includes('id="'+id+'"'),'missing interactive control '+id);
 }
-assert.match(fs.readFileSync('index.html','utf8'),/board_scope\.js\?v=11/);
-assert.match(fs.readFileSync('sw.js','utf8'),/slt-study-studio-v11/);
+assert.match(fs.readFileSync('index.html','utf8'),/board_scope\.js\?v=13/);
+assert.match(fs.readFileSync('sw.js','utf8'),/slt-study-studio-v13/);
 const manifest=JSON.parse(fs.readFileSync('simulation/board/board_cycles_verification.json','utf8'));
 assert.equal(manifest.duration_ns,240);
 assert.equal(manifest.cases.length,48);
