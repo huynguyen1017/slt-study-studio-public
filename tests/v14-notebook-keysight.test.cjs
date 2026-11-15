@@ -1,0 +1,60 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const {chromium}=require('playwright');
+const context={window:{},console};
+vm.runInNewContext(fs.readFileSync('simulation/keysight_manual_bench.js','utf8'),context);
+const m=context.window.keysightBenchMath;
+assert.deepEqual(m.stats([0,1,2,3]).pp,3);
+const times=[0,1,2,3,4,5,6];
+assert.ok(Math.abs(m.cross([0,0,1,1,0,0,1],times,.5,true)[0]-1.5)<1e-8);
+assert.equal(m.trigger([0,0,1,1,0,0,1],times,'edge',.5,'rise',2),1.5);
+assert.equal(m.trigger([0,0,1,1,0,0,1],times,'droop',.5,'fall',2),3.5);
+const filtered=m.filter([0,0,1,1,1],1e-9,2e7);
+assert.ok(filtered[2]>0&&filtered[2]<1);
+assert.ok(m.reduceSamples([0,1,2,10,3,4,5,6],'peak',4,2).hi.includes(10));
+assert.equal(m.timing([0,0,1,1,0,0,1,1],[0,1,2,3,4,5,6,7],10).period,4);
+(async()=>{
+const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+try{
+for(const width of [1280,390]){
+ const page=await browser.newPage({viewport:{width,height:900}});
+ const exceptions=[];page.on('pageerror',e=>exceptions.push(e.message));
+ await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
+ await page.locator('#flip').click();
+ assert.equal(await page.locator('.notebook-classic .ink-question').count(),1,'original question restored');
+ assert.match(await page.locator('.notebook-classic .ink-question').textContent(),/signal integrity/i);
+ assert.equal(await page.locator('.notebook-classic .ink-highlighter').count(),1,'original yellow highlighter restored');
+ assert.equal(await page.locator('.notebook-classic .ink-diagram-scroll .ink-figure').count(),1,'signal path drawing restored');
+ assert.match(await page.locator('.notebook-classic .ink-sheet').textContent(),/Remember:/);
+ await page.locator('[data-note-page="1"]').click();
+ await page.locator('#kmBench').waitFor({state:'attached',timeout:18000});
+ assert.equal(await page.locator('#kmPlot [data-km-marker="A"]').count(),4);
+ assert.equal(await page.locator('#kmReadings tbody tr').count(),4);
+ const initial=await page.locator('#kmStatus').textContent();
+ assert.match(initial,/effective .* MSa\/s/);
+ await page.locator('#kmAcq').selectOption('peak');
+ assert.match(await page.locator('#kmStatus').textContent(),/PEAK/);
+ assert.equal(await page.locator('#kmPlot [data-km-marker="B"]').count(),4);
+ await page.locator('#kmAcq').selectOption('average');
+ await page.locator('#kmMath').selectOption('energy');
+ assert.match(await page.locator('#kmMathResult').textContent(),/μJ/);
+ await page.locator('#kmTrigType').selectOption('droop');
+ await page.locator('#kmCurrent').selectOption('shunt');
+ assert.equal(await page.locator('#kmReadings tbody tr').count(),4);
+ await page.locator('#kmCpu').click();
+ assert.match(await page.locator('#kmStatus').textContent(),/Processed/);
+ const linkBefore=await page.locator('#kmDelta').textContent();
+ await page.evaluate(()=>{const e=document.querySelector('#kmA');e.value='52';e.dispatchEvent(new Event('input',{bubbles:true}))});
+ const linkAfter=await page.locator('#kmDelta').textContent();
+ assert.notEqual(linkBefore,linkAfter,'A and B timeline responds');
+ const downloadPromise=page.waitForEvent('download');
+ await page.locator('#kmSave').click();
+ const dl=await downloadPromise;assert.match(dl.suggestedFilename(),/json$/);
+ assert.deepEqual(exceptions,[],'no runtime errors');
+ console.log('PASS v14 '+width+'px: overview Q, diagram, highlighter; manual bench capture, math, cursors, export');
+ await page.close();
+}
+}finally{await browser.close()}
+})().catch(e=>{console.error(e);process.exitCode=1});
