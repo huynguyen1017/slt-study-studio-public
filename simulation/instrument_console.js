@@ -134,24 +134,32 @@ function getPresets(){
 
  const engr852={
   id:"ENGR852_520MHz_14nm_SAD_Pipeline",
-  title:"ENGR 852 520 MHz 14nm Motion Estimator · 8-Bit Overflow vs 16-Bit BestDist Fix",
-  unit:"ns",T:16,t0:0,sampleRate:"20 GSa/s",memDepth:"50 Mpts",presetName:"ENGR852_520MHz_14nm_SAD_Pipeline.set",
-  faultLabel:"8-Bit Wraparound Truncation (BestDist=0xFF)",fixedLabel:"16-Bit PE + Verdi Clean BestMV",
+  title:"ENGR 852 · 520 MHz · 8-Bit Saturation vs 16-Bit SAD Range (Illustrative Comparator Edge)",
+  unit:"ns",T:16,t0:0,sampleRate:"Numerically drawn training timing",memDepth:"Not a VCS capture",presetName:"ENGR852_SAD_8bit_16bit_training.set",
+  faultLabel:"ILLUSTRATIVE · 8-Bit Saturated Accumulator: BestDist Stays FF",
+  fixedLabel:"ILLUSTRATIVE · 16-Bit Datapath Supports FF00 < FFFF",
   signalsFault:[
-   spec("CLK_520MHz","clock","V",-0.1,1.1,(t)=>Math.floor(t/0.9615)%2*0.8,"520 MHz system clock (T = 1.923 ns @ 14nm FF/0.8V)","VCS/Verdi nWave","DC","12 GHz"),
-   spec("SAD_SUM_8BIT","bus","hex",0,255,(t)=>t<4?220:t<8?255:t<12?(48):12,"TRUNCATED 8-bit sum wraps modulo 256 (304 -> 0x30)!","RTL Bus Probe","LOGIC","—"),
-   spec("BEST_DIST","bus","hex",0,255,(t)=>t<8?220:48,"False minimum captured due to 8-bit wraparound bug!","RTL Bus Probe","LOGIC","—"),
-   spec("MOTION_X_ERR","digital","logic",-0.15,1.15,(t)=>step(t,8),"Golden model mismatch flag raised in Verdi assertion","SVA Flag","LOGIC","—")
+   spec("CLK_520MHz","clock","V",-0.1,1.1,(t)=>Math.floor(t/0.9615)%2*.8,"Ideal 520 MHz training clock; not a VCS acquisition","RTL illustration","LOGIC","—"),
+   spec("ACCUM[7:0]","bus","hex",0,255,t=>t<4?240:255,"Saturation at 8'hFF cannot represent 256×255 = 65280","Training 8-bit bus","LOGIC","—"),
+   spec("BestDist[7:0]","bus","hex",0,255,()=>255,"Strict comparison FF < FF is false; no update","Training comparator","LOGIC","—"),
+   spec("newBest","digital","logic",-.1,1.1,()=>0,"Tie prevents newBest assertion in max-distortion case","Training logic flag","LOGIC","—")
   ],
   signalsFixed:[
-   spec("CLK_520MHz","clock","V",-0.1,1.1,(t)=>Math.floor(t/0.9615)%2*0.8,"520 MHz system clock (T = 1.923 ns @ 14nm FinFET)","VCS/Verdi nWave","DC","12 GHz"),
-   spec("SAD_SUM_16BIT","bus","hex",0,511,(t)=>t<4?220:t<8?304:t<12?184:96,"Full 12/16-bit datapath preserves true 304 (0x130) sum without wrap","RTL Bus Probe","LOGIC","—"),
-   spec("BEST_DIST","bus","hex",0,511,(t)=>t<12?184:96,"True minimum candidate retained accurately","RTL Bus Probe","LOGIC","—"),
-   spec("MOTION_X_ERR","digital","logic",-0.15,1.15,(t)=>0,"Zero mismatches across 256-pixel full search window","SVA Flag","LOGIC","—")
+   spec("CLK_520MHz","clock","V",-0.1,1.1,(t)=>Math.floor(t/0.9615)%2*.8,"Ideal 520 MHz training clock; not a VCS acquisition","RTL illustration","LOGIC","—"),
+   spec("ACCUM[15:0]","bus","hex",0,65535,t=>t<4?0xFE01:0xFF00,"Exact maximum SAD = 16'hFF00; comparator can represent it","Training 16-bit bus","LOGIC","—"),
+   spec("BestDist[15:0]","bus","hex",0,65535,t=>t<8?0xFFFF:0xFF00,"16'hFF00 < 16'hFFFF updates minimum","Training comparator","LOGIC","—"),
+   spec("newBest","digital","logic",-.1,1.1,t=>wave(t,8,8.9),"Illustrative comparator update flag at an example sample","Training logic flag","LOGIC","—")
   ],
-  registers:[["RTL Bug","reg [7:0] BestDist;","Max SAD per 4x4*256 block > 255 wraps! Fixed with reg [15:0] BestDist"],["Clock Period","T_clk = 1 / 520 MHz = 1.923 ns","Critical path closed cleanly in Design Compiler 14nm"] ],
-  events:[event(4.0,"Sum > 255 Overflow",1,"8-bit accumulator wraps 304 -> 48, fooling comparator"),event(8.0,"Verdi nWave Mismatch",3,"TB catches golden BestMV delta immediately")],
-  lesson:"Bit-width truncation in RTL datapaths manifests identically to hardware corruption in Verdi nWave; widen accumulator + comparator registers beyond worst-case sum."
+  registers:[
+   ["8-bit limit","BestDist = 8'hFF","Max pixel SAD 256×255 = 65,280 cannot be represented"],
+   ["16-bit full range","16'hFF00 < 16'hFFFF","Comparator can accept the maximum-distortion candidate"],
+   ["Real timing","Use a native VCD","Import original VCS simulation for genuine count, PEready, AddressR/S1/S2 and motion-vector buses"]
+  ],
+  events:[
+   event(4,"Illustrative accumulator boundary",1,"The comparison intentionally contrasts saturation at FF with full-range FF00"),
+   event(8,"Illustrative comparator sample",2,"In 8-bit mode newBest=0; in 16-bit mode FF00 < FFFF, newBest pulses")
+  ],
+  lesson:"This 16 ns timing sketch is an EDUCATIONAL reconstruction of the slide 14–17 maximum-distortion mechanism, not a captured VCS/Verdi waveform. For true 0/1/X/Z, addresses, counter values and timing at 520 MHz, import the original VCD below. Do not confuse this local illustration with the separate authentic ngspice board data."
  };
 
  const startupPreset={
@@ -470,7 +478,7 @@ function markup(){
    '<button type="button" id="ixDlSet" style="background:#243952;color:#fff;border:1px solid #597698;border-radius:5px;padding:6px 9px;font:700 10.5px system-ui;cursor:pointer">⬇ Export .set</button>'+
    '<label style="background:#1c2e44;color:#cfe4fa;border:1px solid #526e8e;border-radius:5px;padding:5px 8px;font:700 10.5px system-ui;cursor:pointer">⬆ Import CSV<input type="file" id="ixUpCsv" accept=".csv,.txt" hidden></label>'+
   '</div><table><thead><tr><th>Channel</th><th>Min</th><th>Max</th><th>Pk–Pk</th><th>RMS</th></tr></thead><tbody id="ixMeasures"></tbody></table></section>'+
-  '<section><h5>CURSORS / EVENT MARKERS (DRAG A / B)</h5><div class="ix-cursors"><label>Cursor A <span id="ixALabel">—</span><input type="range" id="ixA" min="0" max="100" step=".1" value="25"></label><label>Cursor B <span id="ixBLabel">—</span><input type="range" id="ixB" min="0" max="100" step=".1" value="60"></label></div><table><thead><tr><th>Marker</th><th>Time</th><th>Δt (B−A)</th><th>1 / |Δt|</th></tr></thead><tbody id="ixMarkerRows"></tbody></table><div id="ixAtCursor"></div></section></div>'+
+  '<section><h5>CURSORS / EVENT MARKERS (DRAG A / B)</h5><div class="ix-linked-tools"><button id="ixLinkB" type="button" aria-pressed="true">🔗 Link B to A: ON</button><button id="ixNextAB" type="button">↦ Next event</button><span id="ixLinkHint">B follows A at selected Δt</span></div><div class="ix-cursors"><label>Cursor A <span id="ixALabel">—</span><input type="range" id="ixA" min="0" max="100" step=".1" value="25"></label><label>Cursor B <span id="ixBLabel">—</span><input type="range" id="ixB" min="0" max="100" step=".1" value="60"></label></div><table><thead><tr><th>Marker</th><th>Time</th><th>Δt (B−A)</th><th>1 / |Δt|</th></tr></thead><tbody id="ixMarkerRows"></tbody></table><div id="ixCursorSummary" role="status" aria-live="polite"></div><div id="ixAtCursor"></div></section></div>'+
   '<div class="ix-lesson"><strong id="ixWhy">ANALYZE THE FIRST ABNORMAL EVENT</strong><p id="ixExplain"></p><ol><li>Use the top Keysight Infiniium menus (Setup, Trigger, Measure, Math, Analyze) just like a real bench scope.</li><li>Toggle 🔴 Faulty Capture vs 🟢 Fixed Capture and Save R1 to overlay before/after improvements directly on the grid.</li><li>Move the Rail Voltage and R/L/C controls below the scope to see wires, shunts, capacitors, and traces react in real time.</li></ol></div>'+
   '<div class="ix-notice" id="ixNotice">Interactive Keysight Infiniium style learning bench. Stored ngspice / synthetic traces are clearly labeled; no real lab instrument hardware is remotely driven.</div></section>';
 }
@@ -484,7 +492,7 @@ function mount(root,ctx={}){
  const state={
   captureMode:"fault", // "fault" | "fixed"
   presetId:"active",
-  a:0,b:0,left:0,right:100,
+  a:0,b:0,left:0,right:100,linkedB:true,gap:0,
   active:[true,true,true,true],
   vGain:[1,1,1,1],
   vOffset:[0,0,0,0],
@@ -501,7 +509,7 @@ function mount(root,ctx={}){
  function syncDefBounds(resetWindow=true){
   const T=activeDef.T;
   if(resetWindow){
-   state.left=0;state.right=T;state.a=T*0.22;state.b=T*0.62;
+   state.left=0;state.right=T;state.a=T*0.22;state.gap=T*0.18;state.b=state.a+state.gap;state.linkedB=true;
   }
   const sigs=currentSignals();
   const s0=sigs[state.trigger]||sigs[0];
@@ -541,6 +549,13 @@ function mount(root,ctx={}){
    val-=avg;
   }
   return val+state.vOffset[j];
+ }
+ function syncB(){if(state.linkedB)state.b=clamp(state.a+state.gap,0,activeDef.T);}
+ function setA(t){state.a=clamp(t,0,activeDef.T);syncB();}
+ function formatChannel(v,ch){
+  if(ch.type==="digital")return v>=.5?"1":"0";
+  if(ch.type==="bus"){const width=/16BIT|\[15:0\]/i.test(ch.name)||ch.max>255?4:2;return "0x"+Math.max(0,Math.round(v)).toString(16).toUpperCase().padStart(width,"0");}
+  return fmt(v,ch.unit);
  }
  function timeText(t){
   const off=activeDef.t0||0;
@@ -701,22 +716,52 @@ function mount(root,ctx={}){
     }
     out+='<path d="'+rPath+'" stroke="#ffffff" stroke-width="1.6" stroke-dasharray="5 4" opacity=".75" fill="none"/>';
    }
-   // Main channel trace
-   let path="";
-   for(let i=0;i<=N;i++){
-    const t=win.times[i];
-    if(state.reveal!==null&&t>state.reveal)break;
-    const x=mapX(t,W,state.left,state.right,sx,ex);
-    path+=(i?"L":"M")+x.toFixed(1)+" "+yFor(arr[i]+(state.coupling[j]==="GND"?-arr[i]:0)+state.vOffset[j]).toFixed(1)+" ";
-   }
-   out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="'+(ch.type==="rail"||ch.type==="current"?2.5:2.1)+'" fill="none"/>';
-   // Bus hex tags
-   if(ch.type==="bus"){
-    for(let b=1;b<=7;b++){
-     const idx=Math.floor(b/8*N);
-     out+='<text x="'+mapX(win.times[idx],W,state.left,state.right,sx,ex)+'" y="'+(yTop+17)+'" fill="'+colors[j]+'" font-size="10.5">0x'+Math.round(arr[idx]).toString(16).toUpperCase()+'</text>';
+   // Digital lanes are states, not voltages. Buses use vector segments.
+   if(ch.type==="digital"||ch.type==="bus"){
+    const groups=[];let last=null;
+    for(let i=0;i<=N;i++){
+     if(state.reveal!==null&&win.times[i]>state.reveal)break;
+     const v=ch.type==="digital"?(arr[i]>=.5?1:0):Math.max(0,Math.round(arr[i]));
+     if(last===null||v!==last){
+      groups.push({v,t:win.times[i]});last=v;
+     }
     }
+    const high=yTop+33,low=yTop+73;
+    if(ch.type==="digital"){
+     let path="";
+     groups.forEach((g,i)=>{
+      const xx=mapX(g.t,W,state.left,state.right,sx,ex),end=mapX(groups[i+1]?.t??(state.reveal??state.right),W,state.left,state.right,sx,ex);
+      const yy=g.v?high:low;
+      path+=(i===0?"M":" H")+xx.toFixed(1)+(i===0?" "+yy:" V"+yy)+" H"+end.toFixed(1);
+      if(end-xx>20)out+='<text x="'+((xx+end)/2).toFixed(1)+'" y="'+(g.v?high-7:low+15)+'" text-anchor="middle" fill="'+colors[j]+'" font-size="12" font-weight="800">'+g.v+'</text>';
+     });
+     if(path)out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.6" fill="none"/>';
+    }else{
+     groups.forEach((g,i)=>{
+      const x0=mapX(g.t,W,state.left,state.right,sx,ex),x1=mapX(groups[i+1]?.t??(state.reveal??state.right),W,state.left,state.right,sx,ex);
+      if(x1<=x0)return;
+      const notch=Math.min(6,(x1-x0)/5);
+      out+='<path d="M'+(x0+notch).toFixed(1)+' '+high+' H'+(x1-notch).toFixed(1)+' L'+x1.toFixed(1)+' '+((high+low)/2)+' L'+(x1-notch).toFixed(1)+' '+low+' H'+(x0+notch).toFixed(1)+' L'+x0.toFixed(1)+' '+((high+low)/2)+' Z" stroke="'+colors[j]+'" stroke-width="1.8" fill="'+colors[j]+'" fill-opacity=".075"/>';
+      if(x1-x0>32)out+='<text x="'+((x0+x1)/2).toFixed(1)+'" y="'+(high+24)+'" text-anchor="middle" fill="'+colors[j]+'" font-size="11" font-weight="750">'+esc(formatChannel(g.v,ch))+'</text>';
+     });
+    }
+   }else{
+    let path="";
+    for(let i=0;i<=N;i++){
+     const t=win.times[i];if(state.reveal!==null&&t>state.reveal)break;
+     const xx=mapX(t,W,state.left,state.right,sx,ex);
+     const val=state.coupling[j]==="GND"?state.vOffset[j]:arr[i]+state.vOffset[j];
+     path+=(i?"L":"M")+xx.toFixed(1)+" "+yFor(val).toFixed(1)+" ";
+    }
+    out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.5" fill="none"/>';
    }
+   // Both points are visible on every active channel, correlated to the two times.
+   [[state.a,"A","#ffda81"],[state.b,"B","#61e0bc"]].forEach(([t,marker,c])=>{
+    if(t<state.left||t>state.right)return;
+    const v=signalNum(t,j),xx=mapX(t,W,state.left,state.right,sx,ex);
+    const yy=ch.type==="bus"?yTop+53:ch.type==="digital"?(v>=.5?yTop+33:yTop+73):yFor(v+state.vOffset[j]);
+    out+='<circle class="ix-ab-point" data-marker="'+marker+'" data-ch="'+j+'" cx="'+xx.toFixed(1)+'" cy="'+yy.toFixed(1)+'" r="5" fill="'+c+'" stroke="'+bg+'" stroke-width="1.5"/>';
+   });
    // Trigger level indicator on triggered channel
    if(j===state.trigger){
     const ty=clamp(yFor(state.level),yTop+4,yBot-4);
@@ -742,6 +787,10 @@ function mount(root,ctx={}){
    out+='<rect x="130" y="458" width="245" height="22" rx="4" fill="#2c1b47" stroke="#c58dff"/><text x="138" y="473" fill="#ebd2ff" font-size="11" font-weight="bold">F1 MATH ('+esc(state.mathMode.toUpperCase())+'): '+fMin.toFixed(2)+'..'+fMax.toFixed(2)+'</text>';
   }
 
+  // Linked cursors enclose the same physical/simulated time window on all lanes.
+  const ax=mapX(state.a,W,state.left,state.right,sx,ex),bx=mapX(state.b,W,state.left,state.right,sx,ex);
+  const xlo=clamp(Math.min(ax,bx),sx,ex),xhi=clamp(Math.max(ax,bx),sx,ex);
+  if(xhi>xlo)out+='<rect class="ix-ab-window" x="'+xlo.toFixed(1)+'" y="38" width="'+(xhi-xlo).toFixed(1)+'" height="454" fill="#65dcc1" fill-opacity=".085"/>';
   // Cursors A and B
   [state.a,state.b].forEach((t,i)=>{
    if(t<state.left||t>state.right)return;
@@ -766,14 +815,36 @@ function mount(root,ctx={}){
    let out='<svg viewBox="0 0 360 138" role="img" aria-label="CH'+(j+1)+' '+esc(ch.name)+'"><rect width="360" height="138" fill="#0b182b"/>';
    out+='<text x="8" y="16" fill="'+colors[j]+'" font-size="12">CH'+(j+1)+' '+esc(ch.name)+'</text><text x="350" y="16" fill="#d8eafd" font-size="10" text-anchor="end">'+esc(ch.probe)+' · '+esc(ch.unit)+'</text>';
    for(let i=0;i<=4;i++){const yy=26+i*22,vol=ch.max-(ch.max-ch.min)*i/4;out+='<path d="M76 '+yy+' H347" stroke="#2f405c" stroke-dasharray="4 5"/><text x="70" y="'+(yy+4)+'" fill="#b6cee2" text-anchor="end" font-size="9.5">'+vol.toFixed(1)+'</text>';}
-   const path=arr.map((v,i)=>((i?"L":"M")+(sx+i/(arr.length-1)*(ex-sx)).toFixed(1)+" "+(114-clamp((v-ch.min)/(ch.max-ch.min||1),0,1)*86).toFixed(1))).join(" ");
-   out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.4" fill="none"/>';
+   if(ch.type==="digital"||ch.type==="bus"){
+    const group=[];let last=null;
+    arr.forEach((v,i)=>{const val=ch.type==="digital"?(v>=.5?1:0):Math.max(0,Math.round(v));
+     if(i===0||val!==last)group.push({i,v:val});last=val});
+    const px=i=>sx+i/(arr.length-1)*(ex-sx);
+    if(ch.type==="digital"){
+     let path="";
+     group.forEach((g,i)=>{
+      const x=px(g.i),end=px(group[i+1]?.i??arr.length-1),yy=g.v?42:109;
+      path+=(i?" H":"M")+x.toFixed(1)+(i?" V"+yy:" "+yy)+" H"+end.toFixed(1);
+      if(end-x>17)out+='<text x="'+((x+end)/2).toFixed(1)+'" y="'+(g.v?34:122)+'" fill="'+colors[j]+'" text-anchor="middle" font-size="10">'+g.v+'</text>';
+     });
+     out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.4" fill="none"/>';
+    }else group.forEach((g,i)=>{
+     const x=px(g.i),end=px(group[i+1]?.i??arr.length-1);if(end<=x)return;
+     const q=Math.min(3,(end-x)/5);
+     out+='<path d="M'+(x+q).toFixed(1)+' 49 H'+(end-q).toFixed(1)+' L'+end.toFixed(1)+' 73 L'+(end-q).toFixed(1)+' 98 H'+(x+q).toFixed(1)+' L'+x.toFixed(1)+' 73 Z" stroke="'+colors[j]+'" fill="'+colors[j]+'" fill-opacity=".06"/>';
+     if(end-x>25)out+='<text x="'+((x+end)/2).toFixed(1)+'" y="77" text-anchor="middle" fill="'+colors[j]+'" font-size="9">'+esc(formatChannel(g.v,ch))+'</text>';
+    });
+   }else{
+    const path=arr.map((v,i)=>((i?"L":"M")+(sx+i/(arr.length-1)*(ex-sx)).toFixed(1)+" "+(114-clamp((v-ch.min)/(ch.max-ch.min||1),0,1)*86).toFixed(1))).join(" ");
+    out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.4" fill="none"/>';
+   }
    [[state.a,"#ffe08a","A"],[state.b,"#69e3be","B"]].forEach(([t,c,l])=>{if(t>=state.left&&t<=state.right){const x=sx+(t-state.left)/(state.right-state.left)*(ex-sx);out+='<path d="M'+x+' 22 V120" stroke="'+c+'" stroke-dasharray="4 4"/><text x="'+x+'" y="132" fill="'+c+'" text-anchor="middle" font-size="10">'+l+'</text>';}});
    return out+'</svg>';
   }).join("");
  }
 
  function draw(){
+  syncB();
   const sigs=currentSignals();
   $("#ixTopic").textContent=activeDef.title;
   $("#ixOrigin").textContent=state.captureMode==="fault"?("🔴 "+activeDef.faultLabel):("🟢 "+activeDef.fixedLabel);
@@ -814,9 +885,16 @@ function mount(root,ctx={}){
 
   const delta=state.b-state.a,sc=TIME_SCALE[activeDef.unit]||1e-9,freq=Math.abs(delta)>1e-9?1/(Math.abs(delta)*sc):0;
   $("#ixALabel").textContent=timeText(state.a);$("#ixBLabel").textContent=timeText(state.b);
+  $("#ixLinkB").setAttribute("aria-pressed",String(state.linkedB));
+  $("#ixLinkB").textContent=state.linkedB?"🔗 Link B to A: ON":"Unlink B: OFF";
+  $("#ixLinkHint").textContent=state.linkedB?"B tracks A by Δt "+delta.toFixed(2)+" "+activeDef.unit:"A/B independent; both read all 4 channels";
   $("#ixA").value=state.a;$("#ixB").value=state.b;
   $("#ixMarkerRows").innerHTML='<tr><td>M1 / A</td><td>'+timeText(state.a)+'</td><td rowspan="2">'+delta.toFixed(2)+' '+activeDef.unit+'</td><td rowspan="2">'+formatFreq(freq)+'</td></tr><tr><td>M2 / B</td><td>'+timeText(state.b)+'</td></tr>';
-  $("#ixAtCursor").innerHTML='<div style="font:700 10px ui-monospace,monospace;color:#b5c9e0;margin-top:6px">At A: '+sigs.map((s,j)=>'<span style="color:'+colors[j]+'">CH'+(j+1)+' '+fmt(signalNum(state.a,j),s.unit)+'</span>').join(" · ")+'</div>';
+  $("#ixCursorSummary").textContent="A "+timeText(state.a)+" → B "+timeText(state.b)+" · Δt "+delta.toFixed(3)+" "+activeDef.unit+" · 1/|Δt| "+formatFreq(freq);
+  $("#ixAtCursor").innerHTML='<div class="ix-ab-detail"><table><thead><tr><th>Channel</th><th>A · '+timeText(state.a)+'</th><th>B · '+timeText(state.b)+'</th><th>Δ (B−A)</th></tr></thead><tbody>'+
+   sigs.map((ch,j)=>'<tr><th style="color:'+colors[j]+'">CH'+(j+1)+' '+esc(ch.name)+'</th><td>'+esc(formatChannel(signalNum(state.a,j),ch))+'</td><td>'+esc(formatChannel(signalNum(state.b,j),ch))+'</td><td>'+
+    (ch.type==="digital"?((signalNum(state.a,j)>=.5?1:0)+" → "+(signalNum(state.b,j)>=.5?1:0)):ch.type==="bus"?(esc(formatChannel(signalNum(state.a,j),ch))+" → "+esc(formatChannel(signalNum(state.b,j),ch))):fmt(signalNum(state.b,j)-signalNum(state.a,j),ch.unit))+
+    '</td></tr>').join("")+'</tbody></table></div>';
  }
 
  // Keysight Infiniium Menubar drawers
@@ -908,7 +986,7 @@ function mount(root,ctx={}){
   if(act.startsWith("trig-")){state.trigType=act.slice(5);$("#ixTrigType").value=state.trigType;}
   if(act==="center-trig"){$("#ixCenter").click();}
   if(act==="force-trig"){state.cleared=false;state.reveal=null;}
-  if(act==="snap-cursors"){const e0=activeDef.events[0]?.t||activeDef.T*0.2;state.a=e0;state.b=clamp(e0+activeDef.T*0.2,0,activeDef.T);}
+  if(act==="snap-cursors"){const e0=activeDef.events[0]?.t||activeDef.T*0.2;state.gap=activeDef.T*.2;setA(e0);}
   if(act==="mode-fault"){state.captureMode="fault";}
   if(act==="mode-fixed"){state.captureMode="fixed";}
   if(act==="save-r1"){$("#ixSaveRef").click();}
@@ -943,24 +1021,24 @@ function mount(root,ctx={}){
 
  const stop=()=>{state.running=false;state.reveal=null;cancelAnimationFrame(state.raf);draw();};
  $("#ixRun").onclick=()=>{
-  stop();state.cleared=false;state.running=true;state.reveal=0;state.a=0;
+  stop();state.cleared=false;state.running=true;state.reveal=0;setA(0);
   const start=performance.now(),dur=6500,T=activeDef.T;
   function frame(now){
    if(!state.running)return;
    const f=clamp((now-start)/dur,0,1);
-   state.a=T*f;state.reveal=state.a;draw();
+   setA(T*f);state.reveal=state.a;draw();
    if(f>=1){state.running=false;state.reveal=null;draw();return;}
    state.raf=requestAnimationFrame(frame);
   }
   state.raf=requestAnimationFrame(frame);
  };
  $("#ixStop").onclick=stop;
- $("#ixSingle").onclick=()=>{stop();state.cleared=false;state.a=triggerTime();state.b=clamp(state.a+activeDef.T/10,0,activeDef.T);draw();};
+ $("#ixSingle").onclick=()=>{stop();state.cleared=false;state.gap=activeDef.T/10;setA(triggerTime());draw();};
  $("#ixClear").onclick=()=>{stop();state.cleared=true;draw();};
  $("#ixAuto").onclick=()=>{stop();state.cleared=false;state.vGain=[1,1,1,1];state.vOffset=[0,0,0,0];syncDefBounds(true);draw();};
  $("#ixZoomIn").onclick=()=>{stop();const w=(state.right-state.left)*0.5,m=(state.left+state.right)/2,nw=clamp(w,activeDef.T/25,activeDef.T);state.left=clamp(m-nw/2,0,activeDef.T-nw);state.right=state.left+nw;draw();};
  $("#ixZoomOut").onclick=()=>{stop();const w=(state.right-state.left)*2,m=(state.left+state.right)/2,nw=clamp(w,activeDef.T/25,activeDef.T);state.left=clamp(m-nw/2,0,activeDef.T-nw);state.right=state.left+nw;draw();};
- $("#ixCenter").onclick=()=>{stop();const m=triggerTime(),w=state.right-state.left;state.left=clamp(m-w/2,0,activeDef.T-w);state.right=state.left+w;state.a=m;draw();};
+ $("#ixCenter").onclick=()=>{stop();const m=triggerTime(),w=state.right-state.left;state.left=clamp(m-w/2,0,activeDef.T-w);state.right=state.left+w;setA(m);draw();};
  $("#ixTrigger").onchange=e=>{state.trigger=Number(e.target.value);draw();};
  $("#ixTrigType").onchange=e=>{state.trigType=e.target.value;draw();};
  $("#ixSlope").onchange=e=>{state.slope=e.target.value;draw();};
@@ -976,15 +1054,17 @@ function mount(root,ctx={}){
   $("#ixSaveRef").textContent=state.showRef?"Hide R1 Compare":"Save R1 Compare";
   draw();
  };
- $("#ixA").oninput=e=>{stop();state.a=Number(e.target.value);draw();};
- $("#ixB").oninput=e=>{stop();state.b=Number(e.target.value);draw();};
+ $("#ixA").oninput=e=>{const requested=Number(e.target.value);stop();setA(requested);draw();};
+ $("#ixB").oninput=e=>{const requested=Number(e.target.value);stop();state.b=clamp(requested,0,activeDef.T);state.gap=state.b-state.a;draw();};
+ $("#ixLinkB").onclick=()=>{state.linkedB=!state.linkedB;if(state.linkedB)state.gap=state.b-state.a;draw();};
+ $("#ixNextAB").onclick=()=>{stop();const e=activeDef.events.find(e=>e.t>state.a+1e-5)||activeDef.events[0];if(e)setA(e.t);draw();};
  $("#ixChannels").onclick=e=>{const b=e.target.closest("[data-ix-ch]");if(!b)return;state.active[+b.dataset.ixCh]=!state.active[+b.dataset.ixCh];draw();};
  $("#ixChannels").onchange=e=>{
   const g=e.target.closest("[data-ix-gain]"),c=e.target.closest("[data-ix-coup]");
   if(g){state.vGain[+g.dataset.ixGain]=Number(g.value);draw();}
   if(c){state.coupling[+c.dataset.ixCoup]=c.value;draw();}
  };
- $("#ixEvents").onclick=e=>{const b=e.target.closest("[data-ix-event]");if(!b)return;const ev=activeDef.events[+b.dataset.ixEvent];state.a=ev.t;state.b=clamp(ev.t+activeDef.T/10,0,activeDef.T);$("#ixExplain").textContent=ev.reason+" "+activeDef.lesson;draw();};
+ $("#ixEvents").onclick=e=>{const b=e.target.closest("[data-ix-event]");if(!b)return;const ev=activeDef.events[+b.dataset.ixEvent];state.gap=activeDef.T/10;setA(ev.t);$("#ixExplain").textContent=ev.reason+" "+activeDef.lesson;draw();};
 
  // Physical board reactor sliders below scope
  $("#ksVoltSlider").oninput=e=>{state.vScale=Number(e.target.value);$("#ksVoltVal").textContent=state.vScale.toFixed(2)+"×";draw();};
@@ -1020,7 +1100,7 @@ function mount(root,ctx={}){
  function seek(e,svg,mobile=false){
   const box=svg.getBoundingClientRect(),x=(e.clientX-box.left)/box.width*(mobile?360:1120),start=mobile?76:122,end=mobile?347:1092;
   if(x<start||x>end)return;
-  stop();state.a=clamp(state.left+(x-start)/(end-start)*(state.right-state.left),0,activeDef.T);draw();
+  stop();setA(state.left+(x-start)/(end-start)*(state.right-state.left));draw();
  }
  $("#ixPlot").onpointerdown=e=>seek(e,$("#ixPlot"),false);
  $("#ixMobile").onpointerdown=e=>{const svg=e.target.closest("svg");if(svg)seek(e,svg,true);};

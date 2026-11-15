@@ -261,7 +261,7 @@ function widget(){
  '<div class="bs-bottom"><section><h5>MEASUREMENTS · WINDOW / ACTUAL SIMULATED VALUES</h5><div class="bs-table-scroll" tabindex="0" role="region" aria-label="Automated channel statistics table"><table><thead><tr><th>Channel</th><th>Min</th><th>Max</th><th>Pk–Pk</th><th>Avg</th><th>StdDev</th></tr></thead><tbody id="bsMetrics"></tbody></table></div></section>'+
  '<section><h5>CURSOR A/B · TIME-ALIGNED VOLTAGE / CURRENT / POWER</h5><div class="bs-sliders">'+
  '<label>A <b id="bsTimeA">—</b><input id="bsA" type="range"></label><label>B <b id="bsTimeB">—</b><input id="bsB" type="range"></label></div>'+
- '<div class="bs-deltas" id="bsDelta"></div><div class="bs-at" id="bsAtCursor"></div></section></div>'+
+ '<div class="bs-linktools"><button id="bsLinkB" type="button" aria-pressed="true">🔗 Link B to A: ON</button><button id="bsNextAB" type="button">↦ Next event pair</button><span id="bsLinkHint">A/B comparison synchronized across 6 lanes</span></div><div class="bs-deltas" id="bsDelta"></div><div class="bs-at" id="bsAtCursor"></div></section></div>'+
  '<div class="bs-disclaimer">Source and gate pulses are <b>periodic stimuli</b>, not clocks. CH6 is a calculated electrical power, not a separate physical probe or a thermal-failure prediction. Long-run samples are newly simulated in ngspice using the original topology. Scope visual styling is educational and does not reproduce real oscilloscope firmware or certify hardware compliance.</div>'+
  '</section>';
 }
@@ -275,7 +275,7 @@ function init(host,run,time,options){
   host.innerHTML=widget();
   const mode=oldmode,limit=endTime(mode);
   const state={run,runId:run.id,mode,lo:0,hi:limit,cursor:clamp(time,0,limit),
-   a:clamp(time,0,limit),b:mode==="cycles"?81:8,shown:[true,true,true,true,true,false],
+   a:clamp(time,0,limit),b:clamp(time+(mode==="cycles"?80:3.7),0,limit),linkedB:true,gap:mode==="cycles"?80:3.7,shown:[true,true,true,true,true,false],
    gain:[1,1,1,1,1,1],coupling:["DC","DC","DC","DC","DC","DC"],inverted:[false,false,false,false,false,false],offset:[0,0,0,0,0,0],trig:0,level:run.supply*.5,edge:"rise",trigMode:"auto",holdoff:0,triggerStatus:"",analysisCh:2,xyX:4,xyY:2,
    speed:1,playing:false,raf:0,lastFrame:0,reveal:null,focus:null,stages:0,compare:false,savedRef:null,openMenu:null,options:options||{},
    eventIndex:0};
@@ -290,8 +290,9 @@ function connect(host,st){
  const rows=()=>samples(st.run,st.mode),T=()=>endTime(st.mode);
  function stop(){st.playing=false;window.cancelAnimationFrame(st.raf);st.raf=0;st.reveal=null}
  st.stop=stop;
+ function syncB(){if(st.linkedB)st.b=clamp(st.a+st.gap,0,T());}
  function emit(t){
-  st.cursor=clamp(t,0,T());
+  st.cursor=clamp(t,0,T());st.a=st.cursor;syncB();
   if(st.mode==="cycles"&&st.options.onCycleSeek){
    st.options.onCycleSeek(st.cursor,nearest(rows(),st.cursor));
   }else if(st.mode==="short"&&st.options.onSeek){
@@ -306,7 +307,7 @@ function connect(host,st){
   return thresholdCrossings(rows(),st.run,st.trig,st.level,st.edge,st.holdoff)[0]??null;
  }
  function zoom(f){stop();around((st.lo+st.hi)/2,(st.hi-st.lo)*f);paint(host,st)}
- function navigate(e){const list=events(st.run,st.mode);if(!list.length)return;st.focus=list[((e%list.length)+list.length)%list.length];st.eventIndex=list.indexOf(st.focus);st.a=st.focus.t;st.b=clamp(st.a+Math.min(4,T()/15),0,T());emit(st.focus.t)}
+ function navigate(e){const list=events(st.run,st.mode);if(!list.length)return;st.focus=list[((e%list.length)+list.length)%list.length];st.eventIndex=list.indexOf(st.focus);st.gap=Math.min(4,T()/15);emit(st.focus.t)}
  $("#bsRun").onclick=()=>{
   if(st.playing){stop();paint(host,st);return}
   const hit=trigger();
@@ -327,7 +328,7 @@ function connect(host,st){
    if(now-st.lastFrame>75||progress===1){
     st.lastFrame=now;
     st.reveal=first+(Tmax-first)*progress;
-    st.cursor=st.reveal;
+    st.cursor=st.reveal;st.a=st.cursor;syncB();
     const list=events(st.run,st.mode),past=list.filter(x=>x.t<=st.cursor);
     if(past.length)st.focus=past[past.length-1];
     if(st.mode==="cycles"&&st.options.onCycleSeek)st.options.onCycleSeek(st.cursor,nearest(rows(),st.cursor));
@@ -426,7 +427,7 @@ function connect(host,st){
  $("#bsMode").value=st.mode;
  $("#bsEdge").value=st.edge;$("#bsTrigMode").value=st.trigMode;$("#bsHoldoff").value=st.holdoff;
  $("#bsMode").onchange=e=>{
-  stop();st.mode=e.target.value;st.lo=0;st.hi=T();st.cursor=clamp(st.cursor,0,T());st.a=clamp(st.a,0,T());st.b=clamp(st.b,0,T());
+  stop();st.mode=e.target.value;st.lo=0;st.hi=T();st.cursor=clamp(st.cursor,0,T());st.a=clamp(st.a,0,T());st.gap=st.mode==="cycles"?80:3.7;syncB();
   st.focus=events(st.run,st.mode)[0]||null;st.eventIndex=0;timeOptions();paint(host,st);
  };
  function timeOptions(){
@@ -447,12 +448,12 @@ function connect(host,st){
   stop();const t=trigger();
   if(t===null){st.triggerStatus="NO MATCHING TRIGGER";paint(host,st);return}
   st.triggerStatus="SINGLE CAPTURE @ "+t.toFixed(2)+" ns";
-  st.a=t;st.b=clamp(t+Math.min(8,T()/10),0,T());
+  st.gap=Math.min(8,T()/10);
   const e=events(st.run,st.mode).find(e=>Math.abs(e.t-t)<1);if(e)st.focus=e;
   emit(t);
  };
  $("#bsAutoset").onclick=()=>{
-  stop();st.mode="cycles";st.lo=0;st.hi=T();st.cursor=0;st.a=0;st.b=80;
+  stop();st.mode="cycles";st.lo=0;st.hi=T();st.cursor=0;st.a=0;st.gap=80;st.b=80;st.linkedB=true;
   st.shown=[true,true,true,true,true,false];st.gain=[1,1,1,1,1,1];
   st.coupling=["DC","DC","DC","DC","DC","DC"];st.inverted=[false,false,false,false,false,false];st.offset=[0,0,0,0,0,0];
   st.trig=0;st.level=st.run.supply*.5;st.edge="rise";st.trigMode="auto";st.holdoff=0;st.triggerStatus="";
@@ -461,8 +462,10 @@ function connect(host,st){
   st.focus=events(st.run,st.mode)[0]||null;timeOptions();paint(host,st);
  };
  $("#bsCenter").onclick=()=>{stop();const t=trigger();if(t===null){st.triggerStatus="NO MATCHING TRIGGER";paint(host,st);return}around(t);emit(t)};
- $("#bsA").oninput=e=>{const t=+e.target.value;stop();st.a=t;emit(t)};
- $("#bsB").oninput=e=>{const t=+e.target.value;stop();st.b=t;paint(host,st)};
+ $("#bsA").oninput=e=>{const t=+e.target.value;stop();emit(t)};
+ $("#bsB").oninput=e=>{stop();st.b=clamp(+e.target.value,0,T());st.gap=st.b-st.a;paint(host,st)};
+ $("#bsLinkB").onclick=()=>{st.linkedB=!st.linkedB;if(st.linkedB)st.gap=st.b-st.a;paint(host,st)};
+ $("#bsNextAB").onclick=()=>{stop();const all=events(st.run,st.mode);const e=all.find(e=>e.t>st.a+.0001)||all[0];if(e){st.focus=e;emit(e.t)}};
  $("#bsChannelbar").onclick=e=>{const b=e.target.closest("[data-bs-ch]");if(!b)return;st.shown[+b.dataset.bsCh]=!st.shown[+b.dataset.bsCh];paint(host,st)};
  $("#bsChannelbar").onchange=e=>{
   const gain=e.target.closest("[data-bs-gain]");
@@ -543,6 +546,7 @@ function paint(host,st){
  $("#bsEvents").innerHTML=evs.map((e,i)=>'<button type="button" data-bs-event="'+i+'" aria-pressed="'+(st.focus===e)+'">'+(e.kind==="source"?"🔌":"⚡")+' '+esc(e.label)+' · '+e.t.toFixed(2)+' ns</button>').join("");
  const W=1160,top=46,rowHeight=118,axisStart=134,axisEnd=1125,plotEnd=top+6*rowHeight+2;
  let svg='<rect x="0" y="0" width="1160" height="880" fill="#061323"/>';
+
  for(let i=0;i<=10;i++){
   let t=st.lo+span*i/10,px=x(t);
   svg+='<path d="M'+px+' 40 V'+plotEnd+'" stroke="#253854" stroke-width="1"/>'+
@@ -579,11 +583,18 @@ function paint(host,st){
    if(rg.length)svg+='<path d="'+rg.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(value(r,k,st.savedRef.run),k,yt,height).toFixed(2)).join(" ")+
       '" fill="none" stroke="#a6c8ff" stroke-dasharray="5 3" stroke-width="1.6" opacity=".82"/>';
   }
+  [[st.a,"A","#ffd57b"],[st.b,"B","#7ceacc"]].forEach(([t,tag,color])=>{
+   if(t<st.lo||t>st.hi)return;
+   const row=nearest(rows,t),pointY=clamp(y(display(row,k),k,yt,height),yt,yt+height);
+   svg+='<circle class="bs-ab-point" data-marker="'+tag+'" data-channel="'+k+'" cx="'+x(t).toFixed(2)+'" cy="'+pointY.toFixed(2)+'" r="4.8" fill="'+color+'" stroke="#061323" stroke-width="1.5"/>';
+  });
   if(st.cursor>=st.lo&&st.cursor<=st.hi&&(st.reveal===null||st.cursor<=st.reveal)){
    let cur=nearest(rows,st.cursor);
    svg+='<circle cx="'+x(st.cursor)+'" cy="'+clamp(y(display(cur,k),k,yt,height),yt,yt+height)+'" r="4.5" fill="'+c.color+'" stroke="#fff" stroke-width="1.5"/>';
   }
  }
+ const ax1=clamp(x(Math.min(st.a,st.b)),134,1125),ax2=clamp(x(Math.max(st.a,st.b)),134,1125);
+ if(ax2>ax1)svg+='<rect class="bs-ab-window" x="'+ax1.toFixed(1)+'" y="40" width="'+(ax2-ax1).toFixed(1)+'" height="714" fill="#66e5bf" fill-opacity=".09"/>';
  for(let [t,tag,c] of [[st.a,"A","#ffd57b"],[st.b,"B","#7ceacc"]]){
   if(t<st.lo||t>st.hi)continue;
   let xx=x(t);
@@ -659,6 +670,9 @@ function paint(host,st){
    '<td>'+fmt(avg,c.unit)+'</td><td>'+fmt(sd,c.unit)+'</td></tr>';
  }).join("");
  $("#bsTimeA").textContent=st.a.toFixed(2)+" ns";$("#bsTimeB").textContent=st.b.toFixed(2)+" ns";
+ $("#bsLinkB").setAttribute("aria-pressed",String(st.linkedB));
+ $("#bsLinkB").textContent=st.linkedB?"🔗 Link B to A: ON":"Unlink B: OFF";
+ $("#bsLinkHint").textContent=st.linkedB?"B follows A by "+(st.b-st.a).toFixed(2)+" ns":"Independent A/B · 6-channel comparison";
  for(let [id,v] of [["bsA",st.a],["bsB",st.b]]){
   let el=$("#"+id);el.min=0;el.max=Tmax;el.step=.01;el.value=v;
  }

@@ -1,0 +1,42 @@
+name: V13 synchronized markers and RTL waveform integration
+on:
+  push:
+    branches:
+      - feature/v13-synchronized-surfer-waveforms
+  pull_request:
+    paths:
+      - 'simulation/**'
+      - 'notebook.js'
+      - 'index.html'
+      - 'sw.js'
+      - 'tests/v13-waveforms.test.cjs'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax checks for both analog and digital waveform viewers
+        run: |
+          node --check simulation/instrument_console.js
+          node --check simulation/board/board_scope.js
+          node --check simulation/scope_pro.js
+          node --check simulation/rtl_vcd_lab.js
+          node --check notebook.js
+          node --check sw.js
+      - name: Numerical SPICE regression
+        run: node tests/scope-analysis.test.cjs
+      - name: Install browser
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: V13 linked A/B and VCD inspector browser regression
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/studio-http.log 2>&1 &
+          sleep 1
+          node tests/v13-waveforms.test.cjs

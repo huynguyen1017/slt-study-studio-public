@@ -207,7 +207,8 @@ function renderPage(c, page){
   const spiceSection = (type === 'si')
    ? `<div class="ink-section"><h4>Actual ngspice-47 Transmission Line Waveform Lab</h4>${window.renderSpiceScope ? window.renderSpiceScope() : '<p>SPICE waveform data unavailable.</p>'}</div>`
    : '';
-  const scopeHtml = spiceSection + (window.renderInstrumentConsole ? `<div class="ix-deepdive">${window.renderInstrumentConsole()}</div>` : '');
+  const scopeHtml = spiceSection + (window.renderInstrumentConsole ? `<div class="ix-deepdive">${window.renderInstrumentConsole()}</div>` : '')+
+    (window.renderDigitalVcdLab ? window.renderDigitalVcdLab() : '');
 
   const show = key => currentSubTab === 'all' || currentSubTab === key;
   content = subBar +
@@ -277,6 +278,8 @@ window.wireStudyNotebook = function(c){
    if(classify(c) === 'si' && window.mountSpiceScope){
     window.mountSpiceScope(host.querySelector('.si-studio'));
    }
+   const vcdHost=host.querySelector('[data-vcd-lab]');
+   if(vcdHost&&window.mountDigitalVcdLab)window.mountDigitalVcdLab(vcdHost);
    const panel = host.querySelector('[data-instrument]');
    if(panel && window.mountInstrumentConsole){
     window.mountInstrumentConsole(panel, {kind:'card', card:c, caseId:host.querySelector('#siCase')?.value});
