@@ -665,6 +665,10 @@ function mount(root,ctx={}){
   }
   out+='<text x="1090" y="538" fill="'+txtClr+'" text-anchor="end" font-size="11.5">TIME ('+esc(activeDef.unit)+') · '+esc(activeDef.sampleRate)+' · '+esc(activeDef.memDepth)+'</text>';
 
+  // Linked cursors enclose the same physical/simulated time window on all lanes.
+  const ax=mapX(state.a,W,state.left,state.right,sx,ex),bx=mapX(state.b,W,state.left,state.right,sx,ex);
+  const xlo=clamp(Math.min(ax,bx),sx,ex),xhi=clamp(Math.max(ax,bx),sx,ex);
+  if(xhi>xlo)out+='<rect class="ix-ab-window" x="'+xlo.toFixed(1)+'" y="38" width="'+(xhi-xlo).toFixed(1)+'" height="454" fill="#65dcc1" fill-opacity=".085"/>';
   // Compute F1 Math points across N steps if enabled
   const N=win.times.length-1;
   sigs.forEach((ch,j)=>{
@@ -708,22 +712,52 @@ function mount(root,ctx={}){
     }
     out+='<path d="'+rPath+'" stroke="#ffffff" stroke-width="1.6" stroke-dasharray="5 4" opacity=".75" fill="none"/>';
    }
-   // Main channel trace
-   let path="";
-   for(let i=0;i<=N;i++){
-    const t=win.times[i];
-    if(state.reveal!==null&&t>state.reveal)break;
-    const x=mapX(t,W,state.left,state.right,sx,ex);
-    path+=(i?"L":"M")+x.toFixed(1)+" "+yFor(arr[i]+(state.coupling[j]==="GND"?-arr[i]:0)+state.vOffset[j]).toFixed(1)+" ";
-   }
-   out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="'+(ch.type==="rail"||ch.type==="current"?2.5:2.1)+'" fill="none"/>';
-   // Bus hex tags
-   if(ch.type==="bus"){
-    for(let b=1;b<=7;b++){
-     const idx=Math.floor(b/8*N);
-     out+='<text x="'+mapX(win.times[idx],W,state.left,state.right,sx,ex)+'" y="'+(yTop+17)+'" fill="'+colors[j]+'" font-size="10.5">0x'+Math.round(arr[idx]).toString(16).toUpperCase()+'</text>';
+   // Digital lanes are states, not voltages. Buses use vector segments.
+   if(ch.type==="digital"||ch.type==="bus"){
+    const groups=[];let last=null;
+    for(let i=0;i<=N;i++){
+     if(state.reveal!==null&&win.times[i]>state.reveal)break;
+     const v=ch.type==="digital"?(arr[i]>=.5?1:0):Math.max(0,Math.round(arr[i]));
+     if(last===null||v!==last){
+      groups.push({v,t:win.times[i]});last=v;
+     }
     }
+    const high=yTop+33,low=yTop+73;
+    if(ch.type==="digital"){
+     let path="";
+     groups.forEach((g,i)=>{
+      const xx=mapX(g.t,W,state.left,state.right,sx,ex),end=mapX(groups[i+1]?.t??(state.reveal??state.right),W,state.left,state.right,sx,ex);
+      const yy=g.v?high:low;
+      path+=(i===0?"M":" H")+xx.toFixed(1)+(i===0?" "+yy:" V"+yy)+" H"+end.toFixed(1);
+      if(end-xx>20)out+='<text x="'+((xx+end)/2).toFixed(1)+'" y="'+(g.v?high-7:low+15)+'" text-anchor="middle" fill="'+colors[j]+'" font-size="12" font-weight="800">'+g.v+'</text>';
+     });
+     if(path)out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.6" fill="none"/>';
+    }else{
+     groups.forEach((g,i)=>{
+      const x0=mapX(g.t,W,state.left,state.right,sx,ex),x1=mapX(groups[i+1]?.t??(state.reveal??state.right),W,state.left,state.right,sx,ex);
+      if(x1<=x0)return;
+      const notch=Math.min(6,(x1-x0)/5);
+      out+='<path d="M'+(x0+notch).toFixed(1)+' '+high+' H'+(x1-notch).toFixed(1)+' L'+x1.toFixed(1)+' '+((high+low)/2)+' L'+(x1-notch).toFixed(1)+' '+low+' H'+(x0+notch).toFixed(1)+' L'+x0.toFixed(1)+' '+((high+low)/2)+' Z" stroke="'+colors[j]+'" stroke-width="1.8" fill="'+colors[j]+'" fill-opacity=".075"/>';
+      if(x1-x0>32)out+='<text x="'+((x0+x1)/2).toFixed(1)+'" y="'+(high+24)+'" text-anchor="middle" fill="'+colors[j]+'" font-size="11" font-weight="750">'+esc(formatChannel(g.v,ch))+'</text>';
+     });
+    }
+   }else{
+    let path="";
+    for(let i=0;i<=N;i++){
+     const t=win.times[i];if(state.reveal!==null&&t>state.reveal)break;
+     const xx=mapX(t,W,state.left,state.right,sx,ex);
+     const val=state.coupling[j]==="GND"?state.vOffset[j]:arr[i]+state.vOffset[j];
+     path+=(i?"L":"M")+xx.toFixed(1)+" "+yFor(val).toFixed(1)+" ";
+    }
+    out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.5" fill="none"/>';
    }
+   // Both points are visible on every active channel, correlated to the two times.
+   [[state.a,"A","#ffda81"],[state.b,"B","#61e0bc"]].forEach(([t,marker,c])=>{
+    if(t<state.left||t>state.right)return;
+    const v=signalNum(t,j),xx=mapX(t,W,state.left,state.right,sx,ex);
+    const yy=ch.type==="bus"?yTop+53:ch.type==="digital"?(v>=.5?yTop+33:yTop+73):yFor(v+state.vOffset[j]);
+    out+='<circle class="ix-ab-point" data-marker="'+marker+'" data-ch="'+j+'" cx="'+xx.toFixed(1)+'" cy="'+yy.toFixed(1)+'" r="5" fill="'+c+'" stroke="'+bg+'" stroke-width="1.5"/>';
+   });
    // Trigger level indicator on triggered channel
    if(j===state.trigger){
     const ty=clamp(yFor(state.level),yTop+4,yBot-4);
