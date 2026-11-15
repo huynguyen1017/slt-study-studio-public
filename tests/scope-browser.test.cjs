@@ -13,7 +13,7 @@ const {chromium}=require('playwright');
    await page.locator('[data-note-page="1"]').click();
    const scope=page.locator('#blProScope [data-board-scope]');
    await scope.waitFor({timeout:30000});
-   await page.locator('#bsSpectrum path').first().waitFor({timeout:20000});
+   await page.locator('#bsSpectrum path').first().waitFor({state:'attached',timeout:20000});
    assert.ok(await page.locator('#bsXY path').count()>0,'XY plot renders');
    assert.equal(await page.locator('#bsAnalysisCh').inputValue(),'2');
    await page.locator('#bsAnalysisCh').selectOption('0');
