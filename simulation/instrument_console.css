@@ -135,3 +135,16 @@
 .lab-instrument-expand>summary{font:800 13px/1.5 system-ui;color:#314c73;padding:8px;cursor:pointer}
 .reset-instrument-console h3{font:850 17px/1.4 system-ui;color:#2b4e76;margin:18px 0 8px}
 .ix-deepdive{max-width:100%;min-width:0}
+
+/* v13: synchronized A/B analysis and clearly segmented RTL state rails. */
+.ix-linked-tools{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:8px 0}
+.ix-linked-tools button{background:#1d3c56;color:#effaff;border:1px solid #5c8aa9;border-radius:6px;padding:8px 11px;min-height:36px;font:750 11px system-ui;cursor:pointer}
+.ix-linked-tools #ixLinkB[aria-pressed="true"]{background:#1b544e;border-color:#6bdfc6}
+.ix-linked-tools span{color:#a8d5e6;font:650 11px/1.45 system-ui}
+#ixCursorSummary{padding:8px 10px;margin:8px 0;background:#173b45;border:1px solid #427b80;border-radius:7px;color:#d3fff6;font:750 11px/1.6 ui-monospace,monospace}
+.ix-ab-detail{overflow-x:auto;max-width:100%;margin:8px 0}
+.ix-ab-detail table{width:100%;min-width:345px;border-collapse:collapse;font:650 11px/1.5 ui-monospace,monospace}
+.ix-ab-detail td,.ix-ab-detail th{padding:7px 8px;border:1px solid #3d5874;white-space:nowrap;color:#e2eaf5;text-align:left}
+.ix-ab-detail thead th{background:#22415a;color:#cde8f9}
+.ix-ab-window{pointer-events:none}
+.ix-ab-point{pointer-events:none}
