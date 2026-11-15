@@ -171,3 +171,9 @@
 .nb-equation-source{font-size:11px!important;opacity:.8;margin-top:5px}
 .nb-code-guide{margin:10px 0;background:#eaf5ff;padding:10px;border:1px solid #bdd5e8;border-radius:8px;font:600 12px/1.6 system-ui}
 .nb-code-guide summary{cursor:pointer;font-weight:800;color:#1d577d}
+
+.nb-code-reading{margin:11px 0;padding:12px;background:#eef6ff;border:1px solid #bad3ea;border-radius:9px}
+.nb-code-reading summary{font:800 12px/1.5 system-ui;color:#245984;cursor:pointer}
+.nb-code-reading p{font:600 12px/1.6 system-ui;color:#415b76}
+.nb-code-reading td code{font:11px/1.5 ui-monospace,monospace;overflow-wrap:anywhere;white-space:pre-wrap}
+.nb-code-reading .nb-table{min-width:650px}
