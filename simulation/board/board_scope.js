@@ -546,6 +546,8 @@ function paint(host,st){
  $("#bsEvents").innerHTML=evs.map((e,i)=>'<button type="button" data-bs-event="'+i+'" aria-pressed="'+(st.focus===e)+'">'+(e.kind==="source"?"🔌":"⚡")+' '+esc(e.label)+' · '+e.t.toFixed(2)+' ns</button>').join("");
  const W=1160,top=46,rowHeight=118,axisStart=134,axisEnd=1125,plotEnd=top+6*rowHeight+2;
  let svg='<rect x="0" y="0" width="1160" height="880" fill="#061323"/>';
+ const ax1=clamp(x(Math.min(st.a,st.b)),134,1125),ax2=clamp(x(Math.max(st.a,st.b)),134,1125);
+ if(ax2>ax1)svg+='<rect class="bs-ab-window" x="'+ax1.toFixed(1)+'" y="40" width="'+(ax2-ax1).toFixed(1)+'" height="714" fill="#66e5bf" fill-opacity=".09"/>';
  for(let i=0;i<=10;i++){
   let t=st.lo+span*i/10,px=x(t);
   svg+='<path d="M'+px+' 40 V'+plotEnd+'" stroke="#253854" stroke-width="1"/>'+
@@ -582,6 +584,11 @@ function paint(host,st){
    if(rg.length)svg+='<path d="'+rg.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(value(r,k,st.savedRef.run),k,yt,height).toFixed(2)).join(" ")+
       '" fill="none" stroke="#a6c8ff" stroke-dasharray="5 3" stroke-width="1.6" opacity=".82"/>';
   }
+  [[st.a,"A","#ffd57b"],[st.b,"B","#7ceacc"]].forEach(([t,tag,color])=>{
+   if(t<st.lo||t>st.hi)return;
+   const row=nearest(rows,t),pointY=clamp(y(display(row,k),k,yt,height),yt,yt+height);
+   svg+='<circle class="bs-ab-point" data-marker="'+tag+'" data-channel="'+k+'" cx="'+x(t).toFixed(2)+'" cy="'+pointY.toFixed(2)+'" r="4.8" fill="'+color+'" stroke="#061323" stroke-width="1.5"/>';
+  });
   if(st.cursor>=st.lo&&st.cursor<=st.hi&&(st.reveal===null||st.cursor<=st.reveal)){
    let cur=nearest(rows,st.cursor);
    svg+='<circle cx="'+x(st.cursor)+'" cy="'+clamp(y(display(cur,k),k,yt,height),yt,yt+height)+'" r="4.5" fill="'+c.color+'" stroke="#fff" stroke-width="1.5"/>';
