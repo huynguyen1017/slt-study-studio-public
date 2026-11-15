@@ -134,24 +134,32 @@ function getPresets(){
 
  const engr852={
   id:"ENGR852_520MHz_14nm_SAD_Pipeline",
-  title:"ENGR 852 520 MHz 14nm Motion Estimator · 8-Bit Overflow vs 16-Bit BestDist Fix",
-  unit:"ns",T:16,t0:0,sampleRate:"20 GSa/s",memDepth:"50 Mpts",presetName:"ENGR852_520MHz_14nm_SAD_Pipeline.set",
-  faultLabel:"8-Bit Wraparound Truncation (BestDist=0xFF)",fixedLabel:"16-Bit PE + Verdi Clean BestMV",
+  title:"ENGR 852 · 520 MHz · 8-Bit Saturation vs 16-Bit SAD Range (Illustrative Comparator Edge)",
+  unit:"ns",T:16,t0:0,sampleRate:"Numerically drawn training timing",memDepth:"Not a VCS capture",presetName:"ENGR852_SAD_8bit_16bit_training.set",
+  faultLabel:"ILLUSTRATIVE · 8-Bit Saturated Accumulator: BestDist Stays FF",
+  fixedLabel:"ILLUSTRATIVE · 16-Bit Datapath Supports FF00 < FFFF",
   signalsFault:[
-   spec("CLK_520MHz","clock","V",-0.1,1.1,(t)=>Math.floor(t/0.9615)%2*0.8,"520 MHz system clock (T = 1.923 ns @ 14nm FF/0.8V)","VCS/Verdi nWave","DC","12 GHz"),
-   spec("SAD_SUM_8BIT","bus","hex",0,255,(t)=>t<4?220:t<8?255:t<12?(48):12,"TRUNCATED 8-bit sum wraps modulo 256 (304 -> 0x30)!","RTL Bus Probe","LOGIC","—"),
-   spec("BEST_DIST","bus","hex",0,255,(t)=>t<8?220:48,"False minimum captured due to 8-bit wraparound bug!","RTL Bus Probe","LOGIC","—"),
-   spec("MOTION_X_ERR","digital","logic",-0.15,1.15,(t)=>step(t,8),"Golden model mismatch flag raised in Verdi assertion","SVA Flag","LOGIC","—")
+   spec("CLK_520MHz","clock","V",-0.1,1.1,(t)=>Math.floor(t/0.9615)%2*.8,"Ideal 520 MHz training clock; not a VCS acquisition","RTL illustration","LOGIC","—"),
+   spec("ACCUM[7:0]","bus","hex",0,255,t=>t<4?240:255,"Saturation at 8'hFF cannot represent 256×255 = 65280","Training 8-bit bus","LOGIC","—"),
+   spec("BestDist[7:0]","bus","hex",0,255,()=>255,"Strict comparison FF < FF is false; no update","Training comparator","LOGIC","—"),
+   spec("newBest","digital","logic",-.1,1.1,()=>0,"Tie prevents newBest assertion in max-distortion case","Training logic flag","LOGIC","—")
   ],
   signalsFixed:[
-   spec("CLK_520MHz","clock","V",-0.1,1.1,(t)=>Math.floor(t/0.9615)%2*0.8,"520 MHz system clock (T = 1.923 ns @ 14nm FinFET)","VCS/Verdi nWave","DC","12 GHz"),
-   spec("SAD_SUM_16BIT","bus","hex",0,511,(t)=>t<4?220:t<8?304:t<12?184:96,"Full 12/16-bit datapath preserves true 304 (0x130) sum without wrap","RTL Bus Probe","LOGIC","—"),
-   spec("BEST_DIST","bus","hex",0,511,(t)=>t<12?184:96,"True minimum candidate retained accurately","RTL Bus Probe","LOGIC","—"),
-   spec("MOTION_X_ERR","digital","logic",-0.15,1.15,(t)=>0,"Zero mismatches across 256-pixel full search window","SVA Flag","LOGIC","—")
+   spec("CLK_520MHz","clock","V",-0.1,1.1,(t)=>Math.floor(t/0.9615)%2*.8,"Ideal 520 MHz training clock; not a VCS acquisition","RTL illustration","LOGIC","—"),
+   spec("ACCUM[15:0]","bus","hex",0,65535,t=>t<4?0xFE01:0xFF00,"Exact maximum SAD = 16'hFF00; comparator can represent it","Training 16-bit bus","LOGIC","—"),
+   spec("BestDist[15:0]","bus","hex",0,65535,t=>t<8?0xFFFF:0xFF00,"16'hFF00 < 16'hFFFF updates minimum","Training comparator","LOGIC","—"),
+   spec("newBest","digital","logic",-.1,1.1,t=>wave(t,8,8.9),"Illustrative comparator update flag at an example sample","Training logic flag","LOGIC","—")
   ],
-  registers:[["RTL Bug","reg [7:0] BestDist;","Max SAD per 4x4*256 block > 255 wraps! Fixed with reg [15:0] BestDist"],["Clock Period","T_clk = 1 / 520 MHz = 1.923 ns","Critical path closed cleanly in Design Compiler 14nm"] ],
-  events:[event(4.0,"Sum > 255 Overflow",1,"8-bit accumulator wraps 304 -> 48, fooling comparator"),event(8.0,"Verdi nWave Mismatch",3,"TB catches golden BestMV delta immediately")],
-  lesson:"Bit-width truncation in RTL datapaths manifests identically to hardware corruption in Verdi nWave; widen accumulator + comparator registers beyond worst-case sum."
+  registers:[
+   ["8-bit limit","BestDist = 8'hFF","Max pixel SAD 256×255 = 65,280 cannot be represented"],
+   ["16-bit full range","16'hFF00 < 16'hFFFF","Comparator can accept the maximum-distortion candidate"],
+   ["Real timing","Use a native VCD","Import original VCS simulation for genuine count, PEready, AddressR/S1/S2 and motion-vector buses"]
+  ],
+  events:[
+   event(4,"Illustrative accumulator boundary",1,"The comparison intentionally contrasts saturation at FF with full-range FF00"),
+   event(8,"Illustrative comparator sample",2,"In 8-bit mode newBest=0; in 16-bit mode FF00 < FFFF, newBest pulses")
+  ],
+  lesson:"This 16 ns timing sketch is an EDUCATIONAL reconstruction of the slide 14–17 maximum-distortion mechanism, not a captured VCS/Verdi waveform. For true 0/1/X/Z, addresses, counter values and timing at 520 MHz, import the original VCD below. Do not confuse this local illustration with the separate authentic ngspice board data."
  };
 
  const startupPreset={
