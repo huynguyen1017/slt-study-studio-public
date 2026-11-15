@@ -21,6 +21,15 @@ This is a **public** GitHub Pages educational repository. The user's uploaded CP
 - STM32 NUCLEO-L476RG in UM1724 Rev 17, Table 23: https://www.st.com/resource/en/user_manual/dm00105823.pdf — PA5/D13 LED; PA0/A0 ADC, PA6/D12, PA7/D11, PB8/D15 I2C1_SCL, PB9/D14 I2C1_SDA, PA2 TX, PA3 RX. PC13 is user button.
 - Pin selector deliberately covers only the curated subset and detects invalid alternate-function selection and duplicate use of single UART/I2C signals. Not a replacement for STM32CubeMX or complete electrical/AF database.
 
+## ENGR 844 GPIO and quadrature lesson
+The user's ENGR 844 Lab 1 report (October 2026, supplied via connected Drive) documents a NUCLEO-L476RG plus Keysight EDU33212A generator and EDUX1052G oscilloscope:
+- Square wave generator input: PA10 / Arduino D2 on CN9.
+- LED indicator: PA5 / Arduino D13 on CN5.
+- Quadrature A output: PB5 / D4, quadrature B output: PB4 / D5.
+- PC13: active-low user button, and common ground between generator, board and oscilloscope.
+- Demonstration source starts with 100 Hz, 0-3.3 V equivalent square, 50% duty, DC-coupled scope near 1.65 V edge trigger. Hardware wiring is verified independently.
+The v15 board selector includes an **ENGR 844 reference pin preset** and a runnable *logical* quadrature state cursor `00 → 01 → 11 → 10`. This is a synthetic digital model, not the recorded oscilloscope trace or verified hardware limit. The actual course report’s polling code responded to both rising and falling edges; when each edge toggles the output, a missed-edge-free output cycle can match the input frequency—do not blindly apply a half-frequency claim.
+
 ## Keysight bench reference (v14 preserved)
 The four-channel scope bench inherited from v14 supports modeled/current-sample processing; no hardware remote-control path is present. N7020A is a 2 GHz power-rail probe with ±24 V offset and ±850 mV active signal range; 1169B is a **12 GHz differential voltage** probe amplifier, not a self-contained current clamp. Current from a differential shunt reading requires I=Vdiff/Rshunt with proper units and real calibration. Genuine scope functions such as SCPI/VISA and licensed serial/jitter/eye-mask options are not implied.
 - https://www.keysight.com/us/en/product/N7020A/power-rail-probe-2-ghz.html
