@@ -815,8 +815,29 @@ function mount(root,ctx={}){
    let out='<svg viewBox="0 0 360 138" role="img" aria-label="CH'+(j+1)+' '+esc(ch.name)+'"><rect width="360" height="138" fill="#0b182b"/>';
    out+='<text x="8" y="16" fill="'+colors[j]+'" font-size="12">CH'+(j+1)+' '+esc(ch.name)+'</text><text x="350" y="16" fill="#d8eafd" font-size="10" text-anchor="end">'+esc(ch.probe)+' · '+esc(ch.unit)+'</text>';
    for(let i=0;i<=4;i++){const yy=26+i*22,vol=ch.max-(ch.max-ch.min)*i/4;out+='<path d="M76 '+yy+' H347" stroke="#2f405c" stroke-dasharray="4 5"/><text x="70" y="'+(yy+4)+'" fill="#b6cee2" text-anchor="end" font-size="9.5">'+vol.toFixed(1)+'</text>';}
-   const path=arr.map((v,i)=>((i?"L":"M")+(sx+i/(arr.length-1)*(ex-sx)).toFixed(1)+" "+(114-clamp((v-ch.min)/(ch.max-ch.min||1),0,1)*86).toFixed(1))).join(" ");
-   out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.4" fill="none"/>';
+   if(ch.type==="digital"||ch.type==="bus"){
+    const group=[];let last=null;
+    arr.forEach((v,i)=>{const val=ch.type==="digital"?(v>=.5?1:0):Math.max(0,Math.round(v));
+     if(i===0||val!==last)group.push({i,v:val});last=val});
+    const px=i=>sx+i/(arr.length-1)*(ex-sx);
+    if(ch.type==="digital"){
+     let path="";
+     group.forEach((g,i)=>{
+      const x=px(g.i),end=px(group[i+1]?.i??arr.length-1),yy=g.v?42:109;
+      path+=(i?" H":"M")+x.toFixed(1)+(i?" V"+yy:" "+yy)+" H"+end.toFixed(1);
+      if(end-x>17)out+='<text x="'+((x+end)/2).toFixed(1)+'" y="'+(g.v?34:122)+'" fill="'+colors[j]+'" text-anchor="middle" font-size="10">'+g.v+'</text>';
+     });
+     out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.4" fill="none"/>';
+    }else group.forEach((g,i)=>{
+     const x=px(g.i),end=px(group[i+1]?.i??arr.length-1);if(end<=x)return;
+     const q=Math.min(3,(end-x)/5);
+     out+='<path d="M'+(x+q).toFixed(1)+' 49 H'+(end-q).toFixed(1)+' L'+end.toFixed(1)+' 73 L'+(end-q).toFixed(1)+' 98 H'+(x+q).toFixed(1)+' L'+x.toFixed(1)+' 73 Z" stroke="'+colors[j]+'" fill="'+colors[j]+'" fill-opacity=".06"/>';
+     if(end-x>25)out+='<text x="'+((x+end)/2).toFixed(1)+'" y="77" text-anchor="middle" fill="'+colors[j]+'" font-size="9">'+esc(formatChannel(g.v,ch))+'</text>';
+    });
+   }else{
+    const path=arr.map((v,i)=>((i?"L":"M")+(sx+i/(arr.length-1)*(ex-sx)).toFixed(1)+" "+(114-clamp((v-ch.min)/(ch.max-ch.min||1),0,1)*86).toFixed(1))).join(" ");
+    out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.4" fill="none"/>';
+   }
    [[state.a,"#ffe08a","A"],[state.b,"#69e3be","B"]].forEach(([t,c,l])=>{if(t>=state.left&&t<=state.right){const x=sx+(t-state.left)/(state.right-state.left)*(ex-sx);out+='<path d="M'+x+' 22 V120" stroke="'+c+'" stroke-dasharray="4 4"/><text x="'+x+'" y="132" fill="'+c+'" text-anchor="middle" font-size="10">'+l+'</text>';}});
    return out+'</svg>';
   }).join("");
