@@ -69,6 +69,17 @@ assert.equal(ctx.window.academyStaticDiagnostics("int main(void){ return 0; }","
    await page.locator("#ideLang").selectOption("c");
    await page.locator("#ideRun").click();
    assert.match(await page.locator("#ideOutput").textContent(),/NOT COMPILED/);
+   if(width===1280){
+    await page.locator("#ideLang").selectOption("python");
+    await page.locator("#ideSource").fill("print(2 + 3)");
+    await page.locator("#ideRun").click();
+    await page.waitForFunction(()=>{
+     const x=document.querySelector("#ideOutput")?.textContent||"";
+     return x.includes("[PASS] Python execution completed.")||x.includes("[ERROR]")||x.includes("[TIMEOUT]");
+    },null,{timeout:60000});
+    assert.match(await page.locator("#ideOutput").textContent(),/\[PASS\] Python execution completed/,"Pyodide must run actual Python and print 5");
+    assert.match(await page.locator("#ideOutput").textContent(),/\b5\b/,"Python stdout");
+   }
    await page.locator('[data-aca="report"]').click();
    assert.equal(await page.locator("#acaReport textarea").count(),7);
    await page.locator("#acaAppendData").click();
