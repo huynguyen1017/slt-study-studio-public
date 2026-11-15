@@ -21,3 +21,7 @@
 .rtl-vcd-matrix thead th{background:#1c354c}
 .rtl-vcd-note{font-size:11px!important;color:#b7cce0!important}
 @media(max-width:600px){.rtl-vcd-bar label{width:100%;max-width:100%}.rtl-vcd-bar button{flex:1 1 90px}}
+
+.rtl-vcd-viewport{max-width:100%;overflow-x:auto;scrollbar-color:#527594 #071627}
+.rtl-vcd-viewport:focus-visible{outline:3px solid #76e2ce;outline-offset:-3px}
+@media(max-width:760px){.rtl-vcd-viewport .rtl-vcd-svg{width:890px;max-width:none;min-width:890px;height:auto}}
