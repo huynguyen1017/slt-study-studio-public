@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v11';
+const CACHE = 'slt-study-studio-v11-v12';
 const CORE = [
   "./",
   "./index.html",

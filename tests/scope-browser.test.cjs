@@ -2,7 +2,9 @@
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 (async()=>{
- const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const launchOpts={headless:true,args:['--no-sandbox']};
+ if(process.env.PW_EXEC)launchOpts.executablePath=process.env.PW_EXEC;
+ const browser=await chromium.launch(launchOpts);
  try{
   for(const width of [1280,390]){
    const page=await browser.newPage({viewport:{width,height:900},acceptDownloads:true});
@@ -45,8 +47,21 @@ const {chromium}=require('playwright');
    if(width<500){
     assert.ok(await page.locator('#bsMobile svg').count()>=4,'mobile waveforms rendered');
    }
+   // v12 checks: Infiniium menubar, Deep-Dive sub-tabs, mini-flashcards, Kahoot check, Guided Labs step waveform
+   await page.locator('[data-ks-menu="setup"]').first().click();
+   assert.equal(await page.locator('[data-ks-menu="setup"]').first().getAttribute('aria-expanded'),'true');
+   await page.locator('#ksDrawer [data-close]').first().click().catch(()=>{});
+   await page.locator('[data-dd-tab="quiz"]').click();
+   assert.equal(await page.locator('[data-dd-tab="quiz"]').getAttribute('aria-selected'),'true');
+   await page.locator('[data-mini-idx="0"]').click();
+   assert.equal(await page.locator('[data-mini-idx="0"]').getAttribute('aria-pressed'),'true');
+   await page.locator('[data-kidx="0"]').click();
+   await page.locator('#nbKahootFb').waitFor({state:'visible',timeout:5000});
+   await page.locator('[data-mode="labs"]').click();
+   await page.locator('[data-lab="reset"]').click();
+   await page.locator('#labPlayer [data-instrument]').waitFor({state:'visible',timeout:10000});
    assert.deepEqual(errors,[],'no unhandled browser exceptions');
-   console.log('PASS browser width='+width+': notebook, board scope, FFT, XY, trigger, no-match, autoset, CSV');
+   console.log('PASS browser width='+width+': notebook, board scope, Infiniium menus, sub-tabs, mini-cards, Kahoot, labs');
    await page.close();
   }
  } finally {await browser.close()}

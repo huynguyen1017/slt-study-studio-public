@@ -221,7 +221,13 @@ function renderXY(rows,run,xch,ych,left,right){
 }
 function widget(){
  return '<section class="bs-scope" data-board-scope aria-label="Real ngspice multicycle transient waveform analyzer">'+
- '<div class="bs-bezel"><div><strong>◉ TRANSIENT ENGINEERING WORKBENCH · 6 LANES</strong><small>Oscilloscope controls · real ngspice samples · source 80 ns pulse / gate 60 ns pulse</small></div><div class="bs-status"><span id="bsState">STOP</span><span id="bsTriggerState">CH1 ↑</span><span id="bsWindow">0–240 ns</span></div></div>'+
+ '<div class="ks-menubar-wrap"><div role="menubar" class="ks-menubar" aria-label="Board oscilloscope menu bar">'+
+  '<button type="button" class="ks-menu-trigger ks-scope-pill" data-bs-menu="scope" aria-haspopup="menu" aria-expanded="false" tabindex="0">Scope</button>'+
+  ['File','Control','Setup','Display','Trigger','Measure','Math','Analyze','Utilities','Help'].map(m=>
+   '<button type="button" class="ks-menu-trigger" data-bs-menu="'+m.toLowerCase()+'" aria-haspopup="menu" aria-expanded="false" tabindex="-1">'+m+'</button>'
+  ).join('')+
+ '</div><div class="ks-menu-drawer" id="bsMenuDrawer" hidden role="region" aria-label="Board scope menu controls"></div></div>'+
+ '<div class="bs-bezel"><div><strong>◉ KEYSIGHT INFINIIUM · SPICE 6-LANE TRANSIENT BENCH</strong><small>Oscilloscope controls · real ngspice samples · source 80 ns pulse / gate 60 ns pulse</small></div><div class="bs-status"><span id="bsState">STOP</span><span id="bsTriggerState">CH1 ↑</span><span id="bsWindow">0–240 ns</span></div></div>'+
  '<div class="bs-origin"><b>SIMULATED — NOT MEASURED HARDWARE</b> · 48 CIRCUIT CONFIGURATIONS · 3 SOURCE PERIODS / 4 GATE PERIODS · 240 ns</div>'+
  '<div class="bs-toolbar" aria-label="Scope playback and acquisition controls">'+
  '<button id="bsRun" type="button">▶ Acquire / Replay</button><button id="bsStop" type="button">■ Pause</button><button id="bsStep" type="button">↦ Next event</button>'+
@@ -234,9 +240,9 @@ function widget(){
  '<label>Edge<select id="bsEdge"><option value="rise">Rising ↑</option><option value="fall">Falling ↓</option></select></label>'+
  '<label>Trigger mode<select id="bsTrigMode"><option value="auto">Auto</option><option value="normal">Normal</option><option value="single">Single</option></select></label>'+
  '<label>Holdoff ns<input id="bsHoldoff" type="number" min="0" max="240" step=".1" value="0"/></label>'+
- '<button id="bsSingle" type="button">Single trigger</button><button id="bsAutoset" type="button">Autoset</button><button id="bsCenter" type="button">Center trigger</button><button id="bsCompare" type="button" aria-pressed="false">Compare baseline: OFF</button><button id="bsExpand" type="button" aria-expanded="false">⛶ Full screen</button></div>'+
+ '<button id="bsSingle" type="button">Single trigger</button><button id="bsAutoset" type="button">Autoset</button><button id="bsCenter" type="button">Center trigger</button><button id="bsCompare" type="button" aria-pressed="false">Compare baseline: OFF</button><button id="bsRefBtn" type="button" aria-pressed="false">Save R1 Compare</button><button id="bsExpand" type="button" aria-expanded="false">⛶ Full screen</button></div>'+
  '<div class="bs-channelbar" id="bsChannelbar" aria-label="Independently calibrated waveform channels"></div>'+
- '<div class="bs-screen"><div class="bs-screenhead"><span><b>CH1–CH6 · FULL-CYCLE ACQUISITION</b></span><span id="bsScreenRange">0–240 ns</span></div>'+
+ '<div class="bs-screen"><div class="bs-screenhead"><span><b>CH1–CH6 · FULL-CYCLE ACQUISITION + R1 COMPARE</b></span><span id="bsScreenRange">0–240 ns</span></div>'+
  '<svg id="bsLarge" role="img" tabindex="0" viewBox="0 0 1160 880" aria-label="Multicycle oscilloscope traces with annotated source rising and falling edges"></svg>'+
  '<div class="bs-mobile" id="bsMobile" aria-label="Full-width stacked mobile trace plots"></div>'+
  '<div class="bs-events" id="bsEvents" aria-label="Detected waveform edge events"></div></div>'+
@@ -252,7 +258,7 @@ function widget(){
  '<div class="bs-analysis-plots"><div><h5>FREQUENCY SPECTRUM · WINDOWED DFT</h5><svg id="bsSpectrum" viewBox="0 0 780 220" role="img" aria-label="Frequency spectrum computed from uniformly interpolated stored SPICE samples"></svg></div>'+
  '<div><h5>XY CHANNEL CORRELATION</h5><svg id="bsXY" viewBox="0 0 780 220" role="img" aria-label="XY plot of two selected simulated channel values"></svg></div></div>'+
  '<p id="bsAnalysisNote" class="bs-analysis-note"></p></div>'+
- '<div class="bs-bottom"><section><h5>MEASUREMENTS · WINDOW / ACTUAL SIMULATED VALUES</h5><table><thead><tr><th>Channel</th><th>Min</th><th>Max</th><th>Pk–Pk</th></tr></thead><tbody id="bsMetrics"></tbody></table></section>'+
+ '<div class="bs-bottom"><section><h5>MEASUREMENTS · WINDOW / ACTUAL SIMULATED VALUES</h5><div class="bs-table-scroll" tabindex="0" role="region" aria-label="Automated channel statistics table"><table><thead><tr><th>Channel</th><th>Min</th><th>Max</th><th>Pk–Pk</th><th>Avg</th><th>StdDev</th></tr></thead><tbody id="bsMetrics"></tbody></table></div></section>'+
  '<section><h5>CURSOR A/B · TIME-ALIGNED VOLTAGE / CURRENT / POWER</h5><div class="bs-sliders">'+
  '<label>A <b id="bsTimeA">—</b><input id="bsA" type="range"></label><label>B <b id="bsTimeB">—</b><input id="bsB" type="range"></label></div>'+
  '<div class="bs-deltas" id="bsDelta"></div><div class="bs-at" id="bsAtCursor"></div></section></div>'+
@@ -271,7 +277,7 @@ function init(host,run,time,options){
   const state={run,runId:run.id,mode,lo:0,hi:limit,cursor:clamp(time,0,limit),
    a:clamp(time,0,limit),b:mode==="cycles"?81:8,shown:[true,true,true,true,true,false],
    gain:[1,1,1,1,1,1],coupling:["DC","DC","DC","DC","DC","DC"],inverted:[false,false,false,false,false,false],offset:[0,0,0,0,0,0],trig:0,level:run.supply*.5,edge:"rise",trigMode:"auto",holdoff:0,triggerStatus:"",analysisCh:2,xyX:4,xyY:2,
-   speed:1,playing:false,raf:0,lastFrame:0,reveal:null,focus:null,stages:0,compare:false,options:options||{},
+   speed:1,playing:false,raf:0,lastFrame:0,reveal:null,focus:null,stages:0,compare:false,savedRef:null,openMenu:null,options:options||{},
    eventIndex:0};
   host.__boardScope=state;
   state.focus=events(run,mode)[0]||null;
@@ -361,6 +367,62 @@ function connect(host,st){
  $("#bsCompare").onclick=()=>{
   stop();st.compare=!st.compare;paint(host,st);
  };
+ $("#bsRefBtn").onclick=()=>{
+  if(st.savedRef){st.savedRef=null;}
+  else{st.savedRef={label:"R1 "+st.run.id,run:st.run,mode:st.mode,rows:rows().map(r=>[...r])};}
+  paint(host,st);
+ };
+ // Keysight Infiniium Top Menubar for Board SPICE Scope (roving tabindex + drawer actions)
+ const menubar=host.querySelector(".ks-menubar"), drawer=$("#bsMenuDrawer");
+ const menuTriggers=[...host.querySelectorAll("[data-bs-menu]")];
+ function closeBsMenu(){
+  st.openMenu=null;
+  menuTriggers.forEach(b=>b.setAttribute("aria-expanded","false"));
+  if(drawer)drawer.hidden=true;
+ }
+ function openBsMenu(key){
+  st.openMenu=key;
+  menuTriggers.forEach((b,i)=>{const act=b.dataset.bsMenu===key;b.setAttribute("aria-expanded",String(act));b.tabIndex=act?0:-1;if(!key&&i===0)b.tabIndex=0;});
+  const items={
+   scope:[["Default Autoscale",()=>$("#bsAutoset").click()],["Toggle Full Screen",()=>$("#bsExpand").click()]],
+   file:[["Save R1 Waveform",()=>$("#bsRefBtn").click()],["Export CSV",()=>$("#bsExportCSV").click()],["Export Scope SVG",()=>$("#bsExportSVG").click()]],
+   control:[["Acquire / Replay",()=>$("#bsRun").click()],["Single Trigger",()=>$("#bsSingle").click()],["Pause",()=>$("#bsStop").click()]],
+   setup:[["240 ns Multicycle",()=>{st.mode="cycles";$("#bsMode").value="cycles";$("#bsMode").onchange({target:$("#bsMode")})}],["16 ns Initial Edge",()=>{st.mode="short";$("#bsMode").value="short";$("#bsMode").onchange({target:$("#bsMode")})}]],
+   display:[["Full Screen Popover",()=>$("#bsExpand").click()],["Compare Baseline R0",()=>$("#bsCompare").click()],["Save/Clear R1",()=>$("#bsRefBtn").click()]],
+   trigger:[["CH1 Vsrc Rising",()=>{st.trig=0;st.edge="rise";$("#bsTrig").value="0";$("#bsEdge").value="rise";paint(host,st)}],["CH3 Vrx Falling",()=>{st.trig=2;st.edge="fall";$("#bsTrig").value="2";$("#bsEdge").value="fall";paint(host,st)}],["Center Trigger",()=>$("#bsCenter").click()]],
+   measure:[["Analyze CH3 Vrx",()=>{st.analysisCh=2;$("#bsAnalysisCh").value="2";paint(host,st)}],["Analyze CH5 Itrace",()=>{st.analysisCh=4;$("#bsAnalysisCh").value="4";paint(host,st)}],["Next Event Marker",()=>$("#bsStep").click()]],
+   math:[["Toggle R1 Overlay",()=>$("#bsRefBtn").click()],["Inspect Derived Power CH6",()=>{st.shown[5]=!st.shown[5];st.analysisCh=5;$("#bsAnalysisCh").value="5";paint(host,st)}]],
+   analyze:[["Focus DFT Spectrum",()=>$("#bsSpectrum").scrollIntoView({behavior:"smooth",block:"center"})],["Focus XY Correlation",()=>$("#bsXY").scrollIntoView({behavior:"smooth",block:"center"})]],
+   utilities:[["Reset All Probes/Gain",()=>$("#bsAutoset").click()]],
+   help:[["ngspice Topology Notice",()=>alert("6-lane transient scope running real ngspice-47 transmission line samples with Keysight Infiniium menu bindings.")]]
+  }[key]||[];
+  drawer.innerHTML=items.map(([lbl],idx)=>'<button type="button" class="ks-drawer-btn" data-bs-mact="'+idx+'">'+esc(lbl)+'</button>').join("")+
+   '<button type="button" class="ks-drawer-close" data-bs-mclose="1">Close ×</button>';
+  drawer.hidden=false;
+  drawer.onclick=ev=>{
+   const act=ev.target.closest("[data-bs-mact]");
+   if(act){items[+act.dataset.bsMact]?.[1]?.();closeBsMenu();return;}
+   if(ev.target.closest("[data-bs-mclose]"))closeBsMenu();
+  };
+ }
+ if(menubar){
+  menubar.addEventListener("click",e=>{
+   const b=e.target.closest("[data-bs-menu]");if(!b)return;
+   if(st.openMenu===b.dataset.bsMenu)closeBsMenu();else openBsMenu(b.dataset.bsMenu);
+  });
+  menubar.addEventListener("mouseover",e=>{
+   if(!st.openMenu)return;const b=e.target.closest("[data-bs-menu]");if(b&&b.dataset.bsMenu!==st.openMenu)openBsMenu(b.dataset.bsMenu);
+  });
+  menubar.addEventListener("keydown",e=>{
+   const cur=document.activeElement?.closest("[data-bs-menu]");if(!cur)return;
+   const i=menuTriggers.indexOf(cur);
+   if(e.key==="ArrowRight"){e.preventDefault();const nxt=menuTriggers[(i+1)%menuTriggers.length];cur.tabIndex=-1;nxt.tabIndex=0;nxt.focus();if(st.openMenu)openBsMenu(nxt.dataset.bsMenu);}
+   else if(e.key==="ArrowLeft"){e.preventDefault();const prv=menuTriggers[(i-1+menuTriggers.length)%menuTriggers.length];cur.tabIndex=-1;prv.tabIndex=0;prv.focus();if(st.openMenu)openBsMenu(prv.dataset.bsMenu);}
+   else if(e.key==="ArrowDown"){e.preventDefault();openBsMenu(cur.dataset.bsMenu);}
+   else if(e.key==="Escape"){closeBsMenu();cur.focus();}
+  });
+  host.ownerDocument.addEventListener("focusin",e=>{if(st.openMenu&&!e.target.closest(".ks-menubar-wrap"))closeBsMenu();});
+ }
  $("#bsMode").value=st.mode;
  $("#bsEdge").value=st.edge;$("#bsTrigMode").value=st.trigMode;$("#bsHoldoff").value=st.holdoff;
  $("#bsMode").onchange=e=>{
@@ -464,6 +526,10 @@ function paint(host,st){
  $("#bsMode").value=st.mode;
  $("#bsCompare").textContent=st.compare?"Compare baseline: ON":"Compare baseline: OFF";
  $("#bsCompare").setAttribute("aria-pressed",String(st.compare));
+ if($("#bsRefBtn")){
+  $("#bsRefBtn").textContent=st.savedRef?"R1 Overlay: ON (Clear)":"Save R1 Compare";
+  $("#bsRefBtn").setAttribute("aria-pressed",String(!!st.savedRef));
+ }
  $("#bsChannelbar").innerHTML=CONFIG.map((c,k)=>{
   let per=(ranges[k][1]-ranges[k][0])/4;
   return '<div class="bs-channel"><button data-bs-ch="'+k+'" style="--bs-color:'+c.color+'" aria-pressed="'+visible[k]+'" type="button">'+
@@ -506,6 +572,12 @@ function paint(host,st){
    const ghost=refSeg.filter(r=>r[0]>=st.lo&&r[0]<=st.hi);
    if(ghost.length)svg+='<path d="'+ghost.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(display(r,2),k,yt,height).toFixed(2)).join(" ")+
       '" fill="none" stroke="#f5e9b8" stroke-dasharray="7 4" stroke-width="1.8" opacity=".9"/>';
+  }
+  if(st.savedRef&&st.savedRef.mode===st.mode){
+   const rSeg=minMaxDecimate(segment(st.savedRef.rows,st.lo,Math.min(st.hi,st.reveal??st.hi)),k,st.savedRef.run,900);
+   const rg=rSeg.filter(r=>r[0]>=st.lo&&r[0]<=st.hi);
+   if(rg.length)svg+='<path d="'+rg.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(value(r,k,st.savedRef.run),k,yt,height).toFixed(2)).join(" ")+
+      '" fill="none" stroke="#a6c8ff" stroke-dasharray="5 3" stroke-width="1.6" opacity=".82"/>';
   }
   if(st.cursor>=st.lo&&st.cursor<=st.hi&&(st.reveal===null||st.cursor<=st.reveal)){
    let cur=nearest(rows,st.cursor);
@@ -578,8 +650,14 @@ function paint(host,st){
   $("#bsXY").innerHTML=renderXY(rows,st.run,st.xyX,st.xyY,st.lo,st.hi);
  }
  $("#bsAnalysisNote").textContent="Vertical AC, GND, invert and offset adjust displayed traces only; AC removes the visible-window mean (not a calibrated physical high-pass filter). Triggers, FFT and engineering measurement tables use raw circuit data. FFT displays an approximate windowed DFT on 128 uniformly interpolated numerical samples; bin spacing "+(1000/span).toFixed(3)+" MHz. It cannot resolve frequencies finer than the selected time window. XY uses stored numerical samples (no hardware ADC, probe calibration, or streaming).";
- $("#bsMetrics").innerHTML=CONFIG.map((c,k)=>'<tr><th style="color:'+c.color+'">'+c.short+'</th>'+
-  '<td>'+fmt(allStats[k].min,c.unit)+'</td><td>'+fmt(allStats[k].max,c.unit)+'</td><td>'+fmt(allStats[k].pp,c.unit)+'</td></tr>').join("");
+ $("#bsMetrics").innerHTML=CONFIG.map((c,k)=>{
+  const vals=data.map(r=>value(r,k,st.run));
+  const avg=mean[k];
+  const sd=Math.sqrt(vals.reduce((s,v)=>s+(v-avg)*(v-avg),0)/Math.max(vals.length,1));
+  return '<tr><th style="color:'+c.color+'">'+c.short+'</th>'+
+   '<td>'+fmt(allStats[k].min,c.unit)+'</td><td>'+fmt(allStats[k].max,c.unit)+'</td><td>'+fmt(allStats[k].pp,c.unit)+'</td>'+
+   '<td>'+fmt(avg,c.unit)+'</td><td>'+fmt(sd,c.unit)+'</td></tr>';
+ }).join("");
  $("#bsTimeA").textContent=st.a.toFixed(2)+" ns";$("#bsTimeB").textContent=st.b.toFixed(2)+" ns";
  for(let [id,v] of [["bsA",st.a],["bsB",st.b]]){
   let el=$("#"+id);el.min=0;el.max=Tmax;el.step=.01;el.value=v;

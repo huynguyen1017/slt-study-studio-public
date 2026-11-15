@@ -162,5 +162,7 @@
 .bs-analysis-plots h5{font:800 11px/1.3 ui-monospace,monospace!important;color:#d9e8f7!important;margin:0 0 8px!important}
 .bs-analysis-plots svg{display:block;width:100%;height:auto;background:#061323;border-radius:5px}
 .bs-analysis-note{font:600 11px/1.6 system-ui;color:#d5e1ed;margin:10px 0 0}
+.bs-table-scroll{width:100%;max-width:100%;overflow-x:auto;border:1px solid #415572;border-radius:6px}
+.bs-table-scroll table{min-width:470px}
 @media(max-width:800px){.bs-analysis-plots{grid-template-columns:1fr}}
 @media(max-width:480px){.bs-analysis{padding:9px}.bs-analysis-controls label{flex:1 1 125px}.bs-analysis-controls button{flex:1 1 132px}.bs-analysis-results{font-size:11px}}
