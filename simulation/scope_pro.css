@@ -22,3 +22,11 @@
 .sp-matrix{overflow-x:auto;max-width:100%;padding:7px}
 .sp-matrix table{border-collapse:collapse;min-width:330px;width:100%;font:650 11px/1.4 ui-monospace,monospace}
 .sp-matrix th,.sp-matrix td{border:1px solid #546882;padding:7px 9px;text-align:left}
+#siPlot .ks-corr-line,#siMobilePlot .ks-corr-line,#blWaveMobile .ks-corr-line{stroke-dashoffset:0;transition:opacity 180ms ease-out;pointer-events:none}
+#siPlot .ks-marker-b-dot,#siMobilePlot .ks-marker-b-dot,#blWaveMobile .ks-marker-b-dot{transition:transform 160ms ease-out;pointer-events:none}
+@media(prefers-reduced-motion:no-preference){
+ #siPlot .ks-corr-line,#siMobilePlot .ks-corr-line,#blWaveMobile .ks-corr-line{animation:spCorrFlow 1.4s linear infinite}
+ #siPlot .ks-dot-b,#siMobilePlot .ks-dot-b,#blWaveMobile .ks-dot-b{animation:spDotPulse 1.8s ease-in-out infinite}
+ @keyframes spCorrFlow{to{stroke-dashoffset:-16}}
+ @keyframes spDotPulse{0%,100%{stroke-width:1.5px}50%{stroke-width:3px}}
+}

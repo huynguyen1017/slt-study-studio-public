@@ -583,11 +583,23 @@ function paint(host,st){
    if(rg.length)svg+='<path d="'+rg.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(value(r,k,st.savedRef.run),k,yt,height).toFixed(2)).join(" ")+
       '" fill="none" stroke="#a6c8ff" stroke-dasharray="5 3" stroke-width="1.6" opacity=".82"/>';
   }
-  [[st.a,"A","#ffd57b"],[st.b,"B","#7ceacc"]].forEach(([t,tag,color])=>{
+  const rowA=nearest(rows,st.a),rowB=nearest(rows,st.b);
+  const yA=clamp(y(display(rowA,k),k,yt,height),yt,yt+height),yB=clamp(y(display(rowB,k),k,yt,height),yt,yt+height);
+  if(st.a>=st.lo&&st.a<=st.hi&&st.b>=st.lo&&st.b<=st.hi&&(st.reveal===null||st.b<=st.reveal)){
+   svg+='<line class="ks-corr-line" data-corr-ch="'+k+'" x1="'+x(st.a).toFixed(2)+'" y1="'+yA.toFixed(2)+'" x2="'+x(st.b).toFixed(2)+'" y2="'+yB.toFixed(2)+'" stroke="#7ceacc" stroke-width="1.8" stroke-dasharray="5 3" opacity="0.9"/>';
+  }
+  [[st.a,"A","#ffd57b",yA,"ks-marker-a-dot"],[st.b,"B","#7ceacc",yB,"ks-marker-b-dot ks-dot-b"]].forEach(([t,tag,color,pointY,cls])=>{
    if(t<st.lo||t>st.hi)return;
-   const row=nearest(rows,t),pointY=clamp(y(display(row,k),k,yt,height),yt,yt+height);
-   svg+='<circle class="bs-ab-point" data-marker="'+tag+'" data-channel="'+k+'" cx="'+x(t).toFixed(2)+'" cy="'+pointY.toFixed(2)+'" r="4.8" fill="'+color+'" stroke="#061323" stroke-width="1.5"/>';
+   svg+='<circle class="bs-ab-point '+cls+'" data-marker="'+tag+'" data-channel="'+k+'" cx="'+x(t).toFixed(2)+'" cy="'+pointY.toFixed(2)+'" r="4.8" fill="'+color+'" stroke="#061323" stroke-width="1.5"/>';
   });
+  if(k===0||k===3){
+   for(let sIdx=0;sIdx<8;sIdx++){
+    const ts=st.lo+span*(sIdx+0.5)/8;
+    if(st.reveal!==null&&ts>st.reveal)continue;
+    const bitVal=(k===0?(value(nearest(rows,ts),0,st.run)>st.run.supply*0.5?1:0):(value(nearest(rows,ts),3,st.run)>1.65?1:0));
+    svg+='<text class="surfer-bit-lbl" x="'+x(ts).toFixed(1)+'" y="'+(bitVal?yt+13:yt+height-4)+'" text-anchor="middle" fill="'+(bitVal?'#a5f8c8':'#8ab4d8')+'" font-size="10">'+bitVal+'</text>';
+   }
+  }
   if(st.cursor>=st.lo&&st.cursor<=st.hi&&(st.reveal===null||st.cursor<=st.reveal)){
    let cur=nearest(rows,st.cursor);
    svg+='<circle cx="'+x(st.cursor)+'" cy="'+clamp(y(display(cur,k),k,yt,height),yt,yt+height)+'" r="4.5" fill="'+c.color+'" stroke="#fff" stroke-width="1.5"/>';
@@ -641,9 +653,13 @@ function paint(host,st){
   }
   let segmentRows=minMaxDecimate(dataShown.filter(r=>r[0]>=st.lo&&r[0]<=st.hi),k,st.run,520);
   if(segmentRows.length)out+='<path d="'+segmentRows.map((r,i)=>(i?"L":"M")+xx(r[0]).toFixed(1)+" "+yy(display(r,k)).toFixed(1)).join(" ")+'" fill="none" stroke="'+c.color+'" stroke-width="2.7"/>';
-  for(let [t,tag,c] of [[st.a,"A","#ffdb8a"],[st.b,"B","#7bedd0"]]){
+  const myA=clamp(yy(display(nearest(rows,st.a),k)),28,124),myB=clamp(yy(display(nearest(rows,st.b),k)),28,124);
+  if(st.a>=st.lo&&st.a<=st.hi&&st.b>=st.lo&&st.b<=st.hi&&(st.reveal===null||st.b<=st.reveal)){
+   out+='<line class="ks-corr-line" data-corr-ch="'+k+'" x1="'+xx(st.a).toFixed(1)+'" y1="'+myA.toFixed(1)+'" x2="'+xx(st.b).toFixed(1)+'" y2="'+myB.toFixed(1)+'" stroke="#7bedd0" stroke-width="1.7" stroke-dasharray="4 3"/>';
+  }
+  for(let [t,tag,col,py,cls] of [[st.a,"A","#ffdb8a",myA,"ks-marker-a-dot"],[st.b,"B","#7bedd0",myB,"ks-marker-b-dot ks-dot-b"]]){
    if(t<st.lo||t>st.hi)continue;
-   out+='<path d="M'+xx(t)+' 27 V125" stroke="'+c+'" stroke-dasharray="5 4"/><text x="'+xx(t)+'" y="154" text-anchor="middle" fill="'+c+'" font-size="11">'+tag+'</text>';
+   out+='<path d="M'+xx(t)+' 27 V125" stroke="'+col+'" stroke-dasharray="5 4"/><circle class="bs-ab-point '+cls+'" data-marker="'+tag+'" data-channel="'+k+'" cx="'+xx(t).toFixed(1)+'" cy="'+py.toFixed(1)+'" r="4.2" fill="'+col+'" stroke="#081320" stroke-width="1.2"/><text x="'+xx(t)+'" y="154" text-anchor="middle" fill="'+col+'" font-size="11">'+tag+'</text>';
   }
   return out+'</svg>';
  }).join("");

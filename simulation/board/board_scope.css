@@ -172,3 +172,11 @@
 .bs-linktools button[aria-pressed="false"]{background:#243b52;border-color:#7696b0}
 .bs-linktools span{color:#c3dbed;font:650 10px/1.5 system-ui}
 .bs-ab-window,.bs-ab-point{pointer-events:none}
+.ks-corr-line{stroke-dashoffset:0;transition:opacity 180ms ease-out;pointer-events:none}
+.ks-marker-b-dot{transition:transform 160ms ease-out}
+@media(prefers-reduced-motion:no-preference){
+ .ks-corr-line{animation:bsCorrFlow 1.4s linear infinite}
+ .ks-dot-b{animation:bsMarkerPulse 1.8s ease-in-out infinite}
+ @keyframes bsCorrFlow{to{stroke-dashoffset:-16}}
+ @keyframes bsMarkerPulse{0%,100%{stroke-width:1.4px}50%{stroke-width:3px}}
+}

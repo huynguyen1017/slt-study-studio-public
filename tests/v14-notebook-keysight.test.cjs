@@ -16,7 +16,7 @@ assert.ok(filtered[2]>0&&filtered[2]<1);
 assert.ok(m.reduceSamples([0,1,2,10,3,4,5,6],'peak',4,2).hi.includes(10));
 assert.equal(m.timing([0,0,1,1,0,0,1,1],[0,1,2,3,4,5,6,7],10).period,4);
 (async()=>{
-const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+const browser=await chromium.launch({headless:true,args:['--no-sandbox'],...(process.env.PW_EXEC?{executablePath:process.env.PW_EXEC}:{})});
 try{
 for(const width of [1280,390]){
  const page=await browser.newPage({viewport:{width,height:900}});

@@ -148,3 +148,13 @@
 .ix-ab-detail thead th{background:#22415a;color:#cde8f9}
 .ix-ab-window{pointer-events:none}
 .ix-ab-point{pointer-events:none}
+.surfer-bit-lbl{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.surfer-bus-seg{transition:fill 180ms ease-out,stroke 180ms ease-out}
+#ixPlot .ks-corr-line,#ixMobile .ks-corr-line{stroke-dashoffset:0;transition:opacity 180ms ease-out;pointer-events:none}
+#ixPlot .ks-marker-b-dot,#ixMobile .ks-marker-b-dot{transition:transform 160ms ease-out;pointer-events:none}
+@media(prefers-reduced-motion:no-preference){
+ #ixPlot .ks-corr-line,#ixMobile .ks-corr-line{animation:ixCorrFlow 1.4s linear infinite}
+ #ixPlot .ks-dot-b,#ixMobile .ks-dot-b{animation:ixDotPulse 1.8s ease-in-out infinite}
+ @keyframes ixCorrFlow{to{stroke-dashoffset:-16}}
+ @keyframes ixDotPulse{0%,100%{stroke-width:1.4px}50%{stroke-width:3px}}
+}

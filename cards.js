@@ -209,7 +209,110 @@ window.STUDY_CARDS = [
             "N7020A Diff (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 1. What is signal integrity and how do you maintain it in high-speed digital designs?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 1. What is signal integrity and how do you maintain it in high-speed digital designs?.",
+        "corrDelta": 45.92,
+        "bitPatternFault": "1110111110111011",
+        "bitPatternFixed": "1110111111101111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00ff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=ff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1ef",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1df",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00ff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0106",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 5.2,
+          "damp": 0.45,
+          "ringMult": 1.71,
+          "seed": 699
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.045,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.73,
+            "w": 0.04,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -423,7 +526,110 @@ window.STUDY_CARDS = [
             "InfiniiMax N (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 2. Explain the difference between single-ended and differential signaling.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 2. Explain the difference between single-ended and differential signaling..",
+        "corrDelta": 28.82,
+        "bitPatternFault": "1011110000001010",
+        "bitPatternFixed": "0100001101000011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "P/N_03",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "dL=11",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "CM_PEAK",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKEW_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "EYE_38%",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "P/N_03",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "dL<0.5",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "CM=0.0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ALIGN",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "EYE_86%",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 4.78,
+          "damp": 0.27,
+          "ringMult": 1.71,
+          "seed": 235
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.055,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.715,
+            "w": 0.064,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -637,7 +843,110 @@ window.STUDY_CARDS = [
             "Active <1pF (DC 1MOhm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 3. What is setup and hold time? What happens if these requirements are not met?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 3. What is setup and hold time? What happens if these requirements are not met?.",
+        "corrDelta": 45.18,
+        "bitPatternFault": "0001001101111011",
+        "bitPatternFixed": "0001001100010011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=03",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1f3",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1e3",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=010a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 3.52,
+          "damp": 0.225,
+          "ringMult": 1.71,
+          "seed": 960
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.045,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.67,
+            "w": 0.064,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -858,6 +1167,109 @@ window.STUDY_CARDS = [
           ]
         ],
         "lesson": "Calibrated 4-channel trace specifically configured for: 6. During SoC bring-up, how do you verify reset sequencing and clock readiness before BIOS/OS execution?.",
+        "corrDelta": 41.42,
+        "bitPatternFault": "0111111100000000",
+        "bitPatternFixed": "0111111101111111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_2b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RST#=1",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "CLK_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "HANG_F0",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DEAD",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_2b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "LOCK=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "tPOR+",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RST#=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "BOOT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 3.52,
+          "damp": 0.45,
+          "ringMult": 1.43,
+          "seed": 283
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.065,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.67,
+            "w": 0.064,
+            "amp": 0.38
+          }
+        ],
         "presetId": "Startup_4CH_PG_CLK_RST"
       }
     }
@@ -1072,7 +1484,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 8. How is a DDR4/DDR5 interface different from LPDDR?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 8. How is a DDR4/DDR5 interface different from LPDDR?.",
+        "corrDelta": 18.32,
+        "bitPatternFault": "0110011111011100",
+        "bitPatternFixed": "0110001101100011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "ZQ_1f0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "ACT_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "MR_BAD",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "VREF_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "WR_40",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "CKE_X",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "ZQ_080",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "ACT_0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RD_A",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "VREF_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "WR_40",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 4.78,
+          "damp": 0.225,
+          "ringMult": 1.15,
+          "seed": 796
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.075,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.7,
+            "w": 0.04,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -1287,6 +1802,109 @@ window.STUDY_CARDS = [
           ]
         ],
         "lesson": "Calibrated 4-channel trace specifically configured for: 9. What are the key specs you consider when using an oscilloscope?.",
+        "corrDelta": 19.5,
+        "bitPatternFault": "0101110000011000",
+        "bitPatternFixed": "1010000110100001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0100",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1f0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1e0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0100",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0107",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 5.62,
+          "damp": 0.36,
+          "ringMult": 1.43,
+          "seed": 121
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.075,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.745,
+            "w": 0.064,
+            "amp": 0.47
+          }
+        ],
         "presetId": "Veagle_1169B_Rsense_16GSa_22Mpts"
       }
     }
@@ -1502,6 +2120,109 @@ window.STUDY_CARDS = [
           ]
         ],
         "lesson": "Calibrated 4-channel trace specifically configured for: 10. How do you use a DMM to measure current on a board?.",
+        "corrDelta": 19.56,
+        "bitPatternFault": "1011010011111000",
+        "bitPatternFixed": "0100101101001011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "CH1_34",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AC_CAP",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "GND_LO",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ALIAS_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "CLIP!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "ERR",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "CH1_34",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DC_50",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "KELV_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "16GSa",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "V=854",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "CAL",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 3.94,
+          "damp": 0.225,
+          "ringMult": 1.43,
+          "seed": 776
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.065,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.495,
+            "w": 0.085,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.73,
+            "w": 0.052,
+            "amp": 0.65
+          }
+        ],
         "presetId": "Veagle_1169B_Rsense_16GSa_22Mpts"
       }
     }
@@ -1716,7 +2437,110 @@ window.STUDY_CARDS = [
             "Active <1pF (DC 1MOhm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 11. How would you validate a power rail with a DAQ setup?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 11. How would you validate a power rail with a DAQ setup?.",
+        "corrDelta": 33.66,
+        "bitPatternFault": "0101100100001101",
+        "bitPatternFixed": "0101100101011001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "t=2635",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "P4:-820p",
+            "state": "fault"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "0101->X",
+            "state": "x"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "META",
+            "state": "fault"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "S=04",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "ERR!",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "t=2635",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "+850p",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S_buf=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "E=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "f=386M",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 3.52,
+          "damp": 0.495,
+          "ringMult": 1.71,
+          "seed": 734
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.075,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.7,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -1930,7 +2754,110 @@ window.STUDY_CARDS = [
             "10:1 Low-C (DC 1MOhm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 12. A USB 3.0 port works in USB 2.0 mode but not in 3.0 — what's your debug path?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 12. A USB 3.0 port works in USB 2.0 mode but not in 3.0 — what's your debug path?.",
+        "corrDelta": 20.61,
+        "bitPatternFault": "1111110000010101",
+        "bitPatternFixed": "1111110011111100",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "A_51",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "47k_RC",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SLOW_R",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BIT9_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "NACK_1",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "STOP",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "A_51",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "2k2_PU",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "D_a1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ACK_0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "CRC_01",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DONE",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 4.78,
+          "damp": 0.45,
+          "ringMult": 1.85,
+          "seed": 566
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.055,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.064,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -2144,7 +3071,110 @@ window.STUDY_CARDS = [
             "10:1 Low-C (DC 1MOhm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 13. How do you validate an Ethernet PHY at board level?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 13. How do you validate an Ethernet PHY at board level?.",
+        "corrDelta": 25.84,
+        "bitPatternFault": "1111001100001011",
+        "bitPatternFixed": "0000110000001100",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "A_59",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "47k_RC",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SLOW_R",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BIT9_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "NACK_1",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "STOP",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "A_59",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "2k2_PU",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "D_a9",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ACK_0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "CRC_09",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DONE",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 5.2,
+          "damp": 0.405,
+          "ringMult": 1.15,
+          "seed": 339
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.055,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.685,
+            "w": 0.052,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -2359,6 +3389,109 @@ window.STUDY_CARDS = [
           ]
         ],
         "lesson": "Calibrated 4-channel trace specifically configured for: 14. Walk me through how you'd bring up and test an I2C sensor..",
+        "corrDelta": 25.9,
+        "bitPatternFault": "0001111111101000",
+        "bitPatternFixed": "1110010111100101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "A_56",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "47k_RC",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SLOW_R",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BIT9_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "NACK_1",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "STOP",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "A_56",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "2k2_PU",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "D_a6",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ACK_0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "CRC_06",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DONE",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 5.2,
+          "damp": 0.495,
+          "ringMult": 1.15,
+          "seed": 658
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.045,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.495,
+            "w": 0.085,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.76,
+            "w": 0.052,
+            "amp": 0.56
+          }
+        ],
         "presetId": "I2C_47k_SharkFin_vs_2k2_Clean"
       }
     }
@@ -2573,7 +3706,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 15. How would you measure SoC power during idle vs. high load?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 15. How would you measure SoC power during idle vs. high load?.",
+        "corrDelta": 24.32,
+        "bitPatternFault": "0101001111100001",
+        "bitPatternFixed": "1010110110101101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VID_42",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DI/DT",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "L*dI!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "UVLO_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "THROT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DROOP",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VID_42",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "MLCC",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DECAP",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "680mV+",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "AVS_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "STABL",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 3.52,
+          "damp": 0.315,
+          "ringMult": 1.57,
+          "seed": 596
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.045,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.67,
+            "w": 0.04,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -2787,7 +4023,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 17. What's the typical DDR training sequence during boot?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 17. What's the typical DDR training sequence during boot?.",
+        "corrDelta": 21.6,
+        "bitPatternFault": "1100110000111011",
+        "bitPatternFixed": "1100111111001111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "ZQ_1f1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "ACT_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "MR_BAD",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "VREF_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "WR_41",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "CKE_X",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "ZQ_081",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "ACT_0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RD_A",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "VREF_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "WR_41",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 4.36,
+          "damp": 0.405,
+          "ringMult": 1.43,
+          "seed": 973
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.065,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.73,
+            "w": 0.064,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -3001,7 +4340,110 @@ window.STUDY_CARDS = [
             "InfiniiMax (AC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 19. How do you check PCIe link speed and width in Linux?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 19. How do you check PCIe link speed and width in Linux?.",
+        "corrDelta": 23.97,
+        "bitPatternFault": "0000010100000101",
+        "bitPatternFixed": "1111101011111010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0102",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=02",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1f2",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1e2",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0102",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0109",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 6.46,
+          "damp": 0.315,
+          "ringMult": 1.85,
+          "seed": 444
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.055,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.495,
+            "w": 0.085,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.052,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -3221,7 +4663,110 @@ window.STUDY_CARDS = [
             "Active Diff (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 21. A new board powers up but there's no boot log. What are your step-by-step debug actions?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 21. A new board powers up but there's no boot log. What are your step-by-step debug actions?.",
+        "corrDelta": 30.97,
+        "bitPatternFault": "0100011101000011",
+        "bitPatternFixed": "0100011101000111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_2b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RST#=1",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "CLK_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "HANG_F0",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DEAD",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_2b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "LOCK=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "tPOR+",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RST#=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "BOOT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 5.2,
+          "damp": 0.45,
+          "ringMult": 1.85,
+          "seed": 412
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.055,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.7,
+            "w": 0.064,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -3432,6 +4977,109 @@ window.STUDY_CARDS = [
           ]
         ],
         "lesson": "Calibrated 4-channel trace specifically configured for: 22. You suspect a missing clock signal — how do you confirm it?.",
+        "corrDelta": 55.08,
+        "bitPatternFault": "0000101011111011",
+        "bitPatternFixed": "1111010111110101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=03",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1f3",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1e3",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=010a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 4.78,
+          "damp": 0.495,
+          "ringMult": 1.71,
+          "seed": 180
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.065,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.495,
+            "w": 0.085,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.685,
+            "w": 0.04,
+            "amp": 0.74
+          }
+        ],
         "presetId": "MBU_DVFS_transition_cpu2_left"
       }
     }
@@ -3646,7 +5294,110 @@ window.STUDY_CARDS = [
             "InfiniiMax (AC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 23. How would you troubleshoot an intermittent PCIe Gen4 link training issue?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 23. How would you troubleshoot an intermittent PCIe Gen4 link training issue?.",
+        "corrDelta": 53.1,
+        "bitPatternFault": "0010011011111101",
+        "bitPatternFixed": "1101100111011001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "GEN4_0a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DET_Q",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "POLL",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "REC_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "GEN1!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "RPLY",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "GEN4_0a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "CTLE",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DFE_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "L0_16G",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "LANE=0a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "L0_OK",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 6.46,
+          "damp": 0.495,
+          "ringMult": 1.43,
+          "seed": 616
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.075,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.745,
+            "w": 0.064,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -3860,7 +5611,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 24. DDR validation fails under thermal stress but not at room temp — how would you debug?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 24. DDR validation fails under thermal stress but not at room temp — how would you debug?.",
+        "corrDelta": 58.14,
+        "bitPatternFault": "0111101000000011",
+        "bitPatternFixed": "1000010110000101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "ZQ_1fb",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "ACT_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "MR_BAD",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "VREF_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "WR_4b",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "CKE_X",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "ZQ_08b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "ACT_0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RD_A",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "VREF_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "WR_4b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 6.04,
+          "damp": 0.36,
+          "ringMult": 1.71,
+          "seed": 382
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.065,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.715,
+            "w": 0.04,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -4074,7 +5928,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 26. A system crashes randomly — what logs or test methods would you use to isolate the root cause?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 26. A system crashes randomly — what logs or test methods would you use to isolate the root cause?.",
+        "corrDelta": 35.14,
+        "bitPatternFault": "1101111110101110",
+        "bitPatternFixed": "0010000100100001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_106",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_106",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin6",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 3.1,
+          "damp": 0.36,
+          "ringMult": 1.43,
+          "seed": 473
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.075,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.7,
+            "w": 0.064,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -4287,7 +6244,110 @@ window.STUDY_CARDS = [
             "1169B Diff (DC Diff)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 27. Write a Python script to: Read voltage/current values from a DAQ, log them with timestamps, and plot power over time.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 27. Write a Python script to: Read voltage/current values from a DAQ, log them with timestamps, and plot power over time..",
+        "corrDelta": 26.55,
+        "bitPatternFault": "0000100000110001",
+        "bitPatternFixed": "1111010111110101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "CH1_31",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AC_CAP",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "GND_LO",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ALIAS_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "CLIP!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "ERR",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "CH1_31",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DC_50",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "KELV_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "16GSa",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "V=851",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "CAL",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 4.78,
+          "damp": 0.36,
+          "ringMult": 1.85,
+          "seed": 868
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.055,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.685,
+            "w": 0.064,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -4500,7 +6560,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 28. You're given a CSV log with performance and power — write a function to flag outliers.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 28. You're given a CSV log with performance and power — write a function to flag outliers..",
+        "corrDelta": 33.3,
+        "bitPatternFault": "0010001001111100",
+        "bitPatternFixed": "0010001000100010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=03",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1f3",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1e3",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=010a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 3.94,
+          "damp": 0.315,
+          "ringMult": 1.15,
+          "seed": 747
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.075,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.73,
+            "w": 0.04,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -4719,7 +6882,110 @@ window.STUDY_CARDS = [
             "Active Diff (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 29. How would you use Python to parse UART logs and extract boot failure messages?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 29. How would you use Python to parse UART logs and extract boot failure messages?.",
+        "corrDelta": 26.2,
+        "bitPatternFault": "1110110111110101",
+        "bitPatternFixed": "1110110011101100",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_22",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RST#=1",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "CLK_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "HANG_F0",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DEAD",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_22",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "LOCK=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "tPOR+",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RST#=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "BOOT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 4.36,
+          "damp": 0.405,
+          "ringMult": 1.71,
+          "seed": 986
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.045,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.685,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -4924,7 +7190,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 30. Describe a Python-based framework you've built or used for hardware validation automation.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 30. Describe a Python-based framework you've built or used for hardware validation automation..",
+        "corrDelta": 30.52,
+        "bitPatternFault": "0011111111111100",
+        "bitPatternFixed": "0011110000111100",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_76",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_76",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 3.1,
+          "damp": 0.45,
+          "ringMult": 1.71,
+          "seed": 152
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.055,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.7,
+            "w": 0.04,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -5137,7 +7506,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 31. You discover a DDR bug one week before tape-out. What do you do?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 31. You discover a DDR bug one week before tape-out. What do you do?.",
+        "corrDelta": 23.98,
+        "bitPatternFault": "0110110100000101",
+        "bitPatternFixed": "1001001010010010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fc",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=fc",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1ec",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1dc",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fc",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 4.36,
+          "damp": 0.495,
+          "ringMult": 1.57,
+          "seed": 834
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.045,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.745,
+            "w": 0.052,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -5342,7 +7814,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 32. A board from another team shows inconsistent behavior. How do you handle the handoff?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 32. A board from another team shows inconsistent behavior. How do you handle the handoff?.",
+        "corrDelta": 25.56,
+        "bitPatternFault": "1110000000100110",
+        "bitPatternFixed": "1110001111100011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_71",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_71",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 4.78,
+          "damp": 0.225,
+          "ringMult": 1.15,
+          "seed": 508
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.075,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.715,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -5555,7 +8130,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 33. You're asked to validate 50 boards under thermal stress in 2 days. How do you plan and scale?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 33. You're asked to validate 50 boards under thermal stress in 2 days. How do you plan and scale?.",
+        "corrDelta": 31.24,
+        "bitPatternFault": "0100110000000110",
+        "bitPatternFixed": "1011001110110011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin3",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 4.78,
+          "damp": 0.225,
+          "ringMult": 1.29,
+          "seed": 899
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.055,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.745,
+            "w": 0.064,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -5760,7 +8438,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 34. Tell me about a time you had to debug a critical issue under pressure.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 34. Tell me about a time you had to debug a critical issue under pressure..",
+        "corrDelta": 19.76,
+        "bitPatternFault": "0011001111000000",
+        "bitPatternFixed": "0011001100110011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 6.46,
+          "damp": 0.27,
+          "ringMult": 1.29,
+          "seed": 200
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.065,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.73,
+            "w": 0.064,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -5979,7 +8760,110 @@ window.STUDY_CARDS = [
             "Active Diff (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 36. What's one lesson you learned from a failed board bring-up?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 36. What's one lesson you learned from a failed board bring-up?.",
+        "corrDelta": 34.35,
+        "bitPatternFault": "0100000000001100",
+        "bitPatternFixed": "0100001101000011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_27",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RST#=1",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "CLK_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "HANG_F0",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DEAD",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_27",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "LOCK=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "tPOR+",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RST#=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "BOOT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 3.1,
+          "damp": 0.45,
+          "ringMult": 1.71,
+          "seed": 222
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.055,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.715,
+            "w": 0.04,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -6192,7 +9076,110 @@ window.STUDY_CARDS = [
             "1169B Diff (DC Diff)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 37. Sketch a block diagram showing how DAQ, Oscilloscope, and DUT connect for validation.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 37. Sketch a block diagram showing how DAQ, Oscilloscope, and DUT connect for validation..",
+        "corrDelta": 43.68,
+        "bitPatternFault": "1000000111100100",
+        "bitPatternFixed": "0111111001111110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0101",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=01",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1f1",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1e1",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0101",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0108",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 5.2,
+          "damp": 0.315,
+          "ringMult": 1.15,
+          "seed": 596
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.055,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.67,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -6405,7 +9392,110 @@ window.STUDY_CARDS = [
             "10:1 Low-C (DC 1MOhm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 38. Write pseudocode for automating USB interface validation across 5 test cases.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 38. Write pseudocode for automating USB interface validation across 5 test cases..",
+        "corrDelta": 20.96,
+        "bitPatternFault": "1011011111100100",
+        "bitPatternFixed": "1011000010110000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "A_50",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "47k_RC",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SLOW_R",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BIT9_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "NACK_1",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "STOP",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "A_50",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "2k2_PU",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "D_a0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ACK_0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "CRC_00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DONE",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 4.36,
+          "damp": 0.225,
+          "ringMult": 1.29,
+          "seed": 982
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.065,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.76,
+            "w": 0.064,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -6619,7 +9709,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 39. Design a test matrix to validate DDR stability under voltage and frequency scaling.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 39. Design a test matrix to validate DDR stability under voltage and frequency scaling..",
+        "corrDelta": 32.76,
+        "bitPatternFault": "0111011001111101",
+        "bitPatternFixed": "1000100110001001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "ZQ_1f4",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "ACT_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "MR_BAD",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "VREF_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "WR_44",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "CKE_X",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "ZQ_084",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "ACT_0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RD_A",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "VREF_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "WR_44",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 5.62,
+          "damp": 0.315,
+          "ringMult": 1.57,
+          "seed": 611
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.055,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.04,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -6824,7 +10017,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 1 Follow-up Q2: Which project are you most proud of and why?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 1 Follow-up Q2: Which project are you most proud of and why?.",
+        "corrDelta": 32.06,
+        "bitPatternFault": "1101111110000001",
+        "bitPatternFixed": "1101111011011110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_76",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_76",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 4.36,
+          "damp": 0.18,
+          "ringMult": 1.71,
+          "seed": 121
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.075,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.7,
+            "w": 0.064,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -7037,7 +10333,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 2 (ASIC Validation) Q3: How do you differentiate between ATE testing and System Level Testing (SLT)?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 2 (ASIC Validation) Q3: How do you differentiate between ATE testing and System Level Testing (SLT)?.",
+        "corrDelta": 30.97,
+        "bitPatternFault": "1001100001000011",
+        "bitPatternFixed": "1001100010011000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_10b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_10b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin11",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 3.52,
+          "damp": 0.27,
+          "ringMult": 1.15,
+          "seed": 94
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.045,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.685,
+            "w": 0.04,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -7251,7 +10650,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 2 Follow-up Q4: If a chip passes ATE but fails SLT, what would be your first debug step?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 2 Follow-up Q4: If a chip passes ATE but fails SLT, what would be your first debug step?.",
+        "corrDelta": 32.45,
+        "bitPatternFault": "0111100100000010",
+        "bitPatternFixed": "0111100101111001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin3",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 3.1,
+          "damp": 0.495,
+          "ringMult": 1.57,
+          "seed": 741
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.065,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.7,
+            "w": 0.052,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -7464,7 +10966,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 3 (DFT Engineer) Q5: How familiar are you with scan chains or BIST structures in post-silicon validation?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 3 (DFT Engineer) Q5: How familiar are you with scan chains or BIST structures in post-silicon validation?.",
+        "corrDelta": 19.56,
+        "bitPatternFault": "1000101001111111",
+        "bitPatternFixed": "1000101010001010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_104",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_104",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin4",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 3.1,
+          "damp": 0.36,
+          "ringMult": 1.29,
+          "seed": 365
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.055,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.04,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -7677,7 +11282,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 3 Follow-up Q6: How would you leverage DFT to debug a failing subsystem?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 3 Follow-up Q6: How would you leverage DFT to debug a failing subsystem?.",
+        "corrDelta": 42.67,
+        "bitPatternFault": "1100110100001101",
+        "bitPatternFixed": "0011001000110010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_109",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_109",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin9",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 6.04,
+          "damp": 0.18,
+          "ringMult": 1.71,
+          "seed": 689
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.065,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.76,
+            "w": 0.064,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -7891,7 +11599,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 4 (Hardware Engineer) Q7: Suppose DDR initialization is failing intermittently. What debug methods would you apply?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 4 (Hardware Engineer) Q7: Suppose DDR initialization is failing intermittently. What debug methods would you apply?.",
+        "corrDelta": 52.48,
+        "bitPatternFault": "1011110111101101",
+        "bitPatternFixed": "1011110010111100",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "ZQ_1f8",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "ACT_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "MR_BAD",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "VREF_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "WR_48",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "CKE_X",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "ZQ_088",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "ACT_0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RD_A",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "VREF_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "WR_48",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 3.52,
+          "damp": 0.225,
+          "ringMult": 1.15,
+          "seed": 269
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.065,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.67,
+            "w": 0.04,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -8104,7 +11915,110 @@ window.STUDY_CARDS = [
             "N7020A Diff (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 4 Follow-up Q8: How do you verify signal integrity and timing margins?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 4 Follow-up Q8: How do you verify signal integrity and timing margins?.",
+        "corrDelta": 35.19,
+        "bitPatternFault": "0010000000001010",
+        "bitPatternFixed": "1101111111011111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "DRV_19",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "Z=34",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "REFL+",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ISI_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "UI-49",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "DRV_19",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "Z=50R",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "STEP1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "MATCH",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "UI+78",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOCK",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 3.52,
+          "damp": 0.225,
+          "ringMult": 1.15,
+          "seed": 541
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.045,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.73,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -8317,7 +12231,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 5 (Software/Automation Lead) Q9: Write a Python snippet that searches log files for critical errors.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 5 (Software/Automation Lead) Q9: Write a Python snippet that searches log files for critical errors..",
+        "corrDelta": 27.36,
+        "bitPatternFault": "1100000111111110",
+        "bitPatternFixed": "1100000111000001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=03",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1f3",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1e3",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=010a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 3.94,
+          "damp": 0.315,
+          "ringMult": 1.57,
+          "seed": 212
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.055,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.67,
+            "w": 0.04,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -8522,7 +12539,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 5 Follow-up Q10: How would you extend it to store results in CSV with timestamps?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 5 Follow-up Q10: How would you extend it to store results in CSV with timestamps?.",
+        "corrDelta": 25.84,
+        "bitPatternFault": "0001000100001101",
+        "bitPatternFixed": "0001000100010001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_79",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_79",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 6.46,
+          "damp": 0.495,
+          "ringMult": 1.57,
+          "seed": 122
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.075,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.715,
+            "w": 0.052,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -8727,7 +12847,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 1 (Hiring Manager) Q11: We discovered a silicon bug during validation. Fixing requires a respin but schedule is tight. How do you decide?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 1 (Hiring Manager) Q11: We discovered a silicon bug during validation. Fixing requires a respin but schedule is tight. How do you decide?.",
+        "corrDelta": 13.0,
+        "bitPatternFault": "1100011111110011",
+        "bitPatternFixed": "0011100100111001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_72",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_72",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 6.04,
+          "damp": 0.18,
+          "ringMult": 1.29,
+          "seed": 616
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.055,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.73,
+            "w": 0.064,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -8940,7 +13163,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 1 Follow-up Q12: How would you communicate this to cross-functional leadership?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 1 Follow-up Q12: How would you communicate this to cross-functional leadership?.",
+        "corrDelta": 55.08,
+        "bitPatternFault": "0000110001111111",
+        "bitPatternFixed": "1111001111110011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_10a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_10a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin10",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 6.04,
+          "damp": 0.27,
+          "ringMult": 1.15,
+          "seed": 633
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.065,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.715,
+            "w": 0.04,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -9145,7 +13471,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 2 (Quality/Process) Q13: How do you ensure your test process continuously improves?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 2 (Quality/Process) Q13: How do you ensure your test process continuously improves?.",
+        "corrDelta": 27.36,
+        "bitPatternFault": "1100001011111101",
+        "bitPatternFixed": "0011110100111101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 6.46,
+          "damp": 0.18,
+          "ringMult": 1.57,
+          "seed": 732
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.055,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.76,
+            "w": 0.04,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -9350,7 +13779,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 2 Follow-up Q14: Give an example of a workflow you optimized in your last role.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Panelist 2 Follow-up Q14: Give an example of a workflow you optimized in your last role..",
+        "corrDelta": 45.6,
+        "bitPatternFault": "0111011101000001",
+        "bitPatternFixed": "0111011101110111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 6.04,
+          "damp": 0.45,
+          "ringMult": 1.57,
+          "seed": 926
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.065,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.76,
+            "w": 0.052,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -9563,7 +14095,110 @@ window.STUDY_CARDS = [
             "1169B Diff (DC Diff)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Q1: Read voltage from a DMM using pyvisa and log to CSV."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Q1: Read voltage from a DMM using pyvisa and log to CSV.",
+        "corrDelta": 26.1,
+        "bitPatternFault": "0110110000101001",
+        "bitPatternFixed": "1001001010010010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "CH1_37",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AC_CAP",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "GND_LO",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ALIAS_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "CLIP!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "ERR",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "CH1_37",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DC_50",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "KELV_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "16GSa",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "V=857",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "CAL",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 6.46,
+          "damp": 0.315,
+          "ringMult": 1.29,
+          "seed": 932
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.045,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.7,
+            "w": 0.064,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -9768,7 +14403,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Q2: Live temperature plotting using matplotlib."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Q2: Live temperature plotting using matplotlib.",
+        "corrDelta": 23.4,
+        "bitPatternFault": "1100010101111011",
+        "bitPatternFixed": "1100010111000101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=03",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1f3",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1e3",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=010a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 3.94,
+          "damp": 0.495,
+          "ringMult": 1.15,
+          "seed": 178
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.055,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.495,
+            "w": 0.085,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.685,
+            "w": 0.052,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -9981,7 +14719,110 @@ window.STUDY_CARDS = [
             "Active <1pF (DC 1MOhm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Q3: Basic test framework structure (Setup, Run, Collect, Cleanup)."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Q3: Basic test framework structure (Setup, Run, Collect, Cleanup).",
+        "corrDelta": 22.2,
+        "bitPatternFault": "1010010001111111",
+        "bitPatternFixed": "0101101101011011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "t=2650",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "P4:-820p",
+            "state": "fault"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "0101->X",
+            "state": "x"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "META",
+            "state": "fault"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "S=05",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "ERR!",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "t=2650",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "+850p",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S_buf=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "E=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "f=386M",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 5.2,
+          "damp": 0.405,
+          "ringMult": 1.29,
+          "seed": 490
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.045,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.495,
+            "w": 0.085,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.76,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -10186,7 +15027,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Question1: How would you read a large file line by line in Python without consuming too much memory?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Question1: How would you read a large file line by line in Python without consuming too much memory?.",
+        "corrDelta": 38.22,
+        "bitPatternFault": "1101111110110100",
+        "bitPatternFixed": "0010001100100011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_76",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_76",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 5.62,
+          "damp": 0.225,
+          "ringMult": 1.43,
+          "seed": 86
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.075,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.67,
+            "w": 0.052,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -10391,7 +15335,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Question2: Explain what a lambda function is in Python with a validation use case.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Question2: Explain what a lambda function is in Python with a validation use case..",
+        "corrDelta": 18.2,
+        "bitPatternFault": "0011111111110101",
+        "bitPatternFixed": "1100000111000001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_76",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_76",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 3.1,
+          "damp": 0.315,
+          "ringMult": 1.71,
+          "seed": 479
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.055,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.745,
+            "w": 0.064,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -10596,7 +15643,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Question3: Describe the difference between deepcopy and shallow copy in Python.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Question3: Describe the difference between deepcopy and shallow copy in Python..",
+        "corrDelta": 30.12,
+        "bitPatternFault": "0101111001111001",
+        "bitPatternFixed": "1010000110100001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_74",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_74",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 5.2,
+          "damp": 0.315,
+          "ringMult": 1.57,
+          "seed": 587
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.045,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.715,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -10801,7 +15951,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Question4: How do you handle exceptions in Python automation scripts?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Question4: How do you handle exceptions in Python automation scripts?.",
+        "corrDelta": 45.44,
+        "bitPatternFault": "0110011111111101",
+        "bitPatternFixed": "0110011001100110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_78",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_78",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 5.2,
+          "damp": 0.495,
+          "ringMult": 1.43,
+          "seed": 884
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.075,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.685,
+            "w": 0.064,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -11006,7 +16259,110 @@ window.STUDY_CARDS = [
             "Telemetry (Stat)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Question6: How would you optimize a Python program for multithreading vs multiprocessing?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Question6: How would you optimize a Python program for multithreading vs multiprocessing?.",
+        "corrDelta": 21.19,
+        "bitPatternFault": "0011000001000001",
+        "bitPatternFixed": "0011000000110000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 5.2,
+          "damp": 0.405,
+          "ringMult": 1.29,
+          "seed": 263
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.065,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.76,
+            "w": 0.04,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -11211,7 +16567,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 1. How do you prepare the workspace and identify the socket before assembly?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 1. How do you prepare the workspace and identify the socket before assembly?.",
+        "corrDelta": 20.8,
+        "bitPatternFault": "1001111111101011",
+        "bitPatternFixed": "0110000001100000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PIN_1c",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=140m",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "OXIDE",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "AB_FAIL",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "COLD_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "ERR",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PIN_1c",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "4WIRE",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "R=12m",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SWAP_B",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "SEAT_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 3.94,
+          "damp": 0.27,
+          "ringMult": 1.43,
+          "seed": 309
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.075,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.76,
+            "w": 0.052,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -11416,7 +16875,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 2. How do you prepare PCB pads and apply solder paste for BGA/LGA sockets?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 2. How do you prepare PCB pads and apply solder paste for BGA/LGA sockets?.",
+        "corrDelta": 43.2,
+        "bitPatternFault": "1111001111111111",
+        "bitPatternFixed": "1111001111110011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PIN_1e",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=140m",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "OXIDE",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "AB_FAIL",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "COLD_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "ERR",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PIN_1e",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "4WIRE",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "R=12m",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SWAP_B",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "SEAT_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 3.52,
+          "damp": 0.27,
+          "ringMult": 1.57,
+          "seed": 67
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.065,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.715,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -11629,7 +17191,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: 7. How do you isolate a bad socket/contactor from a bad silicon chip in SLT?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: 7. How do you isolate a bad socket/contactor from a bad silicon chip in SLT?.",
+        "corrDelta": 16.65,
+        "bitPatternFault": "0011010000010100",
+        "bitPatternFixed": "1100100011001000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_101",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_101",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 5.62,
+          "damp": 0.45,
+          "ringMult": 1.85,
+          "seed": 413
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.065,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.715,
+            "w": 0.064,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -11842,7 +17507,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Linux Q2: How do you verify the Linux OS, kernel, and system resource baseline before running GPU/SLT diagnostics?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Linux Q2: How do you verify the Linux OS, kernel, and system resource baseline before running GPU/SLT diagnostics?.",
+        "corrDelta": 37.26,
+        "bitPatternFault": "1111010111111001",
+        "bitPatternFixed": "0000101000001010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VID_44",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DI/DT",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "L*dI!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "UVLO_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "THROT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DROOP",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VID_44",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "MLCC",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DECAP",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "680mV+",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "AVS_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "STABL",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 3.52,
+          "damp": 0.315,
+          "ringMult": 1.57,
+          "seed": 406
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.065,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.495,
+            "w": 0.085,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.745,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -12055,7 +17823,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Linux Q5: How do you inspect kernel and system logs when a GPU drops off the bus, a driver crashes, or the system fails to boot?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Linux Q5: How do you inspect kernel and system logs when a GPU drops off the bus, a driver crashes, or the system fails to boot?.",
+        "corrDelta": 22.62,
+        "bitPatternFault": "0001000110000001",
+        "bitPatternFixed": "1110111011101110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fe",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=fe",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1ee",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1de",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fe",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0105",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 3.1,
+          "damp": 0.315,
+          "ringMult": 1.15,
+          "seed": 332
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.075,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.04,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -12268,7 +18139,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Linux Q7: How do you monitor system thermals, fans, and power supplies on a Linux test station?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Linux Q7: How do you monitor system thermals, fans, and power supplies on a Linux test station?.",
+        "corrDelta": 14.3,
+        "bitPatternFault": "1001100100001111",
+        "bitPatternFixed": "0110011001100110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VID_3d",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DI/DT",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "L*dI!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "UVLO_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "THROT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DROOP",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VID_3d",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "MLCC",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DECAP",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "680mV+",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "AVS_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "STABL",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 4.36,
+          "damp": 0.36,
+          "ringMult": 1.71,
+          "seed": 623
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.045,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.715,
+            "w": 0.04,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -12481,7 +18455,110 @@ window.STUDY_CARDS = [
             "10:1 Low-C (DC 1MOhm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Linux Q8: How do you check USB debug adapters, block storage, NVMe drives, and network interfaces on a Linux bench host?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Linux Q8: How do you check USB debug adapters, block storage, NVMe drives, and network interfaces on a Linux bench host?.",
+        "corrDelta": 17.44,
+        "bitPatternFault": "0100011111110111",
+        "bitPatternFixed": "1011100010111000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "A_50",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "47k_RC",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SLOW_R",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BIT9_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "NACK_1",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "STOP",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "A_50",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "2k2_PU",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "D_a0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ACK_0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "CRC_00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DONE",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 3.1,
+          "damp": 0.405,
+          "ringMult": 1.71,
+          "seed": 990
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.065,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.745,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -12694,7 +18771,110 @@ window.STUDY_CARDS = [
             "10:1 Low-C (DC 1MOhm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q2 (Steps 2–3): The target log stopped mid-run. How do you distinguish a Linux USB-UART drop from a hung DUT?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q2 (Steps 2–3): The target log stopped mid-run. How do you distinguish a Linux USB-UART drop from a hung DUT?.",
+        "corrDelta": 18.63,
+        "bitPatternFault": "0010010000111110",
+        "bitPatternFixed": "1101100011011000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fa",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=fa",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1ea",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1da",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fa",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0101",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 3.1,
+          "damp": 0.27,
+          "ringMult": 1.43,
+          "seed": 265
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.045,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.745,
+            "w": 0.052,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -12907,7 +19087,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q3 (Step 4): How do you rule out a firmware or image mismatch before blaming the silicon or socket?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q3 (Step 4): How do you rule out a firmware or image mismatch before blaming the silicon or socket?.",
+        "corrDelta": 16.3,
+        "bitPatternFault": "1101011111101110",
+        "bitPatternFixed": "0010100100101001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_102",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_102",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin2",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 4.78,
+          "damp": 0.36,
+          "ringMult": 1.71,
+          "seed": 404
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.075,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.7,
+            "w": 0.04,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -13120,7 +19403,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q4 (Steps 5–6): When is it safe to power-cycle a failing assembly, and how do you structure the restart?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q4 (Steps 5–6): When is it safe to power-cycle a failing assembly, and how do you structure the restart?.",
+        "corrDelta": 34.87,
+        "bitPatternFault": "1011100100000111",
+        "bitPatternFixed": "0100011001000110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VID_3d",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DI/DT",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "L*dI!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "UVLO_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "THROT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DROOP",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VID_3d",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "MLCC",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DECAP",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "680mV+",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "AVS_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "STABL",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 4.78,
+          "damp": 0.18,
+          "ringMult": 1.71,
+          "seed": 328
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.055,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.76,
+            "w": 0.064,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -13333,7 +19719,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q5 (Step 7): If socket seating is suspected, how do you test that hypothesis cleanly without fooling yourself?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q5 (Step 7): If socket seating is suspected, how do you test that hypothesis cleanly without fooling yourself?.",
+        "corrDelta": 43.68,
+        "bitPatternFault": "0100000111111010",
+        "bitPatternFixed": "0100000101000001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0101",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=01",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1f1",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1e1",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0101",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0108",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 3.52,
+          "damp": 0.18,
+          "ringMult": 1.43,
+          "seed": 6
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.065,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.73,
+            "w": 0.052,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -13546,7 +20035,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q6 (Steps 8–9): Walk me through how you use a known-good reference unit and A-B-A swaps to isolate DRAM vs. board vs. socket.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q6 (Steps 8–9): Walk me through how you use a known-good reference unit and A-B-A swaps to isolate DRAM vs. board vs. socket..",
+        "corrDelta": 16.92,
+        "bitPatternFault": "1010100101111010",
+        "bitPatternFixed": "1010100110101001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_104",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_104",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin4",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 6.46,
+          "damp": 0.495,
+          "ringMult": 1.15,
+          "seed": 908
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.045,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.715,
+            "w": 0.052,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -13759,7 +20351,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q7 (Step 10): How do you separate a firmware regression from a parser/automation bug when a test starts failing?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q7 (Step 10): How do you separate a firmware regression from a parser/automation bug when a test starts failing?.",
+        "corrDelta": 39.3,
+        "bitPatternFault": "1000110000110000",
+        "bitPatternFixed": "0111001101110011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_107",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_107",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin7",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 6.46,
+          "damp": 0.45,
+          "ringMult": 1.43,
+          "seed": 19
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.065,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.76,
+            "w": 0.064,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -13972,7 +20667,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q8 (Steps 11–12): In memtester dvfs pattern [0,8,10,16] loops 50 size 16 MB, what does each parameter tell you during debug?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q8 (Steps 11–12): In memtester dvfs pattern [0,8,10,16] loops 50 size 16 MB, what does each parameter tell you during debug?.",
+        "corrDelta": 17.93,
+        "bitPatternFault": "0101011100000111",
+        "bitPatternFixed": "0101011101010111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin3",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 6.04,
+          "damp": 0.27,
+          "ringMult": 1.43,
+          "seed": 119
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.075,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.715,
+            "w": 0.052,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -14185,7 +20983,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q9 (Steps 13–14): Reconstruct a failing memtester loop—how do you interpret PF_high reports, unwanted interrupts, and sensor vs. chamber temperatures?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: HLD Q9 (Steps 13–14): Reconstruct a failing memtester loop—how do you interpret PF_high reports, unwanted interrupts, and sensor vs. chamber temperatures?.",
+        "corrDelta": 16.92,
+        "bitPatternFault": "1001100011111100",
+        "bitPatternFixed": "1001100010011000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fd",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=fd",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1ed",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1dd",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fd",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0104",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 4.36,
+          "damp": 0.225,
+          "ringMult": 1.15,
+          "seed": 195
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.075,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.715,
+            "w": 0.04,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -14398,7 +21299,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Comm Q2: Tell me about a time your attention to detail caught a subtle hardware or test issue.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Comm Q2: Tell me about a time your attention to detail caught a subtle hardware or test issue..",
+        "corrDelta": 35.28,
+        "bitPatternFault": "0011011011111100",
+        "bitPatternFixed": "0011011000110110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_10a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_10a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin10",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 6.46,
+          "damp": 0.495,
+          "ringMult": 1.57,
+          "seed": 53
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.055,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.715,
+            "w": 0.052,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -14611,7 +21615,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Comm Q3: Describe how you work in a team and communicate with design, firmware, or senior engineers when escalating a bug.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Comm Q3: Describe how you work in a team and communicate with design, firmware, or senior engineers when escalating a bug..",
+        "corrDelta": 14.8,
+        "bitPatternFault": "1001111110101110",
+        "bitPatternFixed": "0110001001100010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_100",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_100",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 4.78,
+          "damp": 0.495,
+          "ringMult": 1.15,
+          "seed": 883
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.075,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.052,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -14824,7 +21931,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Comm Q4: How do you handle shifting priorities, unexpected hardware bottlenecks, or changing test plans (Flexibility)?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Comm Q4: How do you handle shifting priorities, unexpected hardware bottlenecks, or changing test plans (Flexibility)?.",
+        "corrDelta": 19.74,
+        "bitPatternFault": "0011011110010100",
+        "bitPatternFixed": "1100110011001100",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00ff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=ff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1ef",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1df",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00ff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0106",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 4.36,
+          "damp": 0.405,
+          "ringMult": 1.29,
+          "seed": 901
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.055,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.745,
+            "w": 0.04,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -15037,7 +22247,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q1: What is the fundamental relationship between charge, capacitance, and voltage in a DRAM cell?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q1: What is the fundamental relationship between charge, capacitance, and voltage in a DRAM cell?.",
+        "corrDelta": 55.08,
+        "bitPatternFault": "0001111011111010",
+        "bitPatternFixed": "0001111000011110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=2!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Edge2?",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "R=A",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "Out=2",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 4.78,
+          "damp": 0.495,
+          "ringMult": 1.15,
+          "seed": 252
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.045,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.685,
+            "w": 0.052,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -15250,7 +22563,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q2: How do you calculate the bitline voltage change ΔV_BL caused by DRAM cell and bitline charge sharing?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q2: How do you calculate the bitline voltage change ΔV_BL caused by DRAM cell and bitline charge sharing?.",
+        "corrDelta": 28.4,
+        "bitPatternFault": "0010111111110010",
+        "bitPatternFixed": "1101000011010000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=2!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Edge2?",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "R=A",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "Out=2",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 4.78,
+          "damp": 0.405,
+          "ringMult": 1.15,
+          "seed": 708
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.075,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.745,
+            "w": 0.052,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -15463,7 +22879,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q3: What is the relationship between tRC, tRAS, and tRP in DRAM row timing, and why does it matter?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q3: What is the relationship between tRC, tRAS, and tRP in DRAM row timing, and why does it matter?.",
+        "corrDelta": 25.1,
+        "bitPatternFault": "1111011111101100",
+        "bitPatternFixed": "0000100100001001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=2!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Edge2?",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "R=A",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "Out=2",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 5.62,
+          "damp": 0.18,
+          "ringMult": 1.43,
+          "seed": 643
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.065,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.715,
+            "w": 0.052,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -15676,7 +23195,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q4: Why do sudden current transients (like ZQCal or burst compute) cause voltage droop, and what equation governs it?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q4: Why do sudden current transients (like ZQCal or burst compute) cause voltage droop, and what equation governs it?.",
+        "corrDelta": 16.56,
+        "bitPatternFault": "0110011111010100",
+        "bitPatternFixed": "1001101110011011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=2!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Edge2?",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "R=A",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "Out=2",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 4.78,
+          "damp": 0.45,
+          "ringMult": 1.15,
+          "seed": 896
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.075,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.052,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -15889,7 +23511,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q5: How do τ = R × C and I_C = C × (dV/dt) help you debug slow signal edges or power-rail ramp failures?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q5: How do τ = R × C and I_C = C × (dV/dt) help you debug slow signal edges or power-rail ramp failures?.",
+        "corrDelta": 49.2,
+        "bitPatternFault": "1010010000111011",
+        "bitPatternFixed": "1010010110100101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=C",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=2!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Edge2?",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "R=A",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=C",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=C",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "Out=2",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 4.36,
+          "damp": 0.18,
+          "ringMult": 1.85,
+          "seed": 800
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.075,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.745,
+            "w": 0.052,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -16102,7 +23827,110 @@ window.STUDY_CARDS = [
             "N7020A Rail (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q6: What causes ringing on a power rail or clock/data trace, and how does the LC resonant frequency equation help you find the root cause?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q6: What causes ringing on a power rail or clock/data trace, and how does the LC resonant frequency equation help you find the root cause?.",
+        "corrDelta": 24.48,
+        "bitPatternFault": "1000011111010000",
+        "bitPatternFixed": "0111100001111000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=2!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Edge2?",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "R=A",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "Out=2",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 6.04,
+          "damp": 0.27,
+          "ringMult": 1.57,
+          "seed": 463
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.055,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.73,
+            "w": 0.04,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -16315,7 +24143,110 @@ window.STUDY_CARDS = [
             "N7020A Diff (DC 50Ohm)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q7: Explain the transmission-line reflection coefficient Γ and what happens at an open, short, or matched load.."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q7: Explain the transmission-line reflection coefficient Γ and what happens at an open, short, or matched load..",
+        "corrDelta": 45.18,
+        "bitPatternFault": "0001010001111010",
+        "bitPatternFixed": "1110101111101011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=03",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1f3",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1e3",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0103",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=010a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 4.78,
+          "damp": 0.27,
+          "ringMult": 1.57,
+          "seed": 661
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.045,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.73,
+            "w": 0.04,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -16528,7 +24459,110 @@ window.STUDY_CARDS = [
             "1169B Diff (DC Diff)"
           ]
         ],
-        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q8: How do you measure rail current and instantaneous power safely on a live bench using a calibrated sense resistor?."
+        "lesson": "Calibrated 4-channel trace specifically configured for: Fund Q8: How do you measure rail current and instantaneous power safely on a live bench using a calibrated sense resistor?.",
+        "corrDelta": 22.72,
+        "bitPatternFault": "1010011111011110",
+        "bitPatternFixed": "1010010110100101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=2!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Edge2?",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "R=A",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "Out=2",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 3.1,
+          "damp": 0.495,
+          "ringMult": 1.29,
+          "seed": 382
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.045,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.495,
+            "w": 0.085,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.685,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -16737,7 +24771,110 @@ window.STUDY_CARDS = [
             "Heap RSS explodes to 5.2 GB vs flat 0.04 GB"
           ]
         ],
-        "lesson": "Python Automation Signal Model for How do you stream a large log in Python?: Compare buggy execution (f.readlines() OOM Spike) vs hardened pattern (Streaming Iterator O(1) RAM)."
+        "lesson": "Python Automation Signal Model for How do you stream a large log in Python?: Compare buggy execution (f.readlines() OOM Spike) vs hardened pattern (Streaming Iterator O(1) RAM).",
+        "corrDelta": 32.76,
+        "bitPatternFault": "0010100111000001",
+        "bitPatternFixed": "1101011011010110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 5.2,
+          "damp": 0.315,
+          "ringMult": 1.85,
+          "seed": 387
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.045,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.745,
+            "w": 0.052,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -16946,7 +25083,110 @@ window.STUDY_CARDS = [
             "False alarms triggered by '0 errors' banners"
           ]
         ],
-        "lesson": "Python Automation Signal Model for How do you count error keywords in a log?: Compare buggy execution (Naive Substring False-Positive Storm) vs hardened pattern (Guarded Regex Counter)."
+        "lesson": "Python Automation Signal Model for How do you count error keywords in a log?: Compare buggy execution (Naive Substring False-Positive Storm) vs hardened pattern (Guarded Regex Counter).",
+        "corrDelta": 29.5,
+        "bitPatternFault": "0111011110100000",
+        "bitPatternFixed": "1000101010001010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_70",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_70",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 6.04,
+          "damp": 0.36,
+          "ringMult": 1.85,
+          "seed": 153
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.055,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.064,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -17151,7 +25391,110 @@ window.STUDY_CARDS = [
             "GPIB/USB hangs when DMM misses ext trigger"
           ]
         ],
-        "lesson": "Python Automation Signal Model for Why use try/except around instrument reads?: Compare buggy execution (Uncaught VI_ERROR_TMO Crash) vs hardened pattern (Guarded VISA Clear & Recover)."
+        "lesson": "Python Automation Signal Model for Why use try/except around instrument reads?: Compare buggy execution (Uncaught VI_ERROR_TMO Crash) vs hardened pattern (Guarded VISA Clear & Recover).",
+        "corrDelta": 26.1,
+        "bitPatternFault": "1100111000001001",
+        "bitPatternFixed": "1100111011001110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_79",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_79",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 4.78,
+          "damp": 0.315,
+          "ringMult": 1.71,
+          "seed": 945
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.065,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.67,
+            "w": 0.064,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -17356,7 +25699,110 @@ window.STUDY_CARDS = [
             "Die temperature drops back toward 25 C vs thermal runaway"
           ]
         ],
-        "lesson": "Python Automation Signal Model for What is the purpose of a finally block?: Compare buggy execution (No finally: 95 C & VDD Stuck ON) vs hardened pattern (finally Restores 25 C + OUTP OFF)."
+        "lesson": "Python Automation Signal Model for What is the purpose of a finally block?: Compare buggy execution (No finally: 95 C & VDD Stuck ON) vs hardened pattern (finally Restores 25 C + OUTP OFF).",
+        "corrDelta": 26.2,
+        "bitPatternFault": "0111110011111011",
+        "bitPatternFixed": "1000001110000011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_74",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_74",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 5.62,
+          "damp": 0.45,
+          "ringMult": 1.29,
+          "seed": 368
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.055,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.685,
+            "w": 0.04,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -17561,7 +26007,110 @@ window.STUDY_CARDS = [
             "EMI transient disrupts attempt #1 at t=20ms"
           ]
         ],
-        "lesson": "Python Automation Signal Model for When are retries safe in hardware control?: Compare buggy execution (Silent Retry Hides Real Boot Flake) vs hardened pattern (Idempotent Read Backoff + Logged)."
+        "lesson": "Python Automation Signal Model for When are retries safe in hardware control?: Compare buggy execution (Silent Retry Hides Real Boot Flake) vs hardened pattern (Idempotent Read Backoff + Logged).",
+        "corrDelta": 27.44,
+        "bitPatternFault": "1011110000001111",
+        "bitPatternFixed": "1011110010111100",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_73",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_73",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 4.78,
+          "damp": 0.27,
+          "ringMult": 1.71,
+          "seed": 520
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.055,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.67,
+            "w": 0.064,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -17770,7 +26319,110 @@ window.STUDY_CARDS = [
             "Shallow bug leaks 0.72 V into nominal 0.85 V run!"
           ]
         ],
-        "lesson": "Python Automation Signal Model for What is the difference between shallow and deep copying?: Compare buggy execution (Shallow Copy Corrupts Nominal Corner) vs hardened pattern (deepcopy Keeps Corners Isolated)."
+        "lesson": "Python Automation Signal Model for What is the difference between shallow and deep copying?: Compare buggy execution (Shallow Copy Corrupts Nominal Corner) vs hardened pattern (deepcopy Keeps Corners Isolated).",
+        "corrDelta": 26.2,
+        "bitPatternFault": "0111001000000101",
+        "bitPatternFixed": "0111001001110010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_73",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_73",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 3.1,
+          "damp": 0.36,
+          "ringMult": 1.71,
+          "seed": 866
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.065,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.76,
+            "w": 0.04,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -17975,7 +26627,110 @@ window.STUDY_CARDS = [
             "Sorted key reveals worst 0.815 V tail part"
           ]
         ],
-        "lesson": "Python Automation Signal Model for When would you use a lambda in Python?: Compare buggy execution (Unsorted Shmoo Hides Vmin Outlier) vs hardened pattern (Keyed Sort Pinpoints Worst Hot Vmin)."
+        "lesson": "Python Automation Signal Model for When would you use a lambda in Python?: Compare buggy execution (Unsorted Shmoo Hides Vmin Outlier) vs hardened pattern (Keyed Sort Pinpoints Worst Hot Vmin).",
+        "corrDelta": 27.3,
+        "bitPatternFault": "0010001100000001",
+        "bitPatternFixed": "1101110011011100",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 3.94,
+          "damp": 0.45,
+          "ringMult": 1.15,
+          "seed": 874
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.045,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.7,
+            "w": 0.052,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -18180,7 +26935,110 @@ window.STUDY_CARDS = [
             "Deterministic step duration measured automatically"
           ]
         ],
-        "lesson": "Python Automation Signal Model for What is a Python decorator used for?: Compare buggy execution (Missing @wraps Hides Failing Function) vs hardened pattern (@log_timing + Mutex Guard)."
+        "lesson": "Python Automation Signal Model for What is a Python decorator used for?: Compare buggy execution (Missing @wraps Hides Failing Function) vs hardened pattern (@log_timing + Mutex Guard).",
+        "corrDelta": 13.0,
+        "bitPatternFault": "1000001100000111",
+        "bitPatternFixed": "1000001110000011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_73",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_73",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 4.36,
+          "damp": 0.405,
+          "ringMult": 1.57,
+          "seed": 284
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.065,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.715,
+            "w": 0.052,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -18389,7 +27247,110 @@ window.STUDY_CARDS = [
             "Threads stall at 1 core on pure-Python FFT"
           ]
         ],
-        "lesson": "Python Automation Signal Model for Threads or processes for CPU-heavy analysis?: Compare buggy execution (Threads Serialized on CPU by GIL) vs hardened pattern (Threads for I/O + Processes for CPU)."
+        "lesson": "Python Automation Signal Model for Threads or processes for CPU-heavy analysis?: Compare buggy execution (Threads Serialized on CPU by GIL) vs hardened pattern (Threads for I/O + Processes for CPU).",
+        "corrDelta": 31.7,
+        "bitPatternFault": "1111110110000001",
+        "bitPatternFixed": "1111110111111101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 4.36,
+          "damp": 0.36,
+          "ringMult": 1.85,
+          "seed": 438
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.055,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.67,
+            "w": 0.064,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -18594,7 +27555,110 @@ window.STUDY_CARDS = [
             "Hits 30s timeout threshold & sends SIGKILL to child"
           ]
         ],
-        "lesson": "Python Automation Signal Model for How do you run a CLI test from Python safely?: Compare buggy execution (os.system() Hangs Forever on Wedged CLI) vs hardened pattern (subprocess Timeout Cleanly Escapes)."
+        "lesson": "Python Automation Signal Model for How do you run a CLI test from Python safely?: Compare buggy execution (os.system() Hangs Forever on Wedged CLI) vs hardened pattern (subprocess Timeout Cleanly Escapes).",
+        "corrDelta": 19.68,
+        "bitPatternFault": "0111110100001010",
+        "bitPatternFixed": "1000001010000010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_73",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_73",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 3.1,
+          "damp": 0.495,
+          "ringMult": 1.43,
+          "seed": 71
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.065,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.7,
+            "w": 0.064,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -18799,7 +27863,110 @@ window.STUDY_CARDS = [
             "2 hard errors inside raw log despite wrapper rc=0"
           ]
         ],
-        "lesson": "Python Automation Signal Model for Does a subprocess exit code of zero prove a test passed?: Compare buggy execution (Wrapper Reports rc=0 Despite 2 Fails) vs hardened pattern (Artifact Parser Catches Raw Log Fail)."
+        "lesson": "Python Automation Signal Model for Does a subprocess exit code of zero prove a test passed?: Compare buggy execution (Wrapper Reports rc=0 Despite 2 Fails) vs hardened pattern (Artifact Parser Catches Raw Log Fail).",
+        "corrDelta": 15.2,
+        "bitPatternFault": "1101011011000010",
+        "bitPatternFixed": "0010100100101001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 5.2,
+          "damp": 0.495,
+          "ringMult": 1.15,
+          "seed": 864
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.045,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.76,
+            "w": 0.052,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -19004,7 +28171,110 @@ window.STUDY_CARDS = [
             "Actual die thermal lag trails chamber air by ~18s"
           ]
         ],
-        "lesson": "Python Automation Signal Model for How do you parse timestamped UART lines?: Compare buggy execution (Unsynced Clock Skew Misaligns Temp) vs hardened pattern (UTC ISO-8601 Aligned Streams)."
+        "lesson": "Python Automation Signal Model for How do you parse timestamped UART lines?: Compare buggy execution (Unsynced Clock Skew Misaligns Temp) vs hardened pattern (UTC ISO-8601 Aligned Streams).",
+        "corrDelta": 36.72,
+        "bitPatternFault": "0001111111100110",
+        "bitPatternFixed": "0001111100011111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fb",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=fb",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1eb",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1db",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fb",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0102",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 3.1,
+          "damp": 0.225,
+          "ringMult": 1.85,
+          "seed": 317
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.045,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.76,
+            "w": 0.052,
+            "amp": 0.74
+          }
+        ]
       }
     }
   },
@@ -19209,7 +28479,110 @@ window.STUDY_CARDS = [
             "Target freezes mid-boot without trailing \\n at t=11s"
           ]
         ],
-        "lesson": "Python Automation Signal Model for How should serial communication timeouts be handled?: Compare buggy execution (Hung UART Mid-Line Blocks Forever) vs hardened pattern (Monotonic Deadline Captures Last Tail)."
+        "lesson": "Python Automation Signal Model for How should serial communication timeouts be handled?: Compare buggy execution (Hung UART Mid-Line Blocks Forever) vs hardened pattern (Monotonic Deadline Captures Last Tail).",
+        "corrDelta": 4.23,
+        "bitPatternFault": "1100110101000001",
+        "bitPatternFixed": "1100110111001101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 6.46,
+          "damp": 0.18,
+          "ringMult": 1.43,
+          "seed": 398
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.065,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.67,
+            "w": 0.052,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -19414,7 +28787,110 @@ window.STUDY_CARDS = [
             "Confirms write(OUTP OFF) executed in finally"
           ]
         ],
-        "lesson": "Python Automation Signal Model for How do you test code without a real instrument?: Compare buggy execution (Untested Script Crashes Night Run) vs hardened pattern (Mock Fault Injection Passes Pre-Bench)."
+        "lesson": "Python Automation Signal Model for How do you test code without a real instrument?: Compare buggy execution (Untested Script Crashes Night Run) vs hardened pattern (Mock Fault Injection Passes Pre-Bench).",
+        "corrDelta": 13.0,
+        "bitPatternFault": "0011111010000010",
+        "bitPatternFixed": "1100000111000001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_75",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 3.94,
+          "damp": 0.18,
+          "ringMult": 1.15,
+          "seed": 418
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.065,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.685,
+            "w": 0.04,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -19619,7 +29095,110 @@ window.STUDY_CARDS = [
             "0 error strings printed before sudden rail drop!"
           ]
         ],
-        "lesson": "Python Automation Signal Model for How would you verify a log parser?: Compare buggy execution (Truncated Brownout Misclassified PASS) vs hardened pattern (Positive Sentinel Catches Incomplete)."
+        "lesson": "Python Automation Signal Model for How would you verify a log parser?: Compare buggy execution (Truncated Brownout Misclassified PASS) vs hardened pattern (Positive Sentinel Catches Incomplete).",
+        "corrDelta": 20.7,
+        "bitPatternFault": "0101101001000000",
+        "bitPatternFixed": "1010010110100101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 3.94,
+          "damp": 0.36,
+          "ringMult": 1.85,
+          "seed": 598
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.075,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.67,
+            "w": 0.064,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -19828,7 +29407,110 @@ window.STUDY_CARDS = [
             "Peaks at 65 mV (13 A across 5 mΩ)"
           ]
         ],
-        "lesson": "Python Automation Signal Model for How do you compute rail power from CSV columns?: Compare buggy execution (mean(V)*mean(I) Under-Reports Correlation) vs hardened pattern (Row-Wise P_i = V_i * (Vshunt / R))."
+        "lesson": "Python Automation Signal Model for How do you compute rail power from CSV columns?: Compare buggy execution (mean(V)*mean(I) Under-Reports Correlation) vs hardened pattern (Row-Wise P_i = V_i * (Vshunt / R)).",
+        "corrDelta": 25.1,
+        "bitPatternFault": "0000110111100011",
+        "bitPatternFixed": "0000110000001100",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VID_3c",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DI/DT",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "L*dI!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "UVLO_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "THROT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DROOP",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VID_3c",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "MLCC",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DECAP",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "680mV+",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "AVS_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "STABL",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 3.1,
+          "damp": 0.27,
+          "ringMult": 1.85,
+          "seed": 628
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.065,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.7,
+            "w": 0.052,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -20033,7 +29715,110 @@ window.STUDY_CARDS = [
             "True rail sits cleanly at 0.85 +/- 0.02 V"
           ]
         ],
-        "lesson": "Python Automation Signal Model for How do you handle malformed numeric CSV cells?: Compare buggy execution ('ERR' -> 0.0 V Fakes Rail Brownout) vs hardened pattern (Quarantine Missing Keep True Envelope)."
+        "lesson": "Python Automation Signal Model for How do you handle malformed numeric CSV cells?: Compare buggy execution ('ERR' -> 0.0 V Fakes Rail Brownout) vs hardened pattern (Quarantine Missing Keep True Envelope).",
+        "corrDelta": 20.7,
+        "bitPatternFault": "1000001111100010",
+        "bitPatternFixed": "0111110101111101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_78",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_78",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 5.2,
+          "damp": 0.36,
+          "ringMult": 1.29,
+          "seed": 271
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.055,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.685,
+            "w": 0.04,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -20242,7 +30027,110 @@ window.STUDY_CARDS = [
             "Masking keeps |Z|=1.2 on real droop (MISSED!)"
           ]
         ],
-        "lesson": "Python Automation Signal Model for How do you detect outliers in voltage samples?: Compare buggy execution (Z-Score Masks 120 mV Droop After Spike) vs hardened pattern (MAD + Spec Catch Both Spike & Droop)."
+        "lesson": "Python Automation Signal Model for How do you detect outliers in voltage samples?: Compare buggy execution (Z-Score Masks 120 mV Droop After Spike) vs hardened pattern (MAD + Spec Catch Both Spike & Droop).",
+        "corrDelta": 13.0,
+        "bitPatternFault": "0000010001111101",
+        "bitPatternFixed": "0000010000000100",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 4.78,
+          "damp": 0.27,
+          "ringMult": 1.43,
+          "seed": 664
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.065,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.67,
+            "w": 0.052,
+            "amp": 0.65
+          }
+        ]
       }
     }
   },
@@ -20452,7 +30340,110 @@ window.STUDY_CARDS = [
             "Clean phase updates only; readable on console"
           ]
         ],
-        "lesson": "Python Automation Signal Model for How do you use logging levels in an automated test?: Compare buggy execution (Bare print() Floods SSH & Dies Unsigned) vs hardened pattern (INFO Console + DEBUG File Preserved)."
+        "lesson": "Python Automation Signal Model for How do you use logging levels in an automated test?: Compare buggy execution (Bare print() Floods SSH & Dies Unsigned) vs hardened pattern (INFO Console + DEBUG File Preserved).",
+        "corrDelta": 14.4,
+        "bitPatternFault": "1110000000010001",
+        "bitPatternFixed": "0001111100011111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_101",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SCAN_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SSO_X",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "IR_DIP",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_7",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "FAIL",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "PAT_101",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AT_SPD",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SHMOO",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Vmin1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BIN_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 3.52,
+          "damp": 0.27,
+          "ringMult": 1.29,
+          "seed": 548
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.075,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.064,
+            "amp": 0.47
+          }
+        ]
       }
     }
   },
@@ -20661,7 +30652,110 @@ window.STUDY_CARDS = [
             "Drops to 0% after accidental global pip upgrade unless isolated"
           ]
         ],
-        "lesson": "Python Automation Signal Model for Why use a virtual environment for test scripts?: Compare buggy execution (Station Drift Breaks Pandas API) vs hardened pattern (Locked .venv Yield Matches All Racks)."
+        "lesson": "Python Automation Signal Model for Why use a virtual environment for test scripts?: Compare buggy execution (Station Drift Breaks Pandas API) vs hardened pattern (Locked .venv Yield Matches All Racks).",
+        "corrDelta": 14.69,
+        "bitPatternFault": "0001100000011111",
+        "bitPatternFixed": "1110010011100100",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_71",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_71",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 4.78,
+          "damp": 0.27,
+          "ringMult": 1.43,
+          "seed": 72
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.075,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.67,
+            "w": 0.052,
+            "amp": 0.56
+          }
+        ]
       }
     }
   },
@@ -20866,7 +30960,110 @@ window.STUDY_CARDS = [
             "Under assert + -O, PSU hits 1.80 V; explicit guard holds 0.85 V"
           ]
         ],
-        "lesson": "Python Automation Signal Model for What is the difference between assert and explicit validation?: Compare buggy execution (python -O Strips assert Overvoltage Guard) vs hardened pattern (Explicit raise ValueError Blocks 1.8 V)."
+        "lesson": "Python Automation Signal Model for What is the difference between assert and explicit validation?: Compare buggy execution (python -O Strips assert Overvoltage Guard) vs hardened pattern (Explicit raise ValueError Blocks 1.8 V).",
+        "corrDelta": 20.7,
+        "bitPatternFault": "1100110000000000",
+        "bitPatternFixed": "0011001100110011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_79",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_79",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 4.78,
+          "damp": 0.45,
+          "ringMult": 1.29,
+          "seed": 782
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.065,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.73,
+            "w": 0.04,
+            "amp": 0.38
+          }
+        ]
       }
     }
   },
@@ -21071,7 +31268,110 @@ window.STUDY_CARDS = [
             "Board impedance peak resonates near f_step at 0.85 V"
           ]
         ],
-        "lesson": "Python Automation Signal Model for How do you write a minimal test for a shmoo parser?: Compare buggy execution (Naive Finder Misses 850 mV Fail Hole) vs hardened pattern (Hole Detector Flags Non-Monotonic Bin)."
+        "lesson": "Python Automation Signal Model for How do you write a minimal test for a shmoo parser?: Compare buggy execution (Naive Finder Misses 850 mV Fail Hole) vs hardened pattern (Hole Detector Flags Non-Monotonic Bin).",
+        "corrDelta": 20.7,
+        "bitPatternFault": "0111011100001100",
+        "bitPatternFixed": "0111011101110111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_73",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_73",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 4.36,
+          "damp": 0.45,
+          "ringMult": 1.43,
+          "seed": 953
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.065,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.715,
+            "w": 0.064,
+            "amp": 0.56
+          }
+        ]
       }
     }
   }

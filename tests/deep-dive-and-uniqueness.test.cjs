@@ -51,6 +51,13 @@ for (const c of cards) {
   assert.ok(dd.waveSpec && dd.waveSpec.id && !seenWaveIds.has(dd.waveSpec.id), `Duplicate/missing waveSpec ID on ${c.id}`);
   seenWaveIds.add(dd.waveSpec.id);
   assert.equal(dd.waveSpec.channels.length, 4, `Expected 4 oscilloscope channels on ${c.id}`);
+  assert.ok(typeof dd.waveSpec.corrDelta === 'number' && dd.waveSpec.corrDelta > 0, `Missing corrDelta on ${c.id}`);
+  assert.ok(typeof dd.waveSpec.bitPatternFault === 'string' && typeof dd.waveSpec.bitPatternFixed === 'string' && dd.waveSpec.bitPatternFault !== dd.waveSpec.bitPatternFixed, `Invalid bitPattern Fault/Fixed on ${c.id}`);
+  assert.ok(Array.isArray(dd.waveSpec.busSegmentsFault) && dd.waveSpec.busSegmentsFault.length >= 5, `Missing busSegmentsFault on ${c.id}`);
+  assert.ok(Array.isArray(dd.waveSpec.busSegmentsFixed) && dd.waveSpec.busSegmentsFixed.length >= 5, `Missing busSegmentsFixed on ${c.id}`);
+  assert.notDeepEqual(dd.waveSpec.busSegmentsFault, dd.waveSpec.busSegmentsFixed, `Identical Fault/Fixed busSegments on ${c.id}`);
+  assert.ok(dd.waveSpec.harmonics && typeof dd.waveSpec.harmonics.f2 === 'number', `Missing harmonics on ${c.id}`);
+  assert.ok(Array.isArray(dd.waveSpec.subPulses) && dd.waveSpec.subPulses.length >= 3, `Missing subPulses on ${c.id}`);
 }
 
 // 2. Validate all 7 Guided Labs and 26 unique stepSpecs
@@ -67,6 +74,13 @@ for (const l of labs) {
     assert.ok(ws && ws.id && !seenStepIds.has(ws.id), `Duplicate stepSpec ID in lab ${l.id} step ${i}`);
     seenStepIds.add(ws.id);
     assert.equal(ws.channels.length, 4, `Expected 4 channels on lab ${l.id} step ${i}`);
+    assert.ok(typeof ws.corrDelta === 'number' && ws.corrDelta > 0, `Missing corrDelta on lab ${l.id} step ${i}`);
+    assert.ok(typeof ws.bitPatternFault === 'string' && typeof ws.bitPatternFixed === 'string' && ws.bitPatternFault !== ws.bitPatternFixed, `Invalid bitPattern on lab ${l.id} step ${i}`);
+    assert.ok(Array.isArray(ws.busSegmentsFault) && ws.busSegmentsFault.length >= 5, `Missing busSegmentsFault on lab ${l.id} step ${i}`);
+    assert.ok(Array.isArray(ws.busSegmentsFixed) && ws.busSegmentsFixed.length >= 5, `Missing busSegmentsFixed on lab ${l.id} step ${i}`);
+    assert.notDeepEqual(ws.busSegmentsFault, ws.busSegmentsFixed, `Identical Fault/Fixed busSegments on lab ${l.id} step ${i}`);
+    assert.ok(ws.harmonics && typeof ws.harmonics.f2 === 'number', `Missing harmonics on lab ${l.id} step ${i}`);
+    assert.ok(Array.isArray(ws.subPulses) && ws.subPulses.length >= 3, `Missing subPulses on lab ${l.id} step ${i}`);
   }
 }
 assert.equal(totalSteps, 26, 'Expected 26 total guided lab steps');
@@ -81,11 +95,11 @@ for (const m of expectedMenus) {
 }
 for (const token of [
   'data-mode-btn="fault"', 'data-mode-btn="fixed"',
-  'id="ixMathMode"', 'id="ixSaveRef"', 'id="ixPreset"',
+  'id="ixMathMode"', 'id="ixSaveRef"', 'id="ixLinkB"', 'id="ixPreset"',
   'id="ksVoltSlider"', 'id="ksRSelect"', 'id="ksCSelect"', 'id="ksLSelect"',
   'id="ixDlCsv"', 'id="ixDlSvg"', 'id="ixDlSet"', 'id="ixUpCsv"',
   'MBU_DVFS_transition_cpu2_left.set', 'Veagle_1169B_Rsense_16GSa_22Mpts.set',
-  'I2C_47k_SharkFin_vs_2k2_Clean.set', 'ENGR852_520MHz_14nm_SAD_Pipeline.set',
+  'I2C_47k_SharkFin_vs_2k2_Clean.set', 'ENGR852_SAD_8bit_16bit_training.set',
   'Startup_4CH_PG_CLK_RST.set', 'Overshoot', 'StdDev'
 ]) {
   assert.ok(markup.includes(token), `Missing required Infiniium UI feature: ${token}`);

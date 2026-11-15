@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v14-keysight-classic';
+const CACHE = 'slt-study-studio-v14-keysight-surfer';
 const CORE = [
   "./",
   "./index.html",

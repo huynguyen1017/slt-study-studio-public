@@ -2,26 +2,45 @@
 (function(){
  const ns="http://www.w3.org/2000/svg",isPhone=()=>matchMedia("(max-width:700px)").matches;
  function nearest(a,t){let l=0,h=a.length-1;while(l<h){let m=(l+h)>>1;if(a[m][0]<t)l=m+1;else h=m}return l&&Math.abs(a[l-1][0]-t)<Math.abs(a[l][0]-t)?a[l-1]:a[l]}
- function paths(rows,x,y,col){return rows.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(r[col]).toFixed(2)).join(" ")}
+ function siChVal(r,ch,run){
+  if(ch<3)return r[ch+1];
+  return window.sltRxCurrentScaled?window.sltRxCurrentScaled(r,run):Math.max(-0.18,Math.min(1.58,(r[3]/Math.max(25,Math.min(250,Number(run&&run.rl)||50)))*35));
+ }
+ function paths(rows,x,y,col,run){return rows.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(run?siChVal(r,col-1,run):r[col]).toFixed(2)).join(" ")}
  function scope(run,st,root){
   const area=root.querySelector("#siMobilePlot");if(!area||!isPhone())return;
-  const min=st.start,max=st.end,W=360,H=334,L=45,R=345,TOP=31,BOT=273;
+  const min=st.start,max=st.end,W=360,H=340,L=45,R=345,TOP=31,BOT=273;
   const relevant=run.trace.filter(r=>r[0]>=min-.03&&r[0]<=max+.03);
-  const yvals=relevant.flatMap(r=>[r[1],r[2],r[3]]);const ymax=Math.max(1.1,...yvals)+.12,ymin=Math.min(0,...yvals)-.12;
+  const yvals=relevant.flatMap(r=>[r[1],r[2],r[3],siChVal(r,3,run)]);const ymax=Math.max(1.1,...yvals)+.12,ymin=Math.min(0,...yvals)-.12;
   const X=t=>L+(t-min)/(max-min)*(R-L),Y=v=>BOT-(v-ymin)/(ymax-ymin)*(BOT-TOP);
-  const color=["#79b5ff","#5de2be","#ff829c"],labels=["SRC","TX","RX"];
-  let svg='<svg viewBox="0 0 360 334" role="img" aria-label="Fit-to-screen ngspice source transmitter receiver voltage waveforms"><rect width="360" height="334" rx="12" fill="#101d33"/>';
+  const color=["#6a99ff","#39d4ad","#ff7393","#f4be6b"],labels=["SRC","TX","RX","I(rx)"];
+  const spState=root.__scopeProState;
+  const tA=(spState&&typeof spState.a==="number")?spState.a:st.time;
+  const tB=(spState&&typeof spState.b==="number")?spState.b:((tA+3.7<=14.8)?tA+3.7:Math.max(0.2,tA-3.7));
+  let svg='<svg viewBox="0 0 360 340" role="img" aria-label="Fit-to-screen ngspice 4-channel voltage and current waveforms"><rect width="360" height="340" rx="12" fill="#101d33"/>';
   for(let j=0;j<=4;j++){let v=ymin+j*(ymax-ymin)/4,q=Y(v);
    svg+='<path d="M45 '+q+' H345" stroke="#33465f" stroke-dasharray="3 5"/><text x="39" y="'+(q+4)+'" fill="#d7e4f2" text-anchor="end" font-size="11">'+v.toFixed(2)+'</text>'}
   for(let j=0;j<=4;j++){let t=min+j*(max-min)/4,p=X(t);
     svg+='<path d="M'+p+' 30 V277" stroke="#203650"/><text x="'+p+'" y="295" fill="#dde9f5" font-size="11" text-anchor="middle">'+t.toFixed(1)+'</text>'}
-  for(let i=0;i<3;i++)if(st.channels[i])svg+='<path d="'+paths(relevant,X,Y,i+1)+'" fill="none" stroke="'+color[i]+'" stroke-width="'+(i===2?2.7:2)+'"/>';
-  if(st.time>=min&&st.time<=max){
-   let x=X(st.time),n=nearest(run.trace,st.time);
-   svg+='<path d="M'+x+' 30 V277" stroke="#fff0a4" stroke-width="1.5" stroke-dasharray="5 4"/>';
-   for(let j=0;j<3;j++)if(st.channels[j])svg+='<circle cx="'+x+'" cy="'+Y(n[j+1])+'" r="3.5" fill="'+color[j]+'" stroke="#fff"/>';
+  for(let i=0;i<4;i++)if(st.channels[i]!==false)svg+='<path d="'+paths(relevant,X,Y,i+1,run)+'" fill="none" stroke="'+color[i]+'" stroke-width="'+(i===2?2.7:(i===3?1.9:2))+'"'+(i===3?' stroke-dasharray="5 3"':'')+'/>';
+  const aIn=tA>=min&&tA<=max,bIn=tB>=min&&tB<=max;
+  const rowA=nearest(run.trace,tA),rowB=nearest(run.trace,tB);
+  if(aIn&&bIn){
+   for(let j=0;j<4;j++)if(st.channels[j]!==false){
+    svg+='<line class="ks-corr-line" x1="'+X(tA).toFixed(1)+'" y1="'+Y(siChVal(rowA,j,run)).toFixed(1)+'" x2="'+X(tB).toFixed(1)+'" y2="'+Y(siChVal(rowB,j,run)).toFixed(1)+'" stroke="'+color[j]+'" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.88"/>';
+   }
   }
-  for(let i=0;i<3;i++){svg+='<rect x="'+(18+i*112)+'" y="311" width="8" height="8" rx="2" fill="'+color[i]+'"/><text x="'+(31+i*112)+'" y="320" fill="#eaf3fc" font-size="12">'+labels[i]+'</text>'}
+  if(aIn){
+   let x=X(tA);
+   svg+='<path d="M'+x+' 30 V277" stroke="#f6c86f" stroke-width="1.6" stroke-dasharray="5 4"/>';
+   for(let j=0;j<4;j++)if(st.channels[j]!==false)svg+='<circle class="ks-dot-a" cx="'+x+'" cy="'+Y(siChVal(rowA,j,run))+'" r="3.6" fill="'+color[j]+'" stroke="#fff"/>';
+  }
+  if(bIn){
+   let xb=X(tB);
+   svg+='<path d="M'+xb+' 30 V277" stroke="#5fe2c4" stroke-width="1.6" stroke-dasharray="5 4"/>';
+   for(let j=0;j<4;j++)if(st.channels[j]!==false)svg+='<circle class="ks-marker-b-dot ks-dot-b" cx="'+xb+'" cy="'+Y(siChVal(rowB,j,run))+'" r="3.8" fill="'+color[j]+'" stroke="#0b172d" stroke-width="1.3"/>';
+  }
+  for(let i=0;i<4;i++){svg+='<rect x="'+(14+i*85)+'" y="313" width="8" height="8" rx="2" fill="'+color[i]+'"/><text x="'+(26+i*85)+'" y="322" fill="#eaf3fc" font-size="11">'+labels[i]+'</text>'}
   area.innerHTML=svg+'</svg>';
  }
  function boardCircuit(r,a,root){
@@ -52,14 +71,22 @@
  function boardWave(r,time,root){
   const target=root.querySelector("#blWaveMobile");if(!target||!isPhone())return;
   const rows=r.samples,x=t=>48+t/16*290,max=Math.max(1.8,r.supply*1.2),y=v=>265-v/max*215;
+  const tB=(time+3.2<=15.6)?(time+3.2):Math.max(0.2,time-3.2);
+  const nA=nearest(rows,time),nB=nearest(rows,tB);
   let svg='<svg viewBox="0 0 360 360" role="img" aria-label="Phone fit board waveform with source, transmitter, receiver and gate"><rect width="360" height="360" rx="12" fill="#0e1930"/>';
   for(let j=0;j<=4;j++){let v=max*j/4,Y=y(v);svg+='<path d="M48 '+Y+' H338" stroke="#31435d" stroke-dasharray="3 4"/><text x="40" y="'+(Y+4)+'" fill="#dce8f6" text-anchor="end" font-size="10">'+v.toFixed(1)+'</text>'}
   for(let i=0;i<=4;i++){let t=i*4;svg+='<path d="M'+x(t)+' 35 V270" stroke="#263754"/><text x="'+x(t)+'" y="291" text-anchor="middle" fill="#e6f0ff" font-size="12">'+t+'</text>'}
-  [[1,"#74b4ff"],[2,"#f5cc64"],[4,"#f47599"]].forEach(([col,c])=>{svg+='<path d="'+paths(rows,x,y,col)+'" fill="none" stroke="'+c+'" stroke-width="2.8"/>'});
-  let line=x(time);svg+='<path d="M'+line+' 29 V271" stroke="#fff2b9" stroke-dasharray="6 4"/>';
-  svg+='<text x="49" y="19" font-size="12" fill="#fff">Board node voltage (V)</text>'+
-  '<text x="19" y="324" fill="#74b4ff" font-size="12">● Source</text><text x="136" y="324" fill="#f5cc64" font-size="12">● TX</text><text x="236" y="324" fill="#f47599" font-size="12">● RX</text>'+
-  '<text x="180" y="347" text-anchor="middle" fill="#dce8f6" font-size="11">Cursor '+time.toFixed(2)+' ns · gate '+nearest(rows,time)[5].toFixed(2)+' V</text>';
+  const chDefs=[[1,"#74b4ff"],[2,"#f5cc64"],[4,"#f47599"],[5,"#5fe2c4"]];
+  chDefs.forEach(([col,c])=>{svg+='<path d="'+paths(rows,x,y,col)+'" fill="none" stroke="'+c+'" stroke-width="'+(col===5?1.8:2.8)+'"'+(col===5?' stroke-dasharray="4 3"':'')+'/>'});
+  chDefs.forEach(([col,c])=>{
+   svg+='<line class="ks-corr-line" x1="'+x(time).toFixed(1)+'" y1="'+y(nA[col]).toFixed(1)+'" x2="'+x(tB).toFixed(1)+'" y2="'+y(nB[col]).toFixed(1)+'" stroke="'+c+'" stroke-width="1.4" stroke-dasharray="4 3"/>';
+   svg+='<circle class="ks-dot-a" cx="'+x(time).toFixed(1)+'" cy="'+y(nA[col]).toFixed(1)+'" r="3.4" fill="'+c+'" stroke="#fff"/>';
+   svg+='<circle class="ks-marker-b-dot ks-dot-b" cx="'+x(tB).toFixed(1)+'" cy="'+y(nB[col]).toFixed(1)+'" r="3.6" fill="'+c+'" stroke="#0e1930" stroke-width="1.2"/>';
+  });
+  let line=x(time),lineB=x(tB);svg+='<path d="M'+line+' 29 V271" stroke="#fff2b9" stroke-dasharray="6 4"/><path d="M'+lineB+' 29 V271" stroke="#5fe2c4" stroke-dasharray="5 4"/>';
+  svg+='<text x="49" y="19" font-size="12" fill="#fff">Board nodes + Gate (V)</text>'+
+  '<text x="12" y="324" fill="#74b4ff" font-size="11">● Source</text><text x="98" y="324" fill="#f5cc64" font-size="11">● TX</text><text x="166" y="324" fill="#f47599" font-size="11">● RX</text><text x="236" y="324" fill="#5fe2c4" font-size="11">● Gate(B)</text>'+
+  '<text x="180" y="347" text-anchor="middle" fill="#dce8f6" font-size="11">A '+time.toFixed(2)+' ns ↔ B '+tB.toFixed(2)+' ns (gate '+nA[5].toFixed(2)+' V)</text>';
   target.innerHTML=svg+'</svg>';
  }
  window.sltMobileScope=scope;window.sltMobileBoard=function(run,z,root,t){boardCircuit(run,z,root);boardWave(run,t,root)};

@@ -148,7 +148,110 @@ window.STUDY_LABS = [
             "A USB bridge and its target are separate devices."
           ]
         ],
-        "lesson": "Enumeration proves host visibility of the adapter. Check stable serial path, baud rate, wiring, target power and competing readers next."
+        "lesson": "Enumeration proves host visibility of the adapter. Check stable serial path, baud rate, wiring, target power and competing readers next.",
+        "corrDelta": 20.88,
+        "bitPatternFault": "1001110111110000",
+        "bitPatternFixed": "1001110110011101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_28",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RST#=1",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "CLK_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "HANG_F0",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DEAD",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_28",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "LOCK=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "tPOR+",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RST#=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "BOOT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 5.2,
+          "damp": 0.495,
+          "ringMult": 1.29,
+          "seed": 785
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.075,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.73,
+            "w": 0.04,
+            "amp": 0.74
+          }
+        ]
       },
       {
         "id": "lab-reset-s1",
@@ -244,7 +347,110 @@ window.STUDY_LABS = [
             "You need the relative timing of events."
           ]
         ],
-        "lesson": "A shared capture lets you compare rail validity and clock qualification with reset release. Use the platform's actual thresholds and delays."
+        "lesson": "A shared capture lets you compare rail validity and clock qualification with reset release. Use the platform's actual thresholds and delays.",
+        "corrDelta": 26.4,
+        "bitPatternFault": "0111100111101111",
+        "bitPatternFixed": "0111100001111000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_28",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RST#=1",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "CLK_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "HANG_F0",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DEAD",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_28",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "LOCK=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "tPOR+",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RST#=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "BOOT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 3.94,
+          "damp": 0.27,
+          "ringMult": 1.71,
+          "seed": 943
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.055,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.064,
+            "amp": 0.47
+          }
+        ]
       },
       {
         "id": "lab-reset-s2",
@@ -340,7 +546,110 @@ window.STUDY_LABS = [
             "Activity and qualification are different observations."
           ]
         ],
-        "lesson": "An input clock can be active while a PLL is acquiring lock. Verify the appropriate status and measurement requirements."
+        "lesson": "An input clock can be active while a PLL is acquiring lock. Verify the appropriate status and measurement requirements.",
+        "corrDelta": 29.5,
+        "bitPatternFault": "1111011111111111",
+        "bitPatternFixed": "0000100100001001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_22",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RST#=1",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "CLK_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "HANG_F0",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "DEAD",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "VR_22",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "PG_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "LOCK=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "tPOR+",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RST#=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "BOOT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 4.36,
+          "damp": 0.18,
+          "ringMult": 1.85,
+          "seed": 53
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.065,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.7,
+            "w": 0.052,
+            "amp": 0.47
+          }
+        ]
       },
       {
         "id": "lab-reset-s3",
@@ -436,7 +745,110 @@ window.STUDY_LABS = [
             "A controlled comparison changes one cause."
           ]
         ],
-        "lesson": "Retain the failing capture, make the approved sequencing correction and repeat. A single successful boot is not a reliability study."
+        "lesson": "Retain the failing capture, make the approved sequencing correction and repeat. A single successful boot is not a reliability study.",
+        "corrDelta": 27.44,
+        "bitPatternFault": "1100001100000100",
+        "bitPatternFixed": "1100001111000011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "t=2725",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "P4:-820p",
+            "state": "fault"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "0101->X",
+            "state": "x"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "META",
+            "state": "fault"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "S=0a",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "ERR!",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "t=2725",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "+850p",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S_buf=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "E=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "f=386M",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 6.04,
+          "damp": 0.225,
+          "ringMult": 1.15,
+          "seed": 902
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.065,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.76,
+            "w": 0.04,
+            "amp": 0.56
+          }
+        ]
       }
     ]
   },
@@ -577,7 +989,110 @@ window.STUDY_LABS = [
             "The summary is derived evidence."
           ]
         ],
-        "lesson": "A disagreement requires investigating the report and the raw run independently. Two failures do not automatically mean two defective chips."
+        "lesson": "A disagreement requires investigating the report and the raw run independently. Two failures do not automatically mean two defective chips.",
+        "corrDelta": 13.0,
+        "bitPatternFault": "1000011110100100",
+        "bitPatternFixed": "0111111001111110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00f9",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=f9",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1e9",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1d9",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00f9",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0100",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 3.52,
+          "damp": 0.495,
+          "ringMult": 1.15,
+          "seed": 783
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.055,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.685,
+            "w": 0.052,
+            "amp": 0.65
+          }
+        ]
       },
       {
         "id": "lab-dram-s1",
@@ -673,7 +1188,110 @@ window.STUDY_LABS = [
             "Match the claim to the observation."
           ]
         ],
-        "lesson": "The message supports changed failure-handling behavior. Inspect actual files and classifications before declaring reporting closure."
+        "lesson": "The message supports changed failure-handling behavior. Inspect actual files and classifications before declaring reporting closure.",
+        "corrDelta": 20.7,
+        "bitPatternFault": "0001110000110111",
+        "bitPatternFixed": "1110000011100000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "ZQ_1f1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "ACT_0",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "MR_BAD",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "VREF_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "WR_41",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "CKE_X",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "ZQ_081",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "ACT_0",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "RD_A",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "VREF_OK",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "WR_41",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 6.04,
+          "damp": 0.45,
+          "ringMult": 1.43,
+          "seed": 753
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.075,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.67,
+            "w": 0.064,
+            "amp": 0.56
+          }
+        ]
       },
       {
         "id": "lab-dram-s2",
@@ -769,7 +1387,110 @@ window.STUDY_LABS = [
             "Several physical conditions change with frequency."
           ]
         ],
-        "lesson": "Use the result to choose the next controlled experiment. Return to the original condition after the proposed correction."
+        "lesson": "Use the result to choose the next controlled experiment. Return to the original condition after the proposed correction.",
+        "corrDelta": 25.36,
+        "bitPatternFault": "1000010111111101",
+        "bitPatternFixed": "0111101001111010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0101",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=01",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1f1",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1e1",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=0101",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0108",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 5.2,
+          "damp": 0.495,
+          "ringMult": 1.15,
+          "seed": 777
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.055,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.495,
+            "w": 0.085,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.685,
+            "w": 0.052,
+            "amp": 0.47
+          }
+        ]
       }
     ]
   },
@@ -910,7 +1631,110 @@ window.STUDY_LABS = [
             "AC coupling removes a component you need."
           ]
         ],
-        "lesson": "DC coupling retains the absolute level and slow behavior. Offset can make small changes visible without removing the DC information."
+        "lesson": "DC coupling retains the absolute level and slow behavior. Offset can make small changes visible without removing the DC information.",
+        "corrDelta": 27.75,
+        "bitPatternFault": "0011100000011101",
+        "bitPatternFixed": "1100011011000110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "CH1_31",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AC_CAP",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "GND_LO",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ALIAS_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "CLIP!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "ERR",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "CH1_31",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DC_50",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "KELV_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "16GSa",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "V=851",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "CAL",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 5.62,
+          "damp": 0.315,
+          "ringMult": 1.43,
+          "seed": 203
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.065,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.7,
+            "w": 0.052,
+            "amp": 0.47
+          }
+        ]
       },
       {
         "id": "lab-scope-s1",
@@ -1006,7 +1830,110 @@ window.STUDY_LABS = [
             "Subtraction does not isolate the inputs."
           ]
         ],
-        "lesson": "Never put common ground clips on opposite high-side terminals. Prefer a suitable differential probe; check common-mode rejection and bandwidth."
+        "lesson": "Never put common ground clips on opposite high-side terminals. Prefer a suitable differential probe; check common-mode rejection and bandwidth.",
+        "corrDelta": 18.5,
+        "bitPatternFault": "1001001111111000",
+        "bitPatternFixed": "1001001010010010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "CH1_38",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AC_CAP",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "GND_LO",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ALIAS_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "CLIP!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "ERR",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "CH1_38",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DC_50",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "KELV_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "16GSa",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "V=858",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "CAL",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 6.46,
+          "damp": 0.18,
+          "ringMult": 1.85,
+          "seed": 666
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.075,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.052,
+            "amp": 0.74
+          }
+        ]
       },
       {
         "id": "lab-scope-s2",
@@ -1102,7 +2029,110 @@ window.STUDY_LABS = [
             "Convert both values to base units, then divide V by R."
           ]
         ],
-        "lesson": "0.050 V / 0.005 Ω = 10 A. Account for shunt tolerance, heating, gain and offset."
+        "lesson": "0.050 V / 0.005 Ω = 10 A. Account for shunt tolerance, heating, gain and offset.",
+        "corrDelta": 21.28,
+        "bitPatternFault": "0101000000001001",
+        "bitPatternFixed": "1010111110101111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "CH1_33",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "AC_CAP",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "GND_LO",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "ALIAS_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "CLIP!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "ERR",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "CH1_33",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DC_50",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "KELV_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "16GSa",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "V=853",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "CAL",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 4.78,
+          "damp": 0.225,
+          "ringMult": 1.85,
+          "seed": 333
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.075,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.76,
+            "w": 0.052,
+            "amp": 0.56
+          }
+        ]
       }
     ]
   },
@@ -1255,7 +2285,110 @@ window.STUDY_LABS = [
             "f = 1/T; 10 ns is 10 × 10⁻⁹ s."
           ]
         ],
-        "lesson": "1/(10 × 10⁻⁹) = 100 × 10⁶ Hz = 100 MHz."
+        "lesson": "1/(10 × 10⁻⁹) = 100 × 10⁶ Hz = 100 MHz.",
+        "corrDelta": 11.45,
+        "bitPatternFault": "1101001010000000",
+        "bitPatternFixed": "0010110100101101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fe",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=fe",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1ee",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1de",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fe",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0105",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.2,
+          "f3": 6.46,
+          "damp": 0.495,
+          "ringMult": 1.85,
+          "seed": 952
+        },
+        "subPulses": [
+          {
+            "t0": 0.2,
+            "w": 0.045,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.76,
+            "w": 0.064,
+            "amp": 0.65
+          }
+        ]
       },
       {
         "id": "lab-clock-s1",
@@ -1351,7 +2484,110 @@ window.STUDY_LABS = [
             "The # suffix convention indicates active low."
           ]
         ],
-        "lesson": "Low is asserted; high is deasserted. SYS_RESET# and PERST# still have different platform requirements."
+        "lesson": "Low is asserted; high is deasserted. SYS_RESET# and PERST# still have different platform requirements.",
+        "corrDelta": 26.2,
+        "bitPatternFault": "0011111111100011",
+        "bitPatternFixed": "0011111100111111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=2!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Edge2?",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "R=A",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "Out=2",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 6.04,
+          "damp": 0.225,
+          "ringMult": 1.15,
+          "seed": 895
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.055,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.76,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       },
       {
         "id": "lab-clock-s2",
@@ -1447,7 +2683,110 @@ window.STUDY_LABS = [
             "One period is 10 ns, much smaller than 1 ms."
           ]
         ],
-        "lesson": "Record length, sample rate and bandwidth determine what was captured. Zoom cannot recover samples that were never acquired."
+        "lesson": "Record length, sample rate and bandwidth determine what was captured. Zoom cannot recover samples that were never acquired.",
+        "corrDelta": 22.2,
+        "bitPatternFault": "1100100011000010",
+        "bitPatternFixed": "1100100011001000",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "t=2665",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "P4:-820p",
+            "state": "fault"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "0101->X",
+            "state": "x"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "META",
+            "state": "fault"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "S=06",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "ERR!",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "t=2665",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "+850p",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S_buf=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "E=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "f=386M",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "PASS",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 3.94,
+          "damp": 0.45,
+          "ringMult": 1.71,
+          "seed": 299
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.065,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.435,
+            "w": 0.065,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.67,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       },
       {
         "id": "lab-clock-s3",
@@ -1543,7 +2882,110 @@ window.STUDY_LABS = [
             "Digital simulation does not establish analog timing margin."
           ]
         ],
-        "lesson": "The receiver may capture an unintended value or become metastable. Check timing constraints and the clock-domain crossing design."
+        "lesson": "The receiver may capture an unintended value or become metastable. Check timing constraints and the clock-domain crossing design.",
+        "corrDelta": 14.4,
+        "bitPatternFault": "1110111011111000",
+        "bitPatternFixed": "1110111011101110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=2!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "Edge2?",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "R=A",
+            "state": "warn"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "In=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=D",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "Out=F",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "R=1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "Out=2",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "Out=A",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 3.52,
+          "damp": 0.18,
+          "ringMult": 1.15,
+          "seed": 43
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.045,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.73,
+            "w": 0.04,
+            "amp": 0.65
+          }
+        ]
       }
     ]
   },
@@ -1696,7 +3138,110 @@ window.STUDY_LABS = [
             "Capability and current state are separate fields."
           ]
         ],
-        "lesson": "Read both endpoints where available. Preserve BDF, topology, kernel/AER logs and the actual test outcome."
+        "lesson": "Read both endpoints where available. Preserve BDF, topology, kernel/AER logs and the actual test outcome.",
+        "corrDelta": 16.3,
+        "bitPatternFault": "0001010111111011",
+        "bitPatternFixed": "1110101011101010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "GEN4_0a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DET_Q",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "POLL",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "REC_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "GEN1!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "RPLY",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "GEN4_0a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "CTLE",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DFE_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "L0_16G",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "LANE=0a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "L0_OK",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.5,
+          "f3": 4.78,
+          "damp": 0.36,
+          "ringMult": 1.43,
+          "seed": 477
+        },
+        "subPulses": [
+          {
+            "t0": 0.17,
+            "w": 0.045,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.67,
+            "w": 0.064,
+            "amp": 0.56
+          }
+        ]
       },
       {
         "id": "lab-pcie-s1",
@@ -1792,7 +3337,110 @@ window.STUDY_LABS = [
             "Equalization, power and protocol conditions can also change."
           ]
         ],
-        "lesson": "A speed change is a useful experiment, not a unique diagnosis. Measure repeatability and control other variables."
+        "lesson": "A speed change is a useful experiment, not a unique diagnosis. Measure repeatability and control other variables.",
+        "corrDelta": 18.32,
+        "bitPatternFault": "1011101111101111",
+        "bitPatternFixed": "0100010101000101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "GEN4_08",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DET_Q",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "POLL",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "REC_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "GEN1!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "RPLY",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "GEN4_08",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "CTLE",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DFE_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "L0_16G",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "LANE=08",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "L0_OK",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 4.78,
+          "damp": 0.18,
+          "ringMult": 1.15,
+          "seed": 181
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.065,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.68
+          },
+          {
+            "t0": 0.7,
+            "w": 0.04,
+            "amp": 0.47
+          }
+        ]
       },
       {
         "id": "lab-pcie-s2",
@@ -1888,7 +3536,110 @@ window.STUDY_LABS = [
             "Use a comparison matrix."
           ]
         ],
-        "lesson": "An A/B cross-comparison shows which component the failure follows, subject to repeatability and interaction effects."
+        "lesson": "An A/B cross-comparison shows which component the failure follows, subject to repeatability and interaction effects.",
+        "corrDelta": 32.8,
+        "bitPatternFault": "1010011100001111",
+        "bitPatternFixed": "1010011110100111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "GEN4_03",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DET_Q",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "POLL",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "REC_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "GEN1!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "RPLY",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "GEN4_03",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "CTLE",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DFE_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "L0_16G",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "LANE=03",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "L0_OK",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 6.04,
+          "damp": 0.225,
+          "ringMult": 1.29,
+          "seed": 307
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.075,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.745,
+            "w": 0.064,
+            "amp": 0.38
+          }
+        ]
       },
       {
         "id": "lab-pcie-s3",
@@ -1984,7 +3735,110 @@ window.STUDY_LABS = [
             "Keep the denominator and the tested population."
           ]
         ],
-        "lesson": "Report observed counts, conditions and duration. A small lab sample cannot establish a production failure rate by itself."
+        "lesson": "Report observed counts, conditions and duration. A small lab sample cannot establish a production failure rate by itself.",
+        "corrDelta": 21.8,
+        "bitPatternFault": "0010010111110100",
+        "bitPatternFixed": "0010010000100100",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "GEN4_02",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "DET_Q",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "POLL",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "REC_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "GEN1!",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "RPLY",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "GEN4_02",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "CTLE",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DFE_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "L0_16G",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "LANE=02",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "L0_OK",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.85,
+          "f3": 4.78,
+          "damp": 0.27,
+          "ringMult": 1.43,
+          "seed": 376
+        },
+        "subPulses": [
+          {
+            "t0": 0.185,
+            "w": 0.075,
+            "amp": 0.54
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.745,
+            "w": 0.052,
+            "amp": 0.38
+          }
+        ]
       }
     ]
   },
@@ -2137,7 +3991,110 @@ window.STUDY_LABS = [
             "Command delivery, completion and success are different."
           ]
         ],
-        "lesson": "A tool can return zero after a failed internal test. Require explicit result parsing and run identity."
+        "lesson": "A tool can return zero after a failed internal test. Require explicit result parsing and run identity.",
+        "corrDelta": 18.5,
+        "bitPatternFault": "0011000111100100",
+        "bitPatternFixed": "1100111011001110",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_72",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_72",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 3.52,
+          "damp": 0.18,
+          "ringMult": 1.15,
+          "seed": 360
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.055,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.745,
+            "w": 0.04,
+            "amp": 0.56
+          }
+        ]
       },
       {
         "id": "lab-automation-s1",
@@ -2233,7 +4190,110 @@ window.STUDY_LABS = [
             "The command may already have executed."
           ]
         ],
-        "lesson": "Blind retries of state-changing commands can create a second transition. Use bounded recovery and preserve the first failure."
+        "lesson": "Blind retries of state-changing commands can create a second transition. Use bounded recovery and preserve the first failure.",
+        "corrDelta": 17.04,
+        "bitPatternFault": "1011010000001100",
+        "bitPatternFixed": "0100101101001011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_73",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_73",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 4.78,
+          "damp": 0.27,
+          "ringMult": 1.15,
+          "seed": 532
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.055,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.67,
+            "w": 0.04,
+            "amp": 0.74
+          }
+        ]
       },
       {
         "id": "lab-automation-s2",
@@ -2329,7 +4389,110 @@ window.STUDY_LABS = [
             "The process may never execute cleanup."
           ]
         ],
-        "lesson": "finally helps with handled exits and exceptions. It cannot run after power loss or a forced kill. Use equipment-approved limits and watchdog behavior."
+        "lesson": "finally helps with handled exits and exceptions. It cannot run after power loss or a forced kill. Use equipment-approved limits and watchdog behavior.",
+        "corrDelta": 18.5,
+        "bitPatternFault": "1110110111110010",
+        "bitPatternFixed": "0001001000010010",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_72",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_72",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 3.1,
+          "damp": 0.315,
+          "ringMult": 1.85,
+          "seed": 345
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.045,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.48,
+            "w": 0.085,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.67,
+            "w": 0.052,
+            "amp": 0.74
+          }
+        ]
       },
       {
         "id": "lab-automation-s3",
@@ -2425,7 +4588,110 @@ window.STUDY_LABS = [
             "A command is not a physical measurement."
           ]
         ],
-        "lesson": "Record sensor identity, timestamps and actual temperature. Setpoint, chamber air, case and on-die temperature are distinct."
+        "lesson": "Record sensor identity, timestamps and actual temperature. Setpoint, chamber air, case and on-die temperature are distinct.",
+        "corrDelta": 7.8,
+        "bitPatternFault": "1100100001111000",
+        "bitPatternFixed": "0011011100110111",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7a",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 5.2,
+          "damp": 0.405,
+          "ringMult": 1.29,
+          "seed": 3
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.055,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.45,
+            "w": 0.075,
+            "amp": 0.92
+          },
+          {
+            "t0": 0.715,
+            "w": 0.04,
+            "amp": 0.74
+          }
+        ]
       }
     ]
   },
@@ -2578,7 +4844,110 @@ window.STUDY_LABS = [
             "A keyword is not the meaning of the whole result."
           ]
         ],
-        "lesson": "Separate search from classification. Zero failures alone does not prove complete execution."
+        "lesson": "Separate search from classification. Zero failures alone does not prove complete execution.",
+        "corrDelta": 27.3,
+        "bitPatternFault": "0111000101000010",
+        "bitPatternFixed": "0111000101110001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.9,
+          "f3": 6.04,
+          "damp": 0.495,
+          "ringMult": 1.85,
+          "seed": 545
+        },
+        "subPulses": [
+          {
+            "t0": 0.23,
+            "w": 0.065,
+            "amp": 0.72
+          },
+          {
+            "t0": 0.465,
+            "w": 0.075,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.715,
+            "w": 0.064,
+            "amp": 0.38
+          }
+        ]
       },
       {
         "id": "lab-python-s1",
@@ -2674,7 +5043,110 @@ window.STUDY_LABS = [
             "Look at what the function retains."
           ]
         ],
-        "lesson": "Streaming input avoids loading the whole file, but a growing results list still consumes growing memory. Yield or write findings for bounded storage."
+        "lesson": "Streaming input avoids loading the whole file, but a growing results list still consumes growing memory. Yield or write findings for bounded storage.",
+        "corrDelta": 22.2,
+        "bitPatternFault": "0000111011000011",
+        "bitPatternFixed": "1111000111110001",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fe",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "R=fe",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "S1=1ee",
+            "state": "warn"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "S2=1de",
+            "state": "warn"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff(X)",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=x/x",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "c=00fe",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "c=0105",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "PE=8000",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "BD=ffff",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "BD=ff00",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "mv=08/0d",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 3.55,
+          "f3": 3.1,
+          "damp": 0.18,
+          "ringMult": 1.85,
+          "seed": 679
+        },
+        "subPulses": [
+          {
+            "t0": 0.215,
+            "w": 0.055,
+            "amp": 0.81
+          },
+          {
+            "t0": 0.42,
+            "w": 0.065,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.052,
+            "amp": 0.65
+          }
+        ]
       },
       {
         "id": "lab-python-s2",
@@ -2770,7 +5242,110 @@ window.STUDY_LABS = [
             "Event time and processing time are different."
           ]
         ],
-        "lesson": "Relative boot timestamps need an anchor before comparison with wall-clock thermal logs."
+        "lesson": "Relative boot timestamps need an anchor before comparison with wall-clock thermal logs.",
+        "corrDelta": 30.6,
+        "bitPatternFault": "1001110111000011",
+        "bitPatternFixed": "1001110110011101",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_7b",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 2.15,
+          "f3": 3.52,
+          "damp": 0.36,
+          "ringMult": 1.15,
+          "seed": 77
+        },
+        "subPulses": [
+          {
+            "t0": 0.155,
+            "w": 0.045,
+            "amp": 0.63
+          },
+          {
+            "t0": 0.405,
+            "w": 0.055,
+            "amp": 0.76
+          },
+          {
+            "t0": 0.745,
+            "w": 0.052,
+            "amp": 0.65
+          }
+        ]
       },
       {
         "id": "lab-python-s3",
@@ -2866,7 +5441,110 @@ window.STUDY_LABS = [
             "There are buffers beyond the Python file object."
           ]
         ],
-        "lesson": "Define a persistence policy, appropriate fsync/checkpoint behavior and recovery tests. Avoid promising zero loss."
+        "lesson": "Define a persistence policy, appropriate fsync/checkpoint behavior and recovery tests. Avoid promising zero loss.",
+        "corrDelta": 25.1,
+        "bitPatternFault": "1000111110101001",
+        "bitPatternFixed": "1000101110001011",
+        "busSegmentsFault": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_70",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "NO_SHA",
+            "state": "warn"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "DRIFT",
+            "state": "fault"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "SKIP_X",
+            "state": "x"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "RC0_?",
+            "state": "fault"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "LOST",
+            "state": "x"
+          }
+        ],
+        "busSegmentsFixed": [
+          {
+            "t0": 0.0,
+            "t1": 0.16,
+            "val": "LOT_70",
+            "state": "ok"
+          },
+          {
+            "t0": 0.16,
+            "t1": 0.33,
+            "val": "SHA256",
+            "state": "ok"
+          },
+          {
+            "t0": 0.33,
+            "t1": 0.5,
+            "val": "SOAK_1",
+            "state": "ok"
+          },
+          {
+            "t0": 0.5,
+            "t1": 0.68,
+            "val": "2/20_L",
+            "state": "ok"
+          },
+          {
+            "t0": 0.68,
+            "t1": 0.85,
+            "val": "YLD99",
+            "state": "ok"
+          },
+          {
+            "t0": 0.85,
+            "t1": 1.0,
+            "val": "AUDIT",
+            "state": "ok"
+          }
+        ],
+        "harmonics": {
+          "f2": 1.8,
+          "f3": 4.78,
+          "damp": 0.45,
+          "ringMult": 1.71,
+          "seed": 272
+        },
+        "subPulses": [
+          {
+            "t0": 0.14,
+            "w": 0.055,
+            "amp": 0.45
+          },
+          {
+            "t0": 0.39,
+            "w": 0.055,
+            "amp": 0.84
+          },
+          {
+            "t0": 0.745,
+            "w": 0.04,
+            "amp": 0.56
+          }
+        ]
       }
     ]
   }

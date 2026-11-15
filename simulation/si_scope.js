@@ -1,7 +1,10 @@
 "use strict";
 (function(){
-var runs=window.SI_SPICE_RUNS||[],colors=["#6a99ff","#39d4ad","#ff7393"];
-var st={run:runs[1]||runs[0],start:0,end:15,time:2.3,channels:[true,true,true],playing:false,raf:0,step:0,attempts:0,solved:false};
+var runs=window.SI_SPICE_RUNS||[],colors=["#6a99ff","#39d4ad","#ff7393","#f4be6b"];
+var st={run:runs[1]||runs[0],start:0,end:15,time:2.3,channels:[true,true,true,true],playing:false,raf:0,step:0,attempts:0,solved:false};
+function rxCurrScaled(z,run){var rEff=Math.max(25,Math.min(250,Number(run&&run.rl)||50));return Math.max(-0.18,Math.min(1.58,(z[3]/rEff)*35))}
+window.sltRxCurrentScaled=rxCurrScaled;
+function chVal(z,ch,run){return ch<3?z[ch+1]:rxCurrScaled(z,run)}
 var qs=[
 ["For RL=200 Ω and Z0=50 Ω, what is ΓL?",["−0.60","0","+0.60","+1.00"],2,"Compute (200−50)/(200+50).","+0.60: the positive reflection increases the first received voltage."],
 ["For Rsrc=20 Ω, Z0=50 Ω, RL=200 Ω, what is Vfirst?",["0.500 V","0.714 V","1.143 V","0.909 V"],2,"Vlaunch=50/(20+50)=0.7143 V; multiply by (1+ΓL).","0.7143×1.6=1.1429 V. The later DC voltage is 0.9091 V."],
@@ -15,7 +18,7 @@ return '<section id="siStudio" class="si-studio"><div class="si-label">NGSPICE 4
 '<div class="si-origin">NGSPICE VERIFIED MODEL · NOT SYNOPSYS / VERDI VERIFIED</div>'+
 '<div class="si-tools"><label>Choose a completed simulation <select id="siCase">'+runs.map(function(r){return '<option value="'+E(r.id)+'">'+E(r.label)+'</option>'}).join("")+'</select></label>'+
 '<div class="si-toolbuttons"><button id="siPlay">▶ Replay</button><button id="siPlus">Zoom +</button><button id="siMinus">Zoom −</button><button id="siLeft">← Pan</button><button id="siRight">Pan →</button><button id="siFit">Fit</button></div></div>'+
-'<div class="si-legend">'+["Source V(vs)","Transmitter V(tx)","Receiver V(rx)"].map(function(n,i){return '<label><input data-si-ch="'+i+'" type="checkbox" checked><i style="background:'+colors[i]+'"></i>'+n+'</label>'}).join("")+'</div>'+
+'<div class="si-legend">'+["Source V(vs)","Transmitter V(tx)","Receiver V(rx)","Load Current I(rx) [scaled]"].map(function(n,i){return '<label><input data-si-ch="'+i+'" type="checkbox" checked><i style="background:'+colors[i]+'"></i>'+n+'</label>'}).join("")+'</div>'+
 '<div class="si-screen"><div class="si-screenbar">Transient voltage · V vs ns <span id="siViewWindow">0–15 ns</span></div><div id="siMobilePlot" class="slt-mobile-plot" aria-label="Fit to screen oscilloscope"></div><svg id="siPlot" viewBox="0 0 1040 410" role="img" aria-label="ngspice source transmitter and receiver voltage graph"></svg><div class="si-screenfoot">Tap or drag to inspect values at the exact cursor time. Zoom and pan to inspect reflected waves.</div></div>'+
 (window.renderScopePro?window.renderScopePro():'')+'<div class="si-timebar"><label>Cursor: <b id="siTimeLabel">2.30 ns</b></label><input type="range" min="0" max="15" step=".01" value="2.3" id="siTime"></div>'+
 '<div class="si-values">'+["Source","Transmitter","Receiver","Receiver peak","DC expected","Load Γ"].map(function(n,i){return '<div><small>'+n+'</small><strong id="siV'+i+'">—</strong></div>'}).join("")+'</div>'+
@@ -61,18 +64,21 @@ window.mountSpiceScope=function(root){
    s+='<text x="'+X(t)+'" y="368" text-anchor="middle" fill="#c7dcf1" font-size="13">'+t.toFixed(1)+'</text>';
   }
   s+='<text x="98" y="22" fill="#eff9ff" font-size="15">Voltage (V)</text><text x="1000" y="392" text-anchor="end" fill="#eff9ff" font-size="14">Time (ns)</text>';
-  for(var ch=0;ch<3;ch++)if(st.channels[ch]){
+  for(var ch=0;ch<4;ch++)if(st.channels[ch]){
    var a=run.trace.filter(function(z){return z[0]>=st.start-.05&&z[0]<=st.end+.05});
-   var path=a.map(function(z,i){return (i?"L":"M")+X(z[0]).toFixed(2)+" "+Y(z[ch+1]).toFixed(2)}).join(" ");
-   s+='<path d="'+path+'" fill="none" stroke="'+colors[ch]+'" stroke-width="'+(ch===2?3.5:2.2)+'"/>';
+   var path=a.map(function(z,i){return (i?"L":"M")+X(z[0]).toFixed(2)+" "+Y(chVal(z,ch,run)).toFixed(2)}).join(" ");
+   s+='<path d="'+path+'" fill="none" stroke="'+colors[ch]+'" stroke-width="'+(ch===2?3.3:(ch===3?2.0:2.2))+'"'+(ch===3?' stroke-dasharray="6 3"':'')+'/>';
   }
   if(st.time>=st.start&&st.time<=st.end){
    var p=nearest(),x=X(st.time);
    s+='<line x1="'+x+'" x2="'+x+'" y1="'+sy+'" y2="'+ey+'" stroke="#ffe89f" stroke-dasharray="7 5" stroke-width="2"/>';
-   for(var j=0;j<3;j++)if(st.channels[j])s+='<circle cx="'+x+'" cy="'+Y(p[j+1])+'" r="5" fill="'+colors[j]+'" stroke="white"/>';
+   for(var j=0;j<4;j++)if(st.channels[j])s+='<circle class="ks-dot-a" cx="'+x+'" cy="'+Y(chVal(p,j,run))+'" r="5" fill="'+colors[j]+'" stroke="white"/>';
   }
-  $("#siPlot").innerHTML=s;readout();if(window.sltMobileScope)window.sltMobileScope(run,st,root);root.dispatchEvent(new CustomEvent("slt:scope-time",{detail:{time:st.time}}));root.dispatchEvent(new CustomEvent("slt:scope-redraw",{detail:{run:st.run.id,start:st.start,end:st.end,time:st.time}}));
+  $("#siPlot").innerHTML=s;readout();if(window.mountScopePro)root.dispatchEvent(new CustomEvent("slt:scope-redraw",{detail:{run:st.run.id,start:st.start,end:st.end,time:st.time,channels:st.channels}}));else if(window.sltMobileScope)window.sltMobileScope(run,st,root);
+  root.dispatchEvent(new CustomEvent("slt:scope-time",{detail:{time:st.time}}));
+  if(window.sltMobileScope)window.sltMobileScope(run,st,root);
  }
+ root.addEventListener("slt:scope-seek",function(e){if(!e.detail||typeof e.detail.time!=="number")return;if(Math.abs(st.time-e.detail.time)>1e-4){stop();st.time=Math.max(0,Math.min(15,e.detail.time));draw()}});
  function seek(t){st.time=Math.max(0,Math.min(15,t));draw()}
  function windowTo(a,b){var w=Math.max(1,Math.min(15,b-a)),left=Math.max(0,Math.min(15-w,a));st.start=left;st.end=left+w;draw()}
  function stop(){st.playing=false;cancelAnimationFrame(st.raf);$("#siPlay").textContent="▶ Replay"}

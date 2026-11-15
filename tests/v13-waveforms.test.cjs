@@ -27,7 +27,7 @@ assert.equal(data.signals.find(x=>x.name==='top.AddressR').data.at(-1)[1],'00000
 const bad=ctx.window.parseLocalVcd.bind(null,'$timescale 1ns $end\n$enddefinitions $end\n#5\n1?');
 assert.throws(bad,/No scalar or vector/);
 (async()=>{
- const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const browser=await chromium.launch({headless:true,args:['--no-sandbox'],...(process.env.PW_EXEC?{executablePath:process.env.PW_EXEC}:{})});
  try{
   for(const width of [1280,390]){
    const page=await browser.newPage({viewport:{width,height:850},acceptDownloads:true});

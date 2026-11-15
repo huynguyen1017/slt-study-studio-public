@@ -138,6 +138,19 @@ function getPresets(){
   unit:"ns",T:16,t0:0,sampleRate:"Numerically drawn training timing",memDepth:"Not a VCS capture",presetName:"ENGR852_SAD_8bit_16bit_training.set",
   faultLabel:"ILLUSTRATIVE · 8-Bit Saturated Accumulator: BestDist Stays FF",
   fixedLabel:"ILLUSTRATIVE · 16-Bit Datapath Supports FF00 < FFFF",
+  corrDelta:2.4,
+  bitPatternFault:"1010111100001010",
+  bitPatternFixed:"1010010111001010",
+  busSegmentsFault:[
+   {t0:0,t1:0.16,val:"c=00f9",state:"ok"},{t0:0.16,t1:0.34,val:"R=f9..ff",state:"ok"},
+   {t0:0.34,t1:0.52,val:"S1=1e9",state:"warn"},{t0:0.52,t1:0.70,val:"BD=ff(sat)",state:"fault"},
+   {t0:0.70,t1:0.86,val:"newBest=0",state:"x"},{t0:0.86,t1:1.0,val:"8b LIMIT",state:"x"}
+  ],
+  busSegmentsFixed:[
+   {t0:0,t1:0.16,val:"c=00f9",state:"ok"},{t0:0.16,t1:0.34,val:"c=0100",state:"ok"},
+   {t0:0.34,t1:0.52,val:"FF00",state:"ok"},{t0:0.52,t1:0.70,val:"BD=ffff",state:"ok"},
+   {t0:0.70,t1:0.86,val:"BD=ff00",state:"ok"},{t0:0.86,t1:1.0,val:"newBest=1",state:"ok"}
+  ],
   signalsFault:[
    spec("CLK_520MHz","clock","V",-0.1,1.1,(t)=>Math.floor(t/0.9615)%2*.8,"Ideal 520 MHz training clock; not a VCS acquisition","RTL illustration","LOGIC","—"),
    spec("ACCUM[7:0]","bus","hex",0,255,t=>t<4?240:255,"Saturation at 8'hFF cannot represent 256×255 = 65280","Training 8-bit bus","LOGIC","—"),
@@ -195,15 +208,27 @@ function profileFromSpec(ws,ctx){
   return {
    ...matchedPreset,
    title:ws.title||matchedPreset.title,
-   lesson:ws.lesson||matchedPreset.lesson
+   lesson:ws.lesson||matchedPreset.lesson,
+   corrDelta:ws.corrDelta??matchedPreset.corrDelta,
+   bitPatternFault:ws.bitPatternFault||matchedPreset.bitPatternFault,
+   bitPatternFixed:ws.bitPatternFixed||matchedPreset.bitPatternFixed,
+   busSegmentsFault:ws.busSegmentsFault||matchedPreset.busSegmentsFault,
+   busSegmentsFixed:ws.busSegmentsFixed||matchedPreset.busSegmentsFixed,
+   harmonics:ws.harmonics||matchedPreset.harmonics,
+   subPulses:ws.subPulses||matchedPreset.subPulses
   };
  }
  const h=hashStr(ws?.id||ctx.question||ctx.card?.id||ctx.lab?.id+"-"+ctx.step);
  const T=ws?.T||100, unit=ws?.unit||"ns", sRate=ws?.sampleRate||(unit==="ns"?"10 GSa/s":"8 GSa/s"), mDepth=ws?.memDepth||"10 Mpts";
  const e1=ws?.e1 ?? clamp(18+(h%22),12,T*0.42);
  const e2=ws?.e2 ?? clamp(e1+22+(h%18),e1+10,T*0.78);
- const baseFreq=ws?.freq ?? (2+(h%6)*0.7);
  const kind=ws?.kind||"generic";
+ const harm=ws?.harmonics||{f2:1.9+(h%5)*0.4,f3:3.3+(h%7)*0.4,damp:0.25,ringMult:1.2,seed:h%997};
+ const subPulses=ws?.subPulses||[
+  {t0:0.18,w:0.05,amp:0.55},{t0:0.44,w:0.06,amp:0.75},{t0:0.72,w:0.05,amp:0.45}
+ ];
+ const bitF=(ws?.bitPatternFault||"1010110010110010").split("").map(Number);
+ const bitG=(ws?.bitPatternFixed||"1010010110100101").split("").map(Number);
  const chMeta=ws?.channels||[
   {name:"CH1_SIG",type:"rail",unit:"V",min:0,max:1.4,probe:"10:1 Passive",coupling:"DC 1MΩ",bw:"2 GHz",desc:ws?.ch1Desc||"Primary input / rail stimulus"},
   {name:"CH2_NODE",type:"rail",unit:"V",min:0,max:1.4,probe:"N7020A Rail",coupling:"DC 50Ω",bw:"2 GHz",desc:ws?.ch2Desc||"Target DUT response node"},
@@ -211,46 +236,73 @@ function profileFromSpec(ws,ctx){
   {name:"CH4_FLAG",type:"digital",unit:"logic",min:-0.15,max:1.15,probe:"Digital Ch",coupling:"DC",bw:"1 GHz",desc:ws?.ch4Desc||"Qualifier / status / reset flag"}
  ];
  function genChannel(c,idx,faultMode){
+  const bits=faultMode?bitF:bitG;
   const fn=(t,mod)=>{
-   const vS=mod.vScale||1, rN=mod.rNorm||1, cN=mod.cNorm||1;
+   const vS=mod.vScale||1, rN=mod.rNorm||1, cN=mod.cNorm||1, lN=mod.lNorm||1;
+   const frac=clamp(t/Math.max(T,1e-6),0,0.9999);
+   const bIdx=Math.min(bits.length-1,Math.floor(frac*bits.length));
    if(c.type==="clock"){
-    const per=Math.max(1,T/(5+(h%8)));
-    const duty=faultMode&&idx===0?0.32:0.5;
-    const jit=faultMode?0.12*Math.sin(t*0.7+idx):0;
-    return c.min+(c.max-c.min)*((((t+jit)%per)/per)<duty?0.88:0.12);
+    const cycles=Math.max(4,6+(h%6));
+    const phase=((t/T)*cycles)%1;
+    const jit=faultMode?(0.13*Math.sin(t*harm.f2+idx+harm.seed*0.01)+0.06*Math.cos(t*harm.f3)):0;
+    const duty=faultMode&&idx===0?0.36:0.5;
+    const rawBit=(((t/T)*cycles+jit)%1+1)%1 < duty ? 0.88 : 0.12;
+    const ringEdge=(faultMode&&lN>1)?0.08*Math.sin(phase*18)*Math.exp(-phase*4):0.01*Math.sin(phase*18)*Math.exp(-phase*6);
+    return clamp(c.min+(c.max-c.min)*(rawBit+ringEdge),c.min,c.max);
    }
    if(c.type==="bus"){
-    const vals=c.busVals||[15,1,10,5,13,3];
-    const seg=Math.floor((t/T)*vals.length)%vals.length;
-    return vals[(faultMode&&idx===1)?(seg+1)%vals.length:seg];
+    const segs=faultMode?(ws?.busSegmentsFault):(ws?.busSegmentsFixed);
+    if(c.busVals){
+     const seg=Math.floor(frac*c.busVals.length)%c.busVals.length;
+     return c.busVals[(faultMode&&idx===1)?(seg+1)%c.busVals.length:seg];
+    }
+    if(segs&&segs.length){
+     const sIdx=segs.findIndex(sg=>frac>=sg.t0&&frac<=sg.t1);
+     const base=sIdx>=0?(sIdx+1)/(segs.length+1):0.5;
+     return c.min+(c.max-c.min)*(faultMode&&(segs[sIdx]?.state==="x"||segs[sIdx]?.state==="fault")?0.94:base);
+    }
+    return c.min+(c.max-c.min)*(bits[bIdx]*0.72+0.15);
    }
    if(c.type==="digital"){
+    const b=bits[(bIdx+(faultMode?idx:0))%bits.length];
     if(faultMode){
-     return idx===3?(step(t,e1*0.65)*wave(t,0,e2)):wave(t,e1*0.7,e2*0.95);
+     const inSub=subPulses.some((sp,si)=>si===1&&frac>=sp.t0&&frac<=sp.t0+sp.w*1.6);
+     return inSub?0.95:(idx===3?step(t,e1*0.65)*b*0.95:b*0.92);
     }
-    return idx===3?step(t,e2):(step(t,e1)-step(t,e2+T*0.18));
+    return (idx===3?(step(t,e2)?1:b*0.85):(b*0.95));
+   }
+   let pSum=0;
+   for(let pi=0;pi<subPulses.length;pi++){
+    const sp=subPulses[pi];
+    const dt=frac-sp.t0;
+    if(dt>=0&&dt<=sp.w*2.4){
+     pSum+=sp.amp*Math.exp(-dt/Math.max(sp.w,0.01))*Math.sin((dt/Math.max(sp.w,0.01))*Math.PI*(faultMode?harm.f2:1.0));
+    }
    }
    if(c.type==="current"){
-    const base=c.min+(c.max-c.min)*0.18;
-    const stepH=(c.max-c.min)*(faultMode?0.72:0.48)*vS;
-    const rise=t>=e1?(1-Math.exp(-(t-e1)/(faultMode?1.2*cN:5.5*cN))):0;
-    const fall=t>=e2?(1-Math.exp(-(t-e2)/(faultMode?1.4:5.0))):0;
-    const osc=faultMode?ring(t,e1,(c.max-c.min)*0.12,0.55+(h%4)*0.15,9):ring(t,e1,(c.max-c.min)*0.02,0.4,5);
-    return base+stepH*(rise-fall)+osc;
+    const base=c.min+(c.max-c.min)*0.16;
+    const stepH=(c.max-c.min)*(faultMode?0.64:0.44)*vS;
+    const rise=t>=e1?(1-Math.exp(-(t-e1)/(faultMode?1.0*cN:4.8*cN))):0;
+    const fall=t>=e2?(1-Math.exp(-(t-e2)/(faultMode?1.2:4.5))):0;
+    const osc=faultMode?ring(t,e1,(c.max-c.min)*0.11*harm.ringMult*lN,harm.damp+(h%4)*0.08,8.5):ring(t,e1,(c.max-c.min)*0.025,0.45,5);
+    return base+stepH*(rise-fall)+osc+(c.max-c.min)*0.18*pSum*(faultMode?1.35:0.45);
    }
-   // Analog rail / eye / node
-   const nom=(c.min+c.max)*0.55*vS;
-   const droopMag=(c.max-c.min)*(faultMode?0.28*rN:0.07*rN);
-   const oversh=(c.max-c.min)*(faultMode?0.22:0.05);
-   if(kind==="shmoo"&&idx===0)return c.min+(c.max-c.min)*((0.25+0.15*Math.floor(t/(T/5))))*vS;
+   // Multi-stage harmonic analog rail / eye / node
+   const nom=(c.min+c.max)*0.54*vS;
+   const spanV=c.max-c.min;
+   const droopMag=spanV*(faultMode?0.27*rN:0.065*rN);
+   const oversh=spanV*(faultMode?0.22*harm.ringMult*lN:0.045);
+   if(kind==="shmoo"&&idx===0)return c.min+spanV*(0.24+0.15*Math.floor(frac*5))*vS+spanV*0.03*Math.sin(t*harm.f2);
    if(kind==="differential"&&idx<2){
-    const cm=faultMode?0.18*Math.sin(t*0.4):0.04*Math.sin(t*0.4);
-    const diff=(idx===0?1:-1)*0.42*Math.sin(t*0.65+h%3)*vS;
+    const cm=faultMode?0.19*Math.sin(t*harm.f2*0.25):0.035*Math.sin(t*0.4);
+    const diff=(idx===0?1:-1)*0.41*(Math.sin(t*0.65+h%3)+0.25*Math.sin(t*harm.f3*0.4))*vS;
     return nom+diff+cm;
    }
-   return nom - droopMag*wave(t,e1,e2)*(1-Math.exp(-Math.max(0,t-e1)/(3*cN)))
-     + ring(t,e1,-droopMag*0.8,0.45+0.07*(h%5),faultMode?14:6)
-     + ring(t,e2,oversh,0.42+0.06*(h%3),faultMode?12:5);
+   const harmRip=spanV*(faultMode?0.055:0.015)*(Math.sin(t*harm.f2*0.22)+0.55*Math.cos(t*harm.f3*0.18));
+   return nom - droopMag*wave(t,e1,e2)*(1-Math.exp(-Math.max(0,t-e1)/(2.8*cN)))
+     + ring(t,e1,-droopMag*0.78*lN,harm.damp+0.25,faultMode?13:6)
+     + ring(t,e2,oversh,0.40+0.05*(h%3),faultMode?11:5)
+     + harmRip + spanV*0.12*pSum*(faultMode?1.2:0.35);
   };
   return spec(c.name,c.type,c.unit,c.min,c.max,fn,c.desc,c.probe||"10:1 Probe",c.coupling||"DC 1MΩ",c.bw||"2 GHz");
  }
@@ -268,6 +320,13 @@ function profileFromSpec(ws,ctx){
   presetName:ws?.presetName||("Custom_"+(ctx.card?.id||ctx.lab?.id||"scope")+".set"),
   faultLabel:ws?.faultLabel||"Faulty / Marginal Capture",
   fixedLabel:ws?.fixedLabel||"Fixed / Verified Capture",
+  corrDelta:ws?.corrDelta,
+  bitPatternFault:ws?.bitPatternFault,
+  bitPatternFixed:ws?.bitPatternFixed,
+  busSegmentsFault:ws?.busSegmentsFault,
+  busSegmentsFixed:ws?.busSegmentsFixed,
+  harmonics:harm,
+  subPulses,
   signalsFault,signalsFixed,
   registers:ws?.registers||[
    ["Trigger",`CH1 ↑ / ${unit}`,ws?.faultDesc||"Baseline fault condition"],
@@ -323,10 +382,14 @@ function buildContext(ctx){
     spec("V_RX","rail","V",-0.2,1.7,(t)=>lookup(m50.trace,t,3),"Matched RX (Gamma_L = 0, zero reflections!)","10:1 Low-C","DC 1MΩ","12 GHz"),
     spec("I_LOAD*","current","mA",-2,25,(t)=>lookup(m50.trace,t,3)/m50.rl*1000,"Derived matched current","Derived MATH","MATH","—")
    ];
+   const wSpec=card?.deepDive?.waveSpec;
    return {id:"spice",question,profile:{
     id:"spice-"+r.id,title:"ngspice-47 Transmission Line ("+r.label+") · 16 GSa/s · 22 Mpts",
     unit:"ns",T:15,t0:0,sampleRate:"16 GSa/s",memDepth:"22 Mpts",presetName:r.id+"_ngspice.set",
     faultLabel:"Selected: "+r.label,fixedLabel:"Compare Matched 50Ω (Γ=0)",
+    corrDelta:3.7,
+    bitPatternFault:wSpec?.bitPatternFault,bitPatternFixed:wSpec?.bitPatternFixed,
+    busSegmentsFault:wSpec?.busSegmentsFault,busSegmentsFixed:wSpec?.busSegmentsFixed,
     signalsFault:sF,signalsFixed:sG,
     registers:[["Z0 Line","50 Ω (TD=1 ns)","R_src=20 Ω -> R_load="+r.rl+" Ω"],["Reflection Γ_L",((r.rl-50)/(r.rl+50)).toFixed(4),"Peak RX = "+r.peak_v.toFixed(4)+" V"]],
     events:[event(1,"Source Step",0,"1 V source transitions @ 1 ns"),event(2,"First RX Arrival",2,"Wave arrives after 1 ns electrical length"),event(4,"Reflected Return",2,"Round-trip reflection lands @ 4 ns")],
@@ -509,7 +572,7 @@ function mount(root,ctx={}){
  function syncDefBounds(resetWindow=true){
   const T=activeDef.T;
   if(resetWindow){
-   state.left=0;state.right=T;state.a=T*0.22;state.gap=T*0.18;state.b=state.a+state.gap;state.linkedB=true;
+   state.left=0;state.right=T;state.a=T*0.22;state.gap=activeDef.corrDelta||T*0.18;state.b=clamp(state.a+state.gap,0,T);state.linkedB=true;
   }
   const sigs=currentSignals();
   const s0=sigs[state.trigger]||sigs[0];
@@ -673,27 +736,60 @@ function mount(root,ctx={}){
   }
   out+='<text x="1090" y="538" fill="'+txtClr+'" text-anchor="end" font-size="11.5">TIME ('+esc(activeDef.unit)+') · '+esc(activeDef.sampleRate)+' · '+esc(activeDef.memDepth)+'</text>';
 
+  function renderSurferBus(segs,yHi,yLo,fallbackClr){
+   const T=activeDef.T||100;
+   let bOut="";
+   segs.forEach(sg=>{
+    const ts=sg.t0*T, te=sg.t1*T;
+    if(te<state.left||ts>state.right)return;
+    const c0=clamp(ts,state.left,state.right), c1=clamp(te,state.left,state.right);
+    const x0=mapX(c0,W,state.left,state.right,sx,ex), x1=mapX(c1,W,state.left,state.right,sx,ex);
+    if(x1-x0<6)return;
+    const dx=Math.min(7,(x1-x0)*0.22), ym=(yHi+yLo)/2;
+    const stName=sg.state||"ok";
+    const fillCol=(stName==="x"||stName==="fault")?(state.lightCrt?"#ffd6dd":"#471620"):(stName==="warn"?(state.lightCrt?"#ffefc7":"#3d2c10"):(state.lightCrt?"#d5f7ea":"#103b31"));
+    const strkCol=(stName==="x"||stName==="fault")?"#ff647f":(stName==="warn"?"#f5ba52":(fallbackClr||"#39d4ad"));
+    const txtCol=(stName==="x"||stName==="fault")?(state.lightCrt?"#8f1128":"#ffc2cc"):(stName==="warn"?(state.lightCrt?"#6e4704":"#ffe8ad"):(state.lightCrt?"#094c38":"#c2ffec"));
+    const d='M'+x0.toFixed(1)+' '+ym.toFixed(1)+' L'+(x0+dx).toFixed(1)+' '+yHi.toFixed(1)+' L'+(x1-dx).toFixed(1)+' '+yHi.toFixed(1)+' L'+x1.toFixed(1)+' '+ym.toFixed(1)+' L'+(x1-dx).toFixed(1)+' '+yLo.toFixed(1)+' L'+(x0+dx).toFixed(1)+' '+yLo.toFixed(1)+' Z';
+    bOut+='<path class="surfer-bus-seg" d="'+d+'" fill="'+fillCol+'" stroke="'+strkCol+'" stroke-width="1.35"/>';
+    if(x1-x0>34){
+     bOut+='<text x="'+((x0+x1)/2).toFixed(1)+'" y="'+(ym+3.5).toFixed(1)+'" text-anchor="middle" fill="'+txtCol+'" font-size="9.5" font-weight="bold">'+esc(sg.val)+'</text>';
+    }
+   });
+   return bOut;
+  }
+
+  const activeSegs=(state.captureMode==="fixed"?activeDef.busSegmentsFixed:activeDef.busSegmentsFault)||[
+   {t0:0,t1:0.17,val:"00f9",state:"ok"},{t0:0.17,t1:0.35,val:"0100",state:"ok"},
+   {t0:0.35,t1:0.54,val:state.captureMode==="fault"?"ff(X)":"8000",state:state.captureMode==="fault"?"fault":"ok"},
+   {t0:0.54,t1:0.75,val:state.captureMode==="fault"?"mv=X":"ffff",state:state.captureMode==="fault"?"x":"ok"},
+   {t0:0.75,t1:1.0,val:state.captureMode==="fault"?"ERR":"0000",state:state.captureMode==="fault"?"fault":"ok"}
+  ];
+  out+='<text x="12" y="18" fill="'+(state.lightCrt?"#1c4266":"#7ee5c8")+'" font-size="10" font-weight="bold">SURFER BUS / ADDR</text>';
+  out+=renderSurferBus(activeSegs,5,23,"#39d4ad");
+
   // Compute F1 Math points across N steps if enabled
   const N=win.times.length-1;
+  const activeBits=(state.captureMode==="fixed"?activeDef.bitPatternFixed:activeDef.bitPatternFault)||"1010110010110010";
   sigs.forEach((ch,j)=>{
    if(!state.active[j])return;
-   const yTop=42+j*each,yBot=yTop+88;
+   const yTop=48+j*each,yBot=yTop+86;
    const arr=win.vals[j];
    const minV=ch.min, maxV=ch.max;
    const spanV=Math.max(1e-6,(maxV-minV)/state.vGain[j]);
    const midV=(minV+maxV)/2;
-   const yFor=v=>yBot-8-clamp(0.5+(v-midV)/spanV,0,1)*72;
-   out+='<rect x="7" y="'+(yTop-4)+'" width="1105" height="98" rx="4" fill="'+(state.lightCrt?(j%2?"#eef4fb":"#ffffff"):(j%2?"#111c2e":"#0a1b2b"))+'" stroke="'+(state.lightCrt?"#cbd9e8":"#1b2d45")+'" opacity=".75"/>';
+   const yFor=v=>yBot-8-clamp(0.5+(v-midV)/spanV,0,1)*70;
+   out+='<rect x="7" y="'+(yTop-4)+'" width="1105" height="96" rx="4" fill="'+(state.lightCrt?(j%2?"#eef4fb":"#ffffff"):(j%2?"#111c2e":"#0a1b2b"))+'" stroke="'+(state.lightCrt?"#cbd9e8":"#1b2d45")+'" opacity=".75"/>';
    if(state.gridStyle==="full"){
-    for(let k=1;k<4;k++)out+='<path d="M'+sx+' '+(yTop+k*22)+' H'+ex+'" stroke="'+gridClr+'" stroke-dasharray="3 5"/>';
+    for(let k=1;k<4;k++)out+='<path d="M'+sx+' '+(yTop+k*21.5)+' H'+ex+'" stroke="'+gridClr+'" stroke-dasharray="3 5"/>';
    }else if(state.gridStyle==="axes"){
-    out+='<path d="M'+sx+' '+(yTop+44)+' H'+ex+'" stroke="'+gridClr+'" stroke-dasharray="4 4"/>';
+    out+='<path d="M'+sx+' '+(yTop+43)+' H'+ex+'" stroke="'+gridClr+'" stroke-dasharray="4 4"/>';
    }
    out+='<rect x="10" y="'+(yTop+3)+'" width="104" height="24" rx="4" fill="'+colors[j]+'" opacity=".18" stroke="'+colors[j]+'"/>';
    out+='<text x="15" y="'+(yTop+19)+'" fill="'+(state.lightCrt?"#112740":colors[j])+'" font-size="11.5" font-weight="bold">CH'+(j+1)+' '+esc(ch.name.slice(0,11))+'</text>';
-   out+='<text x="12" y="'+(yTop+45)+'" fill="'+txtClr+'" font-size="10">'+esc(ch.probe.slice(0,15))+'</text>';
-   out+='<text x="12" y="'+(yTop+60)+'" fill="'+txtClr+'" font-size="9.5">'+esc(state.coupling[j])+' · '+esc(state.bw[j])+'</text>';
-   out+='<text x="12" y="'+(yTop+76)+'" fill="'+txtClr+'" font-size="9.5">'+minV.toFixed(1)+'..'+maxV.toFixed(1)+' '+esc(ch.unit)+'</text>';
+   out+='<text x="12" y="'+(yTop+43)+'" fill="'+txtClr+'" font-size="10">'+esc(ch.probe.slice(0,15))+'</text>';
+   out+='<text x="12" y="'+(yTop+58)+'" fill="'+txtClr+'" font-size="9.5">'+esc(state.coupling[j])+' · '+esc(state.bw[j])+'</text>';
+   out+='<text x="12" y="'+(yTop+74)+'" fill="'+txtClr+'" font-size="9.5">'+minV.toFixed(1)+'..'+maxV.toFixed(1)+' '+esc(ch.unit)+'</text>';
 
    if(state.cleared)return;
    // Persistence ghost shadow if enabled
@@ -726,14 +822,14 @@ function mount(root,ctx={}){
       groups.push({v,t:win.times[i]});last=v;
      }
     }
-    const high=yTop+33,low=yTop+73;
+    const high=yTop+31,low=yTop+71;
     if(ch.type==="digital"){
      let path="";
      groups.forEach((g,i)=>{
       const xx=mapX(g.t,W,state.left,state.right,sx,ex),end=mapX(groups[i+1]?.t??(state.reveal??state.right),W,state.left,state.right,sx,ex);
       const yy=g.v?high:low;
       path+=(i===0?"M":" H")+xx.toFixed(1)+(i===0?" "+yy:" V"+yy)+" H"+end.toFixed(1);
-      if(end-xx>20)out+='<text x="'+((xx+end)/2).toFixed(1)+'" y="'+(g.v?high-7:low+15)+'" text-anchor="middle" fill="'+colors[j]+'" font-size="12" font-weight="800">'+g.v+'</text>';
+      if(end-xx>20)out+='<text class="surfer-bit-lbl" x="'+((xx+end)/2).toFixed(1)+'" y="'+(g.v?high-7:low+15)+'" text-anchor="middle" fill="'+colors[j]+'" font-size="12" font-weight="800">'+g.v+'</text>';
      });
      if(path)out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.6" fill="none"/>';
     }else{
@@ -741,7 +837,7 @@ function mount(root,ctx={}){
       const x0=mapX(g.t,W,state.left,state.right,sx,ex),x1=mapX(groups[i+1]?.t??(state.reveal??state.right),W,state.left,state.right,sx,ex);
       if(x1<=x0)return;
       const notch=Math.min(6,(x1-x0)/5);
-      out+='<path d="M'+(x0+notch).toFixed(1)+' '+high+' H'+(x1-notch).toFixed(1)+' L'+x1.toFixed(1)+' '+((high+low)/2)+' L'+(x1-notch).toFixed(1)+' '+low+' H'+(x0+notch).toFixed(1)+' L'+x0.toFixed(1)+' '+((high+low)/2)+' Z" stroke="'+colors[j]+'" stroke-width="1.8" fill="'+colors[j]+'" fill-opacity=".075"/>';
+      out+='<path class="surfer-bus-seg" d="M'+(x0+notch).toFixed(1)+' '+high+' H'+(x1-notch).toFixed(1)+' L'+x1.toFixed(1)+' '+((high+low)/2)+' L'+(x1-notch).toFixed(1)+' '+low+' H'+(x0+notch).toFixed(1)+' L'+x0.toFixed(1)+' '+((high+low)/2)+' Z" stroke="'+colors[j]+'" stroke-width="1.8" fill="'+colors[j]+'" fill-opacity=".075"/>';
       if(x1-x0>32)out+='<text x="'+((x0+x1)/2).toFixed(1)+'" y="'+(high+24)+'" text-anchor="middle" fill="'+colors[j]+'" font-size="11" font-weight="750">'+esc(formatChannel(g.v,ch))+'</text>';
      });
     }
@@ -754,13 +850,31 @@ function mount(root,ctx={}){
      path+=(i?"L":"M")+xx.toFixed(1)+" "+yFor(val).toFixed(1)+" ";
     }
     out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.5" fill="none"/>';
+    if(ch.type==="clock"||j===3){
+     for(let si=0;si<8;si++){
+      const fracBit=(si+0.5)/8, ts=state.left+(state.right-state.left)*fracBit;
+      if(state.reveal!==null&&ts>state.reveal)continue;
+      const idxS=Math.min(N,Math.floor(fracBit*N));
+      const valBit=ch.type==="clock"?(arr[idxS]>midV?1:0):(Number(activeBits[si%activeBits.length])||0);
+      out+='<text class="surfer-bit-lbl" x="'+mapX(ts,W,state.left,state.right,sx,ex).toFixed(1)+'" y="'+(valBit?yTop+16:yBot-6)+'" text-anchor="middle" fill="'+(valBit?(state.lightCrt?"#0b5e42":"#9ff9cd"):(state.lightCrt?"#315278":"#8bb5db"))+'" font-size="10" font-weight="bold">'+valBit+'</text>';
+     }
+    }
    }
-   // Both points are visible on every active channel, correlated to the two times.
-   [[state.a,"A","#ffda81"],[state.b,"B","#61e0bc"]].forEach(([t,marker,c])=>{
-    if(t<state.left||t>state.right)return;
-    const v=signalNum(t,j),xx=mapX(t,W,state.left,state.right,sx,ex);
-    const yy=ch.type==="bus"?yTop+53:ch.type==="digital"?(v>=.5?yTop+33:yTop+73):yFor(v+state.vOffset[j]);
-    out+='<circle class="ix-ab-point" data-marker="'+marker+'" data-ch="'+j+'" cx="'+xx.toFixed(1)+'" cy="'+yy.toFixed(1)+'" r="5" fill="'+c+'" stroke="'+bg+'" stroke-width="1.5"/>';
+   // Proactive Marker A <-> B correlation vector + both sample dots on every active channel
+   const aVis=state.a>=state.left&&state.a<=state.right&&(state.reveal===null||state.a<=state.reveal);
+   const bVis=state.b>=state.left&&state.b<=state.right&&(state.reveal===null||state.b<=state.reveal);
+   const yAt=t=>{
+    const v=signalNum(t,j);
+    return ch.type==="bus"?yTop+51:ch.type==="digital"?(v>=.5?yTop+31:yTop+71):yFor(v+state.vOffset[j]);
+   };
+   const xA=mapX(state.a,W,state.left,state.right,sx,ex), xB=mapX(state.b,W,state.left,state.right,sx,ex);
+   const yyA=yAt(state.a), yyB=yAt(state.b);
+   if(aVis&&bVis){
+    out+='<line class="ks-corr-line" data-corr-ch="'+j+'" x1="'+xA.toFixed(1)+'" y1="'+yyA.toFixed(1)+'" x2="'+xB.toFixed(1)+'" y2="'+yyB.toFixed(1)+'" stroke="#61e0bc" stroke-width="1.8" stroke-dasharray="5 3" opacity="0.9"/>';
+   }
+   [[state.a,"A","#ffda81",aVis,xA,yyA,"ks-marker-a-dot"],[state.b,"B","#61e0bc",bVis,xB,yyB,"ks-marker-b-dot ks-dot-b"]].forEach(([t,marker,c,vis,xx,yy,cls])=>{
+    if(!vis)return;
+    out+='<circle class="ix-ab-point '+cls+'" data-marker="'+marker+'" data-ch="'+j+'" cx="'+xx.toFixed(1)+'" cy="'+yy.toFixed(1)+'" r="5" fill="'+c+'" stroke="'+bg+'" stroke-width="1.5"/>';
    });
    // Trigger level indicator on triggered channel
    if(j===state.trigger){
@@ -790,17 +904,17 @@ function mount(root,ctx={}){
   // Linked cursors enclose the same physical/simulated time window on all lanes.
   const ax=mapX(state.a,W,state.left,state.right,sx,ex),bx=mapX(state.b,W,state.left,state.right,sx,ex);
   const xlo=clamp(Math.min(ax,bx),sx,ex),xhi=clamp(Math.max(ax,bx),sx,ex);
-  if(xhi>xlo)out+='<rect class="ix-ab-window" x="'+xlo.toFixed(1)+'" y="38" width="'+(xhi-xlo).toFixed(1)+'" height="454" fill="#65dcc1" fill-opacity=".085"/>';
+  if(xhi>xlo)out+='<rect class="ix-ab-window" x="'+xlo.toFixed(1)+'" y="44" width="'+(xhi-xlo).toFixed(1)+'" height="448" fill="#65dcc1" fill-opacity=".085"/>';
   // Cursors A and B
   [state.a,state.b].forEach((t,i)=>{
    if(t<state.left||t>state.right)return;
    const x=mapX(t,W,state.left,state.right,sx,ex),c=i?"#61e0bc":"#ffda81";
-   out+='<path d="M'+x+' 34 V494" stroke="'+c+'" stroke-width="1.6" stroke-dasharray="7 5"/><rect x="'+(x-18)+'" y="6" width="36" height="22" rx="4" fill="#213a4b" stroke="'+c+'"/><text x="'+x+'" y="21" fill="'+c+'" text-anchor="middle" font-size="12">'+(i?"B":"A")+'</text>';
+   out+='<path d="M'+x+' 44 V494" stroke="'+c+'" stroke-width="1.6" stroke-dasharray="7 5"/><rect x="'+clamp(x-18,sx,ex-36)+'" y="26" width="36" height="17" rx="4" fill="#213a4b" stroke="'+c+'"/><text x="'+clamp(x,sx+18,ex-18)+'" y="38" fill="'+c+'" text-anchor="middle" font-size="11">'+(i?"B":"A")+'</text>';
   });
   // Event callout markers
   activeDef.events.forEach(v=>{
    if(v.t<state.left||v.t>state.right)return;
-   const x=mapX(v.t,W,state.left,state.right,sx,ex),yy=42+v.ch*each+52;
+   const x=mapX(v.t,W,state.left,state.right,sx,ex),yy=48+v.ch*each+48;
    out+='<circle cx="'+x+'" cy="'+yy+'" r="4.5" fill="#ffebaa" stroke="#172739" stroke-width="1.5"/>'+
     '<rect x="'+clamp(x-55,sx,ex-122)+'" y="'+(yy+14)+'" width="120" height="19" rx="3" fill="#2d3850" stroke="#738398"/><text x="'+clamp(x+5,sx+60,ex-62)+'" y="'+(yy+27)+'" fill="#f6e3ad" text-anchor="middle" font-size="9.5">'+esc(v.label.slice(0,20))+'</text>';
   });
@@ -809,9 +923,12 @@ function mount(root,ctx={}){
 
  function drawMobileSvgs(win){
   const sigs=currentSignals(),W=360,sx=76,ex=347;
+  const activeBits=(state.captureMode==="fixed"?activeDef.bitPatternFixed:activeDef.bitPatternFault)||"1010110010110010";
   $("#ixMobile").innerHTML=sigs.map((ch,j)=>{
    if(!state.active[j])return "";
    const arr=win.vals[j];
+   const xMap=t=>sx+clamp((t-state.left)/Math.max(1e-6,state.right-state.left),0,1)*(ex-sx);
+   const yMap=v=>114-clamp((v-ch.min)/(ch.max-ch.min||1),0,1)*86;
    let out='<svg viewBox="0 0 360 138" role="img" aria-label="CH'+(j+1)+' '+esc(ch.name)+'"><rect width="360" height="138" fill="#0b182b"/>';
    out+='<text x="8" y="16" fill="'+colors[j]+'" font-size="12">CH'+(j+1)+' '+esc(ch.name)+'</text><text x="350" y="16" fill="#d8eafd" font-size="10" text-anchor="end">'+esc(ch.probe)+' · '+esc(ch.unit)+'</text>';
    for(let i=0;i<=4;i++){const yy=26+i*22,vol=ch.max-(ch.max-ch.min)*i/4;out+='<path d="M76 '+yy+' H347" stroke="#2f405c" stroke-dasharray="4 5"/><text x="70" y="'+(yy+4)+'" fill="#b6cee2" text-anchor="end" font-size="9.5">'+vol.toFixed(1)+'</text>';}
@@ -825,20 +942,28 @@ function mount(root,ctx={}){
      group.forEach((g,i)=>{
       const x=px(g.i),end=px(group[i+1]?.i??arr.length-1),yy=g.v?42:109;
       path+=(i?" H":"M")+x.toFixed(1)+(i?" V"+yy:" "+yy)+" H"+end.toFixed(1);
-      if(end-x>17)out+='<text x="'+((x+end)/2).toFixed(1)+'" y="'+(g.v?34:122)+'" fill="'+colors[j]+'" text-anchor="middle" font-size="10">'+g.v+'</text>';
+      if(end-x>17)out+='<text class="surfer-bit-lbl" x="'+((x+end)/2).toFixed(1)+'" y="'+(g.v?34:122)+'" fill="'+colors[j]+'" text-anchor="middle" font-size="10">'+g.v+'</text>';
      });
      out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.4" fill="none"/>';
     }else group.forEach((g,i)=>{
      const x=px(g.i),end=px(group[i+1]?.i??arr.length-1);if(end<=x)return;
      const q=Math.min(3,(end-x)/5);
-     out+='<path d="M'+(x+q).toFixed(1)+' 49 H'+(end-q).toFixed(1)+' L'+end.toFixed(1)+' 73 L'+(end-q).toFixed(1)+' 98 H'+(x+q).toFixed(1)+' L'+x.toFixed(1)+' 73 Z" stroke="'+colors[j]+'" fill="'+colors[j]+'" fill-opacity=".06"/>';
+     out+='<path class="surfer-bus-seg" d="M'+(x+q).toFixed(1)+' 49 H'+(end-q).toFixed(1)+' L'+end.toFixed(1)+' 73 L'+(end-q).toFixed(1)+' 98 H'+(x+q).toFixed(1)+' L'+x.toFixed(1)+' 73 Z" stroke="'+colors[j]+'" fill="'+colors[j]+'" fill-opacity=".06"/>';
      if(end-x>25)out+='<text x="'+((x+end)/2).toFixed(1)+'" y="77" text-anchor="middle" fill="'+colors[j]+'" font-size="9">'+esc(formatChannel(g.v,ch))+'</text>';
     });
    }else{
-    const path=arr.map((v,i)=>((i?"L":"M")+(sx+i/(arr.length-1)*(ex-sx)).toFixed(1)+" "+(114-clamp((v-ch.min)/(ch.max-ch.min||1),0,1)*86).toFixed(1))).join(" ");
+    const path=arr.map((v,i)=>((i?"L":"M")+(sx+i/(arr.length-1)*(ex-sx)).toFixed(1)+" "+yMap(v).toFixed(1))).join(" ");
     out+='<path d="'+path+'" stroke="'+colors[j]+'" stroke-width="2.4" fill="none"/>';
+    if(ch.type==="clock"||j===3){
+     for(let si=0;si<6;si++){const bit=Number(activeBits[si%activeBits.length])||0;out+='<text class="surfer-bit-lbl" x="'+(sx+(si+0.5)*(ex-sx)/6).toFixed(1)+'" y="'+(bit?35:111)+'" text-anchor="middle" fill="'+(bit?"#9ff9cd":"#8bb5db")+'" font-size="9">'+bit+'</text>';}
+    }
    }
-   [[state.a,"#ffe08a","A"],[state.b,"#69e3be","B"]].forEach(([t,c,l])=>{if(t>=state.left&&t<=state.right){const x=sx+(t-state.left)/(state.right-state.left)*(ex-sx);out+='<path d="M'+x+' 22 V120" stroke="'+c+'" stroke-dasharray="4 4"/><text x="'+x+'" y="132" fill="'+c+'" text-anchor="middle" font-size="10">'+l+'</text>';}});
+   const pyFor=t=>{const v=signalNum(t,j);return ch.type==="bus"?73:ch.type==="digital"?(v>=.5?42:109):yMap(v);};
+   const pyA=pyFor(state.a), pyB=pyFor(state.b);
+   if(state.a>=state.left&&state.a<=state.right&&state.b>=state.left&&state.b<=state.right){
+    out+='<line class="ks-corr-line" data-corr-ch="'+j+'" x1="'+xMap(state.a).toFixed(1)+'" y1="'+pyA.toFixed(1)+'" x2="'+xMap(state.b).toFixed(1)+'" y2="'+pyB.toFixed(1)+'" stroke="#69e3be" stroke-width="1.6" stroke-dasharray="4 3"/>';
+   }
+   [[state.a,"#ffe08a","A",pyA,"ks-marker-a-dot"],[state.b,"#69e3be","B",pyB,"ks-marker-b-dot ks-dot-b"]].forEach(([t,c,l,py,cls])=>{if(t>=state.left&&t<=state.right){const x=xMap(t);out+='<path d="M'+x+' 22 V120" stroke="'+c+'" stroke-dasharray="4 4"/><circle class="ix-ab-point '+cls+'" data-marker="'+l+'" data-ch="'+j+'" cx="'+x.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="4" fill="'+c+'" stroke="#0b182b" stroke-width="1.2"/><text x="'+x+'" y="132" fill="'+c+'" text-anchor="middle" font-size="10">'+l+'</text>';}});
    return out+'</svg>';
   }).join("");
  }

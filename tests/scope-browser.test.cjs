@@ -46,8 +46,35 @@ const {chromium}=require('playwright');
    assert.match(download.suggestedFilename(),/\.csv$/);
    if(width<500){
     assert.ok(await page.locator('#bsMobile svg').count()>=4,'mobile waveforms rendered');
+    assert.ok(await page.locator('#bsMobile .ks-corr-line').count()>=4,'mobile board scope correlation lines');
+    assert.ok(await page.locator('#bsMobile .ks-marker-b-dot').count()>=4,'mobile board scope Marker B dots');
+    assert.ok(await page.locator('#siMobilePlot .ks-corr-line').count()===4,'mobile SI scope 4-ch correlation lines');
+    assert.ok(await page.locator('#ixMobile .ks-corr-line').count()===4,'mobile Infiniium 4-ch correlation lines');
+   }else{
+    assert.ok(await page.locator('#bsLarge .ks-corr-line').count()>=4,'board scope multi-channel correlation lines');
+    assert.ok(await page.locator('#bsLarge .ks-marker-b-dot').count()>=4,'board scope Marker B sample dots');
+    assert.ok(await page.locator('#siPlot .ks-corr-line').count()===4,'SI scope 4-ch correlation lines');
+    assert.ok(await page.locator('#siPlot .ks-marker-b-dot').count()===4,'SI scope 4-ch Marker B dots');
+    assert.ok(await page.locator('#ixPlot .surfer-bus-seg').count()>=4,'Infiniium Surfer hex bus envelopes');
+    assert.ok(await page.locator('#ixPlot .surfer-bit-lbl').count()>=4,'Infiniium Surfer 0/1 bit labels');
+    assert.ok(await page.locator('#ixPlot .ks-corr-line').count()===4,'Infiniium 4-ch Marker B correlation lines');
+    assert.ok(await page.locator('#ixPlot .ks-marker-b-dot').count()===4,'Infiniium 4-ch Marker B sample dots');
    }
-   // v12 checks: Infiniium menubar, Deep-Dive sub-tabs, mini-flashcards, Kahoot check, Guided Labs step waveform
+   // Verify proactive Marker B correlation on all 3 scopes
+   assert.equal(await page.locator('#bsLinkB').getAttribute('aria-pressed'),'true');
+   const bsB0=await page.locator('#bsTimeB').innerText();
+   await page.evaluate(()=>{const el=document.querySelector('#bsA');el.value='62.5';el.dispatchEvent(new Event('input',{bubbles:true}));});
+   assert.notEqual(await page.locator('#bsTimeB').innerText(),bsB0,'board scope Marker B moves proactively when A moves');
+   assert.equal(await page.locator('[data-si-ch]').count(),4,'SI scope has 4 channel toggles');
+   assert.equal(await page.locator('#spLinkB').getAttribute('aria-pressed'),'true');
+   const spB0=await page.locator('#spBT').innerText();
+   await page.evaluate(()=>{const el=document.querySelector('#spA');el.value='7.25';el.dispatchEvent(new Event('input',{bubbles:true}));});
+   assert.notEqual(await page.locator('#spBT').innerText(),spB0,'SI scope Marker B moves proactively when A moves');
+   assert.equal(await page.locator('#ixLinkB').getAttribute('aria-pressed'),'true');
+   const ixB0=await page.locator('#ixBLabel').innerText();
+   await page.evaluate(()=>{const el=document.querySelector('#ixA');el.value=String((Number(el.max)*0.55).toFixed(2));el.dispatchEvent(new Event('input',{bubbles:true}));});
+   assert.notEqual(await page.locator('#ixBLabel').innerText(),ixB0,'Infiniium Marker B moves proactively when A moves');
+   // v12/v13 checks: Infiniium menubar, Deep-Dive sub-tabs, mini-flashcards, Kahoot check, Guided Labs step waveform
    await page.locator('[data-ks-menu="setup"]').first().click();
    assert.equal(await page.locator('[data-ks-menu="setup"]').first().getAttribute('aria-expanded'),'true');
    await page.locator('#ksDrawer [data-close]').first().click().catch(()=>{});
