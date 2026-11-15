@@ -1,0 +1,32 @@
+name: SLT scope static and numerical regression
+on:
+  push:
+    branches:
+      - feature/oscilloscope-controls-20261115
+  pull_request:
+    paths:
+      - 'simulation/board/**'
+      - 'tests/**'
+      - 'index.html'
+      - 'sw.js'
+permissions:
+  contents: read
+jobs:
+  scope-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Parse JavaScript files
+        run: |
+          node --check simulation/board/board_scope.js
+          node --check simulation/board/board.js
+          node --check app.js
+          node --check notebook.js
+          node --check sw.js
+      - name: Trigger, spectrum, waveform and manifest regression
+        run: node tests/scope-analysis.test.cjs
