@@ -108,3 +108,60 @@
 @media(max-width:860px){.mini-deck-grid{grid-template-columns:1fr}.kahoot-grid{grid-template-columns:1fr}}
 @media(max-width:640px){.notebook-paper{padding:14px 12px 14px 36px;background-image:linear-gradient(to right,transparent 24px,#f0b4b4 24px,#f0b4b4 25px,transparent 25px),repeating-linear-gradient(to bottom,transparent 0,transparent 25px,#edf3fa 25px,#edf3fa 26px)}.notebook-paper::before{left:6px}.notebook-tab{padding:8px 11px;font-size:12px}}
 @media(prefers-reduced-motion:reduce){.notebook-tab,.mini-card,.kahoot-btn{transition:none}}
+
+/* v14 restoration: the v1 hand-drawn graph-paper page within the current tabs */
+.notebook-book{background:#faf6ef;border-color:#e7dfd4;padding:16px}
+.notebook-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;overflow:visible;border:0;margin-bottom:13px}
+.notebook-tab{min-width:0;justify-content:center;background:#faf6ee;border-color:#dacfb8;color:#514174;padding:10px 8px;white-space:normal}
+.notebook-tab.active{background:#354887;border-color:#354887;color:#fff}
+.notebook-tab small{display:none}
+.notebook-paper.notebook-classic{background:transparent;border:0;padding:0;box-shadow:none;border-radius:8px;overflow:visible}
+.notebook-paper.notebook-classic:before{display:none}
+.notebook-classic .nb-page-head{display:none}
+.notebook-classic .nb-footer{margin-top:9px;border-top:0}
+.notebook-classic .notebook-original{margin:14px 0;background:#fff;border:1px solid #eadcca;border-radius:9px}
+.notebook-classic .notebook-original summary{padding:12px;font:750 12px system-ui;color:#6e3cb5;cursor:pointer}
+.notebook-classic .notebook-transcript{white-space:pre-wrap;padding:12px;font:14px/1.7 system-ui;color:#26354e}
+.notebook-classic .ink-sheet{position:relative;padding:28px 26px 24px 48px;background-color:#fffefa;background-image:linear-gradient(#8cb6d52b 1px,transparent 1px),linear-gradient(90deg,#8cb6d52b 1px,transparent 1px);background-size:24px 24px;border:1px solid #d9d6c9;border-radius:9px;box-shadow:inset -2px 0 18px #8373590d;min-height:550px}
+.notebook-classic .ink-sheet:before{content:"";position:absolute;top:14px;bottom:14px;left:13px;border-left:2px solid #d36e78a0}
+.notebook-classic .ink-sheet:after{content:"";position:absolute;left:5px;top:26px;bottom:26px;width:25px;background:radial-gradient(ellipse at 12px 13px,#756f63 0 4px,#ffffff 4.4px 6px,transparent 6.5px) 0 0/25px 62px repeat-y;pointer-events:none}
+.notebook-classic .ink-page-heading{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;letter-spacing:.1em;font-weight:850;color:#3156a5}
+.notebook-classic .ink-pagecount{color:#b04454}
+.notebook-classic .ink-title{font-family:"Noteworthy","Bradley Hand","Chalkboard SE",cursive;margin:13px 0 17px;color:#1a2850;font-size:clamp(23px,2.7vw,33px);text-decoration:underline;text-decoration-color:#3e62a0;text-underline-offset:7px;font-weight:750}
+.notebook-classic .ink-question{border:2px solid #c74a5c;border-radius:7px;padding:13px 15px;background:#fff9f0e8;font-weight:750;font-size:clamp(16px,2vw,21px);line-height:1.45;margin-bottom:17px;color:#29314e}
+.notebook-classic .ink-question b{color:#bf344d;text-decoration:underline}
+.notebook-classic .ink-section{margin:18px 0 20px}
+.notebook-classic .ink-section h4{color:#2157a0;font-size:clamp(19px,2.2vw,24px);font-weight:800;line-height:1.35;text-decoration:underline;text-decoration-color:#2157a0;margin:0 0 13px;text-underline-offset:5px}
+.notebook-classic .ink-paragraph{font-family:"Noteworthy","Bradley Hand","Chalkboard SE",system-ui,sans-serif;font-size:clamp(16px,1.75vw,20px);line-height:1.65;color:#28334c;background:#ffffff9c;padding:8px 11px;border-left:3px solid #57a788;margin:12px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.notebook-classic .ink-figure{display:block;width:100%;height:auto;max-height:330px;border-radius:12px;filter:drop-shadow(0 2px 1px #00000014);font-family:"Noteworthy","Bradley Hand","Chalkboard SE",system-ui,sans-serif}
+.notebook-classic .ink-figure text{font-family:"Noteworthy","Bradley Hand","Chalkboard SE",system-ui,sans-serif}
+.notebook-classic .ink-caption{margin:7px 2px 0;font:500 13px/1.5 system-ui,sans-serif;color:#6a5a5d}
+.notebook-classic .ink-highlighter{background:#fff2b7e6;border:2px solid #d16a4a;border-radius:7px;margin:18px 0 8px;padding:13px 14px;color:#32406b;font-size:clamp(16px,1.8vw,19px);line-height:1.55}
+.notebook-classic .ink-highlighter b{color:#ae3346}
+.notebook-classic .ink-steps{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.notebook-classic .ink-steps li{display:flex;align-items:start;gap:13px;font-size:clamp(16px,1.8vw,19px);line-height:1.55;background:#fffff8d6;padding:12px;border:1px solid #b4c9d74d;border-radius:7px;overflow-wrap:anywhere}
+.notebook-classic .ink-stepnum{white-space:nowrap;font-weight:900;color:#b83748;text-decoration:underline;text-underline-offset:4px}
+.notebook-classic .ink-bottom{border-top:2px solid #436493;color:#385680;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;font:750 11px/1.6 system-ui,sans-serif;margin-top:18px;padding-top:13px}
+.notebook-classic .ink-selfcheck{border-color:#5b977b;background:#f2fff3d9}
+.notebook-classic .ink-sheet{padding:23px 16px 20px 30px;background-size:19px 19px}
+.notebook-classic .ink-sheet:before{left:8px}
+.notebook-classic .ink-sheet:after{left:0;width:17px;background-size:17px 47px}
+.notebook-classic .ink-page-heading{font-size:10px}
+.notebook-classic .ink-title{font-size:23px}
+.notebook-classic .ink-section h4{font-size:19px}
+.notebook-classic .ink-paragraph{font-size:16px}
+.notebook-classic .ink-steps li{flex-wrap:wrap;font-size:16px}
+.notebook-classic .ink-stepnum{display:block;width:100%}
+.notebook-classic .ink-figure{min-height:130px}
+.notebook-classic .ink-diagram-scroll{max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;border-radius:12px;-webkit-overflow-scrolling:touch;scrollbar-color:#97acc9 #e9eff4}
+.notebook-classic .ink-equations{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:14px 0}
+.notebook-classic .ink-equation{background:#f9f4dccc;border:2px solid #b9a56d;border-radius:7px;padding:9px 12px;display:grid;gap:5px}
+.notebook-classic .ink-equation small{font:700 11px system-ui,sans-serif;color:#914750;letter-spacing:.04em}
+.notebook-classic .ink-equation strong{font-size:clamp(17px,2.1vw,23px);font-family:"Noteworthy","Bradley Hand",system-ui,sans-serif;color:#254779;overflow-wrap:anywhere}
+.notebook-classic .ink-lab-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:19px}
+.notebook-classic .ink-lab-links button{font-family:system-ui,sans-serif;font-size:13px;min-height:48px}
+@media(max-width:640px){.notebook-book{padding:8px}.notebook-tab{font-size:11px}.notebook-classic .ink-sheet{padding:22px 12px 20px 34px}.notebook-classic .ink-page-heading{font-size:10px}.notebook-classic .ink-title{font-size:24px}.notebook-classic .ink-question{font-size:16px}.notebook-classic .ink-section h4{font-size:19px}.notebook-classic .ink-diagram-scroll>.ink-figure{min-width:620px;width:620px}}
+
+.notebook-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 1px 12px}
+.notebook-kicker{color:#933f57;font:850 12px/1.4 system-ui;letter-spacing:.085em}
+.notebook-topic{color:#6237a3;background:#f0e6fb;border-radius:99px;padding:6px 10px;font:750 11px system-ui}

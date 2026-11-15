@@ -1107,7 +1107,7 @@ function mount(root,ctx={}){
 
  draw();
  root.dataset.mounted="true";
- root.__instrument={state,def:activeDef,draw,stop,setReset:t=>{
+ root.__instrument={state,def:activeDef,draw,stop,getDefinition:()=>activeDef,getSignals:()=>currentSignals(),getRaw:(t,j)=>signalNum(t,j),setReset:t=>{
   if(built.id!=="reset")return;
   const alt=t>=68?"fixed":"fault";
   state.captureMode=alt;
@@ -1116,6 +1116,7 @@ function mount(root,ctx={}){
   activeDef.events[3].t=t;
   draw();
  }};
+ if(window.mountKeysightManualBench)window.mountKeysightManualBench(root,root.__instrument);
  return root.__instrument;
 }
 

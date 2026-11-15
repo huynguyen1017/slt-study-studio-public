@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v13-cursor-vcd';
+const CACHE = 'slt-study-studio-v14-keysight-classic';
 const CORE = [
   "./",
   "./index.html",
@@ -14,6 +14,9 @@ const CORE = [
   "./manifest.webmanifest",
   "./studio-icon.svg",
   "./simulation/scope_pro.js",
+  "./simulation/notebook_classic.js",
+  "./simulation/keysight_manual_bench.js",
+  "./simulation/keysight_manual_bench.css",
   "./simulation/instrument_console.js",
   "./simulation/instrument_console.css",
   "./simulation/rtl_vcd_lab.js",

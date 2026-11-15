@@ -185,12 +185,9 @@ function renderPage(c, page){
  let content = '';
 
  if(p === 0){
-  content = `
-   <div class="ink-section"><h4>What I Would Say · Core Idea</h4><div class="ink-body">${esc(s.core)}</div></div>
-   ${renderCustomDiagram(c, 0)}
-   ${(dd.equations||[])[0] ? `<div class="formula-card"><strong>Key Quantitative Relationship</strong><code>${esc(dd.equations[0].eq)}</code><div class="formula-note">${esc(dd.equations[0].note)}</div></div>` : ''}
-   ${dd.trapAlert ? `<div class="trap-card"><strong>⚠ Common Trap to Watch</strong>${esc(dd.trapAlert)}</div>` : ''}
-  `;
+  content = window.renderClassicNotebookOverview
+    ? window.renderClassicNotebookOverview(c)
+    : '<div class="ink-question"><b>Q:</b> '+esc(c.question)+'</div><div class="ink-section"><h4>① What I would say · short answer</h4><div class="ink-body">'+esc(s.core)+'</div></div>'+renderCustomDiagram(c,0);
  }else if(p === 1){
   const tabs = [
    ['all', 'All Sections'],
@@ -229,14 +226,16 @@ function renderPage(c, page){
  }
 
  return `<div class="notebook-book">
+  <div class="notebook-top"><span class="notebook-kicker">✎ NOTEBOOK ANSWER · 3 VISUAL PAGES</span><span class="notebook-topic">${esc(c.topic || "ENGINEERING")}</span></div>
   <div class="notebook-tabs" role="tablist" aria-label="3-page engineering notebook">
    <button type="button" role="tab" class="notebook-tab ${p===0?'active':''}" aria-selected="${p===0}" data-note-page="0"><b>1</b><span>Overview</span><small>Core & Path</small></button>
    <button type="button" role="tab" class="notebook-tab ${p===1?'active':''}" aria-selected="${p===1}" data-note-page="1"><b>2</b><span>Deep dive</span><small>Scope + Quiz</small></button>
    <button type="button" role="tab" class="notebook-tab ${p===2?'active':''}" aria-selected="${p===2}" data-note-page="2"><b>3</b><span>Lab steps</span><small>Debug & Code</small></button>
   </div>
-  <div class="notebook-paper">
+  <div class="notebook-paper ${p===0?'notebook-classic':''}">
    <div class="nb-page-head"><div class="nb-page-title">${esc(titles[p])}</div><div class="nb-page-num">${esc(c.id)} · ${p+1} / 3</div></div>
    ${content}
+   ${p===0 ? '<details class="notebook-original"><summary>Read the complete source-derived text answer</summary><div class="notebook-transcript">'+esc(c.answer)+'</div></details>': ''}
    <div class="nb-footer">
     <button type="button" class="nb-nav-btn" data-note-nav="-1" ${p===0?'disabled':''}>← Previous page</button>
     <span style="font:600 12px system-ui,sans-serif;color:#4f6886">${esc(dd.subTitle || c.topic)}</span>
