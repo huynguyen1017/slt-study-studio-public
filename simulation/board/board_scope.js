@@ -270,7 +270,7 @@ function init(host,run,time,options){
   const mode=oldmode,limit=endTime(mode);
   const state={run,runId:run.id,mode,lo:0,hi:limit,cursor:clamp(time,0,limit),
    a:clamp(time,0,limit),b:mode==="cycles"?81:8,shown:[true,true,true,true,true,false],
-   gain:[1,1,1,1,1,1],trig:0,level:run.supply*.5,edge:"rise",trigMode:"auto",holdoff:0,triggerStatus:"",analysisCh:2,xyX:4,xyY:2,
+   gain:[1,1,1,1,1,1],coupling:["DC","DC","DC","DC","DC","DC"],inverted:[false,false,false,false,false,false],offset:[0,0,0,0,0,0],trig:0,level:run.supply*.5,edge:"rise",trigMode:"auto",holdoff:0,triggerStatus:"",analysisCh:2,xyX:4,xyY:2,
    speed:1,playing:false,raf:0,lastFrame:0,reveal:null,focus:null,stages:0,compare:false,options:options||{},
    eventIndex:0};
   host.__boardScope=state;
@@ -392,6 +392,7 @@ function connect(host,st){
  $("#bsAutoset").onclick=()=>{
   stop();st.mode="cycles";st.lo=0;st.hi=T();st.cursor=0;st.a=0;st.b=80;
   st.shown=[true,true,true,true,true,false];st.gain=[1,1,1,1,1,1];
+  st.coupling=["DC","DC","DC","DC","DC","DC"];st.inverted=[false,false,false,false,false,false];st.offset=[0,0,0,0,0,0];
   st.trig=0;st.level=st.run.supply*.5;st.edge="rise";st.trigMode="auto";st.holdoff=0;st.triggerStatus="";
   $("#bsTrig").value="0";$("#bsTrigLevel").value=st.level;$("#bsEdge").value="rise";
   $("#bsTrigMode").value="auto";$("#bsHoldoff").value=0;
@@ -401,7 +402,16 @@ function connect(host,st){
  $("#bsA").oninput=e=>{const t=+e.target.value;stop();st.a=t;emit(t)};
  $("#bsB").oninput=e=>{const t=+e.target.value;stop();st.b=t;paint(host,st)};
  $("#bsChannelbar").onclick=e=>{const b=e.target.closest("[data-bs-ch]");if(!b)return;st.shown[+b.dataset.bsCh]=!st.shown[+b.dataset.bsCh];paint(host,st)};
- $("#bsChannelbar").onchange=e=>{const b=e.target.closest("[data-bs-gain]");if(!b)return;st.gain[+b.dataset.bsGain]=+b.value;paint(host,st)};
+ $("#bsChannelbar").onchange=e=>{
+  const gain=e.target.closest("[data-bs-gain]");
+  if(gain){st.gain[+gain.dataset.bsGain]=+gain.value;paint(host,st);return}
+  const coupling=e.target.closest("[data-bs-coupling]");
+  if(coupling){st.coupling[+coupling.dataset.bsCoupling]=coupling.value;paint(host,st);return}
+  const invert=e.target.closest("[data-bs-invert]");
+  if(invert){st.inverted[+invert.dataset.bsInvert]=invert.checked;paint(host,st);return}
+  const offset=e.target.closest("[data-bs-offset]");
+  if(offset){st.offset[+offset.dataset.bsOffset]=clamp(Number(offset.value)||0,-1000,1000);paint(host,st)}
+ };
  $("#bsEvents").onclick=e=>{const b=e.target.closest("[data-bs-event]");if(!b)return;stop();navigate(+b.dataset.bsEvent)};
  function pointing(e,small){
   const svg=small?e.target.closest("svg"):$("#bsLarge");if(!svg)return;
@@ -426,9 +436,22 @@ function paint(host,st){
  const $=s=>host.querySelector(s);
  const rows=samples(st.run,st.mode), Tmax=endTime(st.mode),span=st.hi-st.lo,evs=events(st.run,st.mode),visible=st.shown;
  const x=(t,w=1160,left=134,right=1125)=>left+(t-st.lo)/span*(right-left);
- const ranges=CONFIG.map((_,k)=>bounds(rows,st.run,k,st.lo,st.hi,st.gain[k]));
- const y=(v,k,top,height)=>top+height-(v-ranges[k][0])/(ranges[k][1]-ranges[k][0])*height;
  const data=segment(rows,st.lo,st.hi);
+ // Vertical display transform is deliberately separate from raw engineering
+ // measurements and trigger logic. AC is a mean-removed educational display,
+ // not a calibrated analog high-pass input circuit.
+ const mean=CONFIG.map((_,k)=>data.reduce((sum,r)=>sum+value(r,k,st.run),0)/Math.max(data.length,1));
+ const display=(r,k)=>{
+  if(st.coupling[k]==="GND")return st.offset[k];
+  return (value(r,k,st.run)-(st.coupling[k]==="AC"?mean[k]:0))*(st.inverted[k]?-1:1)+st.offset[k];
+ };
+ const ranges=CONFIG.map((_,k)=>{
+  if(st.coupling[k]==="GND")return [st.offset[k]-.12,st.offset[k]+.12];
+  const [min,max]=bounds(rows,st.run,k,st.lo,st.hi,st.gain[k]);
+  const transform=v=>(v-(st.coupling[k]==="AC"?mean[k]:0))*(st.inverted[k]?-1:1)+st.offset[k];
+  const a=transform(min),b=transform(max);return [Math.min(a,b),Math.max(a,b)];
+ });
+ const y=(v,k,top,height)=>top+height-(v-ranges[k][0])/(ranges[k][1]-ranges[k][0])*height;
  const dataShown=st.reveal==null?data:data.filter(r=>r[0]<=st.reveal);
  const reference=referenceRun(st.run);
  const referenceRows=reference?samples(reference,st.mode):null;
@@ -445,7 +468,11 @@ function paint(host,st){
   let per=(ranges[k][1]-ranges[k][0])/4;
   return '<div class="bs-channel"><button data-bs-ch="'+k+'" style="--bs-color:'+c.color+'" aria-pressed="'+visible[k]+'" type="button">'+
    '<span>CH'+(k+1)+' '+c.short+'</span><small>'+esc(c.type)+' / '+esc(c.unit)+'</small><b>'+fmt(per,c.unit)+'/div</b></button>'+
-   '<label>GAIN<select data-bs-gain="'+k+'" aria-label="CH'+(k+1)+' vertical span">'+[.5,1,2,4].map(v=>'<option value="'+v+'"'+(st.gain[k]===v?' selected':'')+'>'+v+'×</option>').join("")+'</select></label></div>';
+   '<label>GAIN<select data-bs-gain="'+k+'" aria-label="CH'+(k+1)+' vertical span">'+[.5,1,2,4].map(v=>'<option value="'+v+'"'+(st.gain[k]===v?' selected':'')+'>'+v+'×</option>').join("")+'</select></label>'+
+   '<label>INPUT<select data-bs-coupling="'+k+'" aria-label="CH'+(k+1)+' display coupling">'+
+    ["DC","AC","GND"].map(mode=>'<option value="'+mode+'"'+(st.coupling[k]===mode?' selected':'')+'>'+mode+'</option>').join("")+'</select></label>'+
+   '<label>OFFSET<input data-bs-offset="'+k+'" type="number" step=".1" aria-label="CH'+(k+1)+' display offset in '+c.unit+'" value="'+st.offset[k]+'"></label>'+
+   '<label class="bs-invert"><input data-bs-invert="'+k+'" type="checkbox" aria-label="CH'+(k+1)+' display invert" '+(st.inverted[k]?'checked':'')+'> INVERT</label></div>';
  }).join("");
  $("#bsEvents").innerHTML=evs.map((e,i)=>'<button type="button" data-bs-event="'+i+'" aria-pressed="'+(st.focus===e)+'">'+(e.kind==="source"?"🔌":"⚡")+' '+esc(e.label)+' · '+e.t.toFixed(2)+' ns</button>').join("");
  const W=1160,top=46,rowHeight=118,axisStart=134,axisEnd=1125,plotEnd=top+6*rowHeight+2;
@@ -471,18 +498,18 @@ function paint(host,st){
   if(!visible[k])continue;
   const points=minMaxDecimate(dataShown.filter(p=>p[0]>=st.lo&&p[0]<=st.hi),k,st.run,950);
   if(points.length){
-   const path=points.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(value(r,k,st.run),k,yt,height).toFixed(2)).join(" ");
+   const path=points.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(display(r,k),k,yt,height).toFixed(2)).join(" ");
    svg+='<path d="'+path+'" fill="none" stroke="'+c.color+'" stroke-width="2.6" stroke-linejoin="round"/>';
   }
   if(k===2&&st.compare&&referenceRows&&reference){
    const refSeg=minMaxDecimate(segment(referenceRows,st.lo,Math.min(st.hi,st.reveal??st.hi)),2,reference,1000);
    const ghost=refSeg.filter(r=>r[0]>=st.lo&&r[0]<=st.hi);
-   if(ghost.length)svg+='<path d="'+ghost.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(value(r,2,reference),k,yt,height).toFixed(2)).join(" ")+
+   if(ghost.length)svg+='<path d="'+ghost.map((r,i)=>(i?"L":"M")+x(r[0]).toFixed(2)+" "+y(display(r,2),k,yt,height).toFixed(2)).join(" ")+
       '" fill="none" stroke="#f5e9b8" stroke-dasharray="7 4" stroke-width="1.8" opacity=".9"/>';
   }
   if(st.cursor>=st.lo&&st.cursor<=st.hi&&(st.reveal===null||st.cursor<=st.reveal)){
    let cur=nearest(rows,st.cursor);
-   svg+='<circle cx="'+x(st.cursor)+'" cy="'+clamp(y(value(cur,k,st.run),k,yt,height),yt,yt+height)+'" r="4.5" fill="'+c.color+'" stroke="#fff" stroke-width="1.5"/>';
+   svg+='<circle cx="'+x(st.cursor)+'" cy="'+clamp(y(display(cur,k),k,yt,height),yt,yt+height)+'" r="4.5" fill="'+c.color+'" stroke="#fff" stroke-width="1.5"/>';
   }
  }
  for(let [t,tag,c] of [[st.a,"A","#ffd57b"],[st.b,"B","#7ceacc"]]){
@@ -498,7 +525,7 @@ function paint(host,st){
  for(let i=0;i<evs.length;i++){
   let e=evs[i];
   if(e.t<st.lo||e.t>st.hi||(st.reveal!==null&&e.t>st.reveal)||!visible[e.ch])continue;
-  const px=x(e.t),k=e.ch,yt=top+k*rowHeight+15,py=clamp(y(value(nearest(rows,e.t),k,st.run),k,yt,82),yt,yt+82);
+  const px=x(e.t),k=e.ch,yt=top+k*rowHeight+15,py=clamp(y(display(nearest(rows,e.t),k),k,yt,82),yt,yt+82);
   const isActive=st.focus&&Math.abs(st.focus.t-e.t)<.04&&st.focus.kind===e.kind;
   svg+='<circle cx="'+px+'" cy="'+py+'" r="'+(isActive?6:3.8)+'" fill="'+(isActive?"#fff0ad":"#e5d7a8")+'" stroke="#1a2535" stroke-width="1.2"/>';
   if(isActive || (span<=40&&painted<6)){
@@ -530,7 +557,7 @@ function paint(host,st){
     '<text x="'+xx(t)+'" y="143" fill="#d0e5f8" text-anchor="middle" font-size="10">'+t.toFixed(span<8?1:0)+'</text>';
   }
   let segmentRows=minMaxDecimate(dataShown.filter(r=>r[0]>=st.lo&&r[0]<=st.hi),k,st.run,520);
-  if(segmentRows.length)out+='<path d="'+segmentRows.map((r,i)=>(i?"L":"M")+xx(r[0]).toFixed(1)+" "+yy(value(r,k,st.run)).toFixed(1)).join(" ")+'" fill="none" stroke="'+c.color+'" stroke-width="2.7"/>';
+  if(segmentRows.length)out+='<path d="'+segmentRows.map((r,i)=>(i?"L":"M")+xx(r[0]).toFixed(1)+" "+yy(display(r,k)).toFixed(1)).join(" ")+'" fill="none" stroke="'+c.color+'" stroke-width="2.7"/>';
   for(let [t,tag,c] of [[st.a,"A","#ffdb8a"],[st.b,"B","#7bedd0"]]){
    if(t<st.lo||t>st.hi)continue;
    out+='<path d="M'+xx(t)+' 27 V125" stroke="'+c+'" stroke-dasharray="5 4"/><text x="'+xx(t)+'" y="154" text-anchor="middle" fill="'+c+'" font-size="11">'+tag+'</text>';
@@ -550,7 +577,7 @@ function paint(host,st){
   $("#bsSpectrum").innerHTML=spectrum.svg;
   $("#bsXY").innerHTML=renderXY(rows,st.run,st.xyX,st.xyY,st.lo,st.hi);
  }
- $("#bsAnalysisNote").textContent="FFT displays an approximate windowed DFT on 128 uniformly interpolated numerical samples; bin spacing "+(1000/span).toFixed(3)+" MHz. It cannot resolve frequencies finer than the selected time window. XY uses stored numerical samples (no hardware ADC, probe calibration, or streaming).";
+ $("#bsAnalysisNote").textContent="Vertical AC, GND, invert and offset adjust displayed traces only; AC removes the visible-window mean (not a calibrated physical high-pass filter). Triggers, FFT and engineering measurement tables use raw circuit data. FFT displays an approximate windowed DFT on 128 uniformly interpolated numerical samples; bin spacing "+(1000/span).toFixed(3)+" MHz. It cannot resolve frequencies finer than the selected time window. XY uses stored numerical samples (no hardware ADC, probe calibration, or streaming).";
  $("#bsMetrics").innerHTML=CONFIG.map((c,k)=>'<tr><th style="color:'+c.color+'">'+c.short+'</th>'+
   '<td>'+fmt(allStats[k].min,c.unit)+'</td><td>'+fmt(allStats[k].max,c.unit)+'</td><td>'+fmt(allStats[k].pp,c.unit)+'</td></tr>').join("");
  $("#bsTimeA").textContent=st.a.toFixed(2)+" ns";$("#bsTimeB").textContent=st.b.toFixed(2)+" ns";
