@@ -226,6 +226,7 @@ function renderPage(c, page){
  }
 
  return `<div class="notebook-book">
+  <div class="notebook-top"><span class="notebook-kicker">✎ NOTEBOOK ANSWER · 3 VISUAL PAGES</span><span class="notebook-topic">${esc(c.topic || "ENGINEERING")}</span></div>
   <div class="notebook-tabs" role="tablist" aria-label="3-page engineering notebook">
    <button type="button" role="tab" class="notebook-tab ${p===0?'active':''}" aria-selected="${p===0}" data-note-page="0"><b>1</b><span>Overview</span><small>Core & Path</small></button>
    <button type="button" role="tab" class="notebook-tab ${p===1?'active':''}" aria-selected="${p===1}" data-note-page="1"><b>2</b><span>Deep dive</span><small>Scope + Quiz</small></button>
