@@ -1,0 +1,53 @@
+
+/* Public virtual electronics teaching workspace. Scoped to academy view. */
+#academyView{width:100%;max-width:100%;min-width:0}
+.aca-frame{background:#f9f7f1;border:1px solid #e5d9c7;border-radius:16px;padding:16px;color:#18314c;box-shadow:0 12px 32px #27384e16}
+.aca-head{background:linear-gradient(115deg,#123c63,#244b72);color:#edfaff;border-radius:13px;padding:21px;margin-bottom:15px}
+.aca-head b{color:#a9eacb;font:800 12px/1.5 ui-monospace,monospace;letter-spacing:.08em}
+.aca-head h2{color:#fff;font:800 clamp(21px,3vw,30px)/1.25 system-ui;margin:8px 0}
+.aca-head p{color:#d4e3f3;margin:0;font-size:13px;line-height:1.55}
+.aca-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:10px 0 17px}
+.aca-tabs button{border:1px solid #bbccd9;background:#fff;color:#24415d;min-width:0;min-height:43px;padding:8px;border-radius:8px;font:750 12px/1.25 system-ui;white-space:normal}
+.aca-tabs button[aria-pressed=true]{background:#244c81;color:white;border-color:#244c81}
+.aca-frame [hidden]{display:none!important}
+.aca-card{background:white;border:1px solid #d1dbe7;border-radius:12px;padding:15px;margin:12px 0;min-width:0;max-width:100%;overflow:hidden}
+.aca-card h3{color:#174d87;font-size:17px;margin:2px 0 8px}
+.aca-card h4{color:#22619c;font-size:14px;margin:9px 0}
+.aca-card p{font-size:13px;line-height:1.55;color:#3c526a}
+.aca-forms{display:flex;flex-wrap:wrap;align-items:end;gap:8px;margin:10px 0}
+.aca-forms label{display:flex;flex-direction:column;gap:4px;font:750 12px/1.35 system-ui;flex:1 1 110px;min-width:104px}
+.aca-forms input,.aca-forms select,.aca-forms textarea{box-sizing:border-box;max-width:100%;min-width:0;width:100%;padding:8px;border:1px solid #9db2c7;border-radius:6px;background:#fbfdff;color:#16324e;font:600 12px system-ui}
+.aca-forms button,.aca-card>button,.aca-code+button{border:1px solid #5d8caf;border-radius:7px;background:#255e8e;color:white;min-height:37px;padding:8px 10px;flex:0 1 auto;font:750 11px system-ui}
+.aca-forms button:hover,.aca-card>button:hover{background:#1a517e}
+.aca-svg{max-width:100%;overflow-x:auto;margin:12px auto}
+.aca-svg svg{display:block;width:100%;min-width:580px;height:auto}
+.aca-wire-items{display:flex;gap:7px;flex-wrap:wrap}
+.aca-wire-items button{border:1px solid #adbfd1;padding:5px 8px;background:#e9f3ff;color:#2a4f73;font-size:10px}
+#acaWireMessage,.aca-status{background:#eff7fa;padding:9px;border:1px solid #afcfdf;border-radius:7px;color:#1e567a;font:700 11px/1.5 system-ui}
+.aca-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.aca-columns>.aca-card{margin:6px 0}
+.aca-meter{font:850 25px/1.4 ui-monospace,monospace;color:#12936b;background:#071b27;text-align:center;border-radius:8px;padding:13px;margin:9px 0}
+.aca-table{border-collapse:collapse;width:100%;font:650 11px/1.55 ui-monospace,monospace;margin:8px 0}
+.aca-table td,.aca-table th{border:1px solid #b9c9d9;padding:6px 8px;text-align:left}
+.aca-table tr:nth-child(2n){background:#f4f8fe}
+.aca-formula{background:#f2f7fe;border-left:4px solid #3375b7;border-radius:6px;overflow-x:auto;padding:8px 10px;margin:8px 0}
+.aca-formula math{font-size:18px;max-width:100%}
+.aca-field{display:flex;flex-direction:column;gap:5px;margin:10px 0;font:700 13px/1.4 system-ui}
+.aca-field textarea{display:block;resize:vertical;min-height:70px;width:100%;box-sizing:border-box;border:1px solid #afc1d4;border-radius:7px;background:#fffefd;padding:9px;font:13px/1.65 system-ui}
+.aca-preview{overflow:auto;white-space:pre-wrap;background:#edf3fc;border-radius:9px;padding:12px;font:13px/1.55 ui-monospace,monospace}
+.aca-disclaimer,.aca-note{color:#4e6378;font:600 12px/1.65 system-ui;padding:8px 2px;overflow-wrap:anywhere}
+.aca-pin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:7px;background:#e8f0f9;padding:11px;border:1px solid #afc5d9;border-radius:10px}
+.aca-pin-grid button{background:#fff;border:1px solid #b4cbe3;display:flex;flex-direction:column;text-align:left;gap:5px;border-radius:6px;padding:8px 9px;min-width:0}
+.aca-pin-grid button.aca-active-pin{background:#d6f6e8;border-color:#239b74}
+.aca-pin-grid small{font:650 10px/1.3 system-ui;color:#50708a;overflow-wrap:anywhere}
+.aca-code{font:12px/1.55 ui-monospace,SFMono-Regular,monospace;overflow:auto;white-space:pre;padding:10px;background:#0c1a29;color:#b6efff;border-radius:8px;min-height:160px}
+.aca-ide{border-radius:9px;background:#081726;overflow:hidden}
+.aca-ide-head{padding:9px 12px;background:#203449;color:#aaf5d7;display:flex;justify-content:space-between;font:800 12px ui-monospace,monospace}
+.aca-ide textarea{display:block;box-sizing:border-box;width:100%;min-height:330px;resize:vertical;padding:13px;color:#ebf4ff;background:#091b2c;border:0;font:12px/1.55 ui-monospace,monospace;white-space:pre;tab-size:4;overflow:auto}
+.aca-ide textarea:focus{outline:2px solid #75d8b4;outline-offset:-2px}
+.aca-terminal{background:#031423;border:1px solid #315375;border-radius:9px;margin:10px 0;overflow:hidden}
+.aca-terminal-head{display:flex;align-items:center;gap:8px;background:#183751;padding:8px 11px;color:#b5f0dc;font:750 11px ui-monospace,monospace}
+.aca-terminal-head span{color:#67ef96}
+.aca-terminal-head button{margin-left:auto;padding:3px 9px;background:#2c506a;border:1px solid #567791;border-radius:5px;color:#f0f9ff}
+.aca-terminal pre{padding:14px;white-space:pre-wrap;overflow-wrap:anywhere;color:#d8f3ee;min-height:155px;margin:0;font:12px/1.6 ui-monospace,monospace}
+@media(max-width:750px){.aca-frame{padding:8px}.aca-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.aca-columns{grid-template-columns:1fr}.aca-svg svg{min-width:620px}.aca-card{padding:9px}.aca-formula math{font-size:16px}.aca-forms button{flex:1 1 115px}.aca-ide textarea{min-height:260px}}
