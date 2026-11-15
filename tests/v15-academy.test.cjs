@@ -35,6 +35,15 @@ assert.equal(ctx.window.academyStaticDiagnostics("int main(void){ return 0; }","
    await page.locator("#acaPower").click();
    assert.match(await page.locator("#acaWireMessage").textContent(),/ON/);
    assert.match(await page.locator("#acaMeter").textContent(),/V/);
+   assert.equal(await page.locator('#acaScopeChart [data-aca-marker="A"]').count(),4);
+   assert.equal(await page.locator('#acaScopeChart [data-aca-marker="B"]').count(),4);
+   const b0=Number(await page.locator('#acaScopeB').inputValue());
+   await page.evaluate(()=>{const el=document.querySelector('#acaScopeA');el.value='300';el.dispatchEvent(new Event('input',{bubbles:true}))});
+   const b1=Number(await page.locator('#acaScopeB').inputValue());
+   assert.ok(b1>b0,'B cursor must actively track A when link is checked');
+   const csvReady=page.waitForEvent('download');
+   await page.locator('#acaScopeExport').click();
+   assert.equal((await csvReady).suggestedFilename(),'tech60-four-channel-ideal-scope.csv');
    await page.locator("#acaR2").fill("2000");
    await page.locator("#acaR2").press("Tab");
    assert.doesNotMatch(await page.locator("#acaValues").textContent(),/869\.727891/);
