@@ -14,3 +14,11 @@
 .sp-markerA,.sp-markerB{padding:2px 7px;border-radius:5px;font-weight:850;color:#172741}
 .sp-markerA{background:#f6c86f}.sp-markerB{background:#5fe2c4}
 @media(max-width:750px){.scope-pro-inputs{grid-template-columns:1fr}.scope-pro-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.scope-pro-pair{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px}
+.scope-pro-pair button{background:#194e50;color:#eafffa;border:1px solid #4ac6b3;border-radius:6px;min-height:36px;padding:7px 11px;cursor:pointer;font:750 11px system-ui}
+.scope-pro-pair button[aria-pressed="false"]{background:#263c58;border-color:#6582a3}
+.scope-pro-pair span{font:650 11px/1.4 system-ui;color:#c0d9ed}
+.sp-matrix{overflow-x:auto;max-width:100%;padding:7px}
+.sp-matrix table{border-collapse:collapse;min-width:330px;width:100%;font:650 11px/1.4 ui-monospace,monospace}
+.sp-matrix th,.sp-matrix td{border:1px solid #546882;padding:7px 9px;text-align:left}
