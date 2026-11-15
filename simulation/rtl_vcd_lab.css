@@ -1,0 +1,23 @@
+
+.rtl-vcd-shell{margin:20px 0 12px;background:#0a192a;color:#e6effa;border:2px solid #3a5e7e;border-radius:12px;overflow:hidden;max-width:100%}
+.rtl-vcd-shell>summary{cursor:pointer;background:#203b55;padding:13px 16px;color:#d9f1ff;font:850 13px/1.5 ui-monospace,monospace}
+.rtl-vcd-shell>p{padding:8px 15px;margin:0;color:#c8ddf0;font:650 12px/1.7 system-ui}
+.rtl-vcd-bar{display:flex;flex-wrap:wrap;gap:7px;align-items:end;padding:12px}
+.rtl-vcd-bar label{display:flex;flex-direction:column;gap:5px;min-width:120px;max-width:260px;color:#bcd7ed;font:700 11px system-ui}
+.rtl-vcd-bar input{max-width:100%;color:#d7edff}
+.rtl-vcd-bar select,.rtl-vcd-bar button{background:#1c3852;color:#eaf8ff;border:1px solid #5d89aa;padding:9px;border-radius:6px;min-height:38px;font:750 11px system-ui}
+.rtl-vcd-bar button{cursor:pointer}
+.rtl-vcd-bar button[aria-pressed="true"]{background:#1d5551;border-color:#6be4bc}
+#rtlVcdNotice{padding:9px 14px;margin:0 11px 11px;background:#172f43;border:1px solid #44627b;border-radius:7px;color:#c1eafc;font:650 11px/1.6 system-ui}
+.rtl-vcd-picker{margin:8px 12px 12px;padding:10px;border:1px solid #355674;border-radius:7px;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;max-height:155px;overflow:auto}
+.rtl-vcd-picker[hidden]{display:none}
+.rtl-vcd-picker-title{grid-column:1/-1;font:800 11px system-ui}
+.rtl-vcd-picker label{display:flex;gap:7px;align-items:center;color:#d8e9f9;font:650 11px ui-monospace,monospace;overflow-wrap:anywhere}
+.rtl-vcd-svg{display:block;width:100%;height:auto;background:#081323}
+.rtl-vcd-ab{padding:12px;color:#c6eadb;font:750 11px/1.5 ui-monospace,monospace}
+.rtl-vcd-matrix{max-width:100%;overflow-x:auto;margin-top:8px}
+.rtl-vcd-matrix table{border-collapse:collapse;min-width:360px;width:100%}
+.rtl-vcd-matrix th,.rtl-vcd-matrix td{border:1px solid #365575;padding:8px;text-align:left;color:#e2eefb}
+.rtl-vcd-matrix thead th{background:#1c354c}
+.rtl-vcd-note{font-size:11px!important;color:#b7cce0!important}
+@media(max-width:600px){.rtl-vcd-bar label{width:100%;max-width:100%}.rtl-vcd-bar button{flex:1 1 90px}}
