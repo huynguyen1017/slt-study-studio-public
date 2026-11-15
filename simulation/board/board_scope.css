@@ -149,3 +149,18 @@
 }
 #blProScope.bs-fullscreen .bs-scope{max-width:1400px;margin:0 auto}
 #bsExpand[aria-expanded=true]{background:#66411c;border-color:#ffce7e}
+
+/* Advanced waveform analyzer: mobile-first, accessible readouts. */
+.bs-analysis{border-top:1px solid #415572;background:#101f33;padding:13px 14px;color:#e6f1fc;min-width:0}
+.bs-analysis-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.bs-analysis-controls label{display:flex;flex-direction:column;gap:5px;font:750 10px/1.4 ui-monospace,monospace;color:#b7d4eb;min-width:112px}
+.bs-analysis-controls select,.bs-analysis-controls button{font:700 11px/1.3 system-ui;background:#263d54;color:#fff;border:1px solid #6c879f;border-radius:6px;padding:9px 8px;min-height:39px;max-width:100%}
+.bs-analysis-controls button{cursor:pointer}
+.bs-analysis-results{padding:10px 12px;margin:10px 0;background:#1b3549;border:1px solid #4a7183;border-radius:7px;font:700 12px/1.7 ui-monospace,monospace;overflow-wrap:anywhere}
+.bs-analysis-plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.bs-analysis-plots>div{min-width:0;background:#081627;border:1px solid #3e5574;border-radius:8px;padding:9px}
+.bs-analysis-plots h5{font:800 11px/1.3 ui-monospace,monospace!important;color:#d9e8f7!important;margin:0 0 8px!important}
+.bs-analysis-plots svg{display:block;width:100%;height:auto;background:#061323;border-radius:5px}
+.bs-analysis-note{font:600 11px/1.6 system-ui;color:#d5e1ed;margin:10px 0 0}
+@media(max-width:800px){.bs-analysis-plots{grid-template-columns:1fr}}
+@media(max-width:480px){.bs-analysis{padding:9px}.bs-analysis-controls label{flex:1 1 125px}.bs-analysis-controls button{flex:1 1 132px}.bs-analysis-results{font-size:11px}}
