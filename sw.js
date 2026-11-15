@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v14-keysight-surfer';
+const CACHE = 'slt-study-studio-v15-electronics-academy';
 const CORE = [
   "./",
   "./index.html",
@@ -19,6 +19,11 @@ const CORE = [
   "./simulation/keysight_manual_bench.css",
   "./simulation/instrument_console.js",
   "./simulation/instrument_console.css",
+  "./simulation/academy_pins.js",
+  "./simulation/academy_ide.js",
+  "./simulation/academy_pyworker.js",
+  "./simulation/virtual_academy.js",
+  "./simulation/virtual_academy.css",
   "./simulation/rtl_vcd_lab.js",
   "./simulation/rtl_vcd_lab.css",
   "./simulation/answer_fx.js",

@@ -90,7 +90,7 @@ function renderMathSection(c, s){
  const eqHtml = (dd.equations || []).map(e => `
   <div class="formula-card">
    <strong>Fundamental Equation / Constraint</strong>
-   <code>${esc(e.eq)}</code>
+   <div class="nb-typeset-equation">${window.studyMath ? window.studyMath(e.eq,true) : esc(e.eq)}</div><code class="nb-equation-source">${esc(e.eq)}</code>
    <div class="formula-note">${esc(e.note)}</div>
   </div>`).join('');
  const proofHtml = (dd.proofSteps || []).length ? `
@@ -126,6 +126,32 @@ function renderSchemAndTable(c){
  return renderCustomDiagram(c, 1) + tblHtml;
 }
 
+function explainCodeLine(line){
+ const x=String(line).trim();
+ if(!x)return "Blank separator between logical steps.";
+ if(x.startsWith("//")||x.startsWith("# ")||x.startsWith("/*"))return "Author's explanatory comment. Connect it to the next line and the problem requirements.";
+ if(/^#include/.test(x)||/^import\s|^from\s/.test(x))return "Adds names or APIs from a library; check why the specific header or package is necessary.";
+ if(/^def\s|^function\s|^void\s|^int\s+main/.test(x))return "Declares the entry point or function. Preserve the exact signature required by the problem.";
+ if(/^for\s|^for\(/.test(x))return "Loop: inspect start, stop and progress to prevent skipping cases or overrunning data.";
+ if(/^while\s|^while\(/.test(x))return "Conditional repetition: check the termination condition and update.";
+ if(/^if\s|^if\(/.test(x))return "Branch: identify the condition, input cases and the alternative path.";
+ if(/^else\b|^elif\b/.test(x))return "Alternative decision path when the preceding condition does not hold.";
+ if(/\breturn\b/.test(x))return "Function result: confirm output type/value and edge-case behavior.";
+ if(/\bprint\s*\(|\bprintf\s*\(|\$display/.test(x))return "Outputs a result; check formatting and physical units.";
+ if(/\bset\s*\(|\bunique/.test(x))return "Typically tracks distinct entries. Validate uniqueness and memory use.";
+ if(/\bappend\s*\(|\bpush\s*\(/.test(x))return "Adds one item to a collection; verify the values and growth.";
+ if(/\bsort\s*\(|\.sort\s*\(/.test(x))return "Ordering operation; confirm any required ranking and tie-breaking rules.";
+ if(/\bassign\b|\balways_comb\b|\balways_ff\b/.test(x))return "Hardware description: follow signal dependence, widths, signedness and event semantics.";
+ if(/\bHAL_\w+|\banalogRead\b|\bdigitalWrite\b/.test(x))return "MCU/board API call. Confirm enabled peripheral, pin function, voltage and board initialization.";
+ if(/=/.test(x))return "Assignment or update: trace inputs, intermediate values and the stored output.";
+ return "Read the statement in context and verify its purpose with a normal and an edge test case.";
+}
+function renderCodeWalkthrough(code){
+ const lines=String(code||"").split("\n").slice(0,80);
+ return '<details class="nb-code-reading"><summary>Step-by-step line walkthrough · control flow, libraries and tests</summary><p>Explanations are general reading hints, not proof that this code compiled or matched every hidden coding-test case.</p><div class="nb-table-scroll"><table class="nb-table"><thead><tr><th>Line</th><th>Source statement</th><th>Why it matters</th></tr></thead><tbody>'+
+ lines.map((ln,i)=>'<tr><td>'+(i+1)+'</td><td><code>'+esc(ln)+'</code></td><td>'+esc(explainCodeLine(ln))+'</td></tr>').join('')+
+ '</tbody></table></div><p>Complexity: determine iteration counts and stored data structures for this exact code; do not assume a universal Big-O. Test empty input, minimum/maximum values, duplicates and ties where relevant.</p></details>';
+}
 function renderCodeSection(c){
  const cd = c.deepDive?.code || {};
  return `
@@ -136,6 +162,8 @@ function renderCodeSection(c){
   <div class="code-box">
    <div class="code-box-head"><span>2. Line-by-Line Commented ${esc(cd.lang || 'Implementation')}</span><span>${esc(c.id)}</span></div>
    <pre><code>${formatCodeLines(cd.code || '# No snippet')}</code></pre>
+   ${renderCodeWalkthrough(cd.code || '# No snippet')}
+   <details class="nb-code-guide"><summary>How to read and verify each step</summary><p>Read the requirements, list inputs and outputs, choose the right library, match each pseudocode step to implementation, test typical/boundary/error cases, then state time and space complexity. A displayed example is not proof it was compiled or executed.</p></details>
   </div>
  `;
 }
