@@ -1,0 +1,42 @@
+name: V15 virtual electronics academy acceptance
+on:
+  push:
+    branches:
+      - feature/v15-virtual-electronics-academy
+  pull_request:
+    paths:
+      - 'simulation/virtual_academy.*'
+      - 'simulation/academy_*'
+      - 'index.html'
+      - 'app.js'
+      - 'notebook.js'
+      - 'tests/v15-academy.test.cjs'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript parse, original numerical regression
+        run: |
+          node --check app.js
+          node --check notebook.js
+          node --check simulation/virtual_academy.js
+          node --check simulation/academy_pins.js
+          node --check simulation/academy_ide.js
+          node --check simulation/academy_pyworker.js
+          node tests/scope-analysis.test.cjs
+      - name: Install headless Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Live circuit/pin/IDE/report browser checks on desktop and phone
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/studio-website.log 2>&1 &
+          sleep 1
+          node tests/v15-academy.test.cjs

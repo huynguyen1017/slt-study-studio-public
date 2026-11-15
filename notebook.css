@@ -165,3 +165,15 @@
 .notebook-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 1px 12px}
 .notebook-kicker{color:#933f57;font:850 12px/1.4 system-ui;letter-spacing:.085em}
 .notebook-topic{color:#6237a3;background:#f0e6fb;border-radius:99px;padding:6px 10px;font:750 11px system-ui}
+
+.nb-typeset-equation{overflow-x:auto;max-width:100%;padding:9px 11px;border:1px solid #bed5ee;border-radius:7px;background:#fff}
+.nb-typeset-equation math{font-size:clamp(17px,2vw,24px);color:#1d4e83}
+.nb-equation-source{font-size:11px!important;opacity:.8;margin-top:5px}
+.nb-code-guide{margin:10px 0;background:#eaf5ff;padding:10px;border:1px solid #bdd5e8;border-radius:8px;font:600 12px/1.6 system-ui}
+.nb-code-guide summary{cursor:pointer;font-weight:800;color:#1d577d}
+
+.nb-code-reading{margin:11px 0;padding:12px;background:#eef6ff;border:1px solid #bad3ea;border-radius:9px}
+.nb-code-reading summary{font:800 12px/1.5 system-ui;color:#245984;cursor:pointer}
+.nb-code-reading p{font:600 12px/1.6 system-ui;color:#415b76}
+.nb-code-reading td code{font:11px/1.5 ui-monospace,monospace;overflow-wrap:anywhere;white-space:pre-wrap}
+.nb-code-reading .nb-table{min-width:650px}

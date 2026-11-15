@@ -195,7 +195,7 @@ function renderEquationCard(eqString,noteString,card){
   const expr=stripNotesParentheses(part);
   // If expression has trailing descriptive words after comma/prose, split cleanly
   const mML=render(expr,true);
-  return '<div class="hw-eq-item">'+mML+'<div class="hw-eq-ascii-fallback" aria-hidden="true">'+enc(part)+'</div></div>';
+  return '<div class="hw-eq-item nb-typeset-equation">'+mML+'<div class="hw-eq-ascii-fallback nb-equation-source" aria-hidden="true">'+enc(part)+'</div></div>';
  }).join("");
  const derived=deriveWorkedExample(eqString,noteString);
  return '<div class="hw-eq-wrap">'+
