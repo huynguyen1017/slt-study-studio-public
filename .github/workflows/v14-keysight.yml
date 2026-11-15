@@ -1,0 +1,41 @@
+name: V14 Keysight manual bench and notebook restoration
+on:
+  push:
+    branches:
+      - feature/v14-notebook-keysight-manual
+  pull_request:
+    paths:
+      - 'notebook.js'
+      - 'notebook.css'
+      - 'simulation/notebook_classic.js'
+      - 'simulation/keysight_manual_bench.js'
+      - 'simulation/keysight_manual_bench.css'
+      - 'simulation/instrument_console.js'
+      - 'tests/v14-notebook-keysight.test.cjs'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and baseline numerical tests
+        run: |
+          node --check notebook.js
+          node --check simulation/notebook_classic.js
+          node --check simulation/keysight_manual_bench.js
+          node --check simulation/instrument_console.js
+          node tests/scope-analysis.test.cjs
+      - name: Install Playwright headless browser
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Original notebook format and Keysight computed functionality
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/website.log 2>&1 &
+          sleep 1
+          node tests/v14-notebook-keysight.test.cjs
