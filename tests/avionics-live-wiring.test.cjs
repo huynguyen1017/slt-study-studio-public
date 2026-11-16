@@ -13,6 +13,9 @@ for(const t of tops){
  for(const q of topicQs){
   const c=vis.getWiringSetup(q,t),s=c.layoutSignature,figure=vis.render(q,t,"wiring");
   assert.equal(c.questionId,q.id);assert(s&&s.length>30);distinct.add(s);all.add(s);
+  for(const wire of c.wires)assert.equal(wire.dst,"abcdefghij"[wire.col]+wire.row,"Wrong physical hole tag for "+q.id);
+  for(const m of (c.target.match(/\b[a-j](?:9|1[0-7])\b/g)||[]))assert(/^[a-j](?:9|1[0-7])$/.test(m),"Invalid build-reference hole "+q.id);
+
   assert(figure.includes("Selected probe node")&&figure.includes(c.selectedHole),"Question-selected probe "+q.id);
   assert(figure.includes("svg")&&figure.includes(q.id),"No SVG for "+q.id);
   assert(c.selectedHole.match(/^[a-j](?:9|1[0-7])$/),"Bad selected hole "+q.id);
