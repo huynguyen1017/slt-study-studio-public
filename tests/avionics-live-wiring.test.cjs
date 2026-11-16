@@ -52,6 +52,6 @@ assert(par.comps.some(x=>x.label==="R1"));
 assert(!sim.build(question("rf-F1"),topic("rf")),"VNA and RF fixtures must not be presented as DC resistor circuit simulations");
 const html=read("index.html"),sw=read("sw.js"),ui=read("avionics_tutor.js");
 assert(html.includes("avionics_circuit_simulator.js?v=2")&&html.includes("avionics_visuals.js?v=10"));
-assert(sw.includes("v33-fifty-guided-topics")&&sw.includes("avionics_circuit_simulator.js"));
+assert(sw.includes("v34-nvidia-slt-academy")&&sw.includes("avionics_circuit_simulator.js"));
 assert(ui.includes("CIRCUITSIM.render(q,t)")&&ui.includes("CIRCUITSIM.bind(host"));
 console.log("PASS: "+total+" question-level wiring diagrams, "+all.size+" distinct layouts/focus designs, "+supported+" CircuitJS-ready examples, correct KVL routing, privacy and offline initial state.");
