@@ -31,9 +31,16 @@ const variants={
  "scope":{title:"Observe GPIO waveform with an oscilloscope",tags:["Scope CH1","Short ground"],p:["PA5","GND"],parts:[["R1","R","c10","c24","1 kΩ"]],links:[["PA5","a10"],["GND","a24"]],bench:[["CH1 TIP","b10"],["CH1 GND","b24"]],jump:[]}
 };
 function choose(q,t){
+ // Never imply that an arbitrary numerical 5/9/12/24 V example can be
+ // physically driven into a NUCLEO 3.3 V input or power rail.
+ if(q.level==="Calculation"){
+  const v=String(q.question).match(/\b(\d+(?:\.\d+)?)\s*V\b/g)||[];
+  if(v.some(x=>Number.parseFloat(x)>3.3))return null;
+ }
+
  const s=(q.question+" "+(q.skillName||"")).toLowerCase();
  if(["rf","qualification","magnetics","linux","python-scpi","thevenin","ac"].includes(t.id))return null;
- if(t.id==="buses")return /i2c|i²c|sda|scl/.test(s)?"i2c":/spi|mosi|miso/.test(s)?"spi":"uart";
+ if(t.id==="buses")return /i2c|i²c|sda|scl/.test(s)?"i2c":/spi|mosi|spitime/.test(s)||q.calcFamily==="spiTime"?"spi":"uart";
  if(t.id==="components")return /led|diode|current.limit/.test(s)?"led":/logic|pull|switch|gpio|input/.test(s)?"button":"divider";
  if(t.id==="rc"||t.id==="capacitors"||t.id==="filters")return "rc";
  if(t.id==="parallel"||t.id==="kcl-kvl")return "parallel";
@@ -41,9 +48,9 @@ function choose(q,t){
  if(t.id==="instruments")return "scope";
  if(t.id==="schematics")return "button";
  if(t.id==="power-rails")return "divider";
- if(t.id==="series"||t.id==="power")return "divider";
+ if(t.id==="series"||t.id==="power")return q.calcFamily==="seriesR"?"divider":"divider";
  if(t.id==="units")return "basic";
- if(t.id==="ohm")return /resist|ohm|dmm|continuity/.test(s)?"basic":"divider";
+ if(t.id==="ohm")return q.calcFamily==="ohmI"||q.calcFamily==="ohmR"?"divider":/resist|ohm|dmm|continuity/.test(s)?"basic":"divider";
  return "divider";
 }
 function setup(q,t){
@@ -57,6 +64,34 @@ function setup(q,t){
    const n=Number(hole.slice(1))+delta;
    return hole[0]+n;
  };
+
+ // Source numbers are used ONLY when the question's circuit family identifies
+ // that component. Never confuse a generic sample circuit with a worked value.
+ const rs=(q.question.match(/\d+(?:\.\d+)?\s*(?:MΩ|kΩ|Ω)/gi)||[]);
+ const cs=(q.question.match(/\d+(?:\.\d+)?\s*(?:µF|uF|nF|pF)/gi)||[]);
+ if(q.calcFamily==="seriesR"&&rs.length===3){
+   c.title="Three-resistor equivalent resistance · DMM power OFF";
+   c.parts=[["R1","R","c10","c15",rs[0]],["R2","R","c15","c20",rs[1]],["R3","R","c20","c24",rs[2]]];
+   c.links=[];c.bench=[["DMM +","a10"],["DMM COM","a24"]];c.jump=[];
+ }
+ if(q.calcFamily==="parallelR"&&rs.length===2){
+   c.title="Two resistor branches connected across identical nodes";
+   c.parts=[["R1","R","c10","c24",rs[0]],["R2","R","h10","h24",rs[1]]];
+   c.links=[];c.bench=[["DMM +","a10"],["DMM COM","a24"]];
+   c.jump=[["e10","f10"],["e24","f24"]];
+ }
+ if(q.calcFamily==="parallelI"&&rs.length){
+   c.title="Single branch load across a source (≤3.3 V teaching only)";
+   c.parts=[["R1","R","c10","c24",rs[0]]];
+   c.jump=[];c.links=[["3V3","a10"],["GND","a24"]];c.bench=[["DMM mA","series gap required"]];
+ }
+ if(q.calcFamily==="rcTau"&&rs.length&&cs.length){
+   c.parts=c.parts.map(p=>p[1]==="R"?[p[0],p[1],p[2],p[3],rs[0]]:p[1]==="C"?[p[0],p[1],p[2],p[3],cs[0]]:p);
+ }
+ if(q.calcFamily==="divider"&&rs.length>=2){
+   c.parts=c.parts.map((p,i)=>p[1]==="R"?[p[0],p[1],p[2],p[3],rs[i]||p[4]]:p);
+ }
+
  c.parts=c.parts.map(p=>[p[0],p[1],move(p[2]),move(p[3]),p[4]]);
  c.links=c.links.map(p=>[p[0],move(p[1])]);
  c.jump=c.jump.map(p=>[move(p[0]),move(p[1])]);
@@ -81,6 +116,7 @@ function point(h){
 function buildSvg(q,t){
  const c=setup(q,t);if(!c)return "";
  let s=rect(10,10,1360,1110,"#fbfdff","#c4d6e1",15);
+ s+=txt(30,87,"Selected question: "+q.id.toUpperCase()+" · "+q.level+" · "+String(q.question).slice(0,95),10,"#567589");
  s+=txt(30,43,"FULL BOARD CIRCUIT · "+c.title,23,"#1b4d6c","start",800);
  s+=txt(30,70,"NUCLEO-L476RG · ST UM1724 Rev 17 · 63-row 830-point module (not full 3220-point assembly)",13,"#4d6b7e");
  s+=rect(24,91,418,770,"#eaf2f8","#9cc3d7",10)+txt(48,117,"ST NUCLEO-L476RG · MB1136",19,"#183e5b","start",800);
@@ -151,8 +187,12 @@ function buildSvg(q,t){
  c.links.forEach(([p,h],i)=>{
   const B=point(h),idx=c.p.indexOf(p);
   if(!B)return;
-  const yy=185+(idx<0?i:idx)*29,col=palette[i%palette.length];
-  s+='<path d="M401 '+yy+' C460 '+yy+' 468 '+B[1]+' '+B[0]+' '+B[1]+'" stroke="'+col+'" stroke-width="3.4" fill="none"/>'+
+  const name=p==="PA5_CLK"?"PA5":p;
+  const lo=leftEven.indexOf(name),ro=rightOdd.indexOf(name),le=leftOdd.indexOf(name),re=rightEven.indexOf(name);
+  const headerX=lo>=0?139:le>=0?74:ro>=0?322:re>=0?384:401;
+  const headerIndex=Math.max(lo,ro,le,re,0);
+  const yy=164+headerIndex*30,col=palette[i%palette.length];
+  s+='<path d="M'+headerX+' '+yy+' C460 '+yy+' 468 '+B[1]+' '+B[0]+' '+B[1]+'" stroke="'+col+'" stroke-width="3.4" fill="none"/>'+
    '<circle cx="'+B[0]+'" cy="'+B[1]+'" r="5.1" fill="'+col+'"/>';
   s+=rect(1042,405+i*25,287,23,"#fff","#d6e1e7",4)+txt(1053,421,p+" · "+(pin[p]||["verify connector",""])[0]+" → "+h,12,col,"start",700);
  });
