@@ -1474,7 +1474,7 @@ function threePanelBoardAndBreadboard(q,t){
  // A highlighted probe location is connected to the active question, not merely a new title.
  const focusX=xs[c.focusPin.col],focusY=rowY[c.focusPin.row];
  s+='<circle cx="'+focusX+'" cy="'+focusY+'" r="9" stroke="'+P.pink+'" stroke-width="2.6" stroke-dasharray="3 2" fill="none"/>';
- s+=text(306,318,(isBreadboard?"Selected probe hole: ":"Virtual probe reference: ")+c.selectedHole+" · "+clipLabel(c.measurement,48),9.5,P.pink,"start","800");
+ s+=text(306,318,(isBreadboard?"Selected probe node (hole): ":"Selected probe node (virtual reference): ")+c.selectedHole+" · "+clipLabel(c.measurement,48),9.5,P.pink,"start","800");
 
  // Internal breadboard jumpers
  c.jumps.forEach(j=>{
