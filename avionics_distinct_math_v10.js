@@ -33,15 +33,18 @@ for(const [ti,t] of topics.entries()){
   lesson(q,q.numericOperation,"Solve the actual electrical calculation in the given source circuit, then name the expected quantity and unit.","Rearrange the physical law if needed and check the units before using the result.");
  }
  {
-  const a=old[0],b=old[1],v=Math.abs(b.expected-a.expected);
+  const a=old[0],b=old.slice(1,5).find(x=>Math.abs(x.expected-a.expected)>1e-12)||null;
+  const actual=b||old[1],showB=b?b.question:"A repeat instrument reading is 10% above the first model value.";
+  const valB=b?b.expected:fix(a.expected*1.10);
+  const v=Math.abs(valB-a.expected);
   update(1,"Compare two circuit conditions",
-    "Condition A: "+a.question+" Condition B: "+b.question+" Compute the absolute change between their predicted results in "+b.unit+". Calculate both conditions before subtracting.",
-    v,b.unit,"Delta_x = |x_B - x_A|",
-    "Delta_x = |"+display(b.expected)+" - "+display(a.expected)+"| = "+display(v),
+    "Condition A: "+a.question+" Condition B: "+showB+" Compute the absolute change between the two results in "+actual.unit+". If B is a reading, compare it to the model rather than treating it as a second circuit law.",
+    v,actual.unit,"Delta_x = |x_B - x_A|",
+    "Delta_x = |"+display(valB)+" - "+display(a.expected)+"| = "+display(v),
     ["Solve case A using "+a.formula+": "+display(a.expected)+" "+a.unit+".",
-     "Solve case B using the same model: "+display(b.expected)+" "+b.unit+".",
+     "Work out case B or the given independent reading: "+display(valB)+" "+actual.unit+".",
      "Take the magnitude of their difference; do not confuse it with the result for case B alone.",
-     "Final absolute change: "+display(v)+" "+b.unit+"."]);
+     "Final absolute change: "+display(v)+" "+actual.unit+"."]);
  }
  {
   const b=old[2],ref=Math.abs(b.expected),measured=fix(ref*0.92),error=fix(ref-measured);
@@ -74,14 +77,17 @@ for(const [ti,t] of topics.entries()){
      "Observed spread = "+display(range)+" "+b.unit+"."]);
  }
  {
-  const a=old[5],b=old[6],diff=Math.abs(b.expected-a.expected);
+  const a=old[5],b=old.slice(6,10).find(x=>Math.abs(x.expected-a.expected)>1e-12)||null;
+  const actual=b||old[6],showB=b?b.question:"An independent meter reading is 10% larger than the first calculated result.";
+  const valB=b?b.expected:fix(a.expected*1.10);
+  const diff=Math.abs(valB-a.expected);
   update(6,"Compare two independent calculated cases",
-    "Two "+t.title+" designs use the same governing relationship: Case A: "+a.question+" Case B: "+b.question+" What is the absolute difference in their predicted outputs, in "+b.unit+"?",
-    diff,b.unit,"Delta_y = |y_B - y_A|","Delta_y = |"+display(b.expected)+" - "+display(a.expected)+"| = "+display(diff),
+    "Two "+t.title+" observations are compared: Case A: "+a.question+" Case B: "+showB+" What is their absolute difference in "+actual.unit+"?",
+    diff,actual.unit,"Delta_y = |y_B - y_A|","Delta_y = |"+display(valB)+" - "+display(a.expected)+"| = "+display(diff),
     ["Calculate the first physical case: "+display(a.expected)+" "+a.unit+".",
-     "Calculate the second physical case: "+display(b.expected)+" "+b.unit+".",
+     "Calculate or read the second result: "+display(valB)+" "+actual.unit+".",
      "Compare outputs after confirming they use identical units and the same kind of quantity.",
-     "Absolute difference = "+display(diff)+" "+b.unit+"."]);
+     "Absolute difference = "+display(diff)+" "+actual.unit+"."]);
  }
  {
   const b=old[7],v=Math.abs(b.expected),limit=fix(v*0.97);
