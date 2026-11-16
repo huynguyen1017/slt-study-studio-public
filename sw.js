@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v32-method-safe-dice-r1';
+const CACHE = 'slt-study-studio-v33-fifty-guided-topics-r1';
 const CORE = [
   "./",
   "./index.html",
@@ -14,6 +14,7 @@ const CORE = [
   "./avionics_distinct_reasoning_v10.js",
   "./avionics_integrative_capstones_v11.js",
   "./avionics_mixed_networks_v11.js",
+  "./avionics_advanced_50_v12.js",
   "./avionics_mixed_visuals_v11.js",
   "./avionics_practice.js",
   "./avionics_practice.css",

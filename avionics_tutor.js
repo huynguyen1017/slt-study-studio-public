@@ -1,6 +1,6 @@
 "use strict";
-/* Beginner-first 4-page visual workbook UI for the 690-question avionics curriculum.
-   Features 1-30 quick-jump + 30-card gallery, native MathML engineering notation,
+/* Beginner-first 4-page visual workbook UI for the 1,150-question avionics curriculum.
+   Features 1-50 quick-jump + 50-card gallery, native MathML engineering notation,
    6-step beginner guides, 3-panel board/breadboard visuals, and rubric/numeric grading. */
 (function(){
 const TOPICS=window.AVIONICS_TOPICS||[];
@@ -18,6 +18,7 @@ const NUCLEO=window.avionicsNucleoWorkbench||null;
 const MIXED=window.avionicsMixedCircuitCurriculum||null;
 const ASSESS=window.avionicsAnswerCheck;
 const STORE="slt-avionics-ee-practice-v1";
+const TOPIC_TOTAL=window.AVIONICS_EXPECTED_PER_TOPIC||30;
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const find=(s,r=document)=>r.querySelector(s);
 const fmt=x=>Math.abs(x)>0&&Math.abs(x)<0.0001?Number(x).toExponential(3):Number(x.toPrecision(5)).toString();
@@ -151,6 +152,17 @@ function stepsFor(q,t,f){
  const out=[];
  const formulaStr=q.formula||(beginner&&beginner.formula)||null;
  const subStr=q.sub||(beginner&&beginner.sub)||null;
+ // Q31–50 have their own eight-step worked answer rather than a generic diagnostic template.
+ if(q.advancedStage>=31){
+  const titles=["Name the concept and its units","Separate evidence from diagnosis","Predict healthy operation","Make a safe independent check","Do the arithmetic or interpret physical proof","Challenge alternative root causes","Corroborate using another observation","Record the disposition and next evidence"];
+  return (q.steps||[]).map((body,i)=>({
+   title:titles[i]||"Explain and verify",body,
+   kind:q.expected!==undefined&&i===4?"answer":q.expected!==undefined&&(i===2||i===3)?"formula":"text",
+   formula:q.expected!==undefined&&i===2?q.formula:q.expected!==undefined&&i===3?q.sub:null,
+   answer:q.expected!==undefined&&i===4?fmt(q.expected)+" "+q.unit:null,
+   engHtml:q.expected!==undefined&&i===4?engVal(q.expected,q.unit):null
+  }));
+ }
  if(q.level==="Foundations"||q.level==="Application"){
   out.push({
    title:"Understand the question in everyday words",
@@ -370,7 +382,7 @@ function lessonPage(q,t,f){
  '<div class="av-eyebrow">PAGE 1 / 4 · UNDERSTAND THE QUESTION &amp; CIRCUIT</div>'+
  '<h3>Start here: '+esc(f.label)+'</h3>'+
  activeBanner(q,t)+
- '<div class="av-learning-stage">Learning step '+esc(String(q.difficulty||1))+' / 30 · '+esc(q.learningObjective||q.level)+' <small>Foundations → Lab applications → Calculations → Fault diagnosis</small></div>'+ 
+ '<div class="av-learning-stage">Learning step '+esc(String(q.difficulty||1))+' / '+TOPIC_TOTAL+' · '+esc(q.learningObjective||q.level)+' <small>Foundations → Lab applications → Calculations → Fault diagnosis</small></div>'+ 
  '<div class="av-lede"><strong>In very simple words (Zero prior EE assumed)</strong><p>'+rich(summary)+'</p></div>'+
  '<div class="av-two-up"><section><h4>Words you need first</h4><table class="av-vocab"><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody>'+
  glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+rich(p[1])+'</td></tr>').join("")+
@@ -382,7 +394,7 @@ function lessonPage(q,t,f){
  (NOTEBOOK?NOTEBOOK.render(t.id):"")+
  (VIDEO?VIDEO.render(q,t):"")+
  '<h4 class="av-figure-heading">Interactive circuit, graph &amp; '+(VIS&&VIS.describe(q,t).board?'breadboard':'test fixture')+' wiring for '+esc(q.id.toUpperCase())+'</h4>'+
- visualSwitcherBar(inlineVisualMode)+illustration+
+ (q.advancedStage>=31&&!q.network?'<p class="av-sim-note">Advanced case diagrams illustrate concepts only; they are not a verified physical DUT netlist or automatically safe STM32 wiring. Use the actual question values and check your own approved schematic.</p>':"")+visualSwitcherBar(inlineVisualMode)+illustration+
  (inlineVisualMode==="wiring"
   ?'<div class="av-sim-host" data-sim-page="learn"></div>'
   :'<div class="av-sim-compact-strip"><span>Open <strong>3. Board &amp; Breadboard</strong> to run the interactive multimeter bench, live scope &amp; Online CircuitJS1 for <strong>'+esc(q.id.toUpperCase())+'</strong>.</span><button type="button" class="av-vis-pill" data-vismode="wiring">⚡ Open Live Simulator</button></div>')+
@@ -450,7 +462,7 @@ function solvePage(q,t,f){
  '</div></article>'+
  '<div class="av-control-row"><button id="avStepBack" class="av-light" '+(stepIndex===0?"disabled":"")+'>← Previous step</button>'+
  (stepIndex<steps.length-1?'<button id="avStepNext" class="av-primary">Next baby step →</button>':'<button id="avGoTry" class="av-primary">I have read the steps — try it yourself →</button>')+'</div>'+
- '<details class="av-all-steps" open><summary>Complete 6-Step Guided Walkthrough (All steps &amp; MathML equations)</summary><div class="av-all-list">'+
+ '<details class="av-all-steps" open><summary>Complete '+steps.length+'-Step Guided Walkthrough (All steps &amp; MathML equations)</summary><div class="av-all-list">'+
  steps.map((s,i)=>'<div class="'+(i===stepIndex?"av-step-highlight":"")+'"><b>Step '+(i+1)+': '+esc(s.title)+'</b><p>'+rich(s.body)+'</p>'+(s.formula?equation(s.formula,"EQUATION (MATHML)"):"")+(s.answer?'<div class="av-final-value">Final Answer: '+esc(s.answer)+(s.engHtml?' · Engineering Notation: '+s.engHtml:"")+'</div>':"")+'</div>').join("")+
  '</div></details>'+
  '<div class="av-takeaway"><strong>How to say this in your Muon Space interview:</strong> First state the physical law, describe how you set up the DMM/scope/breadboard, then explain the safety check and Go/No-Go limit.</div>'+
@@ -501,21 +513,21 @@ function show(){
 
  host.innerHTML='<div class="av-tutor">'+
  '<header class="av-hero"><div><span class="av-eyebrow">MUON SPACE AVIONICS TEST READINESS · ZERO TO BENCH FLUENCY</span><h2>Understand it. See it. Solve it in baby steps.</h2>'+
- '<p>23 electrical engineering topics × 30 progressively harder questions = 690 guided exercises. Practice foundational concepts, circuit building, calculations and fault diagnosis with verified STM32 connector references and two independent video-learning sources.</p></div>'+
+ '<p>23 electrical engineering topics × 50 progressively harder questions = 1,150 guided exercises. Practice foundational concepts, circuit building, calculations and fault diagnosis with verified STM32 connector references and two independent video-learning sources.</p></div>'+
  '<div class="av-hero-stats"><strong>'+allKnown+' / '+QUESTIONS.length+'</strong><small>questions mastered</small></div></header>'+
  '<div class="av-tutor-layout"><aside class="av-guide-menu"><div class="av-guide-label">YOUR LEARNING PATH</div>'+
  '<label class="av-selector-label" for="avTopicList">Select a topic (23 topics)</label><select id="avTopicList">'+TOPICS.map((x,i)=>'<option value="'+esc(x.id)+'" '+(x.id===topic?"selected":"")+'>Topic '+(i+1)+': '+esc(x.title)+'</option>').join("")+'</select>'+
- '<div class="av-topic-progress"><strong>'+count+' / 30</strong> mastered in this topic<div><span style="width:'+(100*count/30)+'%"></span></div></div>'+
+ '<div class="av-topic-progress"><strong>'+count+' / '+TOPIC_TOTAL+'</strong> mastered in this topic<div><span style="width:'+(100*count/TOPIC_TOTAL)+'%"></span></div></div>'+
  '<div class="av-guide-label">QUESTION TYPE</div><select id="avLevelList">'+["All","Foundations","Application","Calculation","Troubleshooting"].map(x=>'<option value="'+x+'" '+(x===filter?"selected":"")+'>'+x+'</option>').join("")+'</select>'+
  '<label class="av-selector-label" for="avQuestionSearch">Search questions</label><input id="avQuestionSearch" type="search" placeholder="Voltage, ripple, UART..." value="'+esc(query)+'">'+
- '<div class="av-how"><strong>How this workbook works</strong><ol><li>Study question 1 through 30 in increasing difficulty.</li><li>Inspect its custom circuit, complete Nucleo/breadboard or virtual test fixture.</li><li>Follow all 6 baby steps in MathML.</li><li>Check your own answer.</li></ol></div>'+
+ '<div class="av-how"><strong>How this workbook works</strong><ol><li>Study questions 1 through 50 in increasing difficulty, starting from zero EE knowledge.</li><li>Inspect its custom circuit, complete Nucleo/breadboard or virtual test fixture.</li><li>Follow every baby step, full substitutions and independent engineering checks.</li><li>Check your own answer.</li></ol></div>'+
  '<button class="av-light av-export" id="avExportLearning">Export my saved progress</button></aside>'+
  '<div class="av-workbook"><div class="av-workbook-heading"><div><span class="av-eyebrow">'+esc(t.group.toUpperCase())+' · TOPIC '+(TOPICS.indexOf(t)+1)+' OF '+TOPICS.length+'</span>'+
  '<h2>'+esc(t.title)+'</h2><p>'+rich(LESSONS[t.id]?.lead||t.goal)+'</p></div></div>'+
  '<div class="av-question-controls"><strong>QUESTION '+(all.length?currentIndex+1:0)+' / '+all.length+'</strong>'+
  '<div><button id="avQuestionPrevious" class="av-light" '+(currentIndex<=0?"disabled":"")+'>← Previous</button><button id="avQuestionNext" class="av-light" '+(currentIndex>=all.length-1?"disabled":"")+'>Next →</button></div></div>'+
- '<div class="av-quick-strip" aria-label="Quick question switcher 1 to 30">'+
-  '<div class="av-quick-head"><span>Build your skills in order (1–30):</span><small>1–5 Basics · 6–10 Lab · 11–20 Math · 21–30 Debug</small></div>'+
+ '<div class="av-quick-strip" aria-label="Quick question switcher 1 to 50">'+
+  '<div class="av-quick-head"><span>Build your skills in order (1–50):</span><small>1–5 Basics · 6–10 Lab · 11–20 Math · 21–30 Debug · 31–50 Advanced avionics</small></div>'+
   '<div class="av-number-grid">'+full30.map((p,i)=>'<button type="button" data-quick-qid="'+esc(p.id)+'" class="'+(q&&q.id===p.id?"active ":"")+(state.ratings[p.id]==="know"?"done":state.ratings[p.id]==="again"?"retry":"")+'" title="Q'+(i+1)+' ('+esc(p.level)+'): '+esc(p.question)+'">'+(i+1)+'</button>').join("")+'</div>'+
  '</div>'+
  (q?'<div class="av-page-tabs" role="tablist" aria-label="Four-page visual guided workbook">'+
@@ -523,8 +535,8 @@ function show(){
  (page==="learn"?lessonPage(q,t,f):page==="visual"?visualPage(q,t,f):page==="work"?solvePage(q,t,f):practicePage(q,t,f)):
  '<div class="av-no-result"><h3>No questions match this filter</h3><p>Clear the search or select another question type.</p></div>')+
  '<details class="av-browse-questions" open><summary>Browse all '+full30.length+' actual questions in this topic — click any card to load it above</summary>'+
- '<p class="av-browse-help">Every card below loads a unique question with its own MathML engineering equations, 6 baby steps, schematic, graph, and 3-panel board/breadboard wiring.</p>'+
- '<div class="av-question-gallery" role="group" aria-label="All 30 practice question titles">'+
+ '<p class="av-browse-help">Every card below loads a unique question with its own MathML engineering equations, fully worked baby steps, schematic, graph, and 3-panel board/breadboard wiring.</p>'+
+ '<div class="av-question-gallery" role="group" aria-label="All 50 practice question titles">'+
  full30.map((p,i)=>'<button data-qid="'+esc(p.id)+'" class="av-browse-card '+(q&&q.id===p.id?"active ":"")+(state.ratings[p.id]==="know"?"done":state.ratings[p.id]==="again"?"retry":"")+'" aria-current="'+(q&&q.id===p.id?"true":"false")+'" aria-label="Open question '+(i+1)+': '+esc(p.question)+'">'+
  '<span class="av-browse-meta"><b>Q'+(i+1)+'</b><em>'+esc(p.level)+'</em></span><span class="av-browse-title">'+esc(p.question)+'</span>'+
  '<small>'+(state.ratings[p.id]==="know"?"✓ Mastered":state.ratings[p.id]==="again"?"↻ Review needed":state.assessments[p.id]?"◈ Checked":"○ Open question")+'</small></button>').join("")+'</div>'+
@@ -652,7 +664,7 @@ function wire(){
 }
 
 window.mountAvionicsPractice=function(el){
- if(!el||!ASSESS||TOPICS.length!==23||QUESTIONS.length!==690){if(el)el.textContent="The Avionics question bank did not load correctly.";return}
+ if(!el||!ASSESS||TOPICS.length!==23||QUESTIONS.length!==TOPICS.length*TOPIC_TOTAL){if(el)el.textContent="The Avionics question bank did not load correctly.";return}
  host=el;el.dataset.avMounted="yes";const q=selected();if(q){draftText=state.responses[progressKey(q)]||"";currentAnswer=draftText;}show();
 };
 window.avionicsWorkbookV2={

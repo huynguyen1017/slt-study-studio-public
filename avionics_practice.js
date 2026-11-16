@@ -30,7 +30,7 @@ function render(){
    <div class="eyebrow">ENGINEERING FROM ZERO → SATELLITE TEST READINESS</div>
    <h2>Avionics &amp; Electrical Engineering Practice</h2>
    <p>Begin with voltage, current, and units; practice calculations with rendered engineering equations; work up to instrument control, board bring-up, RF, and flight-hardware go/no-go.</p>
-   <div class="av-metrics"><span>${TOPICS.length} learning topics</span><span>${ITEMS.length} original questions</span><span>${known} mastered locally</span><span>30 questions in every topic</span></div>
+   <div class="av-metrics"><span>${TOPICS.length} learning topics</span><span>${ITEMS.length} original questions</span><span>${known} mastered locally</span><span>50 questions in every topic</span></div>
   </div>
   <div class="av-wrap">
     <aside class="av-side" aria-label="Avionics practice topics">
@@ -42,7 +42,7 @@ function render(){
        <label>Find a question<input id="avSearch" type="search" placeholder="e.g. ripple" value="${esc(filterText)}"/></label>
       </div>
       <div class="av-topics">
-       ${TOPICS.map((t,i)=>`<button class="av-topic ${t.id===topic?"active":""}" data-topic="${esc(t.id)}" aria-pressed="${String(t.id===topic)}"><strong>${i+1}. ${esc(t.title)}</strong><small>${completeCount(t.id)} of 30 mastered · ${esc(t.group)}</small><span class="av-track"><i style="width:${100*completeCount(t.id)/30}%"></i></span></button>`).join("")}
+       ${TOPICS.map((t,i)=>`<button class="av-topic ${t.id===topic?"active":""}" data-topic="${esc(t.id)}" aria-pressed="${String(t.id===topic)}"><strong>${i+1}. ${esc(t.title)}</strong><small>${completeCount(t.id)} of 50 mastered · ${esc(t.group)}</small><span class="av-track"><i style="width:${100*completeCount(t.id)/50}%"></i></span></button>`).join("")}
       </div>
     </aside>
     <div class="av-main">
@@ -116,7 +116,7 @@ function resetQuestion(){revealed=false;hints=0;notice=null}
 function goto(i){index=i;resetQuestion();render();$('#avPlayer',root)?.scrollIntoView({block:"start",behavior:"smooth"})}
 function rate(which){const q=qs()[index];if(!q)return;state.ratings[q.id]=which;persist();if(index<qs().length-1)goto(index+1);else render()}
 window.mountAvionicsPractice=function(el){
- if(!el||!TOPICS.length||ITEMS.length!==TOPICS.length*30){if(el)el.textContent="Avionics question bank did not load. Check the JavaScript asset versions.";return}
+ if(!el||!TOPICS.length||ITEMS.length!==TOPICS.length*(window.AVIONICS_EXPECTED_PER_TOPIC||30)){if(el)el.textContent="Avionics question bank did not load. Check the JavaScript asset versions.";return}
  if(root===el&&el.dataset.avMounted==="yes")return;
  root=el;el.dataset.avMounted="yes";render();
 };
