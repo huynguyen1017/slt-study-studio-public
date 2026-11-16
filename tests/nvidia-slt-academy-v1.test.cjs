@@ -74,7 +74,7 @@ console.log("PASS: 12 topics ×50 =600; 120 distinct topic methods; 840 method-c
   assert.equal(await page.locator("#nvidiaView [data-nvs-view]").count(),4,"Each lab needs four useful tools");
   await page.locator("#nvidiaView [data-nvs-view='1']").click();
   await page.locator("#nvidiaView [data-nvs-hyp='0']").click();
-  assert((await page.locator("#nvidiaView .nvs-causal-answer").textContent()).includes("follows the same DUT"));
+  assert((await page.locator("#nvidiaView .nvs-causal-answer").textContent()).includes("follow the same DUT"));
   await page.locator("#nvidiaView [data-nvs-view='2']").click();
   await page.locator("#nvidiaView [data-nvs-aba='1']").click();
   assert((await page.locator("#nvidiaView .nvs-causal-answer").textContent()).includes("ONE factor"));
