@@ -108,15 +108,15 @@ function stepsFor(q,t,f){
    kind:"text"
   });
   out.push({
-   title:"Engineering equation in MathML notation",
-   body:`Here is the mathematical relationship that governs "${f.label}". Notice how each symbol maps directly to a measurable physical quantity.`,
-   kind:"formula",
+   title:formulaStr?"The governing equation and its symbols":"Distinguish a principle from a numerical equation",
+   body:formulaStr?"We will define every symbol in this equation before using it.":"This is a concept question. Not every definition needs a calculation, and using an unrelated equation would be misleading. Describe the physical meaning first: "+f.definition,
+   kind:formulaStr?"formula":"text",
    formula:formulaStr
   });
   out.push({
-   title:"Worked numerical example (with engineering units)",
-   body:`${beginner?beginner.example:LESSONS[t.id].example} Substituting real bench values gives:`,
-   kind:"formula",
+   title:subStr?"Work through the given numbers":"Use a concrete example without assuming numbers",
+   body:subStr?((beginner?beginner.example:LESSONS[t.id].example)+" Substitute the stated values in the equation."):((beginner?beginner.example:LESSONS[t.id].example)+" This is a qualitative example, not a measured dataset or a calculation."),
+   kind:subStr?"formula":"text",
    formula:subStr
   });
   out.push({
