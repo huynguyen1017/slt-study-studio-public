@@ -30,7 +30,7 @@ function render(){
    <div class="eyebrow">ENGINEERING FROM ZERO → SATELLITE TEST READINESS</div>
    <h2>Avionics &amp; Electrical Engineering Practice</h2>
    <p>Begin with voltage, current, and units; practice calculations with rendered engineering equations; work up to instrument control, board bring-up, RF, and flight-hardware go/no-go.</p>
-   <div class="av-metrics"><span>${TOPICS.length} learning topics</span><span>${ITEMS.length} original questions</span><span>${known} mastered locally</span><span>30 questions in every topic</span></div>
+   <div class="av-metrics"><span>${TOPICS.length} learning topics</span><span>${ITEMS.length} original questions</span><span>${known} mastered locally</span><span>50 questions in every topic</span></div>
   </div>
   <div class="av-wrap">
     <aside class="av-side" aria-label="Avionics practice topics">
