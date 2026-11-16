@@ -319,7 +319,7 @@ function wire(){
 }
 window.mountAvionicsPractice=function(el){
  if(!el||!ASSESS||TOPICS.length!==23||QUESTIONS.length!==690){if(el)el.textContent="The Avionics question bank did not load correctly.";return}
- host=el;el.dataset.avMounted="yes";show();
+ host=el;el.dataset.avMounted="yes";const q=selected();if(q){draftText=state.responses[q.id]||"";currentAnswer=draftText;}show();
 };
 window.avionicsWorkbookV2={getQuestionCount:()=>QUESTIONS.length,getTopics:()=>TOPICS.length,stepsForQuestion:id=>{
  const q=QUESTIONS.find(x=>x.id===id);if(!q)return null;
