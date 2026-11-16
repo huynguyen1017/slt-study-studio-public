@@ -166,7 +166,9 @@ function build(src){
 }
 
 function render(src,display=false){
- return '<math xmlns="http://www.w3.org/1998/Math/MathML" display="'+(display?"block":"inline")+'" class="math-'+(display?"display":"inline")+'" aria-label="'+enc(src)+'">'+build(src)+'</math>';
+ const inner=build(src);
+ const row=inner.startsWith("<mrow>")&&inner.endsWith("</mrow>")?inner:"<mrow>"+inner+"</mrow>";
+ return '<math xmlns="http://www.w3.org/1998/Math/MathML" display="'+(display?"block":"inline")+'" class="math-'+(display?"display":"inline")+'" aria-label="'+enc(src)+'">'+row+'</math>';
 }
 
 function deriveWorkedExample(eqString,noteString){
@@ -313,7 +315,7 @@ function formatEngineeringMath(val,unit=""){
  if(!p)return render("0");
  const u=String(unit||"").trim();
  const expr=p.exp===0?p.mantissa:`${p.mantissa} * 10^(${p.exp})`;
- const inner=build(expr)+(u?'<mspace width="0.28em"/><mtext>'+enc(u)+'</mtext>':"");
+ const inner='<mrow>'+build(expr)+(u?'<mspace width="0.28em"/><mtext>'+enc(u)+'</mtext>':"")+'</mrow>';
  return '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline" class="math-inline" aria-label="'+enc(expr+(u?" "+u:""))+'">'+inner+'</math>';
 }
 

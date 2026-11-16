@@ -231,28 +231,41 @@ function activeBanner(q,t){
  </div>`;
 }
 
-function unitTable(title,rows){
- return '<section class="av-si-table"><h4>'+esc(title)+'</h4><div class="av-table-scroll"><table class="av-vocab"><thead><tr><th>Physical quantity</th><th>SI unit</th><th>Symbol</th></tr></thead><tbody>'+
- rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td><strong>'+esc(r[2])+'</strong></td></tr>').join("")+
+function unitTable(title,rows,showQtySymbol){
+ const symCell=s=>{
+  const str=String(s||"");
+  const idx=str.indexOf("_");
+  if(idx>0){
+   return '<i class="av-qty-sym">'+esc(str.slice(0,idx))+'<sub>'+esc(str.slice(idx+1))+'</sub></i>';
+  }
+  return '<i class="av-qty-sym">'+esc(str)+'</i>';
+ };
+ if(showQtySymbol){
+  return '<section class="av-si-table"><h4>'+esc(title)+'</h4><div class="av-table-scroll"><table class="av-vocab"><thead><tr><th>Quantity</th><th>Symbol (Italic)</th><th>SI Unit</th><th>Unit Symbol (Upright)</th></tr></thead><tbody>'+
+  rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+symCell(r[3]||"")+'</td><td>'+esc(r[1])+'</td><td><strong class="av-unit-sym">'+esc(r[2])+'</strong></td></tr>').join("")+
+  '</tbody></table></div></section>';
+ }
+ return '<section class="av-si-table"><h4>'+esc(title)+'</h4><div class="av-table-scroll"><table class="av-vocab"><thead><tr><th>Quantity</th><th>SI Unit</th><th>Unit Symbol</th></tr></thead><tbody>'+
+ rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td><strong class="av-unit-sym">'+esc(r[2])+'</strong></td></tr>').join("")+
  '</tbody></table></div></section>';
 }
 function siChapterPanel(){
  if(!SI)return "";
  return '<section class="av-si-chapter" aria-label="SI base units and derived units from Chapter 1">'+
  '<div class="av-chapter-tag">TEXTBOOK-ALIGNED · CHAPTER 1 · BASE AND DERIVED UNITS</div>'+
- '<h3>Seven base units — the complete definition</h3>'+
- '<p>Every SI base quantity has one base unit. An SI derived unit combines base units. The ampere is the electrical base unit; the volt, ohm and watt are electrical derived units.</p>'+
- unitTable("The seven SI base units",SI.base)+
- '<div class="av-si-highlight"><strong>Only one base unit here is an electrical unit:</strong> ampere (A) measures electric current. The volt (V) measures potential difference, but it is a derived unit.</div>'+
- unitTable("Common derived units — electric and magnetic",SI.derived)+
- unitTable("Magnetic quantities and their SI-related unit expressions",SI.magnetic)+
+ '<h3>Base and Derived Units (Floyd &amp; Buchla, Tables 1–1 to 1–4)</h3>'+
+ '<p>The SI system is based on <strong>seven base units</strong> (fundamental units, Table 1–1) and <strong>two supplementary units</strong> (Table 1–2). The base electrical unit, the <strong>ampere (A)</strong>, is the unit for electrical current (<i>I</i>, for intensity) and is unique in that it uses the base unit of time (<strong>second, s</strong>) in its definition. All other electrical and magnetic units use combinations of base units and are called <strong>derived units</strong>.</p>'+
+ unitTable("Table 1–1 · SI base units",SI.base,false)+
+ '<div class="av-si-highlight"><strong>Only one SI base unit is an electrical unit:</strong> the ampere (<strong class="av-unit-sym">A</strong>) for electric current (<i>I</i>). All other electrical and magnetic units—such as the volt (<strong class="av-unit-sym">V</strong>), ohm (<strong class="av-unit-sym">Ω</strong>), watt (<strong class="av-unit-sym">W</strong>), coulomb (<strong class="av-unit-sym">C</strong>), and farad (<strong class="av-unit-sym">F</strong>)—are <strong>derived units</strong> built from combinations of base units.</div>'+
+ unitTable("Table 1–3 · Electrical quantities and derived units with SI symbols",SI.derived,true)+
+ unitTable("Table 1–4 · Magnetic quantities and derived units with SI symbols",SI.magnetic,true)+
  '<p class="av-si-note">'+esc(SI.gaussNote)+'</p>'+
  '<div class="av-math"><div class="av-math-label">EXAMPLE · VOLT EXPRESSED IN SI UNITS</div><div class="av-math-scroll">'+SI.formulaMathml+'</div><div class="av-math-scroll">'+SI.baseFormulaMathml+'</div><p class="av-meaning">Two equivalent equations are separated to avoid an overly wide mathematical expression.</p></div>'+
  '<h4>How this textbook labels supplementary units</h4>'+
- unitTable("Historical SI supplementary class",SI.historical)+
+ unitTable("Table 1–2 · Historical SI supplementary units",SI.historical,false)+
  '<p class="av-si-note">'+esc(SI.note)+'</p>'+
  '<p class="av-si-note">'+esc(SI.mksNote)+'</p>'+
- '<h4>Quantity symbols versus unit symbols</h4>'+
+ '<h4>Quantity symbols versus unit symbols (Italic vs. Upright Roman)</h4>'+
  '<p>'+esc(SI.styleNote)+'</p>'+
  '<div class="av-math"><div class="av-math-label">ITALIC QUANTITY VS UPRIGHT UNIT SYMBOL</div><div class="av-math-scroll">'+SI.symbolMathml+'</div><p class="av-symbol-example">'+esc(SI.symbolNote)+'</p></div>'+
  '<div class="av-si-sources"><strong>Reference scope</strong><p>'+esc(SI.sourceScope)+'</p>'+

@@ -32,14 +32,21 @@ qualification:P("Space qualification proves flight hardware works in launch vibr
 const rawDeep={
 /* Topic 1: units */
 "units:SI base unit":{
- plain:"The International System (SI) defines seven exact base units—including the ampere (A) for electric current—and builds derived units like the volt (V) and ohm (Ω) from them.",
- analogy:"Meters and seconds are base cooking ingredients; 'meters per second' is a recipe made from those base ingredients. Likewise, ampere is a base unit while volt = joule / coulomb is derived.",
- why:"In test logs and PyVISA scripts, mixing base units and derived units without labels makes voltage, current, and power thresholds ambiguous and dangerous.",
- example:"1 volt = 1 joule of energy per 1 coulomb of charge (1 V = 1 J/C), while 1 ampere = 1 coulomb passing per second (1 A = 1 C/s).",
- formula:"1 V = 1 J / 1 C",
- sub:"I = 1 C / 1 s = 1 A",
- words:[["Ampere (A)","SI base unit of electric current."],["Volt (V)","SI derived unit of electric potential difference."],["Coulomb (C)","Unit of electric charge (1 C = 1 A·s)."]],
- recap:"Ampere is an SI base unit for current; volt is an SI derived unit for potential difference."
+ plain:"The SI system is based on seven fundamental base units (Table 1–1: meter, kilogram, second, ampere, kelvin, candela, mole) and two historical supplementary angle units (Table 1–2: radian, steradian). The ampere (A) is the ONLY electrical base unit (measuring current I), and is unique in using the base unit of time (second, s) in its definition. All other electrical and magnetic units—such as the volt (V), ohm (Ω), watt (W), farad (F), henry (H), and coulomb (C)—are derived units built from combinations of base units. As a rule, italic letters represent quantities (I, V, P, R) and nonitalic (upright roman) letters represent units (A, V, W, Ω).",
+ analogy:"Treat the seven base units as irreducible building blocks. Because combinations like kg·m²/(s³·A) are too cumbersome in daily circuit work, engineers give that exact base-unit combination a derived unit name: the volt (V).",
+ why:"Before measuring or automating test limits on a satellite board, know the difference between an italic quantity symbol (V for voltage), an upright derived unit symbol (V for volt), a base unit (A for ampere), and a scaling prefix (m, µ).",
+ example:"Expressing the derived unit volt in base units: 1 V = 1 W / 1 A = (1 J/s) / 1 A = (kg·m²)/(s³·A). And with symbols: italic I = 25 mA = 0.025 A (upright unit), while italic V = 12 V (upright unit).",
+ formula:"1 V = (1 W) / (1 A)",
+ sub:"I = 25 * 10^(-3) = 0.025",
+ words:[
+  ["SI base units (7)","Meter (m), kilogram (kg), second (s), ampere (A), kelvin (K), candela (cd), mole (mol)."],
+  ["Supplementary units (2)","Radian (r / rad) for plane angle; steradian (sr) for solid angle (reclassified in 1995 as dimensionless derived units)."],
+  ["Ampere (A) vs. Current (I)","Ampere is the sole electrical base unit (uses second s in its definition); italic I stands for the current quantity."],
+  ["Derived electrical units","Built from combinations of base units: volt (V), coulomb (C), ohm (Ω), watt (W), joule (J), farad (F), henry (H), hertz (Hz), siemens (S)."],
+  ["Volt (V) vs. Voltage (V)","Italic V stands for the voltage quantity; nonitalic (upright) V stands for the derived unit volt."],
+  ["Italic vs. Roman rule","As a rule, italic letters represent physical quantities and nonitalic (roman) letters represent measurement units."]
+ ],
+ recap:"SI has 7 base units and 2 textbook supplementary units. Ampere (A) is the only electrical base unit; volt (V) is derived. Italic = quantity (I, V, P); upright roman = unit (A, V, W)."
 },
 "units:Milli prefix":{
  plain:"The prefix 'milli' (symbol m) means one thousandth, or 10⁻³ (0.001). Every 1,000 milliamps equals 1 ampere.",

@@ -5,34 +5,34 @@
    using BIPM SI Brochure 9th ed. and NIST SP 811. All prose is original. */
 (function(){
 const base=[
- ["Length","meter","m"],
- ["Mass","kilogram","kg"],
- ["Time","second","s"],
- ["Electric current","ampere","A"],
- ["Thermodynamic temperature","kelvin","K"],
- ["Luminous intensity","candela","cd"],
- ["Amount of substance","mole","mol"]
+ ["Length","meter","m","l"],
+ ["Mass","kilogram","kg","m"],
+ ["Time","second","s","t"],
+ ["Electric current","ampere","A","I"],
+ ["Thermodynamic temperature","kelvin","K","T"],
+ ["Luminous intensity","candela","cd","I_v"],
+ ["Amount of substance","mole","mol","n"]
 ];
 const derived=[
- ["Electric potential difference","volt","V"],
- ["Electric charge","coulomb","C"],
- ["Resistance / impedance / reactance","ohm","Ω"],
- ["Capacitance","farad","F"],
- ["Inductance","henry","H"],
- ["Power","watt","W"],
- ["Energy / work","joule","J"],
- ["Frequency","hertz","Hz"],
- ["Conductance","siemens","S"],
- ["Magnetic flux","weber","Wb"],
- ["Magnetic flux density","tesla","T"]
+ ["Capacitance","farad","F","C"],
+ ["Charge","coulomb","C","Q"],
+ ["Conductance","siemens","S","G"],
+ ["Energy (work)","joule","J","W"],
+ ["Frequency","hertz","Hz","f"],
+ ["Impedance","ohm","Ω","Z"],
+ ["Inductance","henry","H","L"],
+ ["Power","watt","W","P"],
+ ["Reactance","ohm","Ω","X"],
+ ["Resistance","ohm","Ω","R"],
+ ["Voltage","volt","V","V"]
 ];
 const magnetic=[
- ["Magnetic field intensity","ampere per meter (turn treated as dimensionless)","A/m"],
- ["Magnetic flux","weber","Wb"],
- ["Magnetic flux density","tesla","T"],
- ["Magnetomotive force","ampere-turn","At"],
- ["Permeability","henry per meter","H/m"],
- ["Reluctance","ampere-turn per weber","At/Wb"]
+ ["Magnetic field intensity","ampere-turns/meter (SI: A/m)","At/m","H"],
+ ["Magnetic flux","weber","Wb","Φ"],
+ ["Magnetic flux density","tesla","T","B"],
+ ["Magnetomotive force","ampere-turn","At","F_m"],
+ ["Permeability","webers/ampere-turn·meter (H/m)","Wb/At·m","μ"],
+ ["Reluctance","ampere-turns/weber","At/Wb","ℛ"]
 ];
 const lesson={
  heading:"What makes a unit an SI base unit?",
@@ -51,15 +51,15 @@ const lesson={
  ],
  base,derived,magnetic,
  historical:[
- ["Plane angle","radian","rad"],
- ["Solid angle","steradian","sr"]
+ ["Plane angle","radian","rad (textbook: r)","θ"],
+ ["Solid angle","steradian","sr","Ω"]
  ],
  gaussNote:"The supplied textbook excerpt calls gauss a magnetic flux unit. In standard electromagnetic terminology, gauss (G) measures magnetic flux density: 1 G = 10⁻⁴ T. Maxwell (Mx) measures magnetic flux: 1 Mx = 10⁻⁸ Wb. This clarification comes from NIST/NBS tables, not a silent rewrite of the excerpt.",
  mksNote:"The textbook contrasts mks (meter–kilogram–second) engineering units with the older cgs (centimeter–gram–second) system. SI still has seven base units; mks names only three historically important base quantities.",
  note:"The quoted textbook uses the historical class 'supplementary units' for radian and steradian. The SI eliminated this separate category in 1995; today they are dimensionless derived units. Both descriptions refer to the same angle units, but to different SI classification periods.",
- styleNote:"In engineering typesetting, use italic quantity symbols such as I, V, P, and t. Use upright (roman) unit symbols such as A, V, W, and s. The same letter V can refer to a voltage quantity when italic and to the volt unit when upright.",
+ styleNote:"Letter symbols represent both quantities and their units. Italic letters stand for the quantity (for example, italic I for current, italic V for voltage, italic P for power), and nonitalic (upright roman) letters stand for the unit of that quantity (for example, upright A for ampere, upright V for volt, upright W for watt).",
  sourceScope:"Aligned to the Base and Derived Units excerpt supplied from Chapter 1 of Principles of Electric Circuits (Floyd and Buchla). Historical SI status and modern unit symbols cross-checked against BIPM and NIST. Other chapters are original curriculum summaries, not verbatim textbook excerpts.",
- formulaMathml:'<math xmlns="http://www.w3.org/1998/Math/MathML" display="block" aria-label="One volt equals one watt divided by one ampere"><mrow><mn>1</mn><mspace width="0.2em"/><mi mathvariant="normal">V</mi><mo>=</mo><mfrac><mrow><mn>1</mn><mspace width="0.2em"/><mi mathvariant="normal">W</mi></mrow><mrow><mn>1</mn><mspace width="0.2em"/><mi mathvariant="normal">A</mi></mrow></mfrac></mrow></math>',
+formulaMathml:'<math xmlns="http://www.w3.org/1998/Math/MathML" display="block" aria-label="One volt equals one watt divided by one ampere"><mrow><mn>1</mn><mspace width="0.2em"/><mi mathvariant="normal">V</mi><mo>=</mo><mfrac><mrow><mn>1</mn><mspace width="0.2em"/><mi mathvariant="normal">W</mi></mrow><mrow><mn>1</mn><mspace width="0.2em"/><mi mathvariant="normal">A</mi></mrow></mfrac></mrow></math>',
  baseFormulaMathml:'<math xmlns="http://www.w3.org/1998/Math/MathML" display="block" aria-label="One volt equals one kilogram meter squared per second cubed ampere"><mrow><mn>1</mn><mspace width="0.2em"/><mi mathvariant="normal">V</mi><mo>=</mo><mfrac><mrow><mn>1</mn><mspace width="0.2em"/><mi mathvariant="normal">kg</mi><mo>·</mo><msup><mi mathvariant="normal">m</mi><mn>2</mn></msup></mrow><mrow><msup><mi mathvariant="normal">s</mi><mn>3</mn></msup><mo>·</mo><mi mathvariant="normal">A</mi></mrow></mfrac></mrow></math>',
  symbolMathml:'<math xmlns="http://www.w3.org/1998/Math/MathML" display="block" aria-label="Italic electric current I equals twenty five milliamperes or zero point zero two five amperes"><mrow><mi>I</mi><mo>=</mo><mn>25</mn><mspace width="0.2em"/><mi mathvariant="normal">mA</mi><mo>=</mo><mn>0.025</mn><mspace width="0.2em"/><mi mathvariant="normal">A</mi></mrow></math>',
  symbolNote:"The first I is an italic quantity symbol for electric current. The upright A is the unit symbol for ampere; the upright m preceding A is the prefix milli, so mA means milliamperes. Multiply by 10⁻³ to convert: 25 mA = 0.025 A.",

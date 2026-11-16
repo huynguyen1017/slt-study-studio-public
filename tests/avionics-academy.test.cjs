@@ -55,7 +55,7 @@ for(const s of ["avionics_beginner_lessons.js","avionics_tutor.js","avionics_tut
  assert(html.includes(s),s);
  assert(service.includes(s),"offline cache missing "+s);
 }
-assert(service.includes("v22-mathml-layout-chapter-map"));
+assert(service.includes("v23-avionics-question-and-math-refresh"));
 assert(service.includes("avionics_si_lesson.js")&&service.includes("avionics_si.css"));
 const ohm=topics.find(t=>t.id==="ohm"),ohmCalc=questions.find(q=>q.id==="ohm-C1");
 const ohmDrawing=VIS.render(ohmCalc,ohm,"schematic");

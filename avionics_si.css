@@ -8,6 +8,8 @@
 #avionicsView .av-si-table{margin:14px 0}
 #avionicsView .av-si-table table{min-width:420px}
 #avionicsView .av-si-table td:last-child{font-variant-numeric:tabular-nums;color:#18536c}
+#avionicsView .av-qty-sym{font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-style:italic;font-weight:700;color:#16496b}
+#avionicsView .av-unit-sym{font-style:normal;font-weight:800;color:#18536c}
 #avionicsView .av-si-highlight{background:#e3f4ea;border-left:5px solid #1c906a;padding:14px 17px;border-radius:0 10px 10px 0;color:#14503e;line-height:1.65;margin:17px 0}
 #avionicsView .av-si-note{background:#fff5e6;border-left:5px solid #d89a39;padding:14px 16px;border-radius:0 9px 9px 0;color:#694c21!important}
 #avionicsView .av-si-sources{border-top:1px solid #d7e4ed;margin-top:20px;padding-top:15px}
