@@ -608,7 +608,7 @@ function tailorWiringLayout(base,q,t){
  const swapCol=k=>k===0?1:k===1?0:k===2?3:k===3?2:k===6?7:k===7?6:k===8?9:k===9?8:k;
  const rearrange=!hasIc&&(n%2===0);
  const col=k=>rearrange?swapCol(k):k;
- c.wires=c.wires.map(w=>({...w,row:shifted(w.row),col:col(w.col)}));
+ c.wires=c.wires.map(w=>{const newRow=shifted(w.row),newCol=col(w.col);return {...w,row:newRow,col:newCol,dst:"abcdefghij"[newCol]+newRow}});
  c.jumps=c.jumps.map(j=>({...j,r1:shifted(j.r1),r2:shifted(j.r2),c1:col(j.c1),c2:col(j.c2)}));
  c.comps=c.comps.map(p=>({...p,r1:shifted(p.r1),r2:shifted(p.r2),
   ...(p.col!==undefined?{col:col(p.col)}:{}),
@@ -629,6 +629,14 @@ function tailorWiringLayout(base,q,t){
    c.comps.push({kind:"R",label:"R3",val:"2.2 kΩ",col:col(9),r1:shifted(13),r2:shifted(16)});
   c.title=(n%2===0?"Three":"Two")+"-Branch KCL Junction";
  }
+ // Keep textual hole references synchronized with the moved physical endpoint.
+ const rewriteHole=h=>{
+  const m=h.match(/^([a-j])(9|1[0-7])$/);
+  if(!m)return h;
+  const p=col("abcdefghij".indexOf(m[1]));
+  return "abcdefghij"[p]+shifted(Number(m[2]));
+ };
+ c.target=String(c.target||"").replace(/\b[a-j](?:9|1[0-7])\b/g,rewriteHole);
  const measurement= /current|ammeter|branch|kcl/i.test(words)?"Current (DMM in series)":
   /voltage|divider|kvl|potential|drop/i.test(words)?"Voltage (DMM across nodes)":
   /ohm|resistance|continuity/i.test(words)?"Resistance (power OFF)":
