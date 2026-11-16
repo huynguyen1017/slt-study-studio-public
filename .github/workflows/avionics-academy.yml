@@ -16,6 +16,7 @@ on:
       - 'avionics_*.css'
       - 'tests/avionics-academy.test.cjs'
       - 'tests/avionics-assessor.test.cjs'
+      - 'tests/avionics-curriculum-accuracy.test.cjs'
 permissions:
   contents: read
 jobs:
@@ -40,6 +41,7 @@ jobs:
           node --check avionics_si_lesson.js
           node tests/avionics-academy.test.cjs
           node tests/avionics-assessor.test.cjs
+          node tests/avionics-curriculum-accuracy.test.cjs
       - name: Install headless browser for desktop and mobile smoke tests
         run: |
           npm install --no-save playwright@1.56.1
