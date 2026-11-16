@@ -55,7 +55,7 @@ function svgDiagram(q){
     ln(95,65,220,65)+resistor(220,48,150,34,"Rs",rs)+ln(370,65,720,65)+
     ln(480,65,480,117)+resistor(445,117,70,48,"Ra",ra)+ln(480,165,480,207)+
     ln(690,65,690,117)+resistor(655,117,70,48,"Rb",rb)+ln(690,165,690,207)+
-    ln(95,207,720,207)+ln(95,65,95,92)+ln(95,168,95,207)+
+    ln(95,207,720,207)+ln(95,65,95,96)+ln(95,164,95,207)+
     '<circle cx="95" cy="130" r="34" fill="#fff7de" stroke="#a5813f" stroke-width="2"/>'+
     '<text x="95" y="125" font-size="14" text-anchor="middle" fill="#6b4922">+'+esc(v)+' V</text><text x="95" y="144" font-size="12" text-anchor="middle" fill="#6b4922">−</text>'+
     '<circle cx="480" cy="65" r="5" fill="#127fbc"/><circle cx="690" cy="65" r="5" fill="#127fbc"/>'+
