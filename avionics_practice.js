@@ -45,7 +45,7 @@ function render(){
        ${TOPICS.map((t,i)=>`<button class="av-topic ${t.id===topic?"active":""}" data-topic="${esc(t.id)}" aria-pressed="${String(t.id===topic)}"><strong>${i+1}. ${esc(t.title)}</strong><small>${completeCount(t.id)} of 30 mastered · ${esc(t.group)}</small><span class="av-track"><i style="width:${100*completeCount(t.id)/30}%"></i></span></button>`).join("")}
       </div>
     </aside>
-    <main class="av-main">
+    <div class="av-main">
       <div class="av-player" id="avPlayer">
       ${q?`
        <div class="av-kicker"><span>${esc(detail.group)} · ${esc(q.level)}</span><strong>QUESTION ${index+1} / ${subset.length}</strong></div>
