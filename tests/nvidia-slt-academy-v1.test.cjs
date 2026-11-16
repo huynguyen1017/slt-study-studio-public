@@ -70,6 +70,18 @@ console.log("PASS: 12 topics ×50 =600; 120 distinct topic methods; 840 method-c
   await page.locator("#nvidiaView [data-goto='21']").last().click();
   assert.equal(await page.locator("#nvidiaView .nvs-exact-circuit").count(),1,"Series-parallel mixed circuit needs exact connected SVG");
   assert((await page.locator("#nvidiaView .nvs-exact-circuit").textContent()).includes("Ra 175 Ω"));
+  assert.equal(await page.locator("#nvidiaView .nvs-scenario-lab").count(),1,"One question-specific visual laboratory must be present");
+  assert.equal(await page.locator("#nvidiaView [data-nvs-view]").count(),4,"Each lab needs four useful tools");
+  await page.locator("#nvidiaView [data-nvs-view='1']").click();
+  await page.locator("#nvidiaView [data-nvs-hyp='0']").click();
+  assert((await page.locator("#nvidiaView .nvs-causal-answer").textContent()).includes("follows the same DUT"));
+  await page.locator("#nvidiaView [data-nvs-view='2']").click();
+  await page.locator("#nvidiaView [data-nvs-aba='1']").click();
+  assert((await page.locator("#nvidiaView .nvs-causal-answer").textContent()).includes("ONE factor"));
+  await page.locator("#nvidiaView [data-nvs-view='3']").click();
+  await page.locator("#nvidiaView [data-nvs-check='0']").check();
+  await page.locator("#nvidiaView #nvsLabNote").fill("Probe loaded source rail; a reference fixture that passes would falsify a station-only assumption.");
+  assert((await page.locator("#nvidiaView .nvs-evidence-worksheet").textContent()).includes("1 / 6"));
   await page.locator("#nvidiaView [data-goto='20']").last().click();
   const canonical=await page.locator("#nvidiaView .nvs-question").textContent();
   assert((await page.locator("#nvidiaView .nvs-toolbar").textContent()).includes("21 / 50"));
@@ -108,8 +120,32 @@ console.log("PASS: 12 topics ×50 =600; 120 distinct topic methods; 840 method-c
   assert(storage.includes("slt-nvidia-soc-academy-v1"),"NVIDIA progress must save to distinct key");
   await page.locator("#nvidiaView [data-goto='49']").last().click();
   assert((await page.locator("#nvidiaView .nvs-question").textContent()).includes("third subsystem"));
+  await page.locator("#nvidiaView [data-nvs-view='1']").click();
+  assert((await page.locator("#nvidiaView .nvs-specific-observations").count())===0,"Fault tree must not repeat the static model");
+  assert((await page.locator("#nvidiaView .nvs-hypotheses").textContent()).includes("hypothesis"));
+  await page.locator("#nvidiaView [data-goto='21']").last().click();
+  await page.locator("#nvidiaView [data-nvs-view='3']").click();
+  assert(await page.locator("#nvidiaView [data-nvs-check='0']").isChecked(),"Question-specific evidence planning must persist across navigation");
+  assert((await page.locator("#nvidiaView #nvsLabNote").inputValue()).includes("Probe loaded source rail"));
+  await page.reload({waitUntil:"load"});
+  await page.locator("#nvidiaView .nvs-scenario-lab").waitFor();
+  await page.locator("#nvidiaView [data-nvs-view='3']").click();
+  assert(await page.locator("#nvidiaView [data-nvs-check='0']").isChecked(),"Evidence planning must survive reload");
   await page.locator("#nvidiaView #nvsTopics").selectOption("dram");
   assert((await page.locator("#nvidiaView .nvs-toolbar").textContent()).includes("DDR"));
+  const topicViews={
+   dram:"DRAM TRAINING",pcie:"PCIe LINK TRAINING",gpu:"GPU VALIDATION",
+   ate:"ATE → DFT",pvt:"PVT SHMOO",instruments:"SYNTHETIC FOUR-CHANNEL",
+   linux:"READ-ONLY LOG INSPECTOR",python:"TEST SCRIPT DECISION",
+   quality:"FIRST-PASS YIELD",interview:"THREE DISTINCT SIGNALS",
+   socboot:"BOOT, CLOCK, RESET",electrical:"POWER PATH"
+  };
+  for(const [id,word] of Object.entries(topicViews)){
+   await page.locator("#nvidiaView #nvsTopics").selectOption(id);
+   const text=await page.locator("#nvidiaView .nvs-scenario-lab").textContent();
+   assert(text.includes(word),id+" needs a tailored visual rather than a generic Linux-host flow");
+   assert(!text.includes("EXPLANATORY FLOW"),id+" still shows obsolete diagram");
+  }
   await page.locator('[data-mode="avionics"]').click();
   assert(await page.locator("#avionicsView").isVisible(),"Muon must remain intact");
   await page.locator('[data-mode="nvidia"]').click();
