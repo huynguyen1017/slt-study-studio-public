@@ -41,7 +41,7 @@ function battery(x,top,bottom,label){
  return line(x,top,x,mid-31)+line(x-20,mid-31,x+20,mid-31,P.ink,4)+line(x-11,mid-18,x+11,mid-18,P.ink,4)+line(x,mid-18,x,mid+4)+line(x-20,mid+4,x+20,mid+4,P.ink,4)+line(x-11,mid+16,x+11,mid+16,P.ink,4)+line(x,mid+16,x,bottom)+text(x-36,mid-28,"+",23,P.red)+text(x-33,mid+27,"−",23,P.muted)+text(x-25,mid+47,label,14,P.ink,"end","700");
 }
 function ground(x,y){return line(x,y,x,y+11)+line(x-17,y+11,x+17,y+11)+line(x-11,y+17,x+11,y+17)+line(x-5,y+23,x+5,y+23);}
-function source(q){return (q.question.match(/(?:\d+(?:\.\d+)?)\s*(?:V|mV)\b/g)||[])[0]||"5 V";}
+function source(q){return (q.question.match(/(?:\d+(?:\.\d+)?)\s*(?:V|mV)\b/g)||[])[0]||"Vₛ";}
 function vals(q){return [...new Set(q.question.match(/(?:\d+(?:\.\d+)?(?:e[+-]?\d+)?)\s*(?:MΩ|kΩ|mΩ|Ω|GHz|MHz|kHz|Hz|mH|µH|µF|mA|mV|ms|ns|µs|V|A|W|dB|%)/gi)||[])].slice(0,7);}
 function resistance(q){return vals(q).filter(x=>/Ω/.test(x));}
 const units={
@@ -69,7 +69,7 @@ const units={
  rf:"RF path and measurement",
  qualification:"Flight-hardware verification process"
 };
-const boards=new Set(["ohm","power","series","parallel","kcl-kvl","thevenin","capacitors","rc","inductors","filters","components","power-rails","schematics","instruments","units"]);
+const boards=new Set(["ohm","power","series","parallel","kcl-kvl","thevenin","capacitors","rc","inductors","filters"]);
 function describe(q,t){
  const id=t.id, v=vals(q);
  return {topic:id,question:q.id,kind:q.level,values:v,schematic:"Circuit diagram",concept: /ac|rc|inductors|filters|timing|rf|capacitors|power-rails|instruments|buses/.test(id)?"Graph / waveform":"Visual explanation",wiring:boards.has(id)?"Breadboard wiring":"Test / system setup",board:boards.has(id)};
@@ -195,7 +195,7 @@ function breadboard(q,t){
  const id=t.id, isPar=id==="parallel", isSeries=id==="series"||id==="thevenin", isRC=["rc","capacitors","inductors","filters"].includes(id);
  const rs=resistance(q);
  const questionVoltage=source(q), match=(parseFloat(questionVoltage)<=5);
- const v=match?questionVoltage:"3.3 V DEMO";
+ const v=match&&questionVoltage!=="Vₛ"?questionVoltage:"3.3 V DEMO";
  let s=head(q,t)+text(533,56,"GENERIC BREADBOARD · NOT A PINOUT",10,P.muted,"start","700");
  s+=rect(82,79,397,212,"#f5f5ef","#d4dbdb",13);
  const cols=["a","b","c","d","e"],xs=[135,199,263,327,391];let ys={};
@@ -210,12 +210,19 @@ function breadboard(q,t){
   s+=text(x+16,mid-23,label,11,P.ink);
  }
  if(isSeries){resistor(xs[0],rtop,rmid,rs[0]||"R₁");resistor(xs[0],rmid,r16,rs[1]||"R₂");}
- else {resistor(xs[0],rtop,rbot,rs[0]||"R₁");if(isPar)resistor(xs[3],rtop,rbot,rs[1]||"R₂");}
- s+=path("M594 116 H"+xs[1]+" V"+rtop,P.red,3)+path("M594 231 H"+xs[1]+" V"+(isSeries?r16:rbot),P.blue,3);
+ else if(isRC){
+  resistor(xs[0],rtop,rmid,rs[0]||"R");
+  const symbol=id==="inductors"?"L":"C";
+  s+=line(xs[0],rmid,xs[0],rmid+13,"#9a7756",2)+rect(xs[0]-13,rmid+13,26,18,"#e0eef7","#6e9db9",3)+
+   text(xs[0],rmid+26,symbol,12,P.blue,"middle","700")+line(xs[0],rmid+31,xs[0],r16,"#9a7756",2);
+ }else{
+  resistor(xs[0],rtop,rbot,rs[0]||"R₁");if(isPar)resistor(xs[3],rtop,rbot,rs[1]||"R₂");
+ }
+ s+=path("M594 116 H"+xs[1]+" V"+rtop,P.red,3)+path("M594 231 H"+xs[1]+" V"+(isSeries||isRC?r16:rbot),P.blue,3);
  s+=rect(510,97,178,151,"#fff","#b6cbd7",12)+text(599,123,"CURRENT-LIMITED",12,P.ink,"middle","700")+text(599,141,"DC supply",12,P.ink,"middle")+
  rect(532,149,134,39,"#eaf5eb","#a2c9ad",6)+text(599,175,v,19,P.green,"middle","700")+
  text(599,207,"+ (red)      − (blue)",13,P.ink,"middle");
- if(isSeries){s+=path("M"+xs[1]+" "+rmid+" H480 V274 H533",P.gold,2.5)+text(540,280,"Midpoint / divider",12,P.gold);}
+ if(isSeries||isRC){s+=path("M"+xs[1]+" "+rmid+" H480 V274 H533",P.gold,2.5)+text(540,280,"Midpoint / signal",12,P.gold);}
  if(isRC){s+=text(123,300,"Reactive parts require correct polarity/ratings and a verified wiring diagram.",12,P.muted);}
  else s+=text(108,309,"Rows are connected across a–e. Adjacent numbered rows are separate.",13,P.muted);
  return svg(s,"Breadboard close-up showing exact row and column hole positions for a "+(isPar?"parallel":isSeries?"series":"single resistor")+" conceptual circuit");
@@ -254,7 +261,7 @@ function render(q,t,mode){
  const warning=mode==="wiring"?"Generic teaching illustration, NOT a manufacturer-approved pinout or a complete wiring procedure. For real hardware, verify power-off connections, rail voltage, ratings and common-ground requirements.":mode==="concept"?"Illustrative model / normalized graph; not measured waveform or qualification data.":"Circuit symbols and current arrows are educational diagrams. Any unspecified values are examples, not part of the question.";
  return '<figure class="av-visual-figure" data-visual-question="'+esc(q.id)+'" data-visual-mode="'+esc(mode)+'">'+
  '<div class="av-visual-top"><strong>'+esc(label)+'</strong><span>Question '+esc(q.id)+' · '+esc(q.level)+'</span></div>'+
- figure+'<figcaption>'+esc(detail)+'. '+esc(warning)+'</figcaption></figure>';
+ figure+'<div class="av-visual-question-line"><strong>Question:</strong> '+esc(q.question)+'</div><figcaption>'+esc(detail)+'. '+esc(warning)+'</figcaption></figure>';
 }
 window.avionicsVisuals={render,describe,hasBreadboard:(q,t)=>describe(q,t).board,viewTypes:()=>["schematic","concept","wiring"]};
 })();
