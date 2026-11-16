@@ -81,10 +81,14 @@ function known(q){
  return out;
 }
 function loop(q,t){
- const r=resistance(q), lab=(r[0]||"1 kΩ"),v=source(q);
+ const r=resistance(q), lab=(r[0]||(t.id==="power"||t.id==="units"?"LOAD":q.level==="Calculation"?"R = ?":"R")),v=source(q);
  return head(q,t)+known(q)+line(126,85,504,85)+line(504,85,504,128)+zigV(504,140,212,lab)+line(504,222,504,257)+line(126,257,504,257)+battery(126,85,257,v)+
  arrow(222,72,344,72)+text(277,65,"I →",16,P.red,"middle","700")+dot(126,85,P.blue)+dot(126,257,P.green)+
- text(535,120,"R / LOAD",11,P.muted)+text(510,291,q.level==="Calculation"?"Find the unknown from the shown values.":"Current has a closed return path.",12,P.muted,"end");
+ text(535,120,"R / LOAD",11,P.muted)+text(510,291,q.level==="Calculation"?"Calculate the requested unknown.":"Current has a closed return path.",12,P.muted,"end")+
+ (t.id==="ohm"?(line(504,85,639,85,P.red,2)+line(639,85,639,135,P.red,2)+line(504,257,639,257,P.blue,2)+line(639,213,639,257,P.blue,2)+
+ rect(572,133,128,82,"#fff","#72a9c4",10)+text(637,158,"DMM",14,P.ink,"middle","700")+
+ rect(589,170,95,29,"#e2f3eb","#9ac7b1",4)+text(636,189,"V (measured)",12,P.green,"middle","700")+
+ text(650,115,"red +",11,P.red)+text(651,243,"black −",11,P.blue)):"");
 }
 function series(q,t){
  const r=resistance(q),v=source(q);
