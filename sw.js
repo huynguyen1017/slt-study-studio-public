@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v27-unique-wiring-sim-r2';
+const CACHE = 'slt-study-studio-v29-nucleo-progressive-videos';
 const CORE = [
   "./",
   "./index.html",
@@ -25,6 +25,9 @@ const CORE = [
   "./avionics_feedback.css",
   "./avionics_tutor.css",
   "./avionics_visuals.js",
+  "./avionics_nucleo_workbench.js",
+  "./avionics_video_lessons.js",
+  "./avionics_progressive_videos.css",
   "./avionics_circuit_simulator.js",
   "./avionics_circuit_simulator.css",
   "./avionics_simulator.js",
