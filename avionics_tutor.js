@@ -185,15 +185,15 @@ function stepsFor(q,t,f){
    kind:"text"
   });
   out.push({
-   title:"Engineering check & governing equation",
-   body:`Safest first action: ${st[1]||st[0]}. Use the governing physical relationship below to predict what a healthy reading must look like:`,
-   kind:"formula",
+   title:formulaStr?"Engineering check and governing equation":"Engineering check without an assumed formula",
+   body:formulaStr?"Safest first action: "+(st[1]||st[0])+". Use the actual governing relationship to predict a healthy reading.":"Safest first action: "+(st[1]||st[0])+". Compare the expected healthy observations with the reported fault.",
+   kind:formulaStr?"formula":"text",
    formula:formulaStr
   });
   out.push({
-   title:"Expected healthy vs. fault signature",
-   body:`Why this isolates the root cause: ${st[2]||f.why} Compare measured telemetry against nominal behavior:`,
-   kind:"formula",
+   title:"Expected healthy behavior versus observed fault",
+   body:"Why this isolates the root cause: "+(st[2]||f.why)+". "+(subStr?"Evaluate the given numeric example.":"No numerical values were provided, so do not invent a substitution."),
+   kind:subStr?"formula":"text",
    formula:subStr
   });
   out.push({
