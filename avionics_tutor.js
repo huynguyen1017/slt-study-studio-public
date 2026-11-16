@@ -7,23 +7,27 @@ const QUESTIONS=window.AVIONICS_QUESTIONS||[];
 const LESSONS=window.AVIONICS_BEGINNER_LESSONS||{};
 const DEEP=window.AVIONICS_CONCEPT_DEEP_DIVE||{};
 const VIS=window.avionicsVisuals;
+const ASSESS=window.avionicsAnswerCheck;
 const STORE="slt-avionics-ee-practice-v1";
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const find=(s,r=document)=>r.querySelector(s);
 const fmt=x=>Math.abs(x)>0&&Math.abs(x)<0.0001?Number(x).toExponential(3):Number(x.toPrecision(5)).toString();
 const eq=x=>window.studyMath?window.studyMath(x,true):'<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mtext>'+esc(x)+'</mtext></math>';
 let remembered={};try{remembered=JSON.parse(localStorage.getItem(STORE)||"{}")||{}}catch{}
-const state={ratings:{},attempts:{},...remembered};
+const state={ratings:{},attempts:{},assessments:{},responses:{},...remembered};
 if(!state.ratings||typeof state.ratings!=="object")state.ratings={};
 if(!state.attempts||typeof state.attempts!=="object")state.attempts={};
+if(!state.assessments||typeof state.assessments!=="object")state.assessments={};
+if(!state.responses||typeof state.responses!=="object")state.responses={};
 let host=null,topic=TOPICS.some(t=>t.id===state.lastTopic)?state.lastTopic:"ohm";
 let currentIndex=Number.isInteger(state.lastIndex)?state.lastIndex:0;
-let filter="All",query="",page="learn",stepIndex=0,expanded=false,feedback="",draftText="",currentAnswer="";
+let filter="All",query="",page="learn",stepIndex=0,expanded=false,feedback="",draftText="",currentAnswer="",answerDirty=false;
 const save=()=>{try{localStorage.setItem(STORE,JSON.stringify(state))}catch{}};
 const topicOf=()=>TOPICS.find(t=>t.id===topic)||TOPICS[0];
 const qset=()=>QUESTIONS.filter(x=>x.topic===topic&&(filter==="All"||x.level===filter)&&(!query||(x.question+" "+x.steps.join(" ")).toLowerCase().includes(query)));
 const selected=()=>{const a=qset();currentIndex=Math.max(0,Math.min(a.length-1,currentIndex));return a[currentIndex]};
 const cnt=id=>QUESTIONS.filter(x=>x.topic===id&&state.ratings[x.id]==="know").length;
+const allTopicQuestions=()=>QUESTIONS.filter(x=>x.topic===topic);
 function matchingSkill(q,t){
  if(!q||!t)return 0;
  const m=q.id.match(/-([FADC])(\d+)$/);
@@ -150,6 +154,7 @@ function solvePage(q,t,f){
  '<h3>Answer in tiny steps — not all at once</h3>'+
  '<p class="av-explain">Only one step is shown at a time. Read it, think about it, then press <strong>Next baby step</strong>. There is no timer.</p>'+
  '<div class="av-question"><span>YOUR QUESTION</span><p>'+esc(q.question)+'</p></div>'+
+ inlineStepVisual(q,t,stepIndex)+
  '<div class="av-step-counter"><strong>Step '+(stepIndex+1)+' of '+steps.length+'</strong><span>'+esc(step.title)+'</span></div>'+
  '<div class="av-steps-rail">'+steps.map((s,i)=>'<span class="'+(i===stepIndex?"here":i<stepIndex?"passed":"")+'" title="'+esc(s.title)+'"></span>').join("")+'</div>'+
  '<article class="av-baby-step"><span class="av-step-icon">'+(stepIndex+1)+'</span>'+
@@ -166,22 +171,47 @@ function solvePage(q,t,f){
  '<div class="av-takeaway"><strong>How to speak in an interview:</strong> First define the idea, explain the check you would perform, then say what evidence would make you confident.</div>'+
  '</section>';
 }
+
+function gradeView(assessment){
+ if(!assessment)return "";
+ const status=assessment.band==="likely-correct"?"good":assessment.band==="partial"?"partial":"review";
+ const score=Number.isFinite(assessment.score)?'<span class="av-score">'+assessment.score+" / "+assessment.max+" key ideas</span>":"";
+ return '<section class="av-assessment av-assessment-'+status+'" aria-label="Your answer feedback">'+
+ '<div class="av-assessment-heading"><strong>'+esc(assessment.title||"Answer feedback")+'</strong>'+score+'</div>'+
+ (assessment.note?'<p>'+esc(assessment.note)+'</p>':"")+
+ ((assessment.met||[]).length?'<div class="av-assess-list"><strong>Ideas recognized</strong><ul>'+assessment.met.map(x=>'<li>'+esc(x.label)+'</li>').join("")+'</ul></div>':"")+
+ ((assessment.missing||[]).length?'<div class="av-assess-list"><strong>How to improve your answer</strong><ul>'+assessment.missing.map(x=>'<li><b>'+esc(x.label)+':</b> '+esc(x.hint)+'</li>').join("")+'</ul></div>':"")+
+ ((assessment.corrections||[]).length?'<div class="av-assess-list"><strong>Specific correction</strong><ul>'+assessment.corrections.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>':"")+
+ '<p class="av-assess-warning">Automated rubric feedback is approximate, especially for original explanations and alternative wording. Review the reference answer and retry. It is not a human or AI semantic evaluation.</p></section>';
+}
+function inlineStepVisual(q,t,step){
+ if(!VIS)return "";
+ const topicGraph=/^(ac|rc|capacitors|inductors|filters|timing|rf|power-rails)$/.test(t.id);
+ let secondary=null;
+ if(q.level==="Troubleshooting" && step>=2)secondary="wiring";
+ else if(topicGraph && step>=3)secondary="concept";
+ return '<div class="av-solution-circuit"><h4>Follow the circuit while reading this step</h4>'+
+ VIS.render(q,t,"schematic")+
+ (secondary?'<details class="av-step-extra"><summary>'+ (secondary==="concept"?"Show the response graph":"Show the wiring / test setup")+'</summary>'+VIS.render(q,t,secondary)+'</details>':"")+
+ '<button id="avStepVisual" class="av-light" type="button">Open all three visual views ↗</button></div>';
+}
+
 function practicePage(q,t,f){
  const result=(q.expected!==undefined)?'The correct result is '+fmt(q.expected)+' '+q.unit+'.':(f.deep?f.deep.recap:q.steps.join(" "));
  return '<section class="av-page" aria-label="Practice without the answer">'+
  '<div class="av-eyebrow">PAGE 4 / 4 · TRY IT YOURSELF</div>'+
  '<h3>Your turn — explain it without reading the solution</h3>'+
- '<p class="av-explain">It is okay to get this wrong. This is practice, not a graded exam.</p>'+
+ '<p class="av-explain">Your answer will be checked against the question’s concepts. You will receive a correct, partially correct, or needs-correction result, with suggestions you can use to retry.</p>'+
  '<div class="av-question"><span>QUESTION '+(currentIndex+1)+' / '+qset().length+'</span><p>'+esc(q.question)+'</p></div>'+
  (q.expected!==undefined?'<form id="avTryNumber" class="av-try-form"><label for="avValue">Enter your calculated answer</label><div class="av-input-row"><input id="avValue" type="text" inputmode="decimal" autocomplete="off" placeholder="Example: 0.025 or 2.5e-2" value="'+esc(currentAnswer)+'" aria-describedby="avRequestedUnit"><span id="avRequestedUnit">'+esc(q.unit)+'</span><button class="av-primary" type="submit">Check answer</button></div></form>':
  '<label class="av-try-label" for="avExplain">Write your explanation in your own words</label><textarea id="avExplain" rows="4" placeholder="I think this means... because... An engineer would test it by...">'+esc(draftText)+'</textarea>'+
- '<button id="avCompare" class="av-light">Show an example explanation to compare</button>')+
- '<div id="avFeedback" role="status" aria-live="polite">'+(feedback?feedback:"")+'</div>'+
+ '<div class="av-actions-bottom"><button id="avCheckExplanation" class="av-primary" type="button">Check my written answer</button><button id="avCompare" class="av-light">Show reference example</button></div>')+
+ '<div id="avFeedback" role="status" aria-live="polite">'+(feedback?feedback:gradeView(state.assessments[q.id]))+'</div>'+
  '<details id="avReference" class="av-reference" '+(expanded?"open":"")+'><summary>Show the worked reference answer</summary><p>'+esc(result)+'</p>'+
  (q.formula?equation(q.formula,"FORMULA")+equation(q.sub,"SUBSTITUTION"):"")+
- '<p>'+esc(q.steps.join(" "))+'</p></details>'+
- '<div class="av-self-check"><h4>Mark your understanding</h4><p>Choose “I can explain it” only when you can repeat the idea or calculation without looking. Your choice is saved on this device.</p>'+
- '<div class="av-control-row"><button id="avNeedReview" class="av-light">I need more practice</button><button id="avUnderstand" class="av-good">I can explain it ✓</button></div></div>'+
+ '</details>'+
+ '<div class="av-self-check"><h4>Learning progress</h4><p>First check your answer. A correct result unlocks mastery; partial or incorrect answers can be revised without losing your work. You may always choose additional practice.</p>'+
+ '<div class="av-control-row"><button id="avNeedReview" class="av-light">I need more practice</button><button id="avUnderstand" class="av-good" '+((state.assessments[q.id]||{}).band!=="likely-correct"||answerDirty?'disabled title="Check and correct your answer first"':'')+'>I can explain it ✓</button></div></div>'+
  '<div class="av-actions-bottom"><button id="avBackLesson" class="av-light">← Review the lesson again</button><button id="avNextQuestion" class="av-primary">Next question →</button></div>'+
  '</section>';
 }
@@ -210,16 +240,20 @@ function show(){
  [["learn","1 · Understand"],["visual","2 · Visuals"],["work","3 · Baby steps"],["try","4 · Try it"]].map((x,i)=>'<button role="tab" aria-selected="'+(page===x[0]?"true":"false")+'" data-page="'+x[0]+'" class="'+(page===x[0]?"active":"")+'">'+x[1]+'</button>').join("")+'</div>'+
  (page==="learn"?lessonPage(q,t,f):page==="visual"?visualPage(q,t,f):page==="work"?solvePage(q,t,f):practicePage(q,t,f)):
  '<div class="av-no-result"><h3>No questions found</h3><p>Clear the search or select another question type.</p></div>')+
- '<details class="av-browse-questions"><summary>Browse all '+all.length+' questions in this topic</summary><div class="av-number-grid">'+
- all.map((p,i)=>'<button data-qindex="'+i+'" class="'+(currentIndex===i?"active ":"")+(state.ratings[p.id]==="know"?"done":state.ratings[p.id]==="again"?"retry":"")+'" aria-label="Question '+(i+1)+' '+esc(p.level)+'">'+(i+1)+'</button>').join("")+'</div>'+
- '<small>Blue: current · Green: mastered · Amber: review needed.</small></details>'+
+ '<details class="av-browse-questions" open><summary>Browse all '+allTopicQuestions().length+' actual questions in this topic — select one to open it</summary>'+
+ '<p class="av-browse-help">These are the real 30 questions, not generated placeholders. Click a question to load its own explanation, circuit, guided steps and answer checker above. The list stays complete when filters are active.</p>'+
+ '<div class="av-question-gallery" role="group" aria-label="All 30 practice question titles">'+
+ allTopicQuestions().map((p,i)=>'<button data-qid="'+esc(p.id)+'" class="av-browse-card '+(q&&q.id===p.id?"active ":"")+(state.ratings[p.id]==="know"?"done":state.ratings[p.id]==="again"?"retry":"")+'" aria-current="'+(q&&q.id===p.id?"true":"false")+'" aria-label="Open question '+(i+1)+': '+esc(p.question)+'">'+
+ '<span class="av-browse-meta"><b>Q'+(i+1)+'</b><em>'+esc(p.level)+'</em></span><span class="av-browse-title">'+esc(p.question)+'</span>'+
+ '<small>'+(state.ratings[p.id]==="know"?"✓ Mastered":state.ratings[p.id]==="again"?"↻ Review needed":state.assessments[p.id]?"◈ Checked":"○ Not answered")+'</small></button>').join("")+'</div>'+
+ '<small class="av-browse-legend">Blue: currently open · Green: mastered · Amber: review needed. Your selection opens at the top of the workbook.</small></details>'+
  '<p class="av-footnote">All examples are educational; use approved procedures and actual device specifications for real hardware. Textbook chapter topics inspired the curriculum, but problems and explanations are original.</p>'+
  '</div></div><dialog class="av-zoom-dialog" id="avVisualZoom" aria-label="Expanded circuit figure"><div class="av-zoom-top"><strong>Expanded engineering diagram</strong><button class="av-light" type="button" id="avZoomClose">Close ×</button></div><div id="avZoomBody"></div></dialog></div>';
  wire();
 }
 function switchPage(p){page=p;stepIndex=0;feedback="";expanded=false;show();find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});}
-function moveQuestion(n){currentIndex=Math.max(0,Math.min(qset().length-1,n));page="learn";stepIndex=0;expanded=false;feedback="";draftText="";currentAnswer="";state.lastTopic=topic;state.lastIndex=currentIndex;save();show();find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});}
-function rating(x){const q=selected();if(!q)return;state.ratings[q.id]=x;save();if(currentIndex<qset().length-1)moveQuestion(currentIndex+1);else show();}
+function moveQuestion(n){currentIndex=Math.max(0,Math.min(qset().length-1,n));page="learn";stepIndex=0;expanded=false;feedback="";const q=selected();draftText=q?(state.responses[q.id]||""):"";currentAnswer=draftText;answerDirty=false;state.lastTopic=topic;state.lastIndex=currentIndex;save();show();const heading=find(".av-workbook-heading h2",host);if(heading){heading.setAttribute("tabindex","-1");heading.focus({preventScroll:true});}find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});}
+function rating(x){const q=selected();if(!q)return;if(x==="know"&&(answerDirty||!state.assessments[q.id]||state.assessments[q.id].band!=="likely-correct"))return;state.ratings[q.id]=x;save();if(currentIndex<qset().length-1)moveQuestion(currentIndex+1);else show();}
 function wire(){
  const el=find("#avTopicList",host);
  if(el)el.onchange=e=>{topic=e.target.value;currentIndex=0;page="learn";stepIndex=0;filter="All";query="";state.lastTopic=topic;state.lastIndex=0;save();show()};
@@ -233,7 +267,7 @@ function wire(){
   const url=URL.createObjectURL(b),a=document.createElement("a");a.href=url;a.download="avionics-ee-progress.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
  };
  host.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
- host.querySelectorAll("[data-qindex]").forEach(b=>b.onclick=()=>moveQuestion(Number(b.dataset.qindex)));
+ host.querySelectorAll("[data-qid]").forEach(b=>b.onclick=()=>{const id=b.dataset.qid;filter="All";query="";const idx=allTopicQuestions().findIndex(x=>x.id===id);if(idx>=0)moveQuestion(idx);});
  const prev=find("#avQuestionPrevious",host),next=find("#avQuestionNext",host);
  if(prev)prev.onclick=()=>moveQuestion(currentIndex-1);
  if(next)next.onclick=()=>moveQuestion(currentIndex+1);
@@ -247,27 +281,37 @@ function wire(){
  const stepBack=find("#avStepBack",host);if(stepBack)stepBack.onclick=()=>{stepIndex=Math.max(0,stepIndex-1);show()};
  const stepNext=find("#avStepNext",host);if(stepNext)stepNext.onclick=()=>{stepIndex++;show()};
  const goTry=find("#avGoTry",host);if(goTry)goTry.onclick=()=>switchPage("try");
+ const stepVis=find("#avStepVisual",host);if(stepVis)stepVis.onclick=()=>switchPage("visual");
+ const numberInput=find("#avValue",host);if(numberInput)numberInput.oninput=e=>{currentAnswer=e.target.value;answerDirty=true;const btn=find("#avUnderstand",host);if(btn)btn.disabled=true;const fb=find("#avFeedback",host);if(fb)fb.innerHTML='<p class="av-message">Answer changed. Recheck the calculation to update your result.</p>';};
  const tryNumber=find("#avTryNumber",host);
  if(tryNumber)tryNumber.onsubmit=e=>{
-  e.preventDefault();const q=selected(),input=find("#avValue",host);
-  currentAnswer=input.value.trim();const val=Number(currentAnswer.replace(/,/g,""));
-  state.attempts[q.id]=(state.attempts[q.id]||0)+1;save();
-  if(!currentAnswer||!Number.isFinite(val))feedback='<div class="av-message">Enter a finite number; scientific notation like 2.5e-2 is accepted.</div>';
-  else{
-    const tolerance=Math.max(Math.abs(q.expected)*0.012,1e-10);
-    feedback=Math.abs(val-q.expected)<=tolerance?
-     '<div class="av-message correct">Correct. Now explain which equation and unit conversion gave you that number.</div>':
-     '<div class="av-message">Not yet. Read the given values and check the units. Return to page 2 for the equation and substitution.</div>';
-  }
-  show();
+   e.preventDefault();const q=selected(),input=find("#avValue",host);
+   currentAnswer=input.value.trim();state.responses[q.id]=currentAnswer;
+   state.attempts[q.id]=(state.attempts[q.id]||0)+1;
+   const result=ASSESS.gradeNumber(q,currentAnswer);
+   state.assessments[q.id]=result;
+   if(result.band!=="likely-correct"&&state.ratings[q.id]==="know")state.ratings[q.id]="again";
+   save();answerDirty=false;feedback=gradeView(result);show();
  };
  const explain=find("#avExplain",host);
- if(explain)explain.oninput=e=>{draftText=e.target.value};
+ if(explain)explain.oninput=e=>{draftText=e.target.value;answerDirty=true;const btn=find("#avUnderstand",host);if(btn)btn.disabled=true;const fb=find("#avFeedback",host);if(fb)fb.innerHTML='<p class="av-message">Answer changed. Check this revised answer to receive updated feedback.</p>';};
+ const checkText=find("#avCheckExplanation",host);
+ if(checkText)checkText.onclick=()=>{
+   const q=selected(),t=topicOf();
+   draftText=(find("#avExplain",host)?.value||"").trim();
+   state.responses[q.id]=draftText;
+   state.attempts[q.id]=(state.attempts[q.id]||0)+1;
+   const result=ASSESS.gradeText(q,t,draftText);
+   state.assessments[q.id]=result;
+   if(result.band!=="likely-correct"&&state.ratings[q.id]==="know")state.ratings[q.id]="again";
+   save();feedback=gradeView(result);show();
+ };
  const compare=find("#avCompare",host);
  if(compare)compare.onclick=()=>{
-  expanded=true;
-  const ref=find("#avReference",host);if(ref)ref.open=true;
-  const feedback=find("#avFeedback",host);if(feedback)feedback.innerHTML='<div class="av-message">Compare your explanation with the example below. Check whether you defined the concept and gave one real measurement or example. This is self-assessment, not automatic grading.</div>';
+   draftText=find("#avExplain",host)?.value||draftText;expanded=true;
+   const ref=find("#avReference",host);if(ref)ref.open=true;
+   const f=find("#avFeedback",host);
+   if(f&&!state.assessments[selected().id])f.innerHTML='<div class="av-message">The reference is for comparison. Use Check my written answer to see your rubric feedback and missing ideas.</div>';
  };
  const under=find("#avUnderstand",host);if(under)under.onclick=()=>rating("know");
  const retry=find("#avNeedReview",host);if(retry)retry.onclick=()=>rating("again");
@@ -275,8 +319,8 @@ function wire(){
  const nxt=find("#avNextQuestion",host);if(nxt)nxt.onclick=()=>moveQuestion(currentIndex+1);
 }
 window.mountAvionicsPractice=function(el){
- if(!el||TOPICS.length!==23||QUESTIONS.length!==690){if(el)el.textContent="The Avionics question bank did not load correctly.";return}
- host=el;el.dataset.avMounted="yes";show();
+ if(!el||!ASSESS||TOPICS.length!==23||QUESTIONS.length!==690){if(el)el.textContent="The Avionics question bank did not load correctly.";return}
+ host=el;el.dataset.avMounted="yes";const q=selected();if(q){draftText=state.responses[q.id]||"";currentAnswer=draftText;}show();
 };
 window.avionicsWorkbookV2={getQuestionCount:()=>QUESTIONS.length,getTopics:()=>TOPICS.length,stepsForQuestion:id=>{
  const q=QUESTIONS.find(x=>x.id===id);if(!q)return null;

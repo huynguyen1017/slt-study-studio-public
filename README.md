@@ -2,6 +2,14 @@
 
 ## Avionics EE Practice Academy (23 topics × 30 original questions)
 
+### Updated question browser and answer feedback (v4)
+
+- **Browse all 30 questions** presents actual question titles, their learning levels and progress states. Selecting a card opens that exact question at the top of the workbook and resets filters if necessary.
+- **Try It** now has an offline formative checker: numeric questions validate values and compatible units (plus likely 1000× conversion errors); written answers receive a transparent concept rubric with **likely correct / partially correct / needs correction**, recognized and missing ideas, and targeted suggestions. Written grading uses keyword/rule heuristics and is **not a reliable judge of all valid paraphrases**; it does not call a hosted AI grader. Full mastery requires a successful check.
+- **Baby Steps** includes the question's circuit schematic on each step, and conditionally opens a waveform/response graph or wiring/test-setup illustration when relevant.
+- Existing browser-local completion records remain under \`slt-avionics-ee-practice-v1\`; new feedback and responses are stored separately within that same local record. No learner answers are uploaded.
+- New regression \`tests/avionics-assessor.test.cjs\` checks all 690 question rubrics, textbook-important SI base-vs-derived distinctions, numerical unit conversions, partial answers and misconceptions. The workbook browser test now checks selecting question 13 of 30, circuit visuals in baby steps, and answer feedback.
+
 ### Per-question original SVG visual explorer (v3)
 
 Every existing Avionics EE Practice question now has a **four-page** guided workbook: Understand → Visuals → Baby Steps → Try It. The Visuals page contains three independently zoomable, accessible SVG figures:

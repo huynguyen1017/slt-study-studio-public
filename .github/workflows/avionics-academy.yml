@@ -5,6 +5,7 @@ on:
       - feature/avionics-ee-practice-academy
       - feature/avionics-baby-steps-workbook-v2
       - feature/avionics-question-specific-visuals-v3
+      - fix/avionics-browser-feedback-guided-circuits-v4
   pull_request:
     paths:
       - 'index.html'
@@ -12,6 +13,7 @@ on:
       - 'avionics_*.js'
       - 'avionics_*.css'
       - 'tests/avionics-academy.test.cjs'
+      - 'tests/avionics-assessor.test.cjs'
 permissions:
   contents: read
 jobs:
@@ -32,7 +34,9 @@ jobs:
           node --check avionics_beginner_lessons.js
           node --check avionics_tutor.js
           node --check avionics_visuals.js
+          node --check avionics_assessor.js
           node tests/avionics-academy.test.cjs
+          node tests/avionics-assessor.test.cjs
       - name: Install headless browser for desktop and mobile smoke tests
         run: |
           npm install --no-save playwright@1.56.1

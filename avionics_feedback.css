@@ -1,0 +1,40 @@
+/* Avionics v4: always-visible question titles, graded feedback, circuits at each baby step */
+#avionicsView .av-question-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:10px 13px 15px;max-height:640px;overflow-y:auto;overscroll-behavior:contain}
+#avionicsView .av-browse-questions{scroll-margin-top:12px}
+#avionicsView .av-browse-questions>summary{font-size:15px;background:#edf7fb;color:#145677;padding:16px 18px}
+#avionicsView .av-browse-help{padding:2px 16px;margin:9px 0 0;font-size:13px;line-height:1.6}
+#avionicsView .av-browse-card{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:7px;background:white;color:#203d52;border:1px solid #cbdde8;border-radius:12px;min-height:106px;padding:13px;cursor:pointer;transition:box-shadow .15s,background .15s,border .15s}
+#avionicsView .av-browse-card:hover{background:#f3faff;box-shadow:0 4px 13px #24567318}
+#avionicsView .av-browse-card:focus-visible{outline:3px solid #d4a52b;outline-offset:3px}
+#avionicsView .av-browse-card.active{background:#e6f3fa;border:2px solid #1d6b90;padding:12px}
+#avionicsView .av-browse-card.done:not(.active){border-left:5px solid #2d9474}
+#avionicsView .av-browse-card.retry:not(.active){border-left:5px solid #c78e2e}
+#avionicsView .av-browse-meta{display:flex;justify-content:space-between;gap:12px;width:100%;align-items:center}
+#avionicsView .av-browse-meta b{display:inline-block;min-width:40px;color:#0f5e86;font-size:13px;font-weight:800}
+#avionicsView .av-browse-meta em{font-size:11px;color:#687e8e;font-style:normal}
+#avionicsView .av-browse-title{line-height:1.45;font-size:13px;font-weight:650;color:#243f54;overflow-wrap:anywhere}
+#avionicsView .av-browse-card small{color:#627f90;font-size:11px;letter-spacing:0;margin-top:auto}
+#avionicsView .av-browse-legend{display:block;padding:0 16px 14px;color:#637b89;font-size:12px;letter-spacing:0}
+#avionicsView .av-assessment{border-radius:12px;padding:17px 18px;margin:14px 0;border:1px solid #e1cda2;background:#fffbf2;color:#4a4e4b}
+#avionicsView .av-assessment-good{border-color:#a0ceb8;background:#ecf9f2}
+#avionicsView .av-assessment-partial{border-color:#e6c882;background:#fff8e9}
+#avionicsView .av-assessment-review{border-color:#e0b3af;background:#fef4f2}
+#avionicsView .av-assessment-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:18px;color:#215d72}
+#avionicsView .av-assessment-good .av-assessment-heading{color:#0c7358}
+#avionicsView .av-assessment-review .av-assessment-heading{color:#92503d}
+#avionicsView .av-score{font-size:13px;font-weight:750;color:#4d6170}
+#avionicsView .av-assessment p{font-size:13px;margin:10px 0;color:inherit}
+#avionicsView .av-assess-list{background:#ffffffaa;padding:11px 14px;border-radius:9px;margin:9px 0}
+#avionicsView .av-assess-list strong{font-size:13px;color:#234f64}
+#avionicsView .av-assess-list ul{margin:8px 0 0;padding-left:20px}
+#avionicsView .av-assess-list li{font-size:13px;line-height:1.7;padding:4px 0}
+#avionicsView .av-assess-warning{font-size:11px!important;color:#677782!important;border-top:1px solid #d8e1e5;padding-top:9px}
+#avionicsView .av-solution-circuit{padding:15px;border:1px solid #b9d6e5;background:#f7fbfe;border-radius:13px;margin:15px 0}
+#avionicsView .av-solution-circuit h4{margin:0 0 10px}
+#avionicsView .av-solution-circuit .av-visual-figure{margin:9px 0}
+#avionicsView .av-solution-circuit>.av-light{margin:7px 0}
+#avionicsView .av-step-extra{border:1px solid #cbdde8;border-radius:9px;margin:12px 0;background:#fff;padding:7px}
+#avionicsView .av-step-extra summary{font-weight:750;color:#205d7b;cursor:pointer;padding:9px}
+#avionicsView .av-try-form .av-primary{min-width:120px}
+#avionicsView .av-good:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:740px){#avionicsView .av-question-gallery{grid-template-columns:1fr;max-height:550px}#avionicsView .av-browse-card{min-height:88px}#avionicsView .av-solution-circuit{padding:9px}}
