@@ -64,19 +64,9 @@ function svgDiagram(q){
    return '<svg class="nvs-flow nvs-exact-circuit" viewBox="0 0 900 270" role="img" aria-label="Connected source, series resistor and two parallel resistor branches with values from the selected question" xmlns="http://www.w3.org/2000/svg">'+fig+'</svg>';
   }
  }
- const t=track(),color=["#2d528c","#8c56a6","#0c7d79"],safe=esc;
- return '<svg class="nvs-flow" viewBox="0 0 900 270" role="img" aria-label="Conceptual fault isolation flow: host, test interface, DUT, physical evidence and independent disposition" xmlns="http://www.w3.org/2000/svg">'+
- '<rect x="2" y="2" width="896" height="266" rx="15" fill="#f9fbff" stroke="#d6e2f5"/>'+
- '<text x="22" y="30" font-size="15" fill="#284362" font-weight="700">EXPLANATORY FLOW — NOT A VERIFIED BOARD SCHEMATIC OR A REAL NVIDIA TEST CAPTURE</text>'+
- [['Linux test host',25],['Fixture / software',250],['SoC / memory / GPU',475],['Raw evidence',700]].map((x,i)=>
- '<rect x="'+x[1]+'" y="63" width="176" height="94" rx="12" fill="'+["#e4eeff","#efeafd","#e4f5f3","#fff0d8"][i]+'" stroke="'+color[i%3]+'"/>'+
- '<text x="'+(x[1]+88)+'" y="95" font-size="16" font-weight="700" fill="#273e5b" text-anchor="middle">'+safe(x[0])+'</text>'+
- '<text x="'+(x[1]+88)+'" y="124" font-size="12" fill="#425675" text-anchor="middle">'+safe(["Run + manifest","Cable / station","Unit under test","Counters / scope / logs"][i])+'</text>').join("")+
- [208,433,658].map(x=>'<path d="M'+x+' 110 h31" stroke="#567aa8" stroke-width="3"/><path d="M'+(x+29)+' 105 l7 5 -7 5" fill="none" stroke="#567aa8" stroke-width="3"/>').join("")+
- '<text x="24" y="188" font-size="14" fill="#27425d">What we are investigating: '+safe(t.title.slice(0,84))+'</text>'+
- '<rect x="20" y="204" width="858" height="44" rx="10" fill="#e5f4ed"/>'+
- '<text x="34" y="223" font-size="13" fill="#165640" font-weight="700">Evidence first → one controlled variable → independent comparison → PASS / FAIL / INVALID / BLOCKED</text>'+
- '<text x="34" y="240" font-size="11" fill="#48715c">Do not claim physical connections, instrument settings or flight hardware approval from this illustrative diagram.</text></svg>';
+ // Preserve the exact connected teaching circuit only; do not show the old generic diagram.
+ return "";
+
 }
 function sources(){
  return '<details class="nvs-references"><summary>Learning sources, scope &amp; professional boundaries</summary><p><strong>Primary source:</strong> uploaded LTTS NVIDIA System Level Test Engineer job description (SoC diag, ATE/DFT, verification, yield, Python/Shell, PCIe/DDR). The uploaded NVIDIA interview study guide and Muon interview guide inform topics, but no private employer logs, interview answers or original document text were published.</p>'+
@@ -89,7 +79,7 @@ function intro(q){
  (q.variant?'<p class="nvs-hint">Practice New Numbers uses a separate answer and score; Restore Canonical Question returns to your original example.</p>':"")+
  '<div class="nvs-two"><section><h4>What this means, in simple language</h4><p>'+esc(q.lesson.summary)+'</p><p>'+esc(q.lesson.analogy)+'</p><h4>Key vocabulary</h4><dl>'+q.lesson.vocabulary.map(x=>'<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>').join("")+'</dl></section>'+
  '<section><h4>Why this matters to SLT</h4><p>'+esc(q.lesson.why)+'</p><h4>Starter hint</h4><p>'+esc(q.hints[0])+'</p><h4>Common mistake</h4><p>'+esc(q.hints[2])+'</p></section></div>'+
- svgDiagram(q)+
+ '<div class="nvs-visual-host">'+(window.NVIDIA_SLT_VISUAL_LAB?window.NVIDIA_SLT_VISUAL_LAB.render(q,track(),svgDiagram(q)):"")+'</div>'+
  (q.formula?'<div class="nvs-math"><strong>Equation</strong><code>'+esc(q.formula)+'</code><strong>Worked substitution</strong><code>'+esc(q.sub)+'</code></div>':"")+
  '<div class="nvs-inline-actions"><button type="button" data-screen="steps" class="nvs-primary">Start guided solution →</button><button type="button" data-screen="practice">Try without peeking</button></div></div>';
 }
@@ -121,11 +111,11 @@ function practice(q){
  '<button type="button" id="nvsReview">↻ Review again</button><button type="button" id="nvsMaster" '+(!checked?'disabled':'')+' class="nvs-primary">✓ I can explain it</button></div></div>';
 }
 function evidence(q){
- return '<div class="nvs-lesson"><div class="nvs-kicker">4 · BENCH &amp; EVIDENCE · EXPLAIN THE PHYSICAL CHECK</div><h3>What would I actually capture?</h3>'+
- svgDiagram(q)+
- '<p>For this question, a relevant independent observation is: <strong>'+esc(track().skills[(q.difficulty-1)%10].observe)+'</strong>.</p>'+
- '<h4>Evidence packet to practice describing</h4><ol><li>DUT board serial, silicon stepping and exact firmware hash.</li><li>Station, fixture and approved test procedure revision.</li><li>Instrument/probe setup and calibration status, plus valid limit.</li><li>Raw first-failure timestamped logs and any relevant scope or DAQ data.</li><li>One controlled A/B/A experiment, comparison to known-good unit and proposed owner.</li><li>PASS / FAIL / INVALID / BLOCKED with a reason and next confirming action.</li></ol>'+
- '<div class="nvs-hint"><strong>Professional accuracy:</strong> The uploaded study materials include documented CPU power/clock measurements, DRAM testing, socket/ATE work and firmware bring-up. A hypothetical GPU/DCGM, RF or formal PCIe compliance task should be discussed as a learning plan—not claimed as completed personal experience.</div></div>';
+ return '<div class="nvs-lesson"><div class="nvs-kicker">4 · QUESTION-SPECIFIC BENCH INVESTIGATION</div>'+
+ '<h3>Pick a signal, challenge a root cause, and build a falsifiable test plan</h3>'+
+ '<div class="nvs-question">'+esc(q.question)+'</div>'+
+ '<div class="nvs-visual-host">'+(window.NVIDIA_SLT_VISUAL_LAB?window.NVIDIA_SLT_VISUAL_LAB.render(q,track(),svgDiagram(q)):"")+'</div>'+
+ '<p class="nvs-hint"><strong>How to use:</strong> inspect this question\'s circuit or topic-specific visual; select a competing fault hypothesis; design a controlled A/B/A verification; and complete the copyable evidence checklist. Every proposed measurement is educational until verified with actual equipment.</p></div>';
 }
 function render(){
  if(!root)return;
@@ -147,6 +137,8 @@ function render(){
  wire();
 }
 function wire(){
+ const visual=window.NVIDIA_SLT_VISUAL_LAB;
+ if(visual)root.querySelectorAll(".nvs-visual-host").forEach(el=>visual.mount(el,getQ(),track(),svgDiagram(getQ())));
  root.querySelector("#nvsTopics").onchange=e=>{state.topic=e.target.value;state.index=0;step=0;screen="concept";feedback="";save();render();};
  root.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>goto(Number(b.dataset.goto)));
  root.querySelectorAll("[data-screen]").forEach(b=>b.onclick=()=>{screen=b.dataset.screen;step=0;feedback="";render()});
