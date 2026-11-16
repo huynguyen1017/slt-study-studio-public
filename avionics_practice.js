@@ -116,7 +116,7 @@ function resetQuestion(){revealed=false;hints=0;notice=null}
 function goto(i){index=i;resetQuestion();render();$('#avPlayer',root)?.scrollIntoView({block:"start",behavior:"smooth"})}
 function rate(which){const q=qs()[index];if(!q)return;state.ratings[q.id]=which;persist();if(index<qs().length-1)goto(index+1);else render()}
 window.mountAvionicsPractice=function(el){
- if(!el||!TOPICS.length||ITEMS.length!==TOPICS.length*30){if(el)el.textContent="Avionics question bank did not load. Check the JavaScript asset versions.";return}
+ if(!el||!TOPICS.length||ITEMS.length!==TOPICS.length*(window.AVIONICS_EXPECTED_PER_TOPIC||30)){if(el)el.textContent="Avionics question bank did not load. Check the JavaScript asset versions.";return}
  if(root===el&&el.dataset.avMounted==="yes")return;
  root=el;el.dataset.avMounted="yes";render();
 };
