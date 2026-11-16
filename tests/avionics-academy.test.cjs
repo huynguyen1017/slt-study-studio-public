@@ -55,7 +55,8 @@ for(const s of ["avionics_beginner_lessons.js","avionics_tutor.js","avionics_tut
  assert(html.includes(s),s);
  assert(service.includes(s),"offline cache missing "+s);
 }
-assert(service.includes("v20-feedback-recheck"));
+assert(service.includes("v21-si-curriculum-audit"));
+assert(service.includes("avionics_si_lesson.js")&&service.includes("avionics_si.css"));
 const ohm=topics.find(t=>t.id==="ohm"),ohmCalc=questions.find(q=>q.id==="ohm-C1");
 const ohmDrawing=VIS.render(ohmCalc,ohm,"schematic");
 assert(ohmDrawing.includes("330 Ω")&&ohmDrawing.includes("3.3 V"),"Use real given values on schematic");
