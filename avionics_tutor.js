@@ -1,5 +1,5 @@
 "use strict";
-/* Beginner-first 4-page visual workbook UI for the 690-question avionics curriculum.
+/* Beginner-first 4-page visual workbook UI for the 1,150-question avionics curriculum.
    Features 1-30 quick-jump + 30-card gallery, native MathML engineering notation,
    6-step beginner guides, 3-panel board/breadboard visuals, and rubric/numeric grading. */
 (function(){
