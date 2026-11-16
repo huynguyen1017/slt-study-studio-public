@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v19-feedback-and-circuit-steps';
+const CACHE = 'slt-study-studio-v20-feedback-recheck';
 const CORE = [
   "./",
   "./index.html",
