@@ -55,7 +55,7 @@ for(const s of ["avionics_beginner_lessons.js","avionics_tutor.js","avionics_tut
  assert(html.includes(s),s);
  assert(service.includes(s),"offline cache missing "+s);
 }
-assert(service.includes("v31-integrated-mixed-networks"));
+assert(service.includes("v32-method-safe-dice"));
 assert(service.includes("avionics_si_lesson.js")&&service.includes("avionics_si.css"));
 assert(service.includes("avionics_simulator.js")&&service.includes("avionics_simulator.css"));
 const ohm=topics.find(t=>t.id==="ohm"),ohmCalc=questions.find(q=>q.id==="ohm-C1");
