@@ -41,6 +41,8 @@ const CORE = [
   "./avionics_tutor.js",
   "./avionics_hw_debug_interview.js",
   "./avionics_hw_debug_interview.css",
+  "./professor_mastery_engine.js",
+  "./professor_mastery_engine.css",
   "./avionics_assessor.js",
   "./avionics_feedback.css",
   "./avionics_tutor.css",

@@ -17,6 +17,7 @@ const VIDEO=window.avionicsVideoLessons||null;
 const NUCLEO=window.avionicsNucleoWorkbench||null;
 const MIXED=window.avionicsMixedCircuitCurriculum||null;
 const HWD=window.avionicsHardwareDebugLab||null;
+const PME=window.PROFESSOR_MASTERY_ENGINE||null;
 const ASSESS=window.avionicsAnswerCheck;
 const STORE="slt-avionics-ee-practice-v1";
 const TOPIC_TOTAL=window.AVIONICS_EXPECTED_PER_TOPIC||30;
@@ -147,6 +148,10 @@ function makeRandomVariant(q){
 }
 
 function stepsFor(q,t,f){
+ const pme=PME||window.PROFESSOR_MASTERY_ENGINE||null;
+ if(pme&&pme.avionics&&typeof pme.avionics.buildProfessorSteps==="function"){
+  return pme.avionics.buildProfessorSteps(q,t,f,{fmt,engVal});
+ }
  const st=q.steps||[];
  const beginner=f.deep;
  const guided=q.lesson||null;
@@ -402,7 +407,8 @@ function lessonPage(q,t,f){
  '<div class="av-lede"><strong>In very simple words (Zero prior EE assumed)</strong><p>'+rich(summary)+'</p></div>'+
  '<div class="av-two-up"><section><h4>Words you need first</h4><table class="av-vocab"><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody>'+
  glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+rich(p[1])+'</td></tr>').join("")+
- '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(lesson?(guide.analogy||lesson.why):item?item.analogy:guide.analogy)+'</p><h4>Why Muon Space engineers care</h4><p>'+rich(lesson?lesson.why:item?item.why:f.why)+'</p></section></div>'+
+ '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(lesson?(guide.analogy||(PME?.TOPIC_PROFESSOR_NOTES?.[t.id]?.intuition)||lesson.why):item?item.analogy:guide.analogy)+'</p><h4>Why Muon Space engineers care</h4><p>'+rich(lesson?lesson.why:item?item.why:f.why)+'</p></section></div>'+
+ ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderUnderstandLecture(q,t,f)||"")+
  (f.label==="SI base unit"?siChapterPanel():"")+
  textbookPanel(t)+
  courseworkBridge(t)+
@@ -435,6 +441,7 @@ function visualPage(q,t,f){
  '<div class="av-eyebrow">PAGE 2 / 4 · SEE THE FULL CIRCUIT, GRAPH &amp; BOARD WIRING</div>'+
  '<h3>Draw it first. Then connect it safely.</h3>'+
  activeBanner(q,t)+
+ ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderVisualGuide(q,t)||"")+
  '<p class="av-explain">Every diagram below is tailored specifically to <strong>'+esc(q.id.toUpperCase())+'</strong>. The selected board pins, component mix, breadboard holes, and schematic topology follow this question’s circuit setup.</p>'+
  '<div class="av-visual-nav">'+pics.map(x=>'<a href="#avVisual-'+x[0]+'">'+esc(x[1])+'</a>').join("")+'</div>'+
  pics.map(x=>'<section class="av-visual-panel" id="avVisual-'+x[0]+'"><div class="av-visual-panel-head"><div><h4>'+esc(x[1])+'</h4><p>'+esc(x[2])+'</p></div><button class="av-light" data-zoom="'+x[0]+'" aria-label="Enlarge '+esc(x[1])+'">↗ Enlarge</button></div>'+
@@ -483,6 +490,7 @@ function solvePage(q,t,f){
  '<details class="av-all-steps" open><summary>Complete '+steps.length+'-Step Guided Walkthrough (All steps &amp; MathML equations)</summary><div class="av-all-list">'+
  steps.map((s,i)=>'<div class="'+(i===stepIndex?"av-step-highlight":"")+'"><b>Step '+(i+1)+': '+esc(s.title)+'</b><p>'+rich(s.body)+'</p>'+(s.formula?equation(s.formula,"EQUATION (MATHML)"):"")+(s.answer?'<div class="av-final-value">Final Answer: '+esc(s.answer)+(s.engHtml?' · Engineering Notation: '+s.engHtml:"")+'</div>':"")+'</div>').join("")+
  '</div></details>'+
+ ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderChalkboard(q,t)||"")+
  (HWD?HWD.render(t,q):"")+
  '<div class="av-takeaway"><strong>How to say this in your Muon Space interview:</strong> First state the physical law, describe how you set up the DMM/scope/breadboard, then explain the safety check and Go/No-Go limit.</div>'+
  '</section>';
@@ -508,6 +516,7 @@ function practicePage(q,t,f){
  '<h3>Your turn — test yourself without peeking</h3>'+
  '<p class="av-explain">Type a calculated number (scientific notation like 2.5e-3 or unit conversion like 0.01 A is accepted!) or explain the concept in your own words.</p>'+
  activeBanner(q,t)+
+ ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderTryCoach(q,t)||"")+
  (q.expected!==undefined?'<form id="avTryNumber" class="av-try-form"><label for="avValue">Enter your calculated answer</label><div class="av-input-row"><input id="avValue" type="text" inputmode="decimal" autocomplete="off" placeholder="Example: 10 or 0.01 A or 2.5e-3" value="'+esc(currentAnswer)+'" aria-describedby="avRequestedUnit"><span id="avRequestedUnit">'+esc(q.unit)+'</span><button class="av-primary" type="submit">Check answer</button></div></form>':
  '<label class="av-try-label" for="avExplain">Write your explanation in your own words</label><textarea id="avExplain" rows="4" placeholder="I think this means... because... On a Muon Space test bench I would verify it by...">'+esc(draftText)+'</textarea>'+
  '<div class="av-actions-bottom"><button id="avCheckExplanation" class="av-primary" type="button">Check my written answer</button><button id="avCompare" class="av-light">Show reference example</button></div>')+
@@ -588,6 +597,7 @@ function wire(){
  if(NUCLEO)NUCLEO.bind(host,()=>activeQuestion());
  if(NOTEBOOK)NOTEBOOK.bind(host);
  if(HWD)HWD.bind(host,topicOf(),activeQuestion());
+ if((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics) (PME||window.PROFESSOR_MASTERY_ENGINE).avionics.bind(host,show);
  const openHwd=find("#avOpenHwdInterview",host);
  if(openHwd)openHwd.onclick=()=>{
   topic="parallel";filter="All";query="";page="learn";stepIndex=0;

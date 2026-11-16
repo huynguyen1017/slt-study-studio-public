@@ -3,6 +3,7 @@
    or its local progress. Does not send responses to any server. */
 (function(){
 const T=window.NVIDIA_SLT_TRACKS||[],Q=window.NVIDIA_SLT_QUESTIONS||[],M=window.NVIDIA_SLT_CALCS;
+const PME=window.PROFESSOR_MASTERY_ENGINE||null;
 const KEY="slt-nvidia-soc-academy-v1";
 const esc=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const fmt=n=>Number(Number(n).toPrecision(7)).toString();
@@ -74,31 +75,39 @@ function sources(){
  '<p>Illustrative practice is not official NVIDIA training, not an active NVIDIA product specification and not proof of professional experience with an instrument.</p></details>';
 }
 function intro(q){
+ const pme=PME||window.PROFESSOR_MASTERY_ENGINE||null;
+ const t=track(),lec=pme?.NVIDIA_TRACK_LECTURES?.[t.id]||null;
  return '<div class="nvs-lesson"><div class="nvs-kicker">1 · UNDERSTAND · NO BACKGROUND REQUIRED</div>'+
  '<h3>'+esc(q.objective)+'</h3><div class="nvs-question">'+esc(q.question)+'</div>'+
  (q.variant?'<p class="nvs-hint">Practice New Numbers uses a separate answer and score; Restore Canonical Question returns to your original example.</p>':"")+
- '<div class="nvs-two"><section><h4>What this means, in simple language</h4><p>'+esc(q.lesson.summary)+'</p><p>'+esc(q.lesson.analogy)+'</p><h4>Key vocabulary</h4><dl>'+q.lesson.vocabulary.map(x=>'<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>').join("")+'</dl></section>'+
- '<section><h4>Why this matters to SLT</h4><p>'+esc(q.lesson.why)+'</p><h4>Starter hint</h4><p>'+esc(q.hints[0])+'</p><h4>Common mistake</h4><p>'+esc(q.hints[2])+'</p></section></div>'+
- '<div class="nvs-visual-host">'+(window.NVIDIA_SLT_VISUAL_LAB?window.NVIDIA_SLT_VISUAL_LAB.render(q,track(),svgDiagram(q)):"")+'</div>'+
+ '<div class="nvs-two"><section><h4>What this means, in simple language</h4><p>'+esc(q.lesson.summary)+'</p><p>'+esc(lec?lec.physics:q.lesson.analogy)+'</p><h4>Key vocabulary</h4><dl>'+q.lesson.vocabulary.map(x=>'<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>').join("")+'</dl></section>'+
+ '<section><h4>Why this matters to SLT</h4><p>'+esc(lec?lec.instrument:q.lesson.why)+'</p><h4>Starter hint</h4><p>'+esc(q.hints[0])+'</p><h4>Common mistake</h4><p>'+esc(q.hints[2])+'</p></section></div>'+
+ (pme?.nvidia?pme.nvidia.renderUnderstand(q,t):"")+
+ '<div class="nvs-visual-host">'+(window.NVIDIA_SLT_VISUAL_LAB?window.NVIDIA_SLT_VISUAL_LAB.render(q,t,svgDiagram(q)):"")+'</div>'+
  (q.formula?'<div class="nvs-math"><strong>Equation</strong><code>'+esc(q.formula)+'</code><strong>Worked substitution</strong><code>'+esc(q.sub)+'</code></div>':"")+
+ (pme?.nvidia?pme.nvidia.renderMasterStudyBank():"")+
  '<div class="nvs-inline-actions"><button type="button" data-screen="steps" class="nvs-primary">Start guided solution →</button><button type="button" data-screen="practice">Try without peeking</button></div></div>';
 }
 function guided(q){
+ const pme=PME||window.PROFESSOR_MASTERY_ENGINE||null;
  const total=q.steps.length;step=Math.min(step,total-1);
  return '<div class="nvs-lesson"><div class="nvs-kicker">2 · BABY STEPS · '+total+' DISTINCT CHECKS</div><h3>Explain the method, not just the answer</h3><div class="nvs-question">'+esc(q.question)+'</div>'+
  '<div class="nvs-stepbar" role="progressbar" aria-valuenow="'+(step+1)+'" aria-valuemin="1" aria-valuemax="'+total+'"><span style="width:'+Math.round((step+1)*100/total)+'%"></span></div>'+
  '<article class="nvs-step"><strong>STEP '+(step+1)+' / '+total+'</strong><p>'+esc(q.steps[step])+'</p></article>'+
  '<div class="nvs-inline-actions"><button type="button" id="nvsPrevStep" '+(!step?'disabled':'')+'>← Prior step</button><button type="button" id="nvsNextStep" '+(step>=total-1?'disabled':'')+'>Next step →</button><button type="button" id="nvsAllSteps">'+(showAll?'Hide':'Show')+' all steps</button></div>'+
  (showAll?'<ol class="nvs-steps-all">'+q.steps.map(s=>'<li>'+esc(s)+'</li>').join("")+'</ol>':"")+
+ (pme?.nvidia?pme.nvidia.renderWorkedDerivation(q,track()):"")+
  (q.code?'<section class="nvs-code"><h4>Runnable teaching example (code is not executed on your device)</h4><pre><code>'+esc(q.code)+'</code></pre><p>Trace each line against the expected result and test negative cases before copying into a real lab system.</p></section>':"")+
  '<div class="nvs-math"><strong>Interview-style proposed explanation</strong><p>'+esc(q.interviewAnswer)+'</p>'+
  (q.expected!==undefined?'<strong>Answer</strong><code>'+esc(fmt(q.expected)+" "+q.unit)+'</code><strong>New substitution</strong><code>'+esc(q.sub)+'</code>':"")+'</div>'+
  '<div class="nvs-inline-actions"><button type="button" data-screen="practice" class="nvs-primary">Now check my understanding →</button></div></div>';
 }
 function practice(q){
+ const pme=PME||window.PROFESSOR_MASTERY_ENGINE||null;
  const key=q.variant?q.id+"::dice":q.id,raw=state.responses[key]||"",isMath=q.questionType==="number",checked=state.checked[key];
  return '<div class="nvs-lesson"><div class="nvs-kicker">3 · PRACTICE &amp; REFLECT · LOCAL ONLY</div><h3>Explain your reasoning before revealing the solution</h3>'+
  '<div class="nvs-question">'+esc(q.question)+'</div>'+
+ (pme?.nvidia?pme.nvidia.renderPracticeCoach(q,track()):"")+
  (isMath?'<label for="nvsValue">Your numeric result ('+esc(q.unit)+')</label><input type="text" id="nvsValue" inputmode="decimal" placeholder="Number, e.g. 2.5e-3" value="'+esc(raw)+'">':
  '<label for="nvsText">Your explanation, evidence and first test</label><textarea rows="6" id="nvsText" placeholder="The concept means... I would compare... A false conclusion would be...">'+esc(raw)+'</textarea>')+
  '<div class="nvs-inline-actions"><button type="button" id="nvsCheck" class="nvs-primary">Check answer</button><button type="button" id="nvsReveal">Show reference answer</button></div>'+
@@ -111,10 +120,12 @@ function practice(q){
  '<button type="button" id="nvsReview">↻ Review again</button><button type="button" id="nvsMaster" '+(!checked?'disabled':'')+' class="nvs-primary">✓ I can explain it</button></div></div>';
 }
 function evidence(q){
+ const pme=PME||window.PROFESSOR_MASTERY_ENGINE||null;
  return '<div class="nvs-lesson"><div class="nvs-kicker">4 · QUESTION-SPECIFIC BENCH INVESTIGATION</div>'+
  '<h3>Pick a signal, challenge a root cause, and build a falsifiable test plan</h3>'+
  '<div class="nvs-question">'+esc(q.question)+'</div>'+
  '<div class="nvs-visual-host">'+(window.NVIDIA_SLT_VISUAL_LAB?window.NVIDIA_SLT_VISUAL_LAB.render(q,track(),svgDiagram(q)):"")+'</div>'+
+ (pme?.nvidia?pme.nvidia.renderMasterStudyBank():"")+
  '<p class="nvs-hint"><strong>How to use:</strong> inspect this question\'s circuit or topic-specific visual; select a competing fault hypothesis; design a controlled A/B/A verification; and complete the copyable evidence checklist. Every proposed measurement is educational until verified with actual equipment.</p></div>';
 }
 function render(){
@@ -139,6 +150,7 @@ function render(){
 function wire(){
  const visual=window.NVIDIA_SLT_VISUAL_LAB;
  if(visual)root.querySelectorAll(".nvs-visual-host").forEach(el=>visual.mount(el,getQ(),track(),svgDiagram(getQ())));
+ if((PME||window.PROFESSOR_MASTERY_ENGINE)?.nvidia) (PME||window.PROFESSOR_MASTERY_ENGINE).nvidia.bind(root,render);
  root.querySelector("#nvsTopics").onchange=e=>{state.topic=e.target.value;state.index=0;step=0;screen="concept";feedback="";save();render();};
  root.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>goto(Number(b.dataset.goto)));
  root.querySelectorAll("[data-screen]").forEach(b=>b.onclick=()=>{screen=b.dataset.screen;step=0;feedback="";render()});

@@ -1,0 +1,412 @@
+/* Professor Mastery Engine styles — scoped strictly to #avionicsView (.av-prof-*) and #nvidiaView (.nvs-prof-*) */
+
+.av-prof-box,
+.nvs-prof-box {
+ margin: 16px 0;
+ padding: 16px 18px;
+ border-radius: 14px;
+ border: 1px solid #cddaf0;
+ background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+ box-shadow: 0 2px 10px rgba(24, 49, 83, 0.05);
+}
+
+.av-prof-box h4,
+.nvs-prof-box h4 {
+ margin: 0 0 8px 0;
+ font-size: 1rem;
+ color: #15345c;
+ display: flex;
+ flex-wrap: wrap;
+ align-items: center;
+ gap: 8px;
+}
+
+.av-prof-badge,
+.nvs-prof-badge {
+ display: inline-block;
+ font-size: 0.72rem;
+ font-weight: 700;
+ letter-spacing: 0.04em;
+ text-transform: uppercase;
+ padding: 3px 9px;
+ border-radius: 999px;
+ background: #e3edff;
+ color: #174180;
+ border: 1px solid #c2d6ff;
+}
+
+.nvs-prof-badge {
+ background: #e3f5ec;
+ color: #0e5a36;
+ border-color: #b7e4cc;
+}
+
+.av-prof-grid,
+.nvs-prof-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+ gap: 12px;
+ margin-top: 10px;
+}
+
+.av-prof-card,
+.nvs-prof-card {
+ background: #ffffff;
+ border: 1px solid #dbe4f2;
+ border-radius: 10px;
+ padding: 12px 14px;
+}
+
+.av-prof-card h5,
+.nvs-prof-card h5 {
+ margin: 0 0 6px 0;
+ font-size: 0.88rem;
+ color: #1d4ed8;
+}
+
+.nvs-prof-card h5 {
+ color: #0f766e;
+}
+
+.av-prof-card p,
+.nvs-prof-card p,
+.av-prof-card li,
+.nvs-prof-card li {
+ font-size: 0.9rem;
+ line-height: 1.5;
+ color: #1f2937;
+ margin: 4px 0;
+}
+
+.av-prof-chalkboard,
+.nvs-prof-chalkboard {
+ margin: 14px 0;
+ padding: 15px 18px;
+ border-radius: 12px;
+ background: #0f1b2d;
+ color: #e6eef8;
+ border: 1px solid #263a57;
+}
+
+.av-prof-chalkboard h4,
+.nvs-prof-chalkboard h4 {
+ color: #93c5fd;
+ margin: 0 0 10px 0;
+ font-size: 0.96rem;
+}
+
+.nvs-prof-chalkboard h4 {
+ color: #6ee7b7;
+}
+
+.av-prof-chalk-step,
+.nvs-prof-chalk-step {
+ padding: 8px 10px;
+ margin-bottom: 8px;
+ border-left: 3px solid #60a5fa;
+ background: rgba(255, 255, 255, 0.04);
+ border-radius: 0 8px 8px 0;
+}
+
+.nvs-prof-chalk-step {
+ border-left-color: #34d399;
+}
+
+.av-prof-chalk-step strong,
+.nvs-prof-chalk-step strong {
+ display: block;
+ font-size: 0.84rem;
+ color: #bae6fd;
+ margin-bottom: 3px;
+}
+
+.nvs-prof-chalk-step strong {
+ color: #a7f3d0;
+}
+
+.av-prof-chalk-step code,
+.nvs-prof-chalk-step code {
+ background: rgba(15, 23, 42, 0.7);
+ color: #fde68a;
+ padding: 2px 6px;
+ border-radius: 5px;
+ font-size: 0.85rem;
+ display: inline-block;
+ margin-top: 2px;
+}
+
+.av-prof-trap,
+.nvs-prof-trap {
+ margin-top: 10px;
+ padding: 10px 12px;
+ border-radius: 9px;
+ background: #fff7ed;
+ border: 1px solid #fed7aa;
+ color: #7c2d12;
+ font-size: 0.88rem;
+}
+
+.av-prof-hints,
+.nvs-prof-hints {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 8px;
+ margin: 10px 0;
+}
+
+.av-prof-hint-btn,
+.nvs-prof-hint-btn {
+ border: 1px solid #bfd2f2;
+ background: #eff6ff;
+ color: #1e40af;
+ padding: 6px 11px;
+ border-radius: 8px;
+ font-size: 0.83rem;
+ font-weight: 600;
+ cursor: pointer;
+}
+
+.nvs-prof-hint-btn {
+ border-color: #a7f3d0;
+ background: #ecfdf5;
+ color: #065f46;
+}
+
+.av-prof-hint-btn.active,
+.nvs-prof-hint-btn.active {
+ background: #1d4ed8;
+ color: #ffffff;
+ border-color: #1d4ed8;
+}
+
+.nvs-prof-hint-btn.active {
+ background: #047857;
+ border-color: #047857;
+}
+
+.av-prof-hint-panel,
+.nvs-prof-hint-panel {
+ padding: 10px 14px;
+ border-radius: 9px;
+ background: #f1f5f9;
+ border: 1px solid #cbd5e1;
+ font-size: 0.9rem;
+ line-height: 1.5;
+ margin-top: 6px;
+}
+
+/* Coursework & Master Problem Banks */
+details.av-prof-bank,
+details.nvs-prof-bank {
+ margin: 16px 0;
+ border: 1px solid #c3d4ec;
+ border-radius: 13px;
+ background: #ffffff;
+ overflow: hidden;
+}
+
+details.nvs-prof-bank {
+ border-color: #b7dfc8;
+}
+
+details.av-prof-bank > summary,
+details.nvs-prof-bank > summary {
+ cursor: pointer;
+ padding: 13px 16px;
+ font-weight: 700;
+ font-size: 0.95rem;
+ background: #eef4ff;
+ color: #163766;
+ list-style-position: inside;
+}
+
+details.nvs-prof-bank > summary {
+ background: #eaf7f0;
+ color: #0b4d2e;
+}
+
+.av-prof-bank-body,
+.nvs-prof-bank-body {
+ padding: 14px 16px;
+}
+
+.av-prof-filters,
+.nvs-prof-filters {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 6px;
+ margin-bottom: 12px;
+}
+
+.av-prof-filter-btn,
+.nvs-prof-filter-btn {
+ border: 1px solid #cbd5e1;
+ background: #f8fafc;
+ color: #1e293b;
+ border-radius: 999px;
+ padding: 5px 11px;
+ font-size: 0.8rem;
+ font-weight: 600;
+ cursor: pointer;
+}
+
+.av-prof-filter-btn.active {
+ background: #1d4ed8;
+ color: #ffffff;
+ border-color: #1d4ed8;
+}
+
+.nvs-prof-filter-btn.active {
+ background: #047857;
+ color: #ffffff;
+ border-color: #047857;
+}
+
+.av-prof-prob-card,
+.nvs-prof-prob-card {
+ border: 1px solid #dce5f2;
+ border-radius: 11px;
+ padding: 12px 14px;
+ margin-bottom: 12px;
+ background: #fcfdff;
+}
+
+.av-prof-prob-head,
+.nvs-prof-prob-head {
+ display: flex;
+ flex-wrap: wrap;
+ justify-content: space-between;
+ align-items: baseline;
+ gap: 8px;
+ margin-bottom: 6px;
+}
+
+.av-prof-prob-title,
+.nvs-prof-prob-title {
+ font-weight: 700;
+ font-size: 0.93rem;
+ color: #0f294a;
+}
+
+.av-prof-prob-src,
+.nvs-prof-prob-src {
+ font-size: 0.75rem;
+ font-weight: 600;
+ color: #475569;
+ background: #e2e8f0;
+ padding: 2px 8px;
+ border-radius: 999px;
+}
+
+.av-prof-prob-sol,
+.nvs-prof-prob-sol {
+ margin-top: 8px;
+ padding: 10px 12px;
+ border-radius: 9px;
+ background: #f8fafc;
+ border: 1px solid #e2e8f0;
+}
+
+.av-prof-prob-sol ol,
+.nvs-prof-prob-sol ul,
+.nvs-prof-prob-sol ol,
+.nvs-prof-prob-sol ul {
+ margin: 6px 0 6px 18px;
+ padding: 0;
+}
+
+.av-prof-prob-sol li,
+.nvs-prof-prob-sol li {
+ margin-bottom: 4px;
+ font-size: 0.87rem;
+ line-height: 1.48;
+}
+
+.av-prof-mini-check,
+.nvs-prof-mini-check {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 8px;
+ align-items: center;
+ margin-top: 8px;
+}
+
+.av-prof-mini-check input,
+.nvs-prof-mini-check input {
+ width: 140px;
+ padding: 5px 8px;
+ border-radius: 7px;
+ border: 1px solid #94a3b8;
+ font-size: 0.86rem;
+}
+
+.av-prof-mini-check button,
+.nvs-prof-mini-check button {
+ padding: 5px 10px;
+ border-radius: 7px;
+ border: 1px solid #1d4ed8;
+ background: #1d4ed8;
+ color: #ffffff;
+ font-size: 0.82rem;
+ font-weight: 600;
+ cursor: pointer;
+}
+
+.nvs-prof-mini-check button {
+ border-color: #047857;
+ background: #047857;
+}
+
+.av-prof-mini-status,
+.nvs-prof-mini-status {
+ font-size: 0.84rem;
+ font-weight: 600;
+}
+
+.av-prof-code,
+.nvs-prof-code {
+ margin: 8px 0;
+ padding: 10px 12px;
+ border-radius: 8px;
+ background: #0f172a;
+ color: #e2e8f0;
+ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+ font-size: 0.8rem;
+ overflow-x: auto;
+ white-space: pre;
+ line-height: 1.45;
+}
+
+.av-prof-table,
+.nvs-prof-table {
+ width: 100%;
+ border-collapse: collapse;
+ font-size: 0.85rem;
+ margin: 8px 0;
+}
+
+.av-prof-table th,
+.av-prof-table td,
+.nvs-prof-table th,
+.nvs-prof-table td {
+ border: 1px solid #cbd5e1;
+ padding: 6px 8px;
+ text-align: left;
+}
+
+.av-prof-table th,
+.nvs-prof-table th {
+ background: #eff6ff;
+ color: #1e3a8a;
+}
+
+@media (max-width: 640px) {
+ .av-prof-grid,
+ .nvs-prof-grid {
+  grid-template-columns: 1fr;
+ }
+ .av-prof-box,
+ .nvs-prof-box {
+  padding: 12px 13px;
+ }
+}
