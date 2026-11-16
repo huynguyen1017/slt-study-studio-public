@@ -1,0 +1,56 @@
+/* Independent avionics practice tab, scoped to avoid changing existing labs. */
+#avionicsView{padding-bottom:28px}
+.av-wrap{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+.av-intro{background:linear-gradient(115deg,#30214e,#6740a4);color:white;padding:26px;border-radius:22px;margin-bottom:18px}
+.av-intro .eyebrow{color:#d9c5ff}
+.av-intro h2{font-size:clamp(25px,3vw,37px);margin:10px 0;letter-spacing:-.6px}
+.av-intro p{color:#f0e8ff;margin:8px 0}
+.av-metrics{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.av-metrics span{border:1px solid #a58bdb;padding:8px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.av-side,.av-player{background:white;border:1px solid var(--line);border-radius:18px;padding:19px}
+.av-side{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+.av-side h3{font-size:15px;margin:4px 0 13px}
+.av-filter{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.av-filter label{font-size:12px}
+.av-filter select,.av-filter input{width:100%;font-size:14px}
+.av-topic{display:block;width:100%;text-align:left;background:#faf9fe;border:1px solid #ece6f6;padding:12px;border-radius:11px;margin:7px 0;color:var(--ink);font-size:13px}
+.av-topic small{display:block;font-size:11px;letter-spacing:0;margin:5px 0 0;color:#69627c}
+.av-topic.active{background:#eee6ff;border:2px solid var(--purple);padding:11px}
+.av-topic .av-track{height:4px;border-radius:4px;background:#e2dbe9;margin-top:9px;overflow:hidden}
+.av-topic .av-track i{display:block;height:100%;background:#12856c}
+.av-question-index{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+.av-question-index button{min-height:34px;min-width:34px;padding:5px 8px;font-size:12px;background:#f6f4fa;border:1px solid #e5deee;color:var(--ink);border-radius:8px}
+.av-question-index button.active{background:var(--purple);color:white}
+.av-question-index button.done:not(.active){background:#d7f3e9;border-color:#71b4a1}
+.av-question-index button.review:not(.active){background:#fff0dc;border-color:#d4aa70}
+.av-player h3{font-size:23px;line-height:1.35;margin:13px 0 17px}
+.av-kicker{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#6b6478;font-size:12px}
+.av-problem{border-left:4px solid #8054d2;background:#f6f3fc;padding:17px 19px;border-radius:0 12px 12px 0;font-size:17px;line-height:1.65;min-height:85px}
+.av-actions{display:flex;flex-wrap:wrap;gap:9px;margin:15px 0}
+.av-actions button{padding:10px 14px;min-height:43px}
+.av-input{display:flex;align-items:end;flex-wrap:wrap;gap:12px;margin:16px 0}
+.av-input label{flex:1;min-width:170px}
+.av-input input{padding:12px;border:1px solid #bfb3d5;border-radius:9px;width:100%;font-size:16px}
+.av-input .unit{font-weight:700;color:#5d3a9c;padding:10px 0}
+.av-feedback{background:#fef5e9;color:#694c22;border-radius:9px;padding:12px;margin:12px 0}
+.av-feedback.good{background:#e2f5ec;color:#0b634e}
+.av-solution{padding:19px;border:1px solid #d8c9ee;border-radius:13px;margin-top:14px;background:#fdfcff}
+.av-solution h4{margin:5px 0 10px}
+.av-solution ol{padding-left:24px;line-height:1.8}
+.av-solution li{padding:3px 0}
+.av-eq{overflow-x:auto;background:white;border:1px solid #e6dcf3;border-radius:12px;padding:13px 15px;margin:9px 0;text-align:center}
+.av-eq math{font-size:1.28em;max-width:100%;display:block;overflow-x:auto}
+.av-formula-label{font-size:12px;font-weight:700;letter-spacing:.3px;color:#625485}
+.av-answer{font-size:20px;font-weight:800;color:#087b62;border-left:4px solid #10a481;padding:11px 14px;background:#effaf5;margin:14px 0}
+.av-help{font-size:13px;color:var(--muted);line-height:1.7}
+.av-bottom{display:flex;gap:9px;flex-wrap:wrap;justify-content:space-between;margin-top:20px}
+.av-bottom button{flex:1}
+.av-section-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:0 0 10px}
+.av-section-header p{margin:0;font-size:13px}
+.av-inline-link{font-size:13px;color:var(--purple);text-decoration:underline}
+.av-hint{background:#fff8e7;border:1px solid #e8d09d;border-radius:10px;padding:13px;line-height:1.7}
+.av-legend{color:#706b7b;font-size:11px;margin-top:6px}
+.av-progress-top{height:7px;background:#e9e5f2;border-radius:9px;overflow:hidden;margin:9px 0 16px}
+.av-progress-top div{height:100%;background:#0f896c}
+@media(max-width:900px){.av-wrap{grid-template-columns:1fr}.av-side{position:static;max-height:none}.av-topics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.av-topic{margin:0}}
+@media(max-width:560px){.av-side,.av-player{padding:14px}.av-intro{padding:19px}.av-topics{grid-template-columns:1fr}.av-filter{grid-template-columns:1fr}.av-player h3{font-size:20px}.av-problem{font-size:15px;padding:14px}.av-actions button{flex:1}.av-metrics span{font-size:11px}}
