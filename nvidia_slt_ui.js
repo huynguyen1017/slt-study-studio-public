@@ -163,4 +163,8 @@ window.mountNvidiaSltAcademy=el=>{
  if(root===el&&el.dataset.nvsMounted==="true")return;
  root=el;el.dataset.nvsMounted="true";render();
 };
+// On a direct #nvidia link, app.js activates the tab before this script loads.
+if(typeof location!=="undefined"&&location.hash==="#nvidia"&&typeof document!=="undefined"){
+ window.mountNvidiaSltAcademy(document.getElementById("nvidiaSltRoot"));
+}
 })();
