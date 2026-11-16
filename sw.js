@@ -10,6 +10,7 @@ const CORE = [
   "./avionics_questions.js",
   "./avionics_distinct_labs_v10.js",
   "./avionics_distinct_math_v10.js",
+  "./avionics_dice_methods_v12.js",
   "./avionics_distinct_reasoning_v10.js",
   "./avionics_integrative_capstones_v11.js",
   "./avionics_mixed_networks_v11.js",
