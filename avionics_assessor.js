@@ -139,6 +139,7 @@ function gradeNumber(q,raw){
  const tolerance=Math.max(Math.abs(q.expected)*0.012,1e-10);
  const correct=Math.abs(measured-q.expected)<=tolerance;
  if(correct)return {band:"likely-correct",title:"Correct result",note:"The value and units match the worked calculation within rounding tolerance."};
+ if(Math.abs(measured-q.expected)<=Math.abs(q.expected)*0.1)return {band:"partial",title:"Close — check your calculation",note:"You are within 10% of the expected result, but not within the rounding tolerance. Review significant digits, units, and arithmetic before retrying."};
  const ratio=Math.abs(measured)/Math.max(Math.abs(q.expected),1e-50);
  let hint="Recheck the given values, equation and numerical substitution, then try again.";
  if(ratio>950&&ratio<1050)hint="Your magnitude is about 1000 times too high. Check milli (10⁻³) versus the base unit.";
