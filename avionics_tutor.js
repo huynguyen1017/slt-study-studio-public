@@ -9,6 +9,7 @@ const LESSONS=window.AVIONICS_BEGINNER_LESSONS||{};
 const DEEP=window.AVIONICS_CONCEPT_DEEP_DIVE||{};
 const SI=window.AVIONICS_SI_LESSON||null;
 const BOOK=window.AVIONICS_TEXTBOOK_TOC||null;
+const COURSE=window.AVIONICS_COURSEWORK_BRIDGES||{};
 const VIS=window.avionicsVisuals;
 const ASSESS=window.avionicsAnswerCheck;
 const STORE="slt-avionics-ee-practice-v1";
@@ -286,6 +287,23 @@ function textbookPanel(t){
  '</ol></details></details>';
 }
 
+function courseworkBridge(t){
+ const item=COURSE[t.id];
+ if(!item)return "";
+ return '<details class="av-course-bridge"><summary>Connect this topic to your coursework <span class="av-course-scope">'+esc(item.scope)+'</span></summary>'+
+  '<div class="av-course-grid"><section><h4>Coursework connection</h4><p>'+esc(item.source)+'</p><p>'+esc(item.bridge)+'</p></section>'+
+  '<section class="av-course-lab"><h4>Carry it into the lab</h4><p>'+esc(item.lab)+'</p></section></div>'+
+  '<p class="av-course-note">This is a fresh concept summary based on your notes and lab work. It does not reproduce the assignment pages or their figures.</p></details>';
+}
+
+function digitalLogicPanel(t){
+ if(t.id!=="components")return "";
+ return '<details class="av-course-bridge av-digital-logic"><summary>Digital logic: truth table to verified gate circuit <span class="av-course-scope">Tech 63 bridge</span></summary>'+
+  '<p class="av-digital-lede">For <i>n</i> binary inputs, enumerate all <code>2<sup>n</sup></code> combinations before simplifying. The truth table is the reference for both the Boolean expression and the simulated or physical circuit.</p>'+
+  '<ol class="av-logic-flow"><li>List every input pattern in binary order.</li><li>Mark the output rows that must be HIGH (SOP) or LOW (POS).</li><li>Simplify with Karnaugh-map groups of adjacent 1s or 0s sized as powers of two; edge cells wrap, diagonal cells do not touch.</li><li>Draw the required gates and verify all rows, including boundary and polarity cases.</li></ol>'+
+  '<div class="av-course-grid"><section><h4>Small combinational building blocks</h4><p>Half adder: <code>SUM = A XOR B</code>, <code>CARRY = A AND B</code>. A full adder adds <code>C_in</code>; a decoder selects an output line; a comparator reports less/equal/greater; a multiplexer routes the selected data input.</p></section><section class="av-course-lab"><h4>Bench check</h4><p>Use current-limited logic levels, keep every input defined, probe the output relative to the correct ground, and compare measured HIGH/LOW voltages with the receiving device’s VIH/VIL limits.</p></section></div></details>';
+}
+
 function lessonPage(q,t,f){
  const item=f.deep,guide=LESSONS[t.id]||{lead:t.goal,analogy:"",example:"",terms:[]};
  const glossary=item?item.words:guide.terms;
@@ -303,6 +321,8 @@ function lessonPage(q,t,f){
  '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(item?item.analogy:guide.analogy)+'</p><h4>Why Muon Space engineers care</h4><p>'+rich(item?item.why:f.why)+'</p></section></div>'+
  (f.label==="SI base unit"?siChapterPanel():"")+
  textbookPanel(t)+
+ courseworkBridge(t)+
+ digitalLogicPanel(t)+
  '<h4 class="av-figure-heading">Interactive circuit, graph &amp; 3-panel breadboard connection for '+esc(q.id.toUpperCase())+'</h4>'+
  visualSwitcherBar(inlineVisualMode)+illustration+
  '<div class="av-actions-bottom"><button id="avGoVisual" class="av-light">See all 3 large visuals stacked →</button><button id="avGoWork" class="av-primary">See all 6 baby steps + worked MathML →</button></div>'+
@@ -480,7 +500,7 @@ function wire(){
  host.querySelectorAll("[data-qid]").forEach(b=>b.onclick=()=>{
   const id=b.dataset.qid;filter="All";query="";
   const idx=allTopicQuestions().findIndex(x=>x.id===id);
-  if(idx>=0)moveQuestion(idx,false);
+  if(idx>=0)moveQuestion(idx,page==="visual"||page==="work");
  });
  host.querySelectorAll("[data-quick-qid]").forEach(b=>b.onclick=()=>{
   const id=b.dataset.quickQid;filter="All";query="";
