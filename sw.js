@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v30-distinct-690-curriculum';
+const CACHE = 'slt-study-studio-v30-distinct-690-curriculum-r2';
 const CORE = [
   "./",
   "./index.html",

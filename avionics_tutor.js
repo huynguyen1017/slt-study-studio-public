@@ -130,7 +130,7 @@ function stepsFor(q,t,f){
   });
   out.push({
    title:"Connect it to a real-world picture",
-   body:`Picture it like this: ${guided?guided.example:beginner?beginner.analogy:LESSONS[t.id].analogy}`,
+   body:`Picture it like this: ${guided?(LESSONS[t.id]?.analogy||guided.why):beginner?beginner.analogy:LESSONS[t.id].analogy}`,
    kind:"text"
   });
   out.push({
@@ -159,7 +159,7 @@ function stepsFor(q,t,f){
   }
   out.push({
    title:"Speak this answer in an interview",
-   body:`${st[0]||f.definition} ${st[1]||""} ${st[2]||""} Takeaway: ${guided?guided.summary:beginner?beginner.recap:LESSONS[t.id].lead}`,
+   body:`${st[0]||f.definition} ${st[1]||""} ${st[2]||""} Takeaway: ${guided?(st[3]||guided.why):beginner?beginner.recap:LESSONS[t.id].lead}`,
    kind:"answer"
   });
  }else if(q.level==="Calculation"){
@@ -345,7 +345,7 @@ function lessonPage(q,t,f){
  '<div class="av-lede"><strong>In very simple words (Zero prior EE assumed)</strong><p>'+rich(summary)+'</p></div>'+
  '<div class="av-two-up"><section><h4>Words you need first</h4><table class="av-vocab"><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody>'+
  glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+rich(p[1])+'</td></tr>').join("")+
- '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(lesson?lesson.example:item?item.analogy:guide.analogy)+'</p><h4>Why Muon Space engineers care</h4><p>'+rich(lesson?lesson.why:item?item.why:f.why)+'</p></section></div>'+
+ '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(lesson?(guide.analogy||lesson.why):item?item.analogy:guide.analogy)+'</p><h4>Why Muon Space engineers care</h4><p>'+rich(lesson?lesson.why:item?item.why:f.why)+'</p></section></div>'+
  (f.label==="SI base unit"?siChapterPanel():"")+
  textbookPanel(t)+
  courseworkBridge(t)+
@@ -361,7 +361,7 @@ function lessonPage(q,t,f){
  (formulaSrc?equation(formulaSrc,"1. ENGINEERING EQUATION (MATHML)"):"")+
  (subSrc?equation(subSrc,"2. WORKED EXAMPLE / SUBSTITUTION (ENGINEERING NOTATION)"):"")+
  '<div class="av-worked-mini"><strong>Worked evidence / expected result</strong><p>'+rich(lesson?lesson.example:item?item.example:guide.example)+'</p></div>'+
- '<div class="av-takeaway"><strong>Remember this:</strong> '+rich(lesson?lesson.summary:item?item.recap:guide.lead)+'</div>'+
+ '<div class="av-takeaway"><strong>Remember this:</strong> '+rich(lesson?(q.steps[q.steps.length-1]||lesson.why):item?item.recap:guide.lead)+'</div>'+
  '</section>';
 }
 

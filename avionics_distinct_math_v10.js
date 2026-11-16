@@ -30,7 +30,13 @@ for(const [ti,t] of topics.entries()){
  for(const j of [0,5]){
   const q=[...one,...two][j];
   q.numericOperation=j===0?"First-principles calculation":"Second physical principle";
-  lesson(q,q.numericOperation,"Solve the actual electrical calculation in the given source circuit, then name the expected quantity and unit.","Rearrange the physical law if needed and check the units before using the result.");
+  const summary=j===0
+   ?"Apply the primary governing law ("+(q.formula||"core relationship")+") directly to solve for the target quantity in "+q.unit+" from "+t.title+"."
+   :"Solve this second independent "+t.title+" relationship ("+(q.formula||"physical model")+") cleanly into base SI powers before reporting in "+q.unit+".";
+  const example=j===0
+   ?"Substitute the problem inputs into "+(q.sub||q.formula)+" and confirm magnitude in "+q.unit+"."
+   :"Convert any scaling prefixes before substituting into "+(q.sub||q.formula)+" so the final unit matches "+q.unit+".";
+  lesson(q,q.numericOperation,summary,example);
  }
  {
   const a=old[0],b=old.slice(1,5).find(x=>Math.abs(x.expected-a.expected)>1e-12)||null;

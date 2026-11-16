@@ -2,10 +2,10 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),vm=require("node:vm");
 const root=path.resolve(__dirname,".."),read=p=>fs.readFileSync(path.join(root,p),"utf8");
 const context={window:{},console,Math};vm.createContext(context);
-for(const p of ["avionics_data.js","avionics_questions.js","avionics_distinct_labs_v10.js","avionics_distinct_math_v10.js","avionics_distinct_reasoning_v10.js","avionics_assessor.js"]){
+for(const p of ["avionics_data.js","avionics_questions.js","avionics_distinct_labs_v10.js","avionics_distinct_math_v10.js","avionics_distinct_reasoning_v10.js","avionics_visuals.js","avionics_assessor.js"]){
  vm.runInContext(read(p),context,{filename:p});
 }
-const t=context.window.AVIONICS_TOPICS,q=context.window.AVIONICS_QUESTIONS,A=context.window.avionicsAnswerCheck;
+const t=context.window.AVIONICS_TOPICS,q=context.window.AVIONICS_QUESTIONS,A=context.window.avionicsAnswerCheck,V=context.window.avionicsVisuals;
 const finite=x=>Number.isFinite(x),norm=x=>x.toLowerCase().replace(/\d+(?:\.\d+)?/g,"#").replace(/\s+/g," ").trim();
 const near=(a,b)=>Math.abs(a-b)<=Math.max(1e-10,Math.abs(b)*0.00005);
 assert.equal(t.length,23);assert.equal(q.length,690);
@@ -64,6 +64,10 @@ for(const [ti,topic] of t.entries()){
  ];
  for(let i=0;i<10;i++)assert(near(C[i].expected,cases[i]),C[i].id+" independently recomputed reference mismatch: "+C[i].expected+" vs "+cases[i]);
  const seen=new Set(C.map(x=>x.numericOperation));assert.equal(seen.size,10,topic.id+" numeric operations still repetitive");
+ const summaries=new Set(questions.map(x=>x.lesson?x.lesson.summary:x.steps[0]));
+ assert.equal(summaries.size,30,topic.id+" page-1 summaries must be mutually distinct across all 30 questions");
+ const focuses=new Set(questions.map(x=>((V.render(x,topic,"schematic").match(/<div class="av-visual-focus">([\s\S]*?)<\/div>/)||[])[1]||"")));
+ assert.equal(focuses.size,30,topic.id+" visual focus captions must differ cleanly across all 30 questions");
  for(let i=0;i<5;i++)assert(!questions[i].question.includes(questions[i+5].question),topic.id+" foundation/application repeated");
  uniqueAnswers+=seen.size;
 }

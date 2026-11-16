@@ -25,10 +25,24 @@ for(const t of T){
   q.learningObjective=t.id==="units"?unitQuestions[i][1]:["Define "+term,"Distinguish "+term,"Interpret "+term,"Apply "+term,"Test boundaries of "+term][i];
   q.auditSkill=q.learningObjective;
   q.hint="Use this exact source definition, then explain the measurement or physical consequence: "+definition;
+  const neighbor=t.skills[(i+1)%5];
+  const specificTaskAnswer=t.id==="units"?[
+   "Plain check: identify the seven SI base quantities (A is current, the sole electrical base unit) and state why V, Ω, and W are derived from them.",
+   "Scale vs physics: 25 mA = 25 × 10^(-3) A = 0.025 A; moving the prefix shifts only the multiplier while the physical electron flow rate stays unchanged.",
+   "Micro conversion check: 47 µF = 47 × 10^(-6) F = 0.000047 F; both markings refer to identical capacitance across the part leads.",
+   "Case & decade check: uppercase M (10^6, mega) exceeds kilo (10^3) by 1,000× and is 1,000× smaller than giga (10^9), so 2 MΩ = 2,000,000 Ω cleanly.",
+   "Accuracy vs resolution check: extra trailing meter digits show finer display resolution, whereas calibration uncertainty defines the real error bar around a limit."
+  ][i]:[
+   "Plain definition summary: state '"+definition+"' cleanly in your own words and cite this physical example: "+example,
+   "Comparison with "+neighbor[0]+": apply "+term+" ("+definition+") when evaluating "+why+" Contrast it directly against "+neighbor[0]+" ("+neighbor[1]+") so setup/units are never mixed.",
+   "Schematic & instrument reading check: always verify (1) the physical unit/scale symbol associated with "+term+" and (2) the exact reference nodes or bench limits shown by "+example,
+   "Concrete misapplication consequence: failing to account for "+term+" causes this error: "+why+" Double-check sign conventions and SI prefixes when executing "+example,
+   "Boundary & falsification test: "+term+" breaks down when underlying assumptions fail ("+why+"). Test this limit directly by measuring: "+example
+  ][i];
   q.steps=["Start with the chapter definition: "+definition,
    "Explain its engineering importance: "+why,
    "Ground the explanation in this actual example: "+example,
-   "Answer the question's specific task and check units, reference and assumptions."];
+   specificTaskAnswer];
  }
  for(let i=0;i<5;i++){
   const raw=t.cases[i];
