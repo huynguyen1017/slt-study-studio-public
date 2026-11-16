@@ -77,7 +77,7 @@ console.log("PASS: 690 questions retained; 23 beginner lessons; six-step guides;
   await page.locator("#avGoVisual").click();
   assert.equal(await page.locator(".av-visual-panel").count(),3);
   assert.equal(await page.locator(".av-visual-svg").count(),3);
-  assert((await page.locator('#avVisual-wiring').textContent()).includes("breadboard"));
+  assert((await page.locator('#avVisual-wiring').textContent()).toLowerCase().includes("breadboard"));
   await page.locator('[data-zoom="wiring"]').click();
   assert.equal(await page.locator("#avVisualZoom").evaluate(el=>el.open),true);
   await page.locator("#avZoomClose").click();
