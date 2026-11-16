@@ -15,7 +15,7 @@ for(const t of T){
   assert(h.includes('data-nvs-lab="'+q.id+'"'),q.id+" missing identity");
   assert(!h.includes("EXPLANATORY FLOW")&&!h.includes("Linux test host")&&!h.includes("Fixture / software"),"Old static diagram leaked");
   assert(h.includes("data-nvs-view")&&h.includes("Signal / model")&&h.includes("Fault tree")&&h.includes("A/B/A test")&&h.includes("Evidence worksheet"),q.id+" missing interaction");
-  assert(h.includes(t.title),q.id+" missing track-specific language");
+  assert(h.includes(t.title.replaceAll("&","&amp;")),q.id+" missing track-specific language");
   assert(h.includes(q.skillName),q.id+" diagram does not use current skill");
   assert(!h.includes("undefined")&&!h.includes("[object Object]"),q.id+" rendered invalid data");
   assert(!seen.has(q.id));seen.add(q.id);rendered++;
