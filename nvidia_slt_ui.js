@@ -43,6 +43,27 @@ function makeDice(){
 function resetDice(){const base=getBase();if(base)delete currentVariants[base.id];feedback="";step=0;screen="concept";showAll=false;render();}
 function goto(i){state.index=Math.max(0,Math.min(49,i));step=0;screen="concept";showAll=false;feedback="";save();render();}
 function svgDiagram(q){
+ // Exact connected educational circuit: supply -> Rs -> (Ra || Rb) -> return.
+ // Values are taken only from the current canonical or rerolled prompt.
+ if(q.operation==="parallel"&&q.math){
+  const m=q.math.prompt.match(/A ([\d.]+) V supply drives ([\d.]+) Ω in series with \(([\d.]+) Ω in parallel with ([\d.]+) Ω\)/);
+  if(m){
+   const [_,v,rs,ra,rb]=m,ln=(x1,y1,x2,y2)=>'<path d="M'+x1+' '+y1+' L'+x2+' '+y2+'" stroke="#294b6c" stroke-width="3" fill="none"/>';
+   const resistor=(x,y,w,h,name,value)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="5" fill="#e6f0fa" stroke="#315f95" stroke-width="2"/><text x="'+(x+w/2)+'" y="'+(y+h/2+4)+'" text-anchor="middle" font-size="13" font-weight="700" fill="#123f6f">'+esc(name+" "+value+" Ω")+'</text>';
+   const fig='<rect x="1" y="1" width="898" height="268" rx="12" fill="#faffff" stroke="#cedde9"/>'+
+    '<text x="18" y="26" font-size="15" font-weight="700" fill="#23537d">EXACT TEACHING TOPOLOGY · SERIES + PARALLEL (NOT A PHYSICAL DUT NETLIST)</text>'+
+    ln(95,65,220,65)+resistor(220,48,150,34,"Rs",rs)+ln(370,65,720,65)+
+    ln(480,65,480,117)+resistor(445,117,70,48,"Ra",ra)+ln(480,165,480,207)+
+    ln(690,65,690,117)+resistor(655,117,70,48,"Rb",rb)+ln(690,165,690,207)+
+    ln(95,207,720,207)+ln(95,65,95,92)+ln(95,168,95,207)+
+    '<circle cx="95" cy="130" r="34" fill="#fff7de" stroke="#a5813f" stroke-width="2"/>'+
+    '<text x="95" y="125" font-size="14" text-anchor="middle" fill="#6b4922">+'+esc(v)+' V</text><text x="95" y="144" font-size="12" text-anchor="middle" fill="#6b4922">−</text>'+
+    '<circle cx="480" cy="65" r="5" fill="#127fbc"/><circle cx="690" cy="65" r="5" fill="#127fbc"/>'+
+    '<circle cx="480" cy="207" r="5" fill="#127fbc"/><circle cx="690" cy="207" r="5" fill="#127fbc"/>'+
+    '<text x="22" y="244" font-size="13" fill="#31576e">Reduce Ra ∥ Rb first; add Rs; then use I = V / Rtotal. Predicted source current: '+esc(fmt(q.expected))+' mA.</text>';
+   return '<svg class="nvs-flow nvs-exact-circuit" viewBox="0 0 900 270" role="img" aria-label="Connected source, series resistor and two parallel resistor branches with values from the selected question" xmlns="http://www.w3.org/2000/svg">'+fig+'</svg>';
+  }
+ }
  const t=track(),color=["#2d528c","#8c56a6","#0c7d79"],safe=esc;
  return '<svg class="nvs-flow" viewBox="0 0 900 270" role="img" aria-label="Conceptual fault isolation flow: host, test interface, DUT, physical evidence and independent disposition" xmlns="http://www.w3.org/2000/svg">'+
  '<rect x="2" y="2" width="896" height="266" rx="15" fill="#f9fbff" stroke="#d6e2f5"/>'+
