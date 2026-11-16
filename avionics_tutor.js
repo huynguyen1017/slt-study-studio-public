@@ -18,6 +18,7 @@ const NUCLEO=window.avionicsNucleoWorkbench||null;
 const MIXED=window.avionicsMixedCircuitCurriculum||null;
 const ASSESS=window.avionicsAnswerCheck;
 const STORE="slt-avionics-ee-practice-v1";
+const TOPIC_TOTAL=window.AVIONICS_EXPECTED_PER_TOPIC||30;
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const find=(s,r=document)=>r.querySelector(s);
 const fmt=x=>Math.abs(x)>0&&Math.abs(x)<0.0001?Number(x).toExponential(3):Number(x.toPrecision(5)).toString();
@@ -501,21 +502,21 @@ function show(){
 
  host.innerHTML='<div class="av-tutor">'+
  '<header class="av-hero"><div><span class="av-eyebrow">MUON SPACE AVIONICS TEST READINESS · ZERO TO BENCH FLUENCY</span><h2>Understand it. See it. Solve it in baby steps.</h2>'+
- '<p>23 electrical engineering topics × 30 progressively harder questions = 690 guided exercises. Practice foundational concepts, circuit building, calculations and fault diagnosis with verified STM32 connector references and two independent video-learning sources.</p></div>'+
+ '<p>23 electrical engineering topics × 50 progressively harder questions = 1,150 guided exercises. Practice foundational concepts, circuit building, calculations and fault diagnosis with verified STM32 connector references and two independent video-learning sources.</p></div>'+
  '<div class="av-hero-stats"><strong>'+allKnown+' / '+QUESTIONS.length+'</strong><small>questions mastered</small></div></header>'+
  '<div class="av-tutor-layout"><aside class="av-guide-menu"><div class="av-guide-label">YOUR LEARNING PATH</div>'+
  '<label class="av-selector-label" for="avTopicList">Select a topic (23 topics)</label><select id="avTopicList">'+TOPICS.map((x,i)=>'<option value="'+esc(x.id)+'" '+(x.id===topic?"selected":"")+'>Topic '+(i+1)+': '+esc(x.title)+'</option>').join("")+'</select>'+
- '<div class="av-topic-progress"><strong>'+count+' / 30</strong> mastered in this topic<div><span style="width:'+(100*count/30)+'%"></span></div></div>'+
+ '<div class="av-topic-progress"><strong>'+count+' / '+TOPIC_TOTAL+'</strong> mastered in this topic<div><span style="width:'+(100*count/TOPIC_TOTAL)+'%"></span></div></div>'+
  '<div class="av-guide-label">QUESTION TYPE</div><select id="avLevelList">'+["All","Foundations","Application","Calculation","Troubleshooting"].map(x=>'<option value="'+x+'" '+(x===filter?"selected":"")+'>'+x+'</option>').join("")+'</select>'+
  '<label class="av-selector-label" for="avQuestionSearch">Search questions</label><input id="avQuestionSearch" type="search" placeholder="Voltage, ripple, UART..." value="'+esc(query)+'">'+
- '<div class="av-how"><strong>How this workbook works</strong><ol><li>Study question 1 through 30 in increasing difficulty.</li><li>Inspect its custom circuit, complete Nucleo/breadboard or virtual test fixture.</li><li>Follow all 6 baby steps in MathML.</li><li>Check your own answer.</li></ol></div>'+
+ '<div class="av-how"><strong>How this workbook works</strong><ol><li>Study questions 1 through 50 in increasing difficulty, starting from zero EE knowledge.</li><li>Inspect its custom circuit, complete Nucleo/breadboard or virtual test fixture.</li><li>Follow every baby step, full substitutions and independent engineering checks.</li><li>Check your own answer.</li></ol></div>'+
  '<button class="av-light av-export" id="avExportLearning">Export my saved progress</button></aside>'+
  '<div class="av-workbook"><div class="av-workbook-heading"><div><span class="av-eyebrow">'+esc(t.group.toUpperCase())+' · TOPIC '+(TOPICS.indexOf(t)+1)+' OF '+TOPICS.length+'</span>'+
  '<h2>'+esc(t.title)+'</h2><p>'+rich(LESSONS[t.id]?.lead||t.goal)+'</p></div></div>'+
  '<div class="av-question-controls"><strong>QUESTION '+(all.length?currentIndex+1:0)+' / '+all.length+'</strong>'+
  '<div><button id="avQuestionPrevious" class="av-light" '+(currentIndex<=0?"disabled":"")+'>← Previous</button><button id="avQuestionNext" class="av-light" '+(currentIndex>=all.length-1?"disabled":"")+'>Next →</button></div></div>'+
- '<div class="av-quick-strip" aria-label="Quick question switcher 1 to 30">'+
-  '<div class="av-quick-head"><span>Build your skills in order (1–30):</span><small>1–5 Basics · 6–10 Lab · 11–20 Math · 21–30 Debug</small></div>'+
+ '<div class="av-quick-strip" aria-label="Quick question switcher 1 to 50">'+
+  '<div class="av-quick-head"><span>Build your skills in order (1–50):</span><small>1–5 Basics · 6–10 Lab · 11–20 Math · 21–30 Debug · 31–50 Advanced avionics</small></div>'+
   '<div class="av-number-grid">'+full30.map((p,i)=>'<button type="button" data-quick-qid="'+esc(p.id)+'" class="'+(q&&q.id===p.id?"active ":"")+(state.ratings[p.id]==="know"?"done":state.ratings[p.id]==="again"?"retry":"")+'" title="Q'+(i+1)+' ('+esc(p.level)+'): '+esc(p.question)+'">'+(i+1)+'</button>').join("")+'</div>'+
  '</div>'+
  (q?'<div class="av-page-tabs" role="tablist" aria-label="Four-page visual guided workbook">'+
@@ -523,8 +524,8 @@ function show(){
  (page==="learn"?lessonPage(q,t,f):page==="visual"?visualPage(q,t,f):page==="work"?solvePage(q,t,f):practicePage(q,t,f)):
  '<div class="av-no-result"><h3>No questions match this filter</h3><p>Clear the search or select another question type.</p></div>')+
  '<details class="av-browse-questions" open><summary>Browse all '+full30.length+' actual questions in this topic — click any card to load it above</summary>'+
- '<p class="av-browse-help">Every card below loads a unique question with its own MathML engineering equations, 6 baby steps, schematic, graph, and 3-panel board/breadboard wiring.</p>'+
- '<div class="av-question-gallery" role="group" aria-label="All 30 practice question titles">'+
+ '<p class="av-browse-help">Every card below loads a unique question with its own MathML engineering equations, fully worked baby steps, schematic, graph, and 3-panel board/breadboard wiring.</p>'+
+ '<div class="av-question-gallery" role="group" aria-label="All 50 practice question titles">'+
  full30.map((p,i)=>'<button data-qid="'+esc(p.id)+'" class="av-browse-card '+(q&&q.id===p.id?"active ":"")+(state.ratings[p.id]==="know"?"done":state.ratings[p.id]==="again"?"retry":"")+'" aria-current="'+(q&&q.id===p.id?"true":"false")+'" aria-label="Open question '+(i+1)+': '+esc(p.question)+'">'+
  '<span class="av-browse-meta"><b>Q'+(i+1)+'</b><em>'+esc(p.level)+'</em></span><span class="av-browse-title">'+esc(p.question)+'</span>'+
  '<small>'+(state.ratings[p.id]==="know"?"✓ Mastered":state.ratings[p.id]==="again"?"↻ Review needed":state.assessments[p.id]?"◈ Checked":"○ Open question")+'</small></button>').join("")+'</div>'+
