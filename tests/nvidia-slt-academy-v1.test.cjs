@@ -69,7 +69,7 @@ console.log("PASS: 12 topics ×50 =600; 120 distinct topic methods; 840 method-c
   assert((await page.locator("#nvidiaView .nvs-toolbar").textContent()).includes("Electrical Foundations"));
   await page.locator("#nvidiaView [data-goto='20']").last().click();
   const canonical=await page.locator("#nvidiaView .nvs-question").textContent();
-  assert((await page.locator("#nvidiaView .nvs-nav").textContent()).includes("21 / 50"));
+  assert((await page.locator("#nvidiaView .nvs-toolbar").textContent()).includes("21 / 50"));
   await page.locator("#nvidiaView #nvsDice").click();
   const rolled=await page.locator("#nvidiaView .nvs-question").textContent();
   assert.notEqual(rolled,canonical);
