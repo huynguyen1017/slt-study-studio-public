@@ -13,7 +13,7 @@ function rh(x,y,t){return l(x-75,y,x-47,y)+
  l(x+44,y,x+75,y)+txt(x,y-29,t,14,navy,700,"middle");}
 function rv(x,y,t){return l(x,y-67,x,y-48)+
  '<path d="M'+x+','+(y-48)+' l-13,10 26,14 -26,14 26,14 -26,14 13,10" fill="none" stroke="'+navy+'" stroke-width="3" stroke-linejoin="round"/>'+
- l(x,y+46,x,y+67)+txt(x+28,y+5,t,14,navy,700);}
+ l(x,y+28,x,y+67)+txt(x+28,y+5,t,14,navy,700);}
 function battery(x,y,label){return l(x,y-72,x,y-21)+l(x-25,y-21,x+25,y-21,navy,4)+l(x-15,y-7,x+15,y-7,navy,4)+l(x,y-7,x,y+72)+txt(x-44,y-24,"+",17,pink,700)+txt(x-44,y+12,"−",17,muted,700)+txt(x-40,y+94,label,15,navy);}
 function board(title){return '<rect x="12" y="14" width="716" height="300" rx="15" fill="#fbfdff" stroke="#c9dfec"/>'+
  txt(27,40,title,18,navy,800)+txt(27,61,"Conceptual practice diagram · not a pinout or wiring approval",11,muted,500);}
@@ -56,7 +56,7 @@ function svg(model,topic){
   let coils="M376 122";for(let i=0;i<5;i++){coils+=" C "+(384+i*27)+" 92 "+(395+i*27)+" 92 "+(403+i*27)+" 122";}
   p+='<path d="'+coils+'" stroke="'+navy+'" stroke-width="3" fill="none"/>'+l(512,122,595,122)+l(595,122,595,265)+l(595,265,105,265)+txt(441,83,"L = 10 mH",15,navy,700,"middle")+txt(429,218,"τ = L/R",21,pink,700,"middle");
  }else if(model==="transformer"){
-  p+=l(110,120,220,120)+l(110,265,220,265)+txt(155,108,"24 V AC",15,navy,700);
+  p+=l(110,120,255,120)+l(110,265,255,265)+txt(155,108,"24 V AC",15,navy,700);
   for(let side of [255,455]){for(let i=0;i<5;i++)p+='<path d="M '+side+' '+(135+i*22)+' q -21 10 0 20" fill="none" stroke="'+navy+'" stroke-width="3"/>';}
   p+=l(455,120,590,120)+l(455,265,590,265)+txt(560,107,"12 V ideal",15,green,700)+
   l(320,130,320,255,muted,2)+l(335,130,335,255,muted,2)+
