@@ -1,3 +1,16 @@
+## v11: integrated circuits from beginner to avionics capstone
+
+The fixed **Series Circuits** and **Parallel Circuits** curricula no longer spend numbered slots on changing numbers in the same formula. Each of their 30 questions introduces a distinct new physical relationship: basic definitions and nodes (1–5), practical connection and measurement skills (6–10), multi-stage network calculations (11–20), fault and evidence calculations (21–27), and three integrated analysis and release cases (28–30). Examples include two resistors in parallel in a series chain, two series chains in parallel, loaded ADC voltage dividers, KCL, voltage drops, current division, heat in a chosen resistor, open/short branch, miswire, probe loading, and source droop. Q30 requires a defensible independent verification and NO-GO decision, not another equivalent-resistance calculation.
+
+The **🎲 Practice New Numbers** button on these fixed numeric problems now regenerates the component values for precisely the selected circuit topology. It recalculates the expected answer and all four physical worked steps without consuming question numbers 12–30. Dice scores are kept separate from the saved canonical answer; old progress is archived under a curriculum version when the meaning of the problem changes.
+
+The other 21 topics preserve foundation, application and calculation teaching while replacing their 21–30 diagnostic pairs with ten staged investigations and a tailored integrated avionics capstone at Q30. The examples are original pedagogical material using relevant topic definitions, not reproductions of proprietary textbook questions.
+
+The visual engine renders the exact series-parallel connectivity from structured network values, including actual branches, shared nodes, source/return and load resistors. **It does not pretend the old Nucleo breadboard/virtual simulator can automatically run a 12 V or arbitrary combined network.** Instead the old generic simulator is disabled for those tasks and the circuit schematic links to a blank CircuitJS editor for deliberate manual construction. Any source or topology without a numerical definition is explicitly called illustrative.
+
+Tests: \`tests/avionics-integrated-v11.test.cjs\` recomputes numerical results independently, verifies 690 ordered questions and integrated Q30 skills, checks each network's SVG modes, checks distinct numerical operations and rerolls, and safeguards against false GPIO/simulator wiring. Browser smoke tests exercise the live dice, Q30 and topology switching. Existing v10 unit regressions remain as baseline checks.
+
+
 ## Beginner-to-advanced Avionics Workbooks with STM32 Nucleo and video resources (v9)
 
 The 23 topics now each have 30 original questions ordered progressively: 1–5 explain/differentiate/draw/predict, 6–10 set up lab experiments, 11–20 calculate with units, and 21–30 isolate faults with controlled evidence. Existing question identifiers and stored numerical answers are retained.

@@ -1499,6 +1499,9 @@
   /** Mount / re-mount live interactive bench & online simulator inside every .av-sim-host in view. */
   function mountAll(rootHost, q, t) {
     if (!rootHost || !q || !t) return;
+    if(q.network){
+      rootHost.querySelectorAll(".av-sim-host").forEach(box=>{box.innerHTML = '<section class="av-sim-deferred"><h4>Integrated circuit schematic: use the exact node model above</h4><p>The previous virtual Nucleo wiring/simulator only supports isolated simple networks. This combined series-parallel / loaded-divider topology has not been imported into that simulator, so an incorrect live simulation is intentionally disabled.</p><p>Trace the actual nodes on the question diagram and use the worked circuit equations. You may manually build and verify the network in <a href="https://www.falstad.com/circuit/" target="_blank" rel="noopener noreferrer">CircuitJS1</a>.</p></section>';});return;
+    }
     const targets = rootHost.querySelectorAll(".av-sim-host");
     if (!targets.length) return;
 

@@ -82,5 +82,5 @@ for(const file of ["avionics_distinct_labs_v10.js","avionics_distinct_math_v10.j
  assert(html.includes(file),file+" missing from site");
  assert(sw.includes(file),file+" missing from offline cache");
 }
-assert(tutor.includes("if(q.lesson)")&&tutor.includes("priorProgressV9"),"New lessons and legacy progress archival should be functional");
+assert(tutor.includes("if(q.lesson)")&&tutor.includes("priorProgressV"),"New lessons and legacy progress archival should be functional");
 console.log("PASS: "+concept+" unique foundations, "+labs+" authored lab tests, "+numbers+" varied numeric operations, "+diagnostics+" progressive diagnostic exercises; 690 distinct prompts and objectives.");
