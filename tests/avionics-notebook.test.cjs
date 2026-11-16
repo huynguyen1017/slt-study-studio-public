@@ -17,7 +17,7 @@ for(const id of topicIds){
  assert(x.steps.length===4,id+" four baby steps");
  for(const step of x.steps)assert(step.length>45,id+" insufficient explanation");
  assert(x.unit&&x.pitfall&&x.pitfall.length>=38,id+" unit/mistake warning");
- const clean=String(x.sub.split("=").at(-1)).replace(/\blog10\s*\(/g,"Math.log10(");
+ const clean=String(x.sub.split("=").at(-1)).replace(/\blog10\s*\(/g,"Math.log10(").replace(/\^/g,"**");
  assert(/^[0-9\s+\-*\/().MathlogPI]+$/i.test(clean),id+" unreadable arithmetic: "+clean);
  const actual=vm.runInNewContext(clean,{Math},{timeout:1000});
  assert(Number.isFinite(actual),id+" nonfinite");
