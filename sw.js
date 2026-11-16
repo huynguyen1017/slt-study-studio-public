@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v34-nvidia-slt-academy-r1';
+const CACHE = 'slt-study-studio-v35-nvidia-scenario-lab-r1';
 const CORE = [
   "./",
   "./index.html",
@@ -19,6 +19,8 @@ const CORE = [
   "./nvidia_slt_math.js",
   "./nvidia_slt_questions.js",
   "./nvidia_slt_ui.js",
+  "./nvidia_slt_visual_lab_v2.js",
+  "./nvidia_slt_visual_lab_v2.css",
   "./nvidia_slt.css",
   "./avionics_mixed_visuals_v11.js",
   "./avionics_practice.js",

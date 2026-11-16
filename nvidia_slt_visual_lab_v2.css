@@ -1,0 +1,50 @@
+
+/* NVIDIA question-specific signal, hypothesis, A/B/A and evidence studio. */
+#nvidiaView .nvs-scenario-lab{margin:18px 0 24px;border:1px solid #bdd2e8;border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 5px 20px #1b49700d}
+#nvidiaView .nvs-lab-heading{padding:17px 20px 12px;background:#ecf5fb;display:flex;justify-content:space-between;gap:14px}
+#nvidiaView .nvs-lab-heading small{font-weight:850;letter-spacing:.1em;color:#387394;font-size:10px}
+#nvidiaView .nvs-lab-heading h3{margin:5px 0!important;font-size:1.18rem;line-height:1.35}
+#nvidiaView .nvs-lab-heading p{font-size:13px;margin:3px 0;color:#4b6981}
+#nvidiaView .nvs-lab-heading>span{font-size:11px;color:#55728a;max-width:180px;text-align:right}
+#nvidiaView .nvs-lab-tabs{padding:11px 15px 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;border-bottom:1px solid #dae6f1}
+#nvidiaView .nvs-lab-tabs button{font-size:12px;line-height:1.35;padding:12px 5px 10px;border-radius:8px 8px 0 0;background:#f0f5fb;border:1px solid #ccdaec;border-bottom:0;white-space:normal}
+#nvidiaView .nvs-lab-tabs button[aria-pressed=true]{background:#194f88;color:#fff;border-color:#194f88}
+#nvidiaView .nvs-lab-content{padding:16px 17px 11px}
+#nvidiaView .nvs-scenario-svg{display:block;width:100%;height:auto;max-height:360px;border-radius:11px;margin:5px 0 14px;overflow:visible}
+#nvidiaView .nvs-scenario-model .nvs-exact-circuit{border:1px solid #dde9f3;border-radius:11px}
+#nvidiaView .nvs-specific-observations{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+#nvidiaView .nvs-specific-observations>div{background:#f6f9fd;border:1px solid #e0eaf4;padding:12px;border-radius:10px;min-width:0}
+#nvidiaView .nvs-specific-observations dt{font-size:12px;color:#315d84;font-weight:800;margin:0 0 6px}
+#nvidiaView .nvs-specific-observations dd{font-size:13px;color:#304b61;line-height:1.55;margin:0}
+#nvidiaView .nvs-lab-result{border:1px solid #a6d9ca;background:#f1fbf6;padding:15px;border-radius:12px;margin:13px 0}
+#nvidiaView .nvs-lab-result>span{display:block;font-size:12px;color:#2b6357;font-weight:650}
+#nvidiaView .nvs-lab-result>strong{font-size:26px;display:block;margin:5px 0;color:#175544}
+#nvidiaView .nvs-lab-result code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;display:block;margin:7px 0}
+#nvidiaView .nvs-lab-result p{font-size:12px;margin:4px 0}
+#nvidiaView .nvs-lab-disclaimer{font-size:11px;line-height:1.6;color:#5e7488;background:#fafbfd;padding:10px 18px;border-top:1px solid #e2ebf4;margin:0}
+#nvidiaView .nvs-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:13px 0}
+#nvidiaView .nvs-choices button{line-height:1.45;padding:12px 7px;font-size:12px;white-space:normal}
+#nvidiaView .nvs-choices button[aria-pressed=true]{background:#205993;color:#fff;border-color:#205993}
+#nvidiaView .nvs-causal-answer{background:#f0f6fd;border:1px solid #bcd4eb;border-radius:12px;padding:16px;margin-top:12px;line-height:1.7}
+#nvidiaView .nvs-causal-answer strong{color:#174d7d}
+#nvidiaView .nvs-causal-answer p{font-size:13px;margin:8px 0}
+#nvidiaView .nvs-lab-lead{color:#405c76}
+#nvidiaView .nvs-lab-guideline{border-left:4px solid #d69a3a;background:#fffaec;padding:12px 15px;font-size:13px;line-height:1.65;margin:15px 0}
+#nvidiaView .nvs-evidence-worksheet>p{color:#315a73;font-size:13px}
+#nvidiaView .nvs-lab-check{display:flex;align-items:flex-start;gap:11px;border:1px solid #dce6f0;background:#f8fafc;padding:10px;border-radius:9px;line-height:1.55;font-size:13px;margin:7px 0;cursor:pointer}
+#nvidiaView .nvs-lab-check input{width:19px;min-width:19px;height:19px;margin:2px 0 0;accent-color:#15846d;cursor:pointer}
+#nvidiaView .nvs-lab-check span{flex:1}
+#nvidiaView .nvs-lab-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0}
+#nvidiaView .nvs-copy-status{font-size:12px;color:#326d60}
+#nvidiaView .nvs-terminal{background:#12243e;color:#e0ecff;border-radius:12px;margin:6px 0 15px;overflow:hidden}
+#nvidiaView .nvs-terminal-head{background:#1b385c;color:#cfe4ff;padding:12px;font-size:12px;font-weight:800;letter-spacing:.05em}
+#nvidiaView .nvs-terminal pre{padding:18px;overflow-x:auto;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;color:#bde7d0;font-size:12px}
+#nvidiaView .nvs-terminal p{padding:0 17px 14px;font-size:12px;color:#e4f0ff}
+@media(max-width:800px){
+#nvidiaView .nvs-lab-heading{display:block}
+#nvidiaView .nvs-lab-heading>span{display:block;max-width:none;text-align:left;margin-top:8px}
+#nvidiaView .nvs-lab-tabs{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#nvidiaView .nvs-lab-tabs button{border-radius:7px;font-size:11px}
+#nvidiaView .nvs-specific-observations{grid-template-columns:1fr}
+}
+@media(max-width:500px){#nvidiaView .nvs-lab-content{padding:12px 10px}#nvidiaView .nvs-choices{grid-template-columns:1fr}#nvidiaView .nvs-lab-heading{padding:12px 13px}#nvidiaView .nvs-scenario-svg{max-height:none}}

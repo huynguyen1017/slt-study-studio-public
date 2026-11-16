@@ -112,7 +112,7 @@ const html=read("index.html"),cache=read("sw.js");
 for(const file of ["avionics_integrative_capstones_v11.js","avionics_mixed_networks_v11.js","avionics_mixed_visuals_v11.js"]){
  assert(html.includes(file),file+" must load online");assert(cache.includes(file),file+" must be cached offline");
 }
-assert(cache.includes("v34-nvidia-slt-academy"));
+assert(cache.includes("v35-nvidia-scenario-lab"));
 assert(html.indexOf("avionics_mixed_networks_v11.js")<html.indexOf("avionics_tutor.js"),"new source must load before workbook");
 assert(html.indexOf("avionics_mixed_visuals_v11.js")>html.indexOf("avionics_visuals.js"),"diagram wrapper should load after base");
 assert(read("avionics_tutor.js").includes("MIXED.reroll(q)"),"dice must use live network values");
