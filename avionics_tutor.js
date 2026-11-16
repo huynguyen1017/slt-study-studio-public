@@ -328,6 +328,9 @@ function lessonPage(q,t,f){
  (NOTEBOOK?NOTEBOOK.render(t.id):"")+
  '<h4 class="av-figure-heading">Interactive circuit, graph &amp; '+(VIS&&VIS.describe(q,t).board?'breadboard':'test fixture')+' wiring for '+esc(q.id.toUpperCase())+'</h4>'+
  visualSwitcherBar(inlineVisualMode)+illustration+
+ (inlineVisualMode==="wiring"
+  ?'<div class="av-sim-host" data-sim-page="learn"></div>'
+  :'<div class="av-sim-compact-strip"><span>Open <strong>3. Board &amp; Breadboard</strong> to run the interactive multimeter bench, live scope &amp; Online CircuitJS1 for <strong>'+esc(q.id.toUpperCase())+'</strong>.</span><button type="button" class="av-vis-pill" data-vismode="wiring">⚡ Open Live Simulator</button></div>')+
  '<div class="av-actions-bottom"><button id="avGoVisual" class="av-light">See all 3 large visuals stacked →</button><button id="avGoWork" class="av-primary">See all 6 baby steps + worked MathML →</button></div>'+
  (formulaSrc?equation(formulaSrc,"1. ENGINEERING EQUATION (MATHML)"):"")+
  (subSrc?equation(subSrc,"2. WORKED EXAMPLE / SUBSTITUTION (ENGINEERING NOTATION)"):"")+
@@ -352,6 +355,7 @@ function visualPage(q,t,f){
  pics.map(x=>'<section class="av-visual-panel" id="avVisual-'+x[0]+'"><div class="av-visual-panel-head"><div><h4>'+esc(x[1])+'</h4><p>'+esc(x[2])+'</p></div><button class="av-light" data-zoom="'+x[0]+'" aria-label="Enlarge '+esc(x[1])+'">↗ Enlarge</button></div>'+
  (VIS?VIS.render(q,t,x[0]):'<p>Visuals are unavailable.</p>')+
  (x[0]==="wiring"&&CIRCUITSIM?CIRCUITSIM.render(q,t):"")+'</section>').join("")+
+ '<section class="av-sim-section" id="avVisual-sim"><div class="av-sim-host" data-sim-page="visual"></div></section>'+
  '<div class="av-takeaway"><strong>Before continuing:</strong> '+((info&&info.board)?'Trace the source and return path, which breadboard row holes share a net, and exactly where the selected probe belongs.':'Trace the test signal, reference and return paths. Fixture grid labels are logical signal references, NOT electrically connected breadboard holes or verified device pins.')+'</div>'+
  '<div class="av-actions-bottom"><button id="avVisualBack" class="av-light">← Review the idea</button><button id="avVisualForward" class="av-primary">Now solve it in 6 baby steps →</button></div></section>';
 }
@@ -367,7 +371,10 @@ function inlineStepVisual(q,t,step){
  visualSwitcherBar(activeMode)+
  VIS.render(q,t,activeMode)+
  (secondary?'<details class="av-step-extra"><summary>'+(secondary==="concept"?"Show the response graph":"Show the 3-panel board &amp; breadboard setup")+'</summary>'+VIS.render(q,t,secondary)+'</details>':"")+
- '<button id="avStepVisual" class="av-light" type="button">Open all three large visual views ↗</button></div>';
+ '<button id="avStepVisual" class="av-light" type="button">Open all three large visual views ↗</button></div>'+
+ (activeMode==="wiring"
+  ?'<div class="av-sim-host" data-sim-page="work"></div>'
+  :'<div class="av-sim-compact-strip"><span>Switch to <strong>3. Board &amp; Breadboard</strong> to interact with the live DMM, scope &amp; Online CircuitJS1 for <strong>'+esc(q.id.toUpperCase())+'</strong>.</span><button type="button" class="av-vis-pill" data-vismode="wiring">⚡ Open Live Simulator</button></div>');
 }
 
 function solvePage(q,t,f){
@@ -492,7 +499,7 @@ function wire(){
  if(CIRCUITSIM)CIRCUITSIM.bind(host,requestedTopic=>requestedTopic?topicOf():activeQuestion());
  if(NOTEBOOK)NOTEBOOK.bind(host);
  const el=find("#avTopicList",host);
- if(el)el.onchange=e=>{topic=e.target.value;currentIndex=0;page="learn";stepIndex=0;inlineVisualMode="schematic";filter="All";query="";state.lastTopic=topic;state.lastIndex=0;save();show()};
+ if(el)el.onchange=e=>{topic=e.target.value;currentIndex=0;page="learn";stepIndex=0;filter="All";query="";state.lastTopic=topic;state.lastIndex=0;save();show()};
  const lev=find("#avLevelList",host);
  if(lev)lev.onchange=e=>{filter=e.target.value;currentIndex=0;page="learn";stepIndex=0;show()};
  const search=find("#avQuestionSearch",host);
@@ -537,7 +544,8 @@ function wire(){
  host.querySelectorAll("[data-zoom]").forEach(b=>b.onclick=()=>{
   const q=selected(),t=topicOf(),dialog=find("#avVisualZoom",host),body=find("#avZoomBody",host);
   if(!q||!VIS||!dialog||!body)return;
-  body.innerHTML=VIS.render(q,t,b.dataset.zoom);
+  body.innerHTML=VIS.render(q,t,b.dataset.zoom)+(b.dataset.zoom==="wiring"?'<div class="av-sim-host" data-sim-page="zoom"></div>':"");
+  if(b.dataset.zoom==="wiring"&&window.mountAvionicsSimulator)window.mountAvionicsSimulator(body,q,t);
   if(typeof dialog.showModal==="function")dialog.showModal();
  });
  const zoomClose=find("#avZoomClose",host);if(zoomClose)zoomClose.onclick=()=>find("#avVisualZoom",host)?.close();
@@ -581,6 +589,10 @@ function wire(){
  const retry=find("#avNeedReview",host);if(retry)retry.onclick=()=>rating("again");
  const back=find("#avBackLesson",host);if(back)back.onclick=()=>switchPage("learn");
  const nxt=find("#avNextQuestion",host);if(nxt)nxt.onclick=()=>moveQuestion(currentIndex+1);
+ if(window.mountAvionicsSimulator){
+  const qNow=selected(),tNow=topicOf();
+  if(qNow&&tNow)window.mountAvionicsSimulator(host,qNow,tNow);
+ }
 }
 
 window.mountAvionicsPractice=function(el){

@@ -1,0 +1,442 @@
+/* Interactive Avionics Circuit, Breadboard & Online Simulator Workbench */
+.av-sim-host {
+  margin-top: 14px;
+  border: 1px solid #d7dfef;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.av-sim-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #0f172a;
+  color: #f8fafc;
+  border-bottom: 1px solid #1e293b;
+}
+
+.av-sim-titlewrap {
+  min-width: 0;
+  flex: 1 1 260px;
+}
+
+.av-sim-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #38bdf8;
+  margin-bottom: 2px;
+}
+
+.av-sim-topbar h4.av-sim-title,
+.av-sim-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.av-sim-sub {
+  font-size: 12px;
+  color: #cbd5e1;
+  margin: 2px 0 0;
+}
+
+.av-sim-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.av-sim-btn {
+  appearance: none;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #f8fafc;
+  border-radius: 9px;
+  padding: 7px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.av-sim-btn:hover {
+  background: #334155;
+  border-color: #64748b;
+}
+
+.av-sim-btn:active {
+  transform: translateY(1px);
+}
+
+.av-sim-btn.power-on {
+  background: #065f46;
+  border-color: #10b981;
+  color: #ecfdf5;
+}
+
+.av-sim-btn.power-off {
+  background: #7f1d1d;
+  border-color: #ef4444;
+  color: #fef2f2;
+}
+
+.av-sim-btn.fault-on {
+  background: #9a3412;
+  border-color: #fb923c;
+  color: #fff7ed;
+}
+
+.av-sim-btn.online-primary {
+  background: #4f46e5;
+  border-color: #818cf8;
+  color: #ffffff;
+}
+
+.av-sim-btn.online-primary:hover {
+  background: #4338ca;
+}
+
+.av-sim-banner {
+  padding: 9px 16px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.av-sim-banner.is-healthy {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.av-sim-banner.is-fault {
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.av-sim-banner.is-poweroff {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.av-sim-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px 16px;
+}
+
+@media (max-width: 920px) {
+  .av-sim-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.av-sim-card {
+  border: 1px solid #dde5f2;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 12px;
+  min-width: 0;
+}
+
+.av-sim-card h5 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.av-sim-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.av-sim-bb-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.av-sim-bb-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+
+.av-sim-probe-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.av-sim-probe-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 5px 8px;
+}
+
+.av-sim-probe-label select {
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 6px;
+}
+
+.av-sim-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.av-sim-dot.red { background: #dc2626; }
+.av-sim-dot.blk { background: #0f172a; }
+
+.av-sim-dmm {
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0b132b 0%, #1c2541 100%);
+  color: #f8fafc;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border: 1px solid #3a506b;
+}
+
+.av-sim-dmm-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.av-sim-dmm-brand {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #93c5fd;
+  text-transform: uppercase;
+}
+
+.av-sim-dmm-modes {
+  display: flex;
+  gap: 4px;
+}
+
+.av-sim-dmm-modes button {
+  appearance: none;
+  border: 1px solid #475569;
+  background: #1e293b;
+  color: #cbd5e1;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.av-sim-dmm-modes button.active {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.av-sim-dmm-readout {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #4ade80;
+  line-height: 1.15;
+}
+
+.av-sim-dmm-readout.warn {
+  color: #fbbf24;
+  font-size: 16px;
+}
+
+.av-sim-dmm-meta {
+  font-size: 11.5px;
+  color: #cbd5e1;
+  margin-top: 4px;
+}
+
+.av-sim-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.av-sim-slider-row {
+  display: grid;
+  grid-template-columns: 115px minmax(0, 1fr) 74px;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.av-sim-slider-row label {
+  font-weight: 600;
+  color: #334155;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.av-sim-slider-row input[type="range"] {
+  width: 100%;
+  accent-color: #4f46e5;
+}
+
+.av-sim-slider-val {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-weight: 700;
+  font-size: 12px;
+  color: #0f172a;
+  text-align: right;
+}
+
+.av-sim-nodes-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.av-sim-nodes-table th,
+.av-sim-nodes-table td {
+  text-align: left;
+  padding: 5px 6px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.av-sim-nodes-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.av-sim-nodes-table td.num {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.av-sim-scope-wrap {
+  margin-top: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #334155;
+  background: #020617;
+}
+
+.av-sim-scope-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.av-sim-target-check {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  font-size: 12px;
+  color: #312e81;
+  line-height: 1.45;
+}
+
+.av-sim-online-drawer {
+  border-top: 1px solid #cbd5e1;
+  background: #f1f5f9;
+  padding: 12px 16px;
+}
+
+.av-sim-online-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 12.5px;
+  color: #334155;
+}
+
+.av-sim-iframe {
+  width: 100%;
+  height: 460px;
+  border: 1px solid #94a3b8;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.av-sim-inline-note {
+  font-size: 11.5px;
+  color: #475569;
+  margin: 6px 0 0;
+}
+
+.av-sim-section {
+  margin-top: 14px;
+}
+
+.av-sim-compact-strip {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #1e293b;
+}

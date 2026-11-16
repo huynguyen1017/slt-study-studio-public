@@ -57,6 +57,7 @@ for(const s of ["avionics_beginner_lessons.js","avionics_tutor.js","avionics_tut
 }
 assert(service.includes("v27-unique-wiring-sim"));
 assert(service.includes("avionics_si_lesson.js")&&service.includes("avionics_si.css"));
+assert(service.includes("avionics_simulator.js")&&service.includes("avionics_simulator.css"));
 const ohm=topics.find(t=>t.id==="ohm"),ohmCalc=questions.find(q=>q.id==="ohm-C1");
 const ohmDrawing=VIS.render(ohmCalc,ohm,"schematic");
 assert(ohmDrawing.includes("330 Ω")&&ohmDrawing.includes("3.3 V"),"Use real given values on schematic");
@@ -86,6 +87,7 @@ console.log("PASS: 690 questions retained; 23 beginner lessons; six-step guides;
   assert.equal(await page.locator(".av-visual-panel").count(),3);
   assert.equal(await page.locator(".av-visual-svg").count(),3);
   assert((await page.locator('#avVisual-wiring').textContent()).toLowerCase().includes("breadboard"));
+  assert.equal(await page.locator("#avVisual-sim .av-sim-host").count(),1);
   await page.locator('[data-zoom="wiring"]').click();
   assert.equal(await page.locator("#avVisualZoom").evaluate(el=>el.open),true);
   await page.locator("#avZoomClose").click();

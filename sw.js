@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v27-unique-wiring-sim';
+const CACHE = 'slt-study-studio-v27-unique-wiring-sim-r2';
 const CORE = [
   "./",
   "./index.html",
@@ -27,6 +27,8 @@ const CORE = [
   "./avionics_visuals.js",
   "./avionics_circuit_simulator.js",
   "./avionics_circuit_simulator.css",
+  "./avionics_simulator.js",
+  "./avionics_simulator.css",
   "./avionics_visuals.css",
   "./cards.js",
   "./labs.js",
@@ -151,5 +153,5 @@ self.addEventListener('fetch',event=>{
   event.respondWith(fetch(request).then(response=>{if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put('./index.html',copy));}return response;}).catch(()=>caches.match('./index.html')));
   return;
  }
- event.respondWith(caches.match(request,{ignoreSearch:true}).then(found=>found||fetch(request).then(response=>{if(response.ok){const clone=response.clone();caches.open(CACHE).then(cache=>cache.put(request,clone));}return response;})));
+ event.respondWith(fetch(request).then(response=>{if(response.ok){const clone=response.clone();caches.open(CACHE).then(cache=>cache.put(request,clone));}return response;}).catch(()=>caches.match(request,{ignoreSearch:true})));
 });
