@@ -474,7 +474,7 @@ function wrapTwo(s,max=25){
 }
 
 function classifyWiring(q,t){
- const id=t.id,cf=q.calcFamily||"",txt=(q.question+" "+cf+" "+q.id).toLowerCase();
+ const id=t.id,cf=q.calcFamily||"",txt=(q.question+" "+cf).toLowerCase();
  if(id==="units"){
   if(/milli|micro|amp|\bcurrent\b|\bmA\b|\bµA\b/i.test(txt)||cf==="milli"||cf==="micro")return "ammeter-series";
   if(/watt|power|joule|energy/i.test(txt))return "dc-power";
@@ -501,8 +501,9 @@ function classifyWiring(q,t){
  }
  if(id==="parallel")return "parallel-network";
  if(id==="kcl-kvl"){
-  if(/kcl|node|junction|branch.*sum|enter|leav/i.test(txt)||cf==="kcl")return "kcl-junction";
-  return "kvl-mesh";
+  if(/kvl|kirchhoff voltage|voltage law|loop voltage|voltage drops|closed loop|loop rule|mesh/i.test(txt)||cf==="kvl")return "kvl-mesh";
+  if(/kcl|kirchhoff current|current law|junction|branch.*sum|enter|leav/i.test(txt)||cf==="kcl")return "kcl-junction";
+  return /-([FA])2$/.test(q.id)?"kvl-mesh":"kcl-junction";
  }
  if(id==="thevenin")return /norton/i.test(txt)||cf==="norton"?"norton-source":"thevenin-port";
  if(id==="ac")return /phase|lead|lag/i.test(txt)?"ac-phase":"ac-bench";
@@ -582,6 +583,74 @@ function classifyWiring(q,t){
   return "qual-verify";
  }
  return "dmm-ohm";
+}
+
+
+/* Each question gets a reproducible teaching fixture without changing the electrical
+   equivalence of ordinary breadboard a-e / f-j rows. The physical pinout is
+   illustrative; never treat this as a manufacturer-approved harness. */
+function tailorWiringLayout(base,q,t){
+ const c={...base,
+  wires:base.wires.map(w=>({...w})),
+  comps:base.comps.map(p=>({...p})),
+  jumps:base.jumps.map(j=>({...j}))};
+ const m=q.id.match(/-([FACD])(\d+)$/),n=m?Number(m[2]):1,level=q.level||"Foundations";
+ const words=q.question.toLowerCase();
+ const hasIc=c.comps.some(x=>x.kind==="IC");
+ const rows=[];
+ for(const w of c.wires)rows.push(w.row);
+ for(const j of c.jumps)rows.push(j.r1,j.r2);
+ for(const p of c.comps)rows.push(p.r1,p.r2);
+ const lower=Math.min(...rows),upper=Math.max(...rows);
+ const wanted=[-1,0,1][(n+(level==="Application"?1:level==="Troubleshooting"?2:0))%3];
+ const shift=lower+wanted>=9&&upper+wanted<=17?wanted:0;
+ const shifted=r=>r+shift;
+ const swapCol=k=>k===0?1:k===1?0:k===2?3:k===3?2:k===6?7:k===7?6:k===8?9:k===9?8:k;
+ const rearrange=!hasIc&&(n%2===0);
+ const col=k=>rearrange?swapCol(k):k;
+ c.wires=c.wires.map(w=>({...w,row:shifted(w.row),col:col(w.col)}));
+ c.jumps=c.jumps.map(j=>({...j,r1:shifted(j.r1),r2:shifted(j.r2),c1:col(j.c1),c2:col(j.c2)}));
+ c.comps=c.comps.map(p=>({...p,r1:shifted(p.r1),r2:shifted(p.r2),
+  ...(p.col!==undefined?{col:col(p.col)}:{}),
+  ...(p.c1!==undefined?{c1:col(p.c1),c2:col(p.c2)}:{})}));
+ // Branch experiments: never add unasked resistances to numerical questions.
+ const isConcept=level==="Foundations"||level==="Application";
+ if(c.key==="parallel-network"&&isConcept){
+  const count=2+(n%3),bank=[1,3,7,9];
+  const used=c.comps.filter(p=>p.kind==="R").slice(0,count);
+  while(used.length<count)used.push({kind:"R",label:"R"+(used.length+1),val:["330 Ω","1 kΩ","470 Ω","2.2 kΩ"][used.length],col:bank[used.length],r1:shifted(10),r2:shifted(16)});
+  used.forEach((p,i)=>{p.col=col(bank[i]);p.label="R"+(i+1)});
+  c.comps=used;
+  c.title=count+"-Branch Parallel Node Experiment";
+ }
+ if(c.key==="kcl-junction"&&isConcept){
+  // The extra branch shares the same two nodes; no arbitrary physical return.
+  if(n%2===0&&!c.comps.some(p=>p.label==="R3"))
+   c.comps.push({kind:"R",label:"R3",val:"2.2 kΩ",col:col(9),r1:shifted(13),r2:shifted(16)});
+  c.title=(n%2===0?"Three":"Two")+"-Branch KCL Junction";
+ }
+ const measurement= /current|ammeter|branch|kcl/i.test(words)?"Current (DMM in series)":
+  /voltage|divider|kvl|potential|drop/i.test(words)?"Voltage (DMM across nodes)":
+  /ohm|resistance|continuity/i.test(words)?"Resistance (power OFF)":
+  /freq|clock|phase|pulse|timing|rise|fall|reset/i.test(words)?"Timing (scope probe and ground)":
+  /fault|short|open|failure|debug|troubleshoot/i.test(words)?"Fault isolation (compare healthy to faulty)":
+  /rf|s11|return loss|s21|spectrum/i.test(words)?"RF instrument reference planes":
+  "Verify endpoints, reference and expected behavior";
+ const cWires=c.wires.filter(w=>w.col>=0&&w.col<=9);
+ const index=(n-1)%Math.max(1,cWires.length);
+ const selected=cWires[index]||{row:shifted(10),col:0};
+ const fault=level==="Troubleshooting"?( /short/i.test(words)?"Possible short (not diagnosed)":
+  /open|missing|disconnect/i.test(words)?"Possible open (not diagnosed)":
+  /wrong|reverse|polarity/i.test(words)?"Possible miswire (not diagnosed)":
+  "Check observed vs expected; root cause unverified"):"";
+ const id=(t.id+" · "+q.id);
+ c.questionId=q.id;c.measurement=measurement;c.selectedHole="abcdefghij"[selected.col]+selected.row;
+ c.questionDetail=words.slice(0,110);
+ c.focusPin={row:selected.row,col:selected.col};
+ c.faultHint=fault;c.rowShift=shift;c.componentCount=c.comps.length;
+ c.title=(c.title||c.hwTitle)+" · "+q.id.toUpperCase();
+ c.layoutSignature=JSON.stringify({key:c.key,w:c.wires.map(w=>[w.pi,w.col,w.row]),p:c.comps.map(p=>[p.kind,p.col,p.c1,p.c2,p.r1,p.r2,p.label]),j:c.jumps.map(j=>[j.c1,j.r1,j.c2,j.r2]),measurement,selected:c.selectedHole,fault});
+ return c;
 }
 
 function boardSetup(q,t){
@@ -1307,7 +1376,7 @@ function boardSetup(q,t){
  };
 
  const cfg=defs[key]||defs["dmm-ohm"];
- return {key,topic:t.id,R0,R1,R2,V0,I0,C0,C1,L0,F0,...cfg};
+ return tailorWiringLayout({key,topic:t.id,R0,R1,R2,V0,I0,C0,C1,L0,F0,...cfg},q,t);
 }
 
 function drawPanel1Body(c){
@@ -1401,6 +1470,10 @@ function threePanelBoardAndBreadboard(q,t){
   xs.forEach(x=>s+=dot(x,rowY[r],"#475b6d",2.4));
  }
  s+=text(308,301,"Rows connect a–e only and f–j only; center gap isolates left from right.",9,P.muted,"start","500");
+ // A highlighted probe location is connected to the active question, not merely a new title.
+ const focusX=xs[c.focusPin.col],focusY=rowY[c.focusPin.row];
+ s+='<circle cx="'+focusX+'" cy="'+focusY+'" r="9" stroke="'+P.pink+'" stroke-width="2.6" stroke-dasharray="3 2" fill="none"/>';
+ s+=text(306,318,"Selected probe node: "+c.selectedHole+" · "+clipLabel(c.measurement,53),10,P.pink,"start","800");
 
  // Internal breadboard jumpers
  c.jumps.forEach(j=>{
@@ -1693,7 +1766,7 @@ function threePanelBoardAndBreadboard(q,t){
    rect(630,yT+2,150,38,"#f0fdf4",P.teal,6,1.4)+text(705,yM+2,clipLabel(c.hwBadge,16),8.6,P.teal,"middle","800");
  }
 
- s+=text(430,440,clipLabel(c.title+" · Physical row map & circuit diagram auto-update per question",118),8.3,P.muted,"middle","500");
+ s+=text(430,439,clipLabel(c.faultHint||c.measurement+" · "+c.componentCount+" installed device(s) · "+c.selectedHole,115),9,c.faultHint?P.red:P.blue,"middle","700");
  return svg(s,"Question-specific "+c.title+" with matched hardware ports, unobstructed 10-column solderless breadboard, build guide, and ANSI/IEEE schematic for "+q.id,860,460);
 }
 
@@ -1718,5 +1791,5 @@ function render(q,t,mode){
  '<div class="av-visual-top"><strong>'+esc(label)+'</strong><span>Question '+esc(q.id)+' · '+esc(q.level)+'</span></div>'+
  figure+'<div class="av-visual-question-line"><strong>Question:</strong> '+esc(q.question)+'</div><div class="av-visual-focus"><strong>Focus: '+esc(focus[0])+'.</strong> '+esc(focus[1]||'')+' <em>'+esc(check)+'</em></div><figcaption>'+esc(detail)+'. '+esc(warning)+'</figcaption></figure>';
 }
-window.avionicsVisuals={render,describe,hasBreadboard:(q,t)=>describe(q,t).board,viewTypes:()=>["schematic","concept","wiring"]};
+window.avionicsVisuals={render,describe,getWiringSetup:boardSetup,getWiringKey:classifyWiring,hasBreadboard:(q,t)=>describe(q,t).board,viewTypes:()=>["schematic","concept","wiring"]};
 })();
