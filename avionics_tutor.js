@@ -12,6 +12,7 @@ const BOOK=window.AVIONICS_TEXTBOOK_TOC||null;
 const COURSE=window.AVIONICS_COURSEWORK_BRIDGES||{};
 const NOTEBOOK=window.avionicsNotebookLabs||null;
 const VIS=window.avionicsVisuals;
+const CIRCUITSIM=window.avionicsCircuitSimulator||null;
 const ASSESS=window.avionicsAnswerCheck;
 const STORE="slt-avionics-ee-practice-v1";
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -325,7 +326,7 @@ function lessonPage(q,t,f){
  courseworkBridge(t)+
  digitalLogicPanel(t)+
  (NOTEBOOK?NOTEBOOK.render(t.id):"")+
- '<h4 class="av-figure-heading">Interactive circuit, graph &amp; 3-panel breadboard connection for '+esc(q.id.toUpperCase())+'</h4>'+
+ '<h4 class="av-figure-heading">Interactive circuit, graph &amp; '+(VIS&&VIS.describe(q,t).board?'breadboard':'test fixture')+' wiring for '+esc(q.id.toUpperCase())+'</h4>'+
  visualSwitcherBar(inlineVisualMode)+illustration+
  '<div class="av-actions-bottom"><button id="avGoVisual" class="av-light">See all 3 large visuals stacked →</button><button id="avGoWork" class="av-primary">See all 6 baby steps + worked MathML →</button></div>'+
  (formulaSrc?equation(formulaSrc,"1. ENGINEERING EQUATION (MATHML)"):"")+
@@ -340,7 +341,7 @@ function visualPage(q,t,f){
  const pics=[
   ["schematic","01 · Full Circuit Schematic (Textbook & Current Loop)","Trace conventional current from (+) through every component back to (−) and locate the unknown quantity."],
   ["concept","02 · Question-Specific Graph / Waveform","Inspect the I-V operating point, transient exponential curve, frequency cutoff, or 4-channel oscilloscope trace."],
-  ["wiring","03 · "+(info?info.wiring:"3-Panel Board, Solderless Breadboard & Circuit Symbols"),"Left: Avionics/Nucleo pin headers · Right: Exact breadboard holes (a–e | f–j, rows 9–17) · Bottom: Matching circuit symbols."]
+  ["wiring","03 · "+(info?info.wiring:"3-Panel Board, Solderless Breadboard & Circuit Symbols"),"Compare the active question’s source and probe ports, revised breadboard rows and component connections, and matched equivalent schematic. Advanced systems use conceptual benches, not verified physical pinouts."]
  ];
  return '<section class="av-page av-visual-page" aria-label="Question-specific visual laboratory">'+
  '<div class="av-eyebrow">PAGE 2 / 4 · SEE THE FULL CIRCUIT, GRAPH &amp; BOARD WIRING</div>'+
@@ -349,8 +350,9 @@ function visualPage(q,t,f){
  '<p class="av-explain">Every diagram below is tailored specifically to <strong>'+esc(q.id.toUpperCase())+'</strong>. The selected board pins, component mix, breadboard holes, and schematic topology follow this question’s circuit setup.</p>'+
  '<div class="av-visual-nav">'+pics.map(x=>'<a href="#avVisual-'+x[0]+'">'+esc(x[1])+'</a>').join("")+'</div>'+
  pics.map(x=>'<section class="av-visual-panel" id="avVisual-'+x[0]+'"><div class="av-visual-panel-head"><div><h4>'+esc(x[1])+'</h4><p>'+esc(x[2])+'</p></div><button class="av-light" data-zoom="'+x[0]+'" aria-label="Enlarge '+esc(x[1])+'">↗ Enlarge</button></div>'+
- (VIS?VIS.render(q,t,x[0]):'<p>Visuals are unavailable.</p>')+'</section>').join("")+
- '<div class="av-takeaway"><strong>Before continuing:</strong> Trace the drive and return connections through the shown components, identify which holes share a breadboard row (`a–e`), and verify where the DMM/scope probes belong for this question.</div>'+
+ (VIS?VIS.render(q,t,x[0]):'<p>Visuals are unavailable.</p>')+
+ (x[0]==="wiring"&&CIRCUITSIM?CIRCUITSIM.render(q,t):"")+'</section>').join("")+
+ '<div class="av-takeaway"><strong>Before continuing:</strong> '+((info&&info.board)?'Trace the source and return path, which breadboard row holes share a net, and exactly where the selected probe belongs.':'Trace the test signal, reference and return paths. Fixture grid labels are logical signal references, NOT electrically connected breadboard holes or verified device pins.')+'</div>'+
  '<div class="av-actions-bottom"><button id="avVisualBack" class="av-light">← Review the idea</button><button id="avVisualForward" class="av-primary">Now solve it in 6 baby steps →</button></div></section>';
 }
 
@@ -487,6 +489,7 @@ function moveQuestion(n,keepPage=false){
 function rating(x){const q=selected();if(!q)return;if(x==="know"&&(answerDirty||!state.assessments[q.id]||state.assessments[q.id].band!=="likely-correct"))return;state.ratings[q.id]=x;save();if(currentIndex<qset().length-1)moveQuestion(currentIndex+1);else show();}
 
 function wire(){
+ if(CIRCUITSIM)CIRCUITSIM.bind(host,requestedTopic=>requestedTopic?topicOf():activeQuestion());
  if(NOTEBOOK)NOTEBOOK.bind(host);
  const el=find("#avTopicList",host);
  if(el)el.onchange=e=>{topic=e.target.value;currentIndex=0;page="learn";stepIndex=0;inlineVisualMode="schematic";filter="All";query="";state.lastTopic=topic;state.lastIndex=0;save();show()};

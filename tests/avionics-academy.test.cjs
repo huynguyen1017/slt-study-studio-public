@@ -55,7 +55,7 @@ for(const s of ["avionics_beginner_lessons.js","avionics_tutor.js","avionics_tut
  assert(html.includes(s),s);
  assert(service.includes(s),"offline cache missing "+s);
 }
-assert(service.includes("v26-coursework-notebook-labs"));
+assert(service.includes("v27-unique-wiring-sim"));
 assert(service.includes("avionics_si_lesson.js")&&service.includes("avionics_si.css"));
 const ohm=topics.find(t=>t.id==="ohm"),ohmCalc=questions.find(q=>q.id==="ohm-C1");
 const ohmDrawing=VIS.render(ohmCalc,ohm,"schematic");
@@ -181,6 +181,19 @@ console.log("PASS: 690 questions retained; 23 beginner lessons; six-step guides;
   await page.locator("#avCheckExplanation").click();
   assert((await page.locator("#avFeedback").textContent()).includes("Likely correct"),"SI base unit evaluation must accept correct seven/ampere/volt distinction");
     assert.equal(errors.length,0,"No page errors "+errors.join(";"));
+  await page.locator("#avTopicList").selectOption("parallel");
+  await page.locator('[data-page="visual"]').click();
+  assert.equal(await page.locator('[data-sim-question="parallel-F1"]').count(),1,"First parallel question has its own CircuitJS model");
+  assert((await page.locator("#avVisual-wiring").textContent()).includes("Selected probe node"),"Probe indicator changes with the question");
+  assert.equal(await page.locator(".av-sim-frame iframe").count(),0,"Third-party simulator must not load until requested");
+  await page.locator('[data-quick-qid="parallel-F2"]').click();
+  assert.equal(await page.locator('[data-sim-question="parallel-F2"]').count(),1,"Simulator data must switch with the question");
+  assert((await page.locator("#avVisual-wiring").textContent()).includes("parallel-F2"),"Wiring must display the new question");
+  await page.locator("#avTopicList").selectOption("kcl-kvl");
+  await page.locator('[data-quick-qid="kcl-kvl-F2"]').click();
+  await page.locator('[data-page="visual"]').click();
+  assert((await page.locator("#avVisual-wiring").textContent()).includes("KVL"),"KVL must show a voltage loop");
+  await page.locator("#avTopicList").selectOption("units");
   const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   await mobile.goto("http://127.0.0.1:8765/#avionics",{waitUntil:"load"});
   await mobile.locator("#avionicsView .av-tutor").waitFor();
