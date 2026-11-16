@@ -1,0 +1,29 @@
+/* Scoped, accessible progressive EE workbook enhancements (v9). */
+#avionicsView .av-video-lessons{margin:19px 0 22px;border:1px solid #b9d5e4;border-radius:15px;background:#f8fcff;padding:16px}
+#avionicsView .av-video-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+#avionicsView .av-video-heading h4{margin:0;color:#1b506e;font-size:18px}
+#avionicsView .av-video-heading span{border-radius:20px;padding:5px 10px;background:#e4f3fb;color:#225673;font-size:12px;font-weight:800}
+#avionicsView .av-video-lessons>p{color:#577184;font-size:13px;line-height:1.65;margin:12px 0}
+#avionicsView .av-video-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#avionicsView .av-video-card{min-width:0;background:#fff;border:1px solid #d2e2ec;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:9px}
+#avionicsView .av-video-card strong{color:#1e5575;font-size:14px}
+#avionicsView .av-video-card p{margin:0;color:#213d54;font-size:14px;font-weight:650;line-height:1.4}
+#avionicsView .av-video-card small{color:#587184;font-size:12px;line-height:1.6;flex:1}
+#avionicsView .av-video-card a{color:#14658b;font-weight:800;font-size:12px}
+#avionicsView .av-video-card a:first-of-type{display:block;border-radius:8px;background:#e8f5fc;border:1px solid #c4dce8;padding:11px 13px;text-align:center}
+#avionicsView .av-video-card a:focus-visible,#avionicsView .av-nucleo-resources a:focus-visible{outline:3px solid #ac8a3b;outline-offset:3px}
+#avionicsView .av-video-lessons .av-video-note{font-size:11px;color:#6e808b}
+#avionicsView .av-nucleo-lesson{border:1px solid #b9cfdf;border-radius:14px;background:#f7fbfe;margin:17px 0;padding:16px;max-width:100%;overflow:hidden}
+#avionicsView .av-nucleo-lesson h4{color:#225a77;font-size:17px;margin:0 0 11px}
+#avionicsView .av-nucleo-lesson p{font-size:12px;color:#526f7e;line-height:1.65}
+#avionicsView .av-nucleo-stage{max-width:100%;overflow:auto;border:1px solid #bfd2e1;border-radius:12px;background:#fff}
+#avionicsView .av-nucleo-full-svg{width:100%;min-width:940px;height:auto;display:block}
+#avionicsView .av-nucleo-stage:focus-visible{outline:3px solid #b99b56}
+#avionicsView .av-nucleo-lesson .av-nucleo-warning{border-left:4px solid #e0a15b;background:#fff7e8;padding:12px;color:#735323}
+#avionicsView .av-nucleo-resources a{color:#165f88;font-size:12px}
+#avionicsView .av-nucleo-lesson>details{margin-top:14px;border-top:1px solid #cddde7;padding-top:12px}
+#avionicsView .av-nucleo-lesson>details summary{cursor:pointer;color:#1e5372;font-weight:750}
+#avionicsView .av-nucleo-lesson li{font-size:13px;line-height:1.75}
+#avionicsView .av-learning-stage{border:1px solid #d7e3eb;background:#f6fafd;border-radius:10px;padding:10px 13px;margin-bottom:12px;font-size:13px;font-weight:700;color:#315b73}
+#avionicsView .av-learning-stage small{font-size:11px;color:#617d8e;font-weight:450}
+@media(max-width:640px){#avionicsView .av-video-grid{grid-template-columns:1fr}#avionicsView .av-nucleo-full-svg{min-width:800px}#avionicsView .av-nucleo-lesson{padding:10px}}
