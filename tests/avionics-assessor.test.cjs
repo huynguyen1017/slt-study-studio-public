@@ -48,7 +48,7 @@ assert.equal(A.gradeNumber(numeric,"9.6").band,"partial");
 assert.equal(A.gradeNumber(numeric,"10 bananas").band,"needs-correction");
 assert.equal(A.gradeNumber(numeric,"not a number").band,"insufficient");
 const site=read("index.html"),sw=read("sw.js"),ui=read("avionics_tutor.js");
-assert(site.includes("avionics_assessor.js?v=4")&&site.includes("avionics_feedback.css?v=4"));
+assert(site.includes("avionics_assessor.js?v=6")&&site.includes("avionics_feedback.css?v=4"));
 assert(sw.includes("avionics_assessor.js")&&sw.includes("v21-si-curriculum-audit"));
 assert(ui.includes("av-question-gallery")&&ui.includes("data-qid="));
 assert(ui.includes("ASSESS.gradeText")&&ui.includes("inlineStepVisual(q,t,stepIndex)"));
