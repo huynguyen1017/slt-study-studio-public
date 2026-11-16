@@ -1434,12 +1434,13 @@ function drawPanel1Body(c){
 
 function threePanelBoardAndBreadboard(q,t){
  const c=boardSetup(q,t);
+ const isBreadboard=boards.has(t.id);
  const COL_NAMES=["a","b","c","d","e","f","g","h","i","j"];
  const xs=[342,370,398,426,454,508,536,564,592,620];
  const hole=(col,row)=>COL_NAMES[col]+row;
  const rowY={};for(let r=9;r<=17;r++)rowY[r]=128+(r-9)*18;
 
- let s=text(18,26,"BENCH & BREADBOARD WIRING ("+q.id.toUpperCase()+"): "+clipLabel(c.title,54),14.2,P.ink,"start","800")+
+ let s=text(18,26,(isBreadboard?"BENCH & BREADBOARD":"TEST FIXTURE / SIGNAL MATRIX")+" ("+q.id.toUpperCase()+"): "+clipLabel(c.title,54),14.2,P.ink,"start","800")+
   text(18,44,c.safety,10.5,"#a84619","start","600");
 
  const p1=drawPanel1Body(c);
@@ -1447,7 +1448,7 @@ function threePanelBoardAndBreadboard(q,t){
 
  // Panel 2: Unobstructed 10-column Solderless Breadboard (a–e | gap | f–j, rows 9–17)
  s+=rect(294,56,382,256,"#fff","#cbdce7",11,1.4)+
-  text(308,77,"2 · SOLDERLESS BREADBOARD (a–e | f–j · rows 9–17)",12,P.ink,"start","800")+
+  text(308,77,isBreadboard?"2 · SOLDERLESS BREADBOARD (a–e | f–j)":"2 · VIRTUAL SIGNAL MATRIX · NOT A BREADBOARD",11,P.ink,"start","800")+
   text(308,93,clipLabel(c.title,54),9.5,P.muted,"start","600")+
   rect(306,101,358,184,"#efefe6","#d4d8cc",9,1.2);
  COL_NAMES.forEach((nm,i)=>s+=text(xs[i],115,nm,9.5,P.ink,"middle","700"));
@@ -1465,15 +1466,15 @@ function threePanelBoardAndBreadboard(q,t){
 
  for(let r=9;r<=17;r++){
   const al=activeL.has(r),ar=activeR.has(r);
-  s+=rect(330,rowY[r]-6,136,12,al?"#d9ebfc":"#f7f7f2",al?"#9ec6eb":"none",5,1)+
-   rect(496,rowY[r]-6,136,12,ar?"#d9ebfc":"#f7f7f2",ar?"#9ec6eb":"none",5,1);
+  s+=rect(330,rowY[r]-6,136,12,isBreadboard?(al?"#d9ebfc":"#f7f7f2"):"#f7f7f2",isBreadboard&&al?"#9ec6eb":"none",5,1)+
+   rect(496,rowY[r]-6,136,12,isBreadboard?(ar?"#d9ebfc":"#f7f7f2"):"#f7f7f2",isBreadboard&&ar?"#9ec6eb":"none",5,1);
   xs.forEach(x=>s+=dot(x,rowY[r],"#475b6d",2.4));
  }
- s+=text(308,301,"Rows connect a–e only and f–j only; center gap isolates left from right.",9,P.muted,"start","500");
+ s+=text(308,301,isBreadboard?"Rows connect a–e only and f–j only; center gap isolates.":"Grid labels are conceptual nets, NOT real connected holes or hardware pins.",8.7,P.muted,"start","500");
  // A highlighted probe location is connected to the active question, not merely a new title.
  const focusX=xs[c.focusPin.col],focusY=rowY[c.focusPin.row];
  s+='<circle cx="'+focusX+'" cy="'+focusY+'" r="9" stroke="'+P.pink+'" stroke-width="2.6" stroke-dasharray="3 2" fill="none"/>';
- s+=text(306,318,"Selected probe node: "+c.selectedHole+" · "+clipLabel(c.measurement,53),10,P.pink,"start","800");
+ s+=text(306,318,(isBreadboard?"Selected probe hole: ":"Virtual probe reference: ")+c.selectedHole+" · "+clipLabel(c.measurement,48),9.5,P.pink,"start","800");
 
  // Internal breadboard jumpers
  c.jumps.forEach(j=>{
