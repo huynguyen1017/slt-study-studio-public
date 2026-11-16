@@ -35,3 +35,6 @@
  #avionicsView .av-zoom-dialog .av-visual-svg{min-width:680px}
  #avionicsView .av-zoom-dialog .av-visual-figure{overflow-x:auto}
 }
+
+#avionicsView .av-visual-question-line{padding:11px 15px;background:#fafcff;border-top:1px solid #e3edf3;font-size:12px;color:#33546a;line-height:1.65}
+#avionicsView .av-visual-question-line strong{color:#0c5976}
