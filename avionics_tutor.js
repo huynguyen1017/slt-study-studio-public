@@ -278,6 +278,7 @@ function textbookPanel(t){
  return '<details class="av-chapter-map"><summary>Floyd &amp; Buchla chapter cross-reference ('+matched.length+' matching headings)</summary>'+
  '<p><strong>'+esc(BOOK.title)+'</strong> — '+esc(BOOK.authors)+'</p>'+
  '<p>'+esc(BOOK.evidence)+'</p>'+
+ '<p><a class="av-book-source-link" href="'+esc(BOOK.bookUrl)+'" target="_blank" rel="noopener noreferrer">Open this book in VitalSource ↗</a></p>'+
  (matched.length?'<p><strong>Related sections by chapter title:</strong> '+matched.map(c=>'Ch. '+c.number+' '+esc(c.title)).join(' · ')+'</p>':
  '<p>Applied avionics skills not explicitly titled as a chapter of this foundational circuit textbook.</p>')+
  '<details><summary>View all 21 chapter names and starting pages</summary><ol>'+
