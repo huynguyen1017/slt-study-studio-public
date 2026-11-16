@@ -16,7 +16,19 @@ for(const t of T){
   let objective="";
   if(phase===0){
    objective="Define and explain "+sk.name;
-   question="Q"+n+". Starting from zero prior EE knowledge, explain "+sk.name+" to a new SoC system tester. What does it physically mean, what would you observe, and how could you distinguish a real hardware problem from the specific trap: "+sk.risk+"?";
+   const foundationPrompts=[
+    "Define "+sk.name+" in everyday language, with a physically observable example and any relevant units.",
+    "A teammate confuses "+sk.name+" with "+next.name+". Explain the difference and how you would distinguish them using evidence.",
+    "Predict one real-world cause-and-effect relationship involving "+sk.name+"; describe a healthy versus unhealthy observation.",
+    "Draw or trace "+sk.name+" through an entire host → fixture → DUT setup. Identify the first point at which you can measure the principle.",
+    "Teach a new technician how to recognize "+sk.name+" in a number, a console message, or an instrument readout, and interpret its units.",
+    "Explain which prerequisite conditions must be true before you trust the result for "+sk.name+"; arrange checks in a safe order.",
+    "Two tools disagree about "+sk.name+". What is each tool actually observing, and what independent test would settle it?",
+    "A station summary prints PASS for "+sk.name+". Show why this alone may be insufficient and what raw evidence you must see.",
+    "Choose a safe tool and connection to assess "+sk.name+"; explain an unsafe or misleading setup you would avoid.",
+    "Defend "+sk.name+" in a beginner interview: give a precise definition, expected behavior, counterexample and one falsifiable check."
+   ];
+   question="Q"+n+". "+foundationPrompts[k]+" One key misunderstanding to avoid: "+sk.risk+" Explain your reasoning without assuming you have previously worked on NVIDIA hardware.";
    steps=[
     "Read the words slowly. The topic is '"+sk.name+"'. Do not start with a memorized acronym; first state what physical system or software result it describes.",
     "The plain-language meaning is: "+sk.meaning+" If there are units or timing conditions, name them explicitly instead of assuming a reading is valid.",
