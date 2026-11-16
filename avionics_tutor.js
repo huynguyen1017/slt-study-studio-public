@@ -152,6 +152,17 @@ function stepsFor(q,t,f){
  const out=[];
  const formulaStr=q.formula||(beginner&&beginner.formula)||null;
  const subStr=q.sub||(beginner&&beginner.sub)||null;
+ // Q31–50 have their own eight-step worked answer rather than a generic diagnostic template.
+ if(q.advancedStage>=31){
+  const titles=["Name the concept and its units","Separate evidence from diagnosis","Predict healthy operation","Make a safe independent check","Do the arithmetic or interpret physical proof","Challenge alternative root causes","Corroborate using another observation","Record the disposition and next evidence"];
+  return (q.steps||[]).map((body,i)=>({
+   title:titles[i]||"Explain and verify",body,
+   kind:q.expected!==undefined&&i===4?"answer":q.expected!==undefined&&(i===2||i===3)?"formula":"text",
+   formula:q.expected!==undefined&&i===2?q.formula:q.expected!==undefined&&i===3?q.sub:null,
+   answer:q.expected!==undefined&&i===4?fmt(q.expected)+" "+q.unit:null,
+   engHtml:q.expected!==undefined&&i===4?engVal(q.expected,q.unit):null
+  }));
+ }
  if(q.level==="Foundations"||q.level==="Application"){
   out.push({
    title:"Understand the question in everyday words",
@@ -371,7 +382,7 @@ function lessonPage(q,t,f){
  '<div class="av-eyebrow">PAGE 1 / 4 · UNDERSTAND THE QUESTION &amp; CIRCUIT</div>'+
  '<h3>Start here: '+esc(f.label)+'</h3>'+
  activeBanner(q,t)+
- '<div class="av-learning-stage">Learning step '+esc(String(q.difficulty||1))+' / 30 · '+esc(q.learningObjective||q.level)+' <small>Foundations → Lab applications → Calculations → Fault diagnosis</small></div>'+ 
+ '<div class="av-learning-stage">Learning step '+esc(String(q.difficulty||1))+' / '+TOPIC_TOTAL+' · '+esc(q.learningObjective||q.level)+' <small>Foundations → Lab applications → Calculations → Fault diagnosis</small></div>'+ 
  '<div class="av-lede"><strong>In very simple words (Zero prior EE assumed)</strong><p>'+rich(summary)+'</p></div>'+
  '<div class="av-two-up"><section><h4>Words you need first</h4><table class="av-vocab"><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody>'+
  glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+rich(p[1])+'</td></tr>').join("")+
@@ -451,7 +462,7 @@ function solvePage(q,t,f){
  '</div></article>'+
  '<div class="av-control-row"><button id="avStepBack" class="av-light" '+(stepIndex===0?"disabled":"")+'>← Previous step</button>'+
  (stepIndex<steps.length-1?'<button id="avStepNext" class="av-primary">Next baby step →</button>':'<button id="avGoTry" class="av-primary">I have read the steps — try it yourself →</button>')+'</div>'+
- '<details class="av-all-steps" open><summary>Complete 6-Step Guided Walkthrough (All steps &amp; MathML equations)</summary><div class="av-all-list">'+
+ '<details class="av-all-steps" open><summary>Complete '+steps.length+'-Step Guided Walkthrough (All steps &amp; MathML equations)</summary><div class="av-all-list">'+
  steps.map((s,i)=>'<div class="'+(i===stepIndex?"av-step-highlight":"")+'"><b>Step '+(i+1)+': '+esc(s.title)+'</b><p>'+rich(s.body)+'</p>'+(s.formula?equation(s.formula,"EQUATION (MATHML)"):"")+(s.answer?'<div class="av-final-value">Final Answer: '+esc(s.answer)+(s.engHtml?' · Engineering Notation: '+s.engHtml:"")+'</div>':"")+'</div>').join("")+
  '</div></details>'+
  '<div class="av-takeaway"><strong>How to say this in your Muon Space interview:</strong> First state the physical law, describe how you set up the DMM/scope/breadboard, then explain the safety check and Go/No-Go limit.</div>'+
