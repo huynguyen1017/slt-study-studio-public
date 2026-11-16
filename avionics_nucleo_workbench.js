@@ -28,6 +28,25 @@ const variants={
  "i2c":{title:"I²C module with separate SDA/SCL pull-ups",tags:["I²C bus","3.3 V logic"],p:["3V3","GND","PB9","PB8"],parts:[["R_SDA","R","b10","b14","4.7 kΩ"],["R_SCL","R","d10","d17","4.7 kΩ"],["U1","MODULE","h10","h24","I²C sensor / OLED"]],links:[["3V3","a10"],["GND","a24"],["PB9","a14"],["PB8","a17"]],jump:[["e10","f10"],["e14","f14"],["e17","f17"],["e24","f24"]],modulePins:[["VCC","f10"],["SDA","f14"],["SCL","f17"],["GND","f24"]]},
  "spi":{title:"3.3 V SPI peripheral with four host signals",tags:["SPI bus","Check CPOL/CPHA"],p:["3V3","GND","PA7","PA6","PB6","PA5_CLK"],parts:[["U1","MODULE","h10","h24","SPI sensor / display"]],links:[["3V3","a10"],["GND","a24"],["PA7","a12"],["PA6","a14"],["PB6","a18"],["PA5_CLK","a20"]],jump:[["e10","f10"],["e12","f12"],["e14","f14"],["e18","f18"],["e20","f20"],["e24","f24"]],modulePins:[["VCC","f10"],["MOSI","f12"],["MISO","f14"],["CS_N","f18"],["SCK","f20"],["GND","f24"]]},
  "uart":{title:"USART2 TX/RX crossover to a 3.3 V peripheral",tags:["UART","Common GND"],p:["3V3","GND","PA2","PA3"],parts:[["U1","MODULE","h10","h24","3.3V UART module"]],links:[["3V3","a10"],["GND","a24"],["PA2","a12"],["PA3","a16"]],jump:[["e10","f10"],["e12","f12"],["e16","f16"],["e24","f24"]],modulePins:[["VCC","f10"],["RX (host TX)","f12"],["TX (host RX)","f16"],["GND","f24"]]},
+
+ "hpf":{title:"RC high-pass: series capacitor followed by shunt resistor",tags:["High pass filter","ADC node"],p:["3V3","GND","PA0"],
+  parts:[["C1","C","c10","c17","100 nF"],["R1","R","h17","h24","10 kΩ"]],
+  links:[["3V3","a10"],["PA0","a17"],["GND","a24"]],jump:[["e17","f17"],["e24","f24"]]},
+ "bypass":{title:"Local decoupling capacitor beside a logic load",tags:["Decoupling","Supply ripple"],p:["3V3","GND","PA0"],
+  parts:[["C1","C","c10","c24","100 nF"],["R_load","R","h10","h24","1 kΩ"]],
+  links:[["3V3","a10"],["GND","a24"],["PA0","a10"]],jump:[["e10","f10"],["e24","f24"]]},
+ "mosfet":{title:"Logic-driven MOSFET module with gate resistor and pull-down",tags:["3V3 GPIO","Check MOSFET module datasheet"],p:["PA5","3V3","GND","PA0"],
+  parts:[["Rg","R","c10","c17","330 Ω"],["Rpd","R","d17","d24","10 kΩ"],["R_load","R","h10","h20","1 kΩ"],["Q1","MODULE","h17","h24","MOSFET lab module"]],
+  links:[["PA5","a10"],["3V3","a12"],["GND","a24"],["PA0","a20"]],jump:[["e12","f10"],["e17","f17"],["e20","f20"],["e24","f24"]],
+  modulePins:[["Gate","f17"],["Drain / Load","f20"],["Source / GND","f24"]]},
+ "logic":{title:"Logic module: two digital inputs and a monitored output",tags:["Digital gates","Check IC supply pins"],p:["3V3","GND","PA5","PB4","PA0"],
+  parts:[["U1","MODULE","h10","h24","Logic gate lab module"],["Rlim","R","c20","c24","1 kΩ"]],
+  links:[["3V3","a10"],["GND","a24"],["PA5","a14"],["PB4","a17"],["PA0","a20"]],
+  jump:[["e10","f10"],["e14","f14"],["e17","f17"],["e20","f20"],["e24","f24"]],
+  modulePins:[["VCC","f10"],["Logic IN A","f14"],["Logic IN B","f17"],["OUT Y","f20"],["GND","f24"]]},
+ "kvl":{title:"Three-resistor series path for Kirchhoff voltage loop",tags:["KVL loop","Voltage drops sum"],p:["3V3","GND","PA0"],
+  parts:[["R1","R","c10","c14","330 Ω"],["R2","R","c14","c19","470 Ω"],["R3","R","c19","c24","1 kΩ"]],
+  links:[["3V3","a10"],["PA0","a19"],["GND","a24"]],jump:[]},
  "scope":{title:"Observe GPIO waveform with an oscilloscope",tags:["Scope CH1","Short ground"],p:["PA5","GND"],parts:[["R1","R","c10","c24","1 kΩ"]],links:[["PA5","a10"],["GND","a24"]],bench:[["CH1 TIP","b10"],["CH1 GND","b24"]],jump:[]}
 };
 function choose(q,t){
@@ -41,16 +60,20 @@ function choose(q,t){
  const s=(q.question+" "+(q.skillName||"")).toLowerCase();
  if(["rf","qualification","magnetics","linux","python-scpi","thevenin","ac"].includes(t.id))return null;
  if(t.id==="buses")return /i2c|i²c|sda|scl/.test(s)?"i2c":/spi|mosi|spitime/.test(s)||q.calcFamily==="spiTime"?"spi":"uart";
- if(t.id==="components")return /led|diode|current.limit/.test(s)?"led":/logic|pull|switch|gpio|input/.test(s)?"button":"divider";
- if(t.id==="rc"||t.id==="capacitors"||t.id==="filters")return "rc";
- if(t.id==="parallel"||t.id==="kcl-kvl")return "parallel";
+ if(t.id==="components")return /mosfet|transistor|switching|gate drive|rds/.test(s)?"mosfet":/logic gate|boolean|truth table|flip.flop/.test(s)?"logic":/led|diode|current.limit/.test(s)?"led":/logic|pull|switch|gpio|input/.test(s)?"button":"divider";
+ if(t.id==="filters")return /high.pass|hpf|dc.block/.test(s)?"hpf":"rc";
+ if(t.id==="capacitors")return /bypass|decoupling|ripple|esr/.test(s)?"bypass":"rc";
+ if(t.id==="rc")return "rc";
+ if(t.id==="kcl-kvl")return q.calcFamily==="kvl"||/voltage law|kvl|loop voltage|mesh|voltage drop/.test(s)?"kvl":"parallel";
+ if(t.id==="parallel")return "parallel";
  if(t.id==="timing")return /pwm|pulse|clock|scope/.test(s)?"scope":"button";
  if(t.id==="instruments")return "scope";
  if(t.id==="schematics")return "button";
  if(t.id==="power-rails")return "divider";
- if(t.id==="series"||t.id==="power")return q.calcFamily==="seriesR"?"divider":"divider";
+ if(t.id==="series")return q.calcFamily==="seriesR"||/voltage drop|kvl|series path/.test(s)?"kvl":"divider";
+ if(t.id==="power")return /thermal|power rail|dissipation/.test(s)?"bypass":"divider";
  if(t.id==="units")return "basic";
- if(t.id==="ohm")return q.calcFamily==="ohmI"||q.calcFamily==="ohmR"?"divider":/resist|ohm|dmm|continuity/.test(s)?"basic":"divider";
+ if(t.id==="ohm")return q.calcFamily==="ohmI"||q.calcFamily==="ohmR"?"divider":/voltage|current|polar/.test(s)?"divider":"basic";
  return "divider";
 }
 function setup(q,t){
@@ -69,6 +92,7 @@ function setup(q,t){
  // that component. Never confuse a generic sample circuit with a worked value.
  const rs=(q.question.match(/\d+(?:\.\d+)?\s*(?:MΩ|kΩ|Ω)/gi)||[]);
  const cs=(q.question.match(/\d+(?:\.\d+)?\s*(?:µF|uF|nF|pF)/gi)||[]);
+ if(q.calcFamily==="kvl"&&c.key==="kvl")c.title="KVL: three voltage drops around one closed source loop";
  if(q.calcFamily==="seriesR"&&rs.length===3){
    c.title="Three-resistor equivalent resistance · DMM power OFF";
    c.parts=[["R1","R","c10","c15",rs[0]],["R2","R","c15","c20",rs[1]],["R3","R","c20","c24",rs[2]]];
