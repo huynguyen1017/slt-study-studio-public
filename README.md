@@ -1,3 +1,17 @@
+## Source-informed Notebook Circuit Labs
+
+The public Avionics workbook now includes 23 original, interactive numeric mini-labs (one per topic), in addition to the existing 690 graded questions. Each has a fresh SVG circuit/logic/waveform/bench diagram, a mathematical equation, numerical substitution, four baby steps, feedback and browser-local completion tracking.
+
+Source basis: the user's 12 Tech 60 and Tech 63 files, including Chapter 1 units, HW2 Ohm's law, HW8 source transformations, Lab 7 circuit measurements, and Tech 63 handwritten logic gates, number systems, full adders, and digital waveforms. No original homework images, handwritten scans, personal names or bench photos are published.
+
+Historical Lab 7: 9 V, R1=330 ohms, R2=1 kilo-ohm, R3=470 ohms, R4=220 ohms, equivalent resistance about 869.73 ohms, expected source current about 10.35 mA. Recorded 9.009 mA total minus recorded branch values (2.968+5.723 mA) yields a 0.318 mA mismatch; conflicting branch voltages also require investigation. Neither deviation establishes a particular root cause.
+
+Original homework errors are teaching opportunities, not certified reference answers: 0.0002 equals 2x10^-4, 3.3x10^6 ohms equals 3.3 mega-ohms, and V=IR. Logic operations must be evaluated as Boolean logic, not unconstrained arithmetic. These corrections are displayed as cautions.
+
+Advanced topics (SCPI, Linux logs, RF and spacecraft verification) are explicitly marked as engineering extensions, not as chapters taught in the attached historical coursework. The website examples are illustrative, not measured hardware outputs or equipment pinouts.
+
+Regression: tests/avionics-notebook.test.cjs independently recomputes all 23 example keys, checks the authored diagrams and grading, and verifies source/privacy boundaries. The existing browser suite tests selected mini-lab interactions and MathML.
+
 ### SI textbook accuracy review (Chapter 1)
 
 The original SI base-unit question previously defined *ampere* and *volt* without defining what makes a **base** unit fundamental. The dedicated Chapter 1 teaching panel now distinguishes all **seven SI base units** (m, kg, s, A, K, cd, mol), common derived units (including volt, ohm and watt), historical supplementary units (radian, steradian), and quantity symbols in italic versus unit symbols in upright roman type. Native MathML is used for relationships such as 1 V = 1 W/A. The definition/rubric and visual illustrations were corrected together.

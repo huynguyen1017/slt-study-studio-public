@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v24-books-library-r3';
+const CACHE = 'slt-study-studio-v26-coursework-notebook-labs';
 const CORE = [
   "./",
   "./index.html",
@@ -14,6 +14,9 @@ const CORE = [
   "./avionics_si_lesson.js",
   "./avionics_textbook_toc.js",
   "./avionics_coursework.js",
+  "./avionics_notebook_cases.js",
+  "./avionics_notebook_labs.js",
+  "./avionics_notebook_labs.css",
   "./book_library.js",
   "./book_library.css",
   "./avionics_si.css",
