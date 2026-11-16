@@ -1791,8 +1791,9 @@ function render(q,t,mode){
  const m=describe(q,t);
  const views={schematic:schematic,concept:curve,wiring:threePanelBoardAndBreadboard};
  if(!views[mode])return "";
- const figure=views[mode](q,t);
- const label=mode==="schematic"?"Full circuit schematic / signal path":mode==="concept"?"Operating-point graph / waveform":m.wiring;
+ const full=window.avionicsNucleoWorkbench;
+ const figure=mode==="wiring"&&full&&full.setup(q,t)?full.render(q,t):views[mode](q,t);
+ const label=mode==="schematic"?"Full circuit schematic / signal path":mode==="concept"?"Operating-point graph / waveform":(window.avionicsNucleoWorkbench&&window.avionicsNucleoWorkbench.setup(q,t)?"Full NUCLEO-L476RG / 63-row breadboard · ST UM1724":m.wiring);
  const focus=focusInfo(q,t),check=q.level==="Troubleshooting"?"Recommended verification: "+(q.steps[q.steps.length-1]||"Verify the issue before changing the hardware."):(focus[3]||"");
  const detail=m.values.length?"Given in question: "+m.values.join(" · "):"Conceptual example; labels represent this exact question's topic.";
  const warning=mode==="wiring"?"Question-specific conceptual bench layout; board header names and wiring colors are illustrative, not a manufacturer-approved flight pinout. Verify the actual board documentation, power-off connections, and component ratings.":mode==="concept"?"Illustrative graph centered on this question's parameters; not measured telemetry.":"Circuit symbols and magenta current loops follow standard textbook conventions.";
