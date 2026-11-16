@@ -58,4 +58,4 @@ if(waveExtra){
   }else target.innerHTML="";
  };
 }$('#checkWave').onclick=()=>{const f=$('#waveFeedback');f.hidden=false;if(reset===68){f.className='feedback good';f.textContent='Correct: max(12, 28, 48) + 20 = 68 ns. Reset stays low until the final prerequisite has been valid for the required interval.';state.wave=true;save()}else if(reset<68){f.textContent=reset<48?`Too early: reset releases ${48-reset} ns before clock lock. Wait for all prerequisites, then add the required interval.`:`Too early. Your setting leaves ${reset-48} ns after clock lock; the model requires 20 ns. Retry using the latest prerequisite.`}else{f.textContent='This satisfies the minimum delay, but the question asks for the earliest allowed release. Try the boundary value.'}};$('#waveHint').onclick=()=>{const f=$('#waveFeedback');f.hidden=false;f.textContent='The final prerequisite is pll_lock at 48 ns. Add the required qualification interval.'}}
-$('#resetTime').oninput=drawWave;stats();renderCard();labGrid();
+$('#resetTime').oninput=drawWave;stats();renderCard();labGrid();if(location.hash==='#nvidia')setMode('nvidia');
