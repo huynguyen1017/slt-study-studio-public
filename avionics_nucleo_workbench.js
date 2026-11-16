@@ -50,6 +50,7 @@ const variants={
  "scope":{title:"Observe GPIO waveform with an oscilloscope",tags:["Scope CH1","Short ground"],p:["PA5","GND"],parts:[["R1","R","c10","c24","1 kΩ"]],links:[["PA5","a10"],["GND","a24"]],bench:[["CH1 TIP","b10"],["CH1 GND","b24"]],jump:[]}
 };
 function choose(q,t){
+ if(q&&q.network)return null; // mixed 9/12 V theoretical circuit, never invent Nucleo GPIO wiring
  // Never imply that an arbitrary numerical 5/9/12/24 V example can be
  // physically driven into a NUCLEO 3.3 V input or power rail.
  if(q.level==="Calculation"){
