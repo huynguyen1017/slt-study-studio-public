@@ -10,6 +10,7 @@ const DEEP=window.AVIONICS_CONCEPT_DEEP_DIVE||{};
 const SI=window.AVIONICS_SI_LESSON||null;
 const BOOK=window.AVIONICS_TEXTBOOK_TOC||null;
 const COURSE=window.AVIONICS_COURSEWORK_BRIDGES||{};
+const NOTEBOOK=window.avionicsNotebookLabs||null;
 const VIS=window.avionicsVisuals;
 const ASSESS=window.avionicsAnswerCheck;
 const STORE="slt-avionics-ee-practice-v1";
@@ -323,6 +324,7 @@ function lessonPage(q,t,f){
  textbookPanel(t)+
  courseworkBridge(t)+
  digitalLogicPanel(t)+
+ (NOTEBOOK?NOTEBOOK.render(t.id):"")+
  '<h4 class="av-figure-heading">Interactive circuit, graph &amp; 3-panel breadboard connection for '+esc(q.id.toUpperCase())+'</h4>'+
  visualSwitcherBar(inlineVisualMode)+illustration+
  '<div class="av-actions-bottom"><button id="avGoVisual" class="av-light">See all 3 large visuals stacked →</button><button id="avGoWork" class="av-primary">See all 6 baby steps + worked MathML →</button></div>'+
@@ -485,6 +487,7 @@ function moveQuestion(n,keepPage=false){
 function rating(x){const q=selected();if(!q)return;if(x==="know"&&(answerDirty||!state.assessments[q.id]||state.assessments[q.id].band!=="likely-correct"))return;state.ratings[q.id]=x;save();if(currentIndex<qset().length-1)moveQuestion(currentIndex+1);else show();}
 
 function wire(){
+ if(NOTEBOOK)NOTEBOOK.bind(host);
  const el=find("#avTopicList",host);
  if(el)el.onchange=e=>{topic=e.target.value;currentIndex=0;page="learn";stepIndex=0;inlineVisualMode="schematic";filter="All";query="";state.lastTopic=topic;state.lastIndex=0;save();show()};
  const lev=find("#avLevelList",host);
