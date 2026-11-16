@@ -77,11 +77,11 @@ const a=(q,t)=>{
    "Illustrative example values are used where this question specifies no complete circuit. This is NOT a numerical simulation of the original question."};
 };
 function render(q,t){
- const spec=a(q,t);
+ const spec=q&&q.network?null:a(q,t);
  if(!spec){
    const logic=t.id==="components"||t.id==="timing"||t.id==="buses";
    return '<details class="av-simulator" data-sim-kind="unsupported"><summary>Optional circuit-design tool · '+(logic?"digital logic editor":"advanced simulation")+'</summary>'+
-    '<p>This question does not define a simple source-to-ground analog netlist. The board/test-harness diagram remains instructional; a generic resistor simulator would be misleading.</p>'+
+    '<p>The exact combined schematic above is the authoritative teaching network. Its mixed topology is not auto-imported into CircuitJS, since a generic one-loop simulator would give incorrect results. Use the external editor to construct this netlist manually.</p>'+
     (logic?'<a href="https://circuitverse.org/simulator" target="_blank" rel="noopener noreferrer">Open CircuitVerse digital logic editor (blank project)</a>':
     '<a href="https://www.falstad.com/circuit/" target="_blank" rel="noopener noreferrer">Open the CircuitJS1 circuit editor (blank project)</a>')+
     '<p class="av-sim-honesty">No automatic question import is claimed for this tool.</p></details>';
