@@ -39,7 +39,7 @@
 .av-solution ol{padding-left:24px;line-height:1.8}
 .av-solution li{padding:3px 0}
 .av-eq{overflow-x:auto;background:white;border:1px solid #e6dcf3;border-radius:12px;padding:13px 15px;margin:9px 0;text-align:center}
-.av-eq math{font-size:1.28em;max-width:100%;display:block;overflow-x:auto}
+.av-eq math{font-size:1.28em;max-width:100%;display:block math;}
 .av-formula-label{font-size:12px;font-weight:700;letter-spacing:.3px;color:#625485}
 .av-answer{font-size:20px;font-weight:800;color:#087b62;border-left:4px solid #10a481;padding:11px 14px;background:#effaf5;margin:14px 0}
 .av-help{font-size:13px;color:var(--muted);line-height:1.7}
