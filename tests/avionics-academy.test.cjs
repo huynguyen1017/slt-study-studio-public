@@ -9,7 +9,7 @@ const store=new Map();
 const storage={getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)};
 const context={window:{},Math,console,localStorage:storage,document:{}};
 vm.createContext(context);
-for(const p of ["avionics_data.js","avionics_questions.js","simulation/math_format.js","avionics_beginner_lessons.js","avionics_visuals.js","avionics_tutor.js"]){
+for(const p of ["avionics_data.js","avionics_questions.js","simulation/math_format.js","avionics_beginner_lessons.js","avionics_si_lesson.js","avionics_textbook_toc.js","avionics_visuals.js","avionics_tutor.js"]){
  vm.runInContext(load(p),context,{filename:p});
 }
 const topics=context.window.AVIONICS_TOPICS,questions=context.window.AVIONICS_QUESTIONS;
@@ -55,7 +55,7 @@ for(const s of ["avionics_beginner_lessons.js","avionics_tutor.js","avionics_tut
  assert(html.includes(s),s);
  assert(service.includes(s),"offline cache missing "+s);
 }
-assert(service.includes("v21-si-curriculum-audit"));
+assert(service.includes("v22-mathml-layout-chapter-map"));
 assert(service.includes("avionics_si_lesson.js")&&service.includes("avionics_si.css"));
 const ohm=topics.find(t=>t.id==="ohm"),ohmCalc=questions.find(q=>q.id==="ohm-C1");
 const ohmDrawing=VIS.render(ohmCalc,ohm,"schematic");
@@ -139,7 +139,21 @@ console.log("PASS: 690 questions retained; 23 beginner lessons; six-step guides;
   assert.equal(await page.locator(".av-si-chapter .av-si-table").first().locator("tbody tr").count(),7,"All seven SI base units");
   assert((await page.locator(".av-si-chapter").textContent()).includes("1995"),"SI supplementary reclassification noted");
   assert((await page.locator(".av-si-chapter").textContent()).includes("gauss"),"Correction to the supplied magnetic-unit passage");
-  assert(await page.locator(".av-si-chapter math[display='block']").count()>=2,"Native MathML for SI example and symbol style");
+  assert(await page.locator(".av-si-chapter math[display='block']").count()===3,"Compact MathML formulas for volt and symbol notation");
+  assert.equal(await page.locator(".av-chapter-map").count(),1,"Textbook TOC cross-reference");
+  assert((await page.locator(".av-chapter-map").textContent()).includes("Chapter"),"Book chapter headings must appear");
+  const formulaGeometry=await page.locator(".av-si-chapter .av-math math").evaluateAll(els=>els.map(e=>{
+   const cs=getComputedStyle(e),r=e.getBoundingClientRect(),nodes=[...e.querySelectorAll("mrow:first-child > mi,mrow:first-child > mo,mrow:first-child > mn")].slice(0,3);
+   return {display:cs.display,width:r.width,height:r.height,topDiff:nodes.length>=2?Math.abs(nodes[0].getBoundingClientRect().top-nodes[1].getBoundingClientRect().top):0,namespace:e.namespaceURI};
+  }));
+  assert.equal(formulaGeometry.length,3);
+  for(const [i,x] of formulaGeometry.entries()){
+   assert(x.display.includes("math"),"Native math display mode lost in CSS: "+i+" "+x.display);
+   assert(x.width<480&&x.height<120,"MathML overflow or vertical stack: "+i+" "+JSON.stringify(x));
+   assert(x.topDiff<30,"Math tokens stacked instead of aligned: "+i+" "+JSON.stringify(x));
+   assert.equal(x.namespace,"http://www.w3.org/1998/Math/MathML");
+  }
+  assert((await page.locator(".av-si-chapter .av-math-scroll").count())===3);
   await page.locator('[data-page="work"]').click();
   assert((await page.locator(".av-step-counter").textContent()).includes("Step 1 of 7"),"SI base-unit definition gets a dedicated seventh step");
   await page.locator('[data-page="try"]').click();
