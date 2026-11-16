@@ -16,3 +16,22 @@
 #avionicsView .av-si-sources a{display:inline-block;color:#185c88;margin:5px 12px 0 0;word-break:break-word;font-size:12px}
 #avionicsView .av-si-chapter .av-math math{font-size:clamp(16px,2vw,25px)}
 @media(max-width:620px){#avionicsView .av-si-chapter{padding:13px}#avionicsView .av-si-chapter .av-math{padding:10px;overflow-x:auto}}
+
+/* MathML Core layout fix: CSS 'display:block' replaces the native math
+   layout algorithm, stacking <mi>, <mo>, <mn> and widening fractions.
+   Preserve MathML inner layout; scroll the surrounding HTML element. */
+#avionicsView .av-si-chapter .av-math{min-width:0;overflow-x:auto;overflow-y:hidden;text-align:initial;overscroll-behavior-x:contain}
+#avionicsView .av-si-chapter .av-math-scroll{display:flex;justify-content:center;align-items:center;min-width:0;width:100%;overflow-x:auto;overflow-y:hidden;padding:10px 3px 14px}
+#avionicsView .av-si-chapter .av-math math[display="block"],
+#avionicsView .av-si-chapter .av-math math{display:block math !important;width:fit-content;max-width:none;min-width:max-content;margin:0 auto;overflow:visible;math-style:normal;text-align:center;white-space:nowrap;color:#183a54;font-family:"Cambria Math","STIX Two Math","Noto Sans Math",serif;font-size:clamp(19px,2.2vw,28px)}
+#avionicsView .av-si-chapter .av-math math mfrac,
+#avionicsView .av-si-chapter .av-math math mfrac > *{padding:0!important}
+#avionicsView .av-si-chapter .av-symbol-example{font-size:13px;line-height:1.6;color:#3f5e70;margin:0 4px 10px}
+#avionicsView .av-si-chapter .av-meaning{font-size:13px;color:#30526a;line-height:1.75;padding:0 4px 2px}
+#avionicsView .av-chapter-map{border:1px solid #c4d9e5;border-radius:12px;padding:2px 15px;margin:22px 0;background:#fafdff}
+#avionicsView .av-chapter-map>summary{color:#225c7a;font-weight:800;cursor:pointer;padding:14px 4px;font-size:14px}
+#avionicsView .av-chapter-map p{font-size:12px;line-height:1.7}
+#avionicsView .av-chapter-map ol{padding-left:26px;margin:10px 0 18px}
+#avionicsView .av-chapter-map li{font-size:13px;padding:3px 0;line-height:1.55}
+#avionicsView .av-chapter-map .av-source-evidence{color:#526678;font-size:11px}
+@media(max-width:620px){#avionicsView .av-si-chapter .av-math-scroll{justify-content:flex-start}#avionicsView .av-si-chapter .av-math math{font-size:19px}}
