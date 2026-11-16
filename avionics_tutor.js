@@ -134,7 +134,7 @@ function visualPage(q,t,f){
  return '<section class="av-page av-visual-page" aria-label="Question-specific visual laboratory">'+
  '<div class="av-eyebrow">PAGE 2 / 4 · SEE THE CIRCUIT IN DETAIL</div>'+
  '<h3>Draw it first. Then solve it.</h3>'+
- '<p class="av-explain">These figures are generated from <strong>this exact question</strong>. The schematic uses known values when they are supplied; any missing values are shown symbolically. The breadboard is a conceptual low-voltage teaching layout, not a manufacturer pinout.</p>'+
+ '<p class="av-explain">These figures are generated from <strong>this exact question</strong>. The schematic uses known values when they are supplied; any missing values are shown symbolically. Breadboards use conceptual low-voltage layouts; instrument and development-board wiring diagrams use generic signal names, not manufacturer pin numbers.</p>'+
  '<div class="av-question"><span>QUESTION '+esc(q.id)+'</span><p>'+esc(q.question)+'</p></div>'+
  '<div class="av-visual-nav">'+pics.map(x=>'<a href="#avVisual-'+x[0]+'">'+esc(x[1])+'</a>').join("")+'</div>'+
  pics.map(x=>'<section class="av-visual-panel" id="avVisual-'+x[0]+'"><div class="av-visual-panel-head"><div><h4>'+esc(x[1])+'</h4><p>'+esc(x[2])+'</p></div><button class="av-light" data-zoom="'+x[0]+'" aria-label="Enlarge '+esc(x[1])+'">↗ Enlarge</button></div>'+
