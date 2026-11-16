@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v32-method-safe-dice-r1';
+const CACHE = 'slt-study-studio-v33-fifty-guided-topics-r1';
 const CORE = [
   "./",
   "./index.html",
