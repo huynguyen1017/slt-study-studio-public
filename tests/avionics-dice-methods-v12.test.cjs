@@ -40,7 +40,7 @@ assert(crafted>=37,"All 37 previously uncovered solving methods now need >=2 cal
 const index=read("index.html"),sw=read("sw.js");
 assert(index.includes("avionics_dice_methods_v12.js?v=1"));
 assert(sw.includes('./avionics_dice_methods_v12.js'));
-assert(sw.includes("slt-study-studio-v32-method-safe-dice-r1"));
+assert(sw.includes("slt-study-studio-v33-fifty-guided-topics-r1"));
 assert(index.indexOf("avionics_distinct_math_v10.js")<index.indexOf("avionics_dice_methods_v12.js"));
 assert(index.indexOf("avionics_dice_methods_v12.js")<index.indexOf("avionics_mixed_networks_v11.js"));
 console.log("PASS v12: "+methodSafe+" corrected slots; "+mark.removed+" old-family variants removed, "+mark.generated+" new method-matched variants, "+cases+" audited dice problems, "+examples+" independently evaluated substitutions.");
