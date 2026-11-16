@@ -101,7 +101,7 @@ function mathPage(t,i){
    "Name every given quantity and convert all SI prefixes. "+m.explain,
    "Select the governing equation: "+m.formula+". State what the numerator and denominator physically represent.",
    "Substitute the given values into that equation: "+m.sub+". Keep all intermediate units visible.",
-   "Compute the result independently. The required final numeric answer is "+fmt(m.answer)+" "+m.unit+".",
+   "Compute the result independently. The required final numeric answer is "+fmt(m.answer)+" "+m.unit+". Confirm each stage of the arithmetic, the conversion factor and the final engineering unit.",
    "Check the magnitude against the physical path. "+m.explain,
    "On hardware, compare against an independent probe/DMM channel and verify whether the instrument was configured for the right unit and range.",
    "State the limitation of the model, record assumptions and explain what different measurement would falsify the prediction."
@@ -120,7 +120,7 @@ function mathPage(t,i){
   "List the quantities: limit="+limit+" "+unit+", measured="+measured+" "+unit+", uncertainty=±"+uncertainty+" "+unit+". Match units before adding.",
   "Choose the correct worst-case endpoint: "+(kind==="max"?"measured+uncertainty="+fmt(measured+uncertainty)+" "+unit:"measured−uncertainty="+fmt(measured-uncertainty)+" "+unit)+". Do not ignore uncertainty.",
   "Write the margin equation: "+formula+". A negative margin means the conservative bound is outside specification.",
-  "Substitute and calculate: "+sub+".",
+  "Substitute and calculate: "+sub+". First evaluate the worst-case endpoint and then subtract it from the approved training limit, retaining its sign and unit.",
   "Interpret the answer: "+verdict+". A numerically passing result alone cannot prove a valid test.",
   "Independently verify probe attenuation, instrument calibration, fixture revision, and the source of the specified limit.",
   "Log the raw measurement, uncertainty basis, pass/fail/invalid disposition and board/firmware identification."
