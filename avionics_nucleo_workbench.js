@@ -47,7 +47,10 @@ const variants={
  "kvl":{title:"Three-resistor series path for Kirchhoff voltage loop",tags:["KVL loop","Voltage drops sum"],p:["3V3","GND","PA0"],
   parts:[["R1","R","c10","c14","330 Ω"],["R2","R","c14","c19","470 Ω"],["R3","R","c19","c24","1 kΩ"]],
   links:[["3V3","a10"],["PA0","a19"],["GND","a24"]],jump:[]},
- "scope":{title:"Observe GPIO waveform with an oscilloscope",tags:["Scope CH1","Short ground"],p:["PA5","GND"],parts:[["R1","R","c10","c24","1 kΩ"]],links:[["PA5","a10"],["GND","a24"]],bench:[["CH1 TIP","b10"],["CH1 GND","b24"]],jump:[]}
+ "scope":{title:"Observe GPIO waveform with an oscilloscope",tags:["Scope CH1","Short ground"],p:["PA5","GND"],parts:[["R1","R","c10","c24","1 kΩ"]],links:[["PA5","a10"],["GND","a24"]],bench:[["CH1 TIP","b10"],["CH1 GND","b24"]],jump:[]},
+ "series-parallel":{title:"Series stem R1 feeding parallel bank R2 || R3 on breadboard",tags:["Series-parallel","Node V_X","Two branches"],p:["3V3","GND","PA0"],
+  parts:[["R1","R","c10","c16","330 Ω"],["R2","R","d16","d24","470 Ω"],["R3","R","h16","h24","470 Ω"]],
+  links:[["3V3","a10"],["PA0","a16"],["GND","a24"]],bench:[["DMM +","b16"],["DMM COM","b24"]],jump:[["e16","f16"],["e24","f24"]]}
 };
 function choose(q,t){
  if(q&&q.network)return null; // mixed 9/12 V theoretical circuit, never invent Nucleo GPIO wiring
@@ -65,6 +68,7 @@ function choose(q,t){
  if(t.id==="filters")return /high.pass|hpf|dc.block/.test(s)?"hpf":"rc";
  if(t.id==="capacitors")return /bypass|decoupling|ripple|esr/.test(s)?"bypass":"rc";
  if(t.id==="rc")return "rc";
+ if(q.topology==="series-parallel"||/series-parallel|loaded.*divider|wheatstone|in series with.*parallel|parallel.*in series/.test(s))return "series-parallel";
  if(t.id==="kcl-kvl")return q.calcFamily==="kvl"||/voltage law|kvl|loop voltage|mesh|voltage drop/.test(s)?"kvl":"parallel";
  if(t.id==="parallel")return "parallel";
  if(t.id==="timing")return /pwm|pulse|clock|scope/.test(s)?"scope":"button";
@@ -115,6 +119,10 @@ function setup(q,t){
  }
  if(q.calcFamily==="divider"&&rs.length>=2){
    c.parts=c.parts.map((p,i)=>p[1]==="R"?[p[0],p[1],p[2],p[3],rs[i]||p[4]]:p);
+ }
+ if(name==="series-parallel"&&rs.length>=3){
+   c.title="Series-parallel network ("+rs[0]+" + "+rs[1]+" ∥ "+rs[2]+")";
+   c.parts=[["R1","R","c10","c16",rs[0]],["R2","R","d16","d24",rs[1]],["R3","R","h16","h24",rs[2]]];
  }
 
  c.parts=c.parts.map(p=>[p[0],p[1],move(p[2]),move(p[3]),p[4]]);

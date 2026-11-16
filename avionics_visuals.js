@@ -194,6 +194,48 @@ function parallelSchematic(q,t){
  s+=text(390,336,"Every branch connects directly between Node A (+) and Node B (return): same V_S across each",12,P.muted,"middle");
  return s;
 }
+function seriesParallelSchematic(q,t){
+ const rawR=q.question.match(/\d+(?:\.\d+)?\s*(?:MΩ|kΩ|mΩ|Ω)/gi)||[];
+ const r=rawR.length?rawR:resistance(q),v=source(q);
+ const isBridge=/bridge|wheatstone/i.test(q.question);
+ const subTitle=isBridge?"Wheatstone Bridge Differential Divider":"Combined Series-Parallel Network & Node Tap";
+ let s=text(22,30,"CIRCUIT · "+q.id.toUpperCase()+" · "+q.level.toUpperCase(),12,P.blue,"start","800")+
+       text(22,52,subTitle,16,P.ink,"start","700")+known(q);
+ if(isBridge){
+  s+=line(115,95,520,95,P.ink,2.8)+line(115,285,520,285,P.green,2.8);
+  s+=battery(115,95,285,v==="Vₛ"?"5 V (ex.)":v,"V");
+  s+=groundSym(115,285);
+  s+=arrow(160,84,235,84,P.pink,2.3)+text(197,75,"I_T",14,P.pink,"middle","700","italic");
+  // Left leg: R1 + R2 with Node A
+  s+=line(300,95,300,108,P.ink,2.8)+zigV(300,118,162,r[0]||"1 kΩ",P.ink,"R₁")+line(300,172,300,202,P.ink,2.8)+zigV(300,212,258,r[1]||"1 kΩ",P.ink,"R₂")+line(300,268,300,285,P.green,2.8);
+  // Right leg: R3 + R4 with Node B
+  s+=line(520,95,520,108,P.ink,2.8)+zigV(520,118,162,r[2]||"1 kΩ",P.ink,"R₃")+line(520,172,520,202,P.ink,2.8)+zigV(520,212,258,r[3]||"1.5 kΩ",P.ink,"R₄")+line(520,268,520,285,P.green,2.8);
+  s+=dot(300,95,P.ink,5)+dot(300,285,P.green,5)+dot(300,188,P.cyan,6)+dot(520,188,P.blue,6);
+  s+=text(286,184,"A",14,P.cyan,"end","700")+text(536,184,"B",14,P.blue,"start","700");
+  s+=path("M300 188 H520",P.pink,2.2,"none","6,4");
+  s+=rect(352,166,116,44,"#ffffff","#6da4bf",7,1.8)+text(410,185,"Bridge ΔV",11,P.ink,"middle","700")+text(410,202,"|V_B − V_A|",12,P.pink,"middle","700");
+  s+=text(390,336,"Wheatstone bridge: V_A = V_S·R₂/(R₁+R₂), V_B = V_S·R₄/(R₃+R₄), ΔV = |V_B − V_A|",12,P.muted,"middle");
+  return s;
+ }
+ const threeBranch=r.length>=4&&/3\s*parallel|three\s*branch|R4/i.test(q.question);
+ const isLoaded=/load|divider/i.test(q.question);
+ const xs=threeBranch?[410,540,670]:[435,605];
+ const lastX=xs[xs.length-1];
+ s+=line(115,98,200,98,P.ink,2.8)+zigH(214,296,98,r[0]||"R₁",P.ink,"Series leg")+line(310,98,355,98,P.ink,2.8);
+ s+=line(355,98,lastX,98,P.cyan,2.8)+line(115,276,lastX,276,P.green,2.8);
+ s+=battery(115,98,276,v==="Vₛ"?"5 V (ex.)":v,"V")+groundSym(115,276);
+ s+=arrow(136,88,186,88,P.pink,2.3)+text(161,78,"I_T",14,P.pink,"middle","700","italic");
+ s+=dot(355,98,P.cyan,6)+text(355,78,"Node X (V_X)",12,P.blue,"middle","700");
+ xs.forEach((bx,i)=>{
+  s+=line(bx,98,bx,145,P.cyan,2.8)+zigV(bx,155,222,r[i+1]||(isLoaded&&i===1?"R_L":"R"+(i+2)),P.ink,(isLoaded&&i===1?"R_L":"R"+(i+2)))+line(bx,232,bx,276,P.green,2.8);
+  if(i<xs.length-1)s+=dot(bx,98,P.cyan,5.5)+dot(bx,276,P.green,5.5);
+  const sub=["₂","₃","₄"][i]||(i+2);
+  s+=arrow(bx-28,145,bx-28,226,P.pink,2.2)+text(bx-38,191,"I"+sub,14,P.pink,"end","700","italic");
+ });
+ s+=arrow(275,292,185,292,P.pink,2.3)+text(230,310,"I_T = I₂ + I₃"+(threeBranch?" + I₄":""),12,P.pink,"middle","700");
+ s+=text(390,338,"Series-Parallel reduction: collapse parallel bank R_p first, then R_total = R₁ + R_p",12,P.muted,"middle");
+ return s;
+}
 
 function nodeSchematic(q,t){
  if(/KVL|loop|voltage/i.test(q.question)&&!/KCL|node|current/i.test(q.question))return seriesSchematic(q,t);
@@ -337,6 +379,10 @@ function siUnitVisual(q,t,mode){
 function schematic(q,t){
  const id=t.id;
  if(id==="units")return siUnitVisual(q,t,"schematic");
+ if(q.topology==="series-parallel"||/series-parallel|in series with.*parallel|parallel.*in series|loaded.*divider|wheatstone|bridge/i.test(q.question)){
+  if(id==="series"||id==="parallel"||id==="kcl-kvl"||id==="thevenin"||id==="ohm"||id==="power")
+   return svg(seriesParallelSchematic(q,t),"Combined series-parallel circuit schematic showing series element and parallel branches");
+ }
  if(id==="series")return svg(seriesSchematic(q,t),"Series circuit schematic with current loop and resistor values");
  if(id==="parallel")return svg(parallelSchematic(q,t),"Parallel circuit schematic with Nodes A and B and branch currents");
  if(id==="kcl-kvl")return svg(nodeSchematic(q,t),"Kirchhoff node current and loop schematic");

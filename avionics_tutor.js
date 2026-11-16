@@ -47,7 +47,7 @@ if(ACTIVE_CURRICULUM>=10&&state.curriculumVersion!==ACTIVE_CURRICULUM){
 let host=null,topic=TOPICS.some(t=>t.id===state.lastTopic)?state.lastTopic:"ohm";
 let currentIndex=Number.isInteger(state.lastIndex)?state.lastIndex:0;
 let filter="All",query="",page="learn",stepIndex=0,expanded=false,feedback="",draftText="",currentAnswer="",answerDirty=false;
-let inlineVisualMode="schematic",customVariants={};
+let inlineVisualMode="schematic",customVariants={},variantRollCount={};
 
 const save=()=>{try{localStorage.setItem(STORE,JSON.stringify(state))}catch{}};
 const progressKey=q=>q&&q.isCustomVariant?q.id+"::dice":q.id;
@@ -88,18 +88,36 @@ function knownValues(text){
 function makeRandomVariant(q){
  if(MIXED&&q.roll)return MIXED.reroll(q);
  const fam=q.calcFamily;
- if(!fam)return null;
+ if(!fam&&!q.variantPool?.length&&typeof q.variantGenerator!=="function")return null;
+ const roll=(variantRollCount[q.id]=(variantRollCount[q.id]||0)+1);
  const pick=(arr)=>arr[Math.floor(Math.random()*arr.length)];
  const randInt=(lo,hi)=>lo+Math.floor(Math.random()*(hi-lo+1));
- const m=(prompt,answer,unit,formula,sub,steps)=>({
- ...q,question:prompt,expected:Number(answer.toPrecision(10)),unit,formula,sub,steps,
- numericOperation:"Fresh-number calculation",learningObjective:"Practice new numbers",
- lesson:{title:"Fresh-number calculation",summary:"This is an optional NEW-NUMBERS drill, not another numbered curriculum task. "+prompt,
+ const m=(prompt,answer,unit,formula,sub,steps,extra={})=>({
+ ...q,...extra,question:prompt,expected:Number(answer.toPrecision(10)),unit,formula,sub,
+ steps:(Array.isArray(steps)&&steps.length)?steps:(Array.isArray(q.steps)?q.steps:[]),
+ numericOperation:"Fresh-number calculation (Drill #"+roll+")",learningObjective:"Practice new numbers",
+ lesson:{title:"Fresh-number calculation",summary:"This is an optional NEW-NUMBERS drill (#"+roll+"), not another numbered curriculum task. "+prompt,
  example:"Compute the expected value in "+unit+" and verify each quantity and its unit.",
- why:"Use this separately from the 30 distinct fixed lessons.",
+ why:"Rotates related single-concept variations and fresh numbers without repeating slots inside the 30-question ladder.",
  vocab:[["Target",prompt],["Engineering units",unit],["Validation","Check the answer against the governing physical model."]]},
- isCustomVariant:true
+ isCustomVariant:true,
+ variantPool:q.variantPool,
+ variantGenerator:q.variantGenerator,
+ topology:extra.topology!==undefined?extra.topology:q.topology
 });
+ const pool=Array.isArray(q.variantPool)?q.variantPool:[];
+ if(typeof q.variantGenerator==="function"&&(roll%2===1||!pool.length)){
+  const v=q.variantGenerator(roll);
+  if(v&&v.question!==q.question){
+   return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:v.topology||q.topology});
+  }
+ }
+ if(pool.length){
+  const v=pool[(roll-1)%pool.length];
+  if(v&&v.question){
+   return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:v.topology||q.topology});
+  }
+ }
  if(fam==="milli"){const x=randInt(3,850);return m(`Convert ${x} mA into amperes (A).`,x*1e-3,"A","I_A = I_mA * 10^(-3)",`I_A = ${x} * 10^(-3) = ${fmt(x*1e-3)}`,["Milli means 10^(-3).","Multiply "+x+" by 10^(-3) (move decimal 3 places left).","Report in amperes (A)."]);}
  if(fam==="micro"){const x=pick([1.5,3.3,6.8,15,22,33,68,220]);return m(`Express a ${x} µF capacitor in farads (F).`,x*1e-6,"F","C_F = C_uF * 10^(-6)",`C_F = ${x} * 10^(-6) = ${fmt(x*1e-6)}`,["Micro means 10^(-6).","Multiply "+x+" by 10^(-6) (shift decimal 6 places left).","Report in farads (F)."]);}
  if(fam==="ohmI"){const v=pick([1.8,3.3,5,9,12,15,24,28]);const r=pick([120,220,330,470,680,1000,1500,2200,4700]);const ia=v/r,ima=1000*ia;return m(`A ${r} Ω resistor has ${v} V across it. Find current in mA.`,ima,"mA","I = V / R",`I = ${v} / ${r} = ${fmt(ia)} = ${fmt(ima)} * 10^(-3)`,["Read V and R in base units.","Compute I = V / R in amperes.","Multiply by 10^(3) to report milliamps (mA)."]);}

@@ -47,30 +47,39 @@ for(const [ti,topic] of t.entries()){
   }
  });
  assert.equal(objectives.size,30,topic.id+" should have 30 distinct objectives");
- const C=questions.slice(10,20),o=C.map(x=>x.originalNumeric?x.originalNumeric.expected:x.expected);
- const firstAlternative=o.slice(1,5).find(v=>Math.abs(v-o[0])>1e-12);
- const secondAlternative=o.slice(6,10).find(v=>Math.abs(v-o[5])>1e-12);
- const cases=[
-  o[0],
-  Math.abs((firstAlternative===undefined?o[0]*1.10:firstAlternative)-o[0]),
-  Math.abs(o[2])*(1-0.92),
-  Math.abs(o[3])*(0.97+1+1.04)/3,
-  Math.abs(o[4])*(1.065-0.945),
-  o[5],
-  Math.abs((secondAlternative===undefined?o[5]*1.10:secondAlternative)-o[5]),
-  Math.abs(o[7])*0.97,
-  100*(0.055+ti%5*0.01),
-  Math.abs(o[9])*(1.05-1.015-ti%3*0.012)
- ];
- for(let i=0;i<10;i++)assert(near(C[i].expected,cases[i]),C[i].id+" independently recomputed reference mismatch: "+C[i].expected+" vs "+cases[i]);
+ const C=questions.slice(10,20);
+ const evalSub=(sub)=>{
+  const parts=String(sub).split("=");
+  assert(parts.length>=2,"sub equation must contain '=': "+sub);
+  const expr=parts[parts.length-2].replace(/√\(/g,"Math.sqrt(").replace(/π/g,"Math.PI").replace(/log10\(/g,"Math.log10(").replace(/exp\(/g,"Math.exp(").replace(/\^/g,"**");
+  return Function("return ("+expr+")")();
+ };
+ for(let i=0;i<10;i++){
+  const computed=evalSub(C[i].sub);
+  assert(near(computed,C[i].expected),C[i].id+" sub arithmetic mismatch: "+computed+" vs "+C[i].expected+" (sub="+C[i].sub+")");
+  assert(Array.isArray(C[i].variantPool)&&C[i].variantPool.length>=1,C[i].id+" missing Practice New Numbers variantPool");
+  for(const v of C[i].variantPool){
+   if(v.sub){
+    const vComputed=evalSub(v.sub);
+    assert(near(vComputed,v.expected),C[i].id+" variantPool sub mismatch: "+vComputed+" vs "+v.expected);
+   }
+  }
+ }
  const seen=new Set(C.map(x=>x.numericOperation));assert.equal(seen.size,10,topic.id+" numeric operations still repetitive");
  const summaries=new Set(questions.map(x=>x.lesson?x.lesson.summary:x.steps[0]));
  assert.equal(summaries.size,30,topic.id+" page-1 summaries must be mutually distinct across all 30 questions");
  const focuses=new Set(questions.map(x=>((V.render(x,topic,"schematic").match(/<div class="av-visual-focus">([\s\S]*?)<\/div>/)||[])[1]||"")));
  assert.equal(focuses.size,30,topic.id+" visual focus captions must differ cleanly across all 30 questions");
  for(let i=0;i<5;i++)assert(!questions[i].question.includes(questions[i+5].question),topic.id+" foundation/application repeated");
+ const dNames=new Set(questions.slice(20,30).map(x=>x.question.split(":")[0]));
+ assert.equal(dNames.size,10,topic.id+" troubleshooting D1-D10 personas must be distinct");
  uniqueAnswers+=seen.size;
 }
+for(const spTopic of ["series","parallel","kcl-kvl","thevenin","ohm","power"]){
+ const spCount=q.filter(x=>x.topic===spTopic&&x.topology==="series-parallel").length;
+ assert(spCount>=2,spTopic+" should include combined series-parallel questions, got "+spCount);
+}
+assert(q.filter(x=>x.topic==="series"&&x.topology==="series-parallel"&&x.level==="Calculation").length>=5,"series should include >= 5 combined series-parallel calculations");
 const one=q.find(x=>x.id==="units-F2"),two=q.find(x=>x.id==="units-A2");
 assert(one.question.includes("25 mA")&&one.question.includes("0.025 A"),"Units Q2 must teach multiplier and actual measured quantity");
 assert(two.question.includes("10 Ω")&&two.question.includes("0.25 V"),"Units Q7 must describe a shunt measurement, not measuring a prefix");
