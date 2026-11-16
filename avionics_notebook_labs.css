@@ -1,0 +1,47 @@
+/* Original notebook circuit labs; scoped to the Avionics academy only. */
+#avionicsView .av-notebook-lab{margin:18px 0;border:1px solid #b7d7e5;border-radius:15px;background:#fafdff;overflow:hidden;box-shadow:0 2px 8px #1645670a}
+#avionicsView .av-notebook-lab>summary{cursor:pointer;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:17px 19px;background:#ebf6fc;color:#184e68;font-size:15px;font-weight:850;line-height:1.4}
+#avionicsView .av-notebook-lab>summary:focus-visible{outline:3px solid #d7a835;outline-offset:-3px}
+#avionicsView .av-notebook-lab>summary small{margin-left:auto;font-size:11px;color:#486a7e;font-weight:650}
+#avionicsView .av-nb-book{font-size:26px;color:#ad3e90;line-height:1}
+#avionicsView .av-nb-content{padding:16px 20px 20px}
+#avionicsView .av-nb-content p{line-height:1.7}
+#avionicsView .av-nb-note{color:#576b7c;font-size:12px;margin:1px 0 13px}
+#avionicsView .av-nb-image{background:#fff;border:1px solid #c6dbe8;border-radius:12px;overflow-x:auto}
+#avionicsView .av-nb-image svg{width:100%;min-width:480px;height:auto;display:block}
+#avionicsView .av-nb-question{border-left:5px solid #b546a3;background:#f7f1fc;padding:14px 18px;margin:18px 0;border-radius:0 10px 10px 0}
+#avionicsView .av-nb-question strong{font-size:16px;color:#4c2b69}
+#avionicsView .av-nb-question p{font-size:15px;color:#392e56;margin:7px 0}
+#avionicsView .av-nb-given{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:11px}
+#avionicsView .av-nb-given>div{border:1px solid #d0e0e9;border-radius:11px;background:#fff;padding:12px;min-width:0}
+#avionicsView .av-nb-given b{display:block;color:#1b5d7c;font-size:12px}
+#avionicsView .av-nb-math{max-width:100%;overflow-x:auto;padding:11px 2px;min-height:55px;display:flex;justify-content:center;align-items:center}
+#avionicsView .av-nb-math math{display:block math!important;max-width:none;width:fit-content;min-width:max-content;overflow:visible;font-family:"Cambria Math","STIX Two Math","Noto Sans Math",serif;font-size:clamp(17px,2vw,25px);white-space:nowrap;color:#1b3856}
+#avionicsView .av-nb-math math mfrac,#avionicsView .av-nb-math math mfrac>*{padding:0!important}
+#avionicsView .av-nb-form{margin:18px 0 9px}
+#avionicsView .av-nb-form label{display:block;color:#21485e;font-size:13px;font-weight:750;margin-bottom:8px}
+#avionicsView .av-nb-controls{display:flex;gap:9px;align-items:center}
+#avionicsView .av-nb-controls input{flex:1;min-width:0;font-size:16px;padding:12px;border:1px solid #b1cbd9;border-radius:9px;background:#fff;color:#1b2e41}
+#avionicsView .av-nb-controls button{white-space:nowrap;background:#155e7d;color:#fff;border-radius:9px;padding:13px 14px;font-size:13px;font-weight:800}
+#avionicsView .av-nb-result{background:#f4f9fc;border-radius:8px;padding:10px 13px;font-size:13px;color:#526b7a;min-height:41px}
+#avionicsView .av-nb-result[data-status="correct"]{background:#e5f6ed;color:#0f674f;font-weight:750}
+#avionicsView .av-nb-result[data-status="close"]{background:#fff4df;color:#885c1a}
+#avionicsView .av-nb-result[data-status="review"],#avionicsView .av-nb-result[data-status="invalid"]{background:#fff0ed;color:#984734}
+#avionicsView .av-nb-steps{margin-top:16px}
+#avionicsView .av-nb-steps h4{margin:0 0 10px;color:#234962;font-size:15px}
+#avionicsView .av-nb-steps>details{border:1px solid #d4e2e8;border-radius:9px;margin:6px 0;background:#fff}
+#avionicsView .av-nb-steps>details>summary{color:#285b76;font-weight:750;cursor:pointer;padding:12px 14px;font-size:13px}
+#avionicsView .av-nb-steps>details>p{margin:0;padding:0 15px 14px;font-size:13px}
+#avionicsView .av-nb-final-number{font-size:20px;font-weight:800;color:#0f775c;padding:5px 15px}
+#avionicsView .av-nb-trap{margin-top:16px;border-left:5px solid #b67f23;background:#fff8e9;padding:13px 16px;border-radius:0 10px 10px 0}
+#avionicsView .av-nb-trap strong{color:#775017;font-size:14px}
+#avionicsView .av-nb-trap p{margin:5px 0;color:#6f5a38;font-size:13px}
+#avionicsView .av-nb-privacy{font-size:11px!important;color:#687d8a!important;margin-top:13px}
+@media(max-width:650px){
+ #avionicsView .av-nb-content{padding:12px}
+ #avionicsView .av-nb-given{grid-template-columns:1fr}
+ #avionicsView .av-nb-controls{flex-direction:column;align-items:stretch}
+ #avionicsView .av-nb-controls button{width:100%}
+ #avionicsView .av-notebook-lab>summary small{margin-left:0;width:100%}
+ #avionicsView .av-nb-math{justify-content:flex-start}
+}
