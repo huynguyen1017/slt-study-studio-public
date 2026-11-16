@@ -117,7 +117,7 @@ for(const t of T){
    ?" A second potentially related observation is: "+secondCase[0]+" Determine whether these symptoms share a root cause or require separate fault trees."
    :"";
   const title=i===9?block[0]:phase[0]+" · "+skill[0];
-  const question=i===9?block[1]:phase[1]+caseRow[0]+extra+phase[2]+" Specific related concept: "+skill[0]+".";
+  const question=i===9?block[1]:phase[1]+caseRow[0]+extra+" "+phase[2].replace(/^\./,"")+" Specific related concept: "+skill[0]+".";
   const result=i===9?block[2]:"Start with "+caseRow[1]+" Then assess "+caseRow[2]+" and independently verify "+caseRow[3]+". "
    +(secondCase?"For the second observation, separately check "+secondCase[1]+" Assess "+secondCase[2]+" and verify "+secondCase[3]+". Compare both before claiming a common root cause. ":"")
    +"Use "+skill[1];
