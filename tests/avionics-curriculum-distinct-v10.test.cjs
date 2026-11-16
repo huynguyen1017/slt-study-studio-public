@@ -48,14 +48,16 @@ for(const [ti,topic] of t.entries()){
  });
  assert.equal(objectives.size,30,topic.id+" should have 30 distinct objectives");
  const C=questions.slice(10,20),o=C.map(x=>x.originalNumeric?x.originalNumeric.expected:x.expected);
+ const firstAlternative=o.slice(1,5).find(v=>Math.abs(v-o[0])>1e-12);
+ const secondAlternative=o.slice(6,10).find(v=>Math.abs(v-o[5])>1e-12);
  const cases=[
   o[0],
-  Math.abs(o[1]-o[0]),
+  Math.abs((firstAlternative===undefined?o[0]*1.10:firstAlternative)-o[0]),
   Math.abs(o[2])*(1-0.92),
   Math.abs(o[3])*(0.97+1+1.04)/3,
   Math.abs(o[4])*(1.065-0.945),
   o[5],
-  Math.abs(o[6]-o[5]),
+  Math.abs((secondAlternative===undefined?o[5]*1.10:secondAlternative)-o[5]),
   Math.abs(o[7])*0.97,
   100*(0.055+ti%5*0.01),
   Math.abs(o[9])*(1.05-1.015-ti%3*0.012)
@@ -70,6 +72,7 @@ assert(one.question.includes("25 mA")&&one.question.includes("0.025 A"),"Units Q
 assert(two.question.includes("10 Ω")&&two.question.includes("0.25 V"),"Units Q7 must describe a shunt measurement, not measuring a prefix");
 assert(two.steps.some(x=>x.includes("0.025 A = 25 mA")),"Units Q7 solution must show real Ohm-law calculation");
 assert(!two.lesson.title.toLowerCase().includes("milli prefix"));
+assert(q.filter(x=>x.level==="Calculation"&&x.expected===0).length===0,"No zero-change comparison variants masquerading as new exercises");
 const html=read("index.html"),sw=read("sw.js"),tutor=read("avionics_tutor.js");
 for(const file of ["avionics_distinct_labs_v10.js","avionics_distinct_math_v10.js","avionics_distinct_reasoning_v10.js"]){
  assert(html.includes(file),file+" missing from site");
