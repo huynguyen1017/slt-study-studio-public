@@ -27,3 +27,8 @@
 #avionicsView .av-learning-stage{border:1px solid #d7e3eb;background:#f6fafd;border-radius:10px;padding:10px 13px;margin-bottom:12px;font-size:13px;font-weight:700;color:#315b73}
 #avionicsView .av-learning-stage small{font-size:11px;color:#617d8e;font-weight:450}
 @media(max-width:640px){#avionicsView .av-video-grid{grid-template-columns:1fr}#avionicsView .av-nucleo-full-svg{min-width:800px}#avionicsView .av-nucleo-lesson{padding:10px}}
+
+#avionicsView .av-3220-details{margin:18px 0;border:1px solid #c4d8e5;border-radius:10px;padding:12px;background:#fff}
+#avionicsView .av-3220-details summary{cursor:pointer;color:#1b6588;font-size:13px;font-weight:800}
+#avionicsView .av-3220-overview{width:100%;min-width:1100px;height:auto;display:block}
+#avionicsView .av-3220-details p{padding:2px 10px;line-height:1.6}
