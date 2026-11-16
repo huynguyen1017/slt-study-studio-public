@@ -7,7 +7,7 @@ const lines=s=>s.trim().split("\n").map(x=>x.trim()).filter(Boolean).map(x=>x.sp
 const T=(id,title,group,goal,skills,cases,calc)=>({id,title,group,goal,skills:lines(skills),cases:lines(cases),calc});
 window.AVIONICS_TOPICS=[
 T("units","SI Units, Prefixes & Measurement","Foundations","Learn to read units and choose meaningful precision before calculating.",
-`SI base unit | Ampere measures current and volt measures potential difference. | Confusing units makes otherwise correct arithmetic unusable. | Label every probe channel and report with its unit.
+`SI base unit | The ampere is an SI base unit for electric current; the volt is an SI derived unit measuring electric potential difference. | Confusing units makes otherwise correct arithmetic unusable. | Label every probe channel and report with its unit.
 Milli prefix | Milli means one thousandth of the base unit. | Mixing milliamps with amps creates a thousand-fold mistake. | Convert 25 mA to 0.025 A before substituting.
 Micro prefix | Micro means one millionth of the base unit. | Capacitors are often labelled in microfarads. | A 47 µF capacitor equals 0.000047 F.
 Mega prefix | Mega means one million times the base unit. | Resistance and frequency often use large prefixes. | A 2 MΩ resistor is 2,000,000 Ω.
