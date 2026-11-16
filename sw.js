@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v29-nucleo-progressive-videos-r2';
+const CACHE = 'slt-study-studio-v30-distinct-690-curriculum';
 const CORE = [
   "./",
   "./index.html",
@@ -8,6 +8,9 @@ const CORE = [
   "./app.js",
   "./avionics_data.js",
   "./avionics_questions.js",
+  "./avionics_distinct_labs_v10.js",
+  "./avionics_distinct_math_v10.js",
+  "./avionics_distinct_reasoning_v10.js",
   "./avionics_practice.js",
   "./avionics_practice.css",
   "./avionics_beginner_lessons.js",
