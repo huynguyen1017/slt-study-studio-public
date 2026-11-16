@@ -52,7 +52,7 @@ assert(html.includes('data-mode="nvidia"')&&html.includes('id="nvidiaSltRoot"'))
 assert(app.includes("nvidiaSltRoot")&&app.includes("'nvidia'"));
 assert.equal(app.includes("localStorage.clear()"),false,"Do not delete saved progress");
 assert(ui.includes('slt-nvidia-soc-academy-v1'));
-assert(sw.includes("v34-nvidia-slt-academy-r1"));
+assert(sw.includes("v35-nvidia-scenario-lab-r1"));
 assert(css.includes("@media(max-width:640px)"));
 console.log("PASS: 12 topics ×50 =600; 120 distinct topic methods; 840 method-consistent numeric rerolls; 5160 guided steps; isolated state and offline assets");
 
