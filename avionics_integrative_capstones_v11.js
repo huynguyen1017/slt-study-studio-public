@@ -123,6 +123,9 @@ for(const t of T){
   x.lesson={title,summary:result,example:caseRow[3],why:"The final decision must be backed by independent measurements and a documented test condition.",
    vocab:[[skill[0],skill[1]],["Observed failure",caseRow[0]],["Verification",caseRow[3]]]};
   x.formula=i===9?block[3]:"";x.sub=i===9?block[4]:"";x.unitConv=null;
+  if(i===9&&(t.id==="power"||t.id==="kcl-kvl")){
+    x.network={kind:"mixed4",values:{v:12,a:100,b:200,c:300,d:80},focus:"system-capstone",illustrative:false};
+  }
   delete x.expected;
  }
 }
