@@ -255,17 +255,25 @@ function bench(q,t){
  text(368,295,"Representative testbench. Validate voltages, pinout and equipment ratings before real wiring.",12,P.muted,"middle");
  return svg(s,"Instrument-to-device block wiring diagram describing "+names.join(", "));
 }
+function focusInfo(q,t){
+ const match=q.id.match(/-([FADC])(\d+)$/);
+ if(!match)return t.skills[0]||["Basic electrical principle","","",""];
+ const n=Number(match[2])-1;
+ const idx=match[1]==="D"?Math.floor(n/2):match[1]==="F"||match[1]==="A"?n:Math.min(4,1+Math.floor(n/5));
+ return t.skills[idx]||t.skills[0];
+}
 function render(q,t,mode){
  const m=describe(q,t);
  const views={schematic:schematic,concept:curve,wiring:m.board?breadboard:bench};
  if(!views[mode])return "";
  const figure=views[mode](q,t);
  const label=mode==="schematic"?"Full schematic / signal path":mode==="concept"?"Graph / current-flow explanation":m.wiring;
+ const focus=focusInfo(q,t),check=q.level==="Troubleshooting"?"Recommended verification: "+(q.steps[q.steps.length-1]||"Verify the issue before changing the hardware."):(focus[3]||"");
  const detail=m.values.length?"Given in question: "+m.values.join(" · "):"Conceptual example; labels represent the question's engineering topic.";
  const warning=mode==="wiring"?"Generic teaching illustration, NOT a manufacturer-approved pinout or a complete wiring procedure. For real hardware, verify power-off connections, rail voltage, ratings and common-ground requirements.":mode==="concept"?"Illustrative model / normalized graph; not measured waveform or qualification data.":"Circuit symbols and current arrows are educational diagrams. Any unspecified values are examples, not part of the question.";
  return '<figure class="av-visual-figure" data-visual-question="'+esc(q.id)+'" data-visual-mode="'+esc(mode)+'">'+
  '<div class="av-visual-top"><strong>'+esc(label)+'</strong><span>Question '+esc(q.id)+' · '+esc(q.level)+'</span></div>'+
- figure+'<div class="av-visual-question-line"><strong>Question:</strong> '+esc(q.question)+'</div><figcaption>'+esc(detail)+'. '+esc(warning)+'</figcaption></figure>';
+ figure+'<div class="av-visual-question-line"><strong>Question:</strong> '+esc(q.question)+'</div><div class="av-visual-focus"><strong>Focus: '+esc(focus[0])+'.</strong> '+esc(focus[1]||'')+' <em>'+esc(check)+'</em></div><figcaption>'+esc(detail)+'. '+esc(warning)+'</figcaption></figure>';
 }
 window.avionicsVisuals={render,describe,hasBreadboard:(q,t)=>describe(q,t).board,viewTypes:()=>["schematic","concept","wiring"]};
 })();
