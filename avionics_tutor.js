@@ -664,7 +664,7 @@ function wire(){
 }
 
 window.mountAvionicsPractice=function(el){
- if(!el||!ASSESS||TOPICS.length!==23||QUESTIONS.length!==690){if(el)el.textContent="The Avionics question bank did not load correctly.";return}
+ if(!el||!ASSESS||TOPICS.length!==23||QUESTIONS.length!==TOPICS.length*TOPIC_TOTAL){if(el)el.textContent="The Avionics question bank did not load correctly.";return}
  host=el;el.dataset.avMounted="yes";const q=selected();if(q){draftText=state.responses[progressKey(q)]||"";currentAnswer=draftText;}show();
 };
 window.avionicsWorkbookV2={
