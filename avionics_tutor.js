@@ -15,6 +15,7 @@ const VIS=window.avionicsVisuals;
 const CIRCUITSIM=window.avionicsCircuitSimulator||null;
 const VIDEO=window.avionicsVideoLessons||null;
 const NUCLEO=window.avionicsNucleoWorkbench||null;
+const MIXED=window.avionicsMixedCircuitCurriculum||null;
 const ASSESS=window.avionicsAnswerCheck;
 const STORE="slt-avionics-ee-practice-v1";
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -33,11 +34,12 @@ if(!state.responses||typeof state.responses!=="object")state.responses={};
 /* Question meanings changed in v10. Archive previous mastery and explanations
    before resetting only their status, so a correct old answer is not displayed
    as already mastered for a new problem with the same stable ID. */
-if(window.AVIONICS_DISTINCT_CURRICULUM_VERSION===10&&state.curriculumVersion!==10){
+const ACTIVE_CURRICULUM=window.AVIONICS_DISTINCT_CURRICULUM_VERSION||10;
+if(ACTIVE_CURRICULUM>=10&&state.curriculumVersion!==ACTIVE_CURRICULUM){
  const old={ratings:state.ratings,assessments:state.assessments,responses:state.responses,attempts:state.attempts,version:state.curriculumVersion||9};
  const had=Object.keys(old.ratings).length+Object.keys(old.responses).length+Object.keys(old.assessments).length>0;
- if(had)state.priorProgressV9=old;
- state.ratings={};state.assessments={};state.responses={};state.attempts={};state.curriculumVersion=10;
+ if(had)state["priorProgressV"+(state.curriculumVersion||9)]=old;
+ state.ratings={};state.assessments={};state.responses={};state.attempts={};state.curriculumVersion=ACTIVE_CURRICULUM;
  try{localStorage.setItem(STORE,JSON.stringify(state))}catch(e){console.warn("Could not persist curriculum migration",e);}
 }
 
@@ -48,6 +50,7 @@ let filter="All",query="",page="learn",stepIndex=0,expanded=false,feedback="",dr
 let inlineVisualMode="schematic",customVariants={};
 
 const save=()=>{try{localStorage.setItem(STORE,JSON.stringify(state))}catch{}};
+const progressKey=q=>q&&q.isCustomVariant?q.id+"::dice":q.id;
 const topicOf=()=>TOPICS.find(t=>t.id===topic)||TOPICS[0];
 const qset=()=>QUESTIONS.filter(x=>x.topic===topic&&(filter==="All"||x.level===filter)&&(!query||(x.question+" "+x.steps.join(" ")).toLowerCase().includes(query)));
 const activeQuestion=()=>{const a=qset();currentIndex=Math.max(0,Math.min(a.length-1,currentIndex));const base=a[currentIndex];return base?(customVariants[base.id]||base):null;};
@@ -83,6 +86,7 @@ function knownValues(text){
 
 /* Dynamic fresh-number variant generator for Calculation questions */
 function makeRandomVariant(q){
+ if(MIXED&&q.roll)return MIXED.reroll(q);
  const fam=q.calcFamily;
  if(!fam)return null;
  const pick=(arr)=>arr[Math.floor(Math.random()*arr.length)];
@@ -162,7 +166,7 @@ function stepsFor(q,t,f){
    body:`${st[0]||f.definition} ${st[1]||""} ${st[2]||""} Takeaway: ${guided?(st[3]||guided.why):beginner?beginner.recap:LESSONS[t.id].lead}`,
    kind:"answer"
   });
- }else if(q.level==="Calculation"){
+ }else if(q.expected!==undefined){
   const vals=knownValues(q.question);
   out.push({
    title:"Read slowly: what is known vs. what are we solving for?",
@@ -247,7 +251,7 @@ function visualSwitcherBar(activeMode){
 function activeBanner(q,t){
  const idx=qset().findIndex(x=>x.id===q.id);
  const total=qset().length||1;
- const variantBtn=q.level==="Calculation"?`<div class="av-variant-bar">
+ const variantBtn=(q.level==="Calculation"||!!q.roll)?`<div class="av-variant-bar">
    <button type="button" id="avRandomize" class="av-light">🎲 Practice New Numbers</button>
    ${q.isCustomVariant?`<button type="button" id="avResetVariant" class="av-light">↺ Restore Canonical Question</button>`:""}
   </div>`:"";
@@ -451,13 +455,13 @@ function practicePage(q,t,f){
  (q.expected!==undefined?'<form id="avTryNumber" class="av-try-form"><label for="avValue">Enter your calculated answer</label><div class="av-input-row"><input id="avValue" type="text" inputmode="decimal" autocomplete="off" placeholder="Example: 10 or 0.01 A or 2.5e-3" value="'+esc(currentAnswer)+'" aria-describedby="avRequestedUnit"><span id="avRequestedUnit">'+esc(q.unit)+'</span><button class="av-primary" type="submit">Check answer</button></div></form>':
  '<label class="av-try-label" for="avExplain">Write your explanation in your own words</label><textarea id="avExplain" rows="4" placeholder="I think this means... because... On a Muon Space test bench I would verify it by...">'+esc(draftText)+'</textarea>'+
  '<div class="av-actions-bottom"><button id="avCheckExplanation" class="av-primary" type="button">Check my written answer</button><button id="avCompare" class="av-light">Show reference example</button></div>')+
- '<div id="avFeedback" role="status" aria-live="polite">'+(feedback?feedback:gradeView(state.assessments[q.id]))+'</div>'+
+ '<div id="avFeedback" role="status" aria-live="polite">'+(feedback?feedback:gradeView(state.assessments[progressKey(q)]))+'</div>'+
  '<details id="avReference" class="av-reference" '+(expanded?"open":"")+'><summary>Show the worked reference answer (MathML)</summary><p>'+rich(result)+'</p>'+
  (q.expected!==undefined?'<p class="av-ref-eng">Engineering notation: '+engVal(q.expected,q.unit)+'</p>':"")+
  (q.formula?equation(q.formula,"FORMULA (MATHML)")+(q.sub?equation(q.sub,"SUBSTITUTION (MATHML)"):""):"")+
  '</details>'+
  '<div class="av-self-check"><h4>Learning progress</h4><p>First check your answer. A correct check unlocks the “I can explain it ✓” mastery badge saved on your device.</p>'+
- '<div class="av-control-row"><button id="avNeedReview" class="av-light">I need more practice</button><button id="avUnderstand" class="av-good" '+((state.assessments[q.id]||{}).band!=="likely-correct"||answerDirty?'disabled title="Check and correct your answer first"':'')+'>I can explain it ✓</button></div></div>'+
+ '<div class="av-control-row"><button id="avNeedReview" class="av-light">I need more practice</button><button id="avUnderstand" class="av-good" '+((state.assessments[progressKey(q)]||{}).band!=="likely-correct"||answerDirty?'disabled title="Check and correct your answer first"':'')+'>I can explain it ✓</button></div></div>'+
  '<div class="av-actions-bottom"><button id="avBackLesson" class="av-light">← Review Page 1 (Understand)</button><button id="avNextQuestion" class="av-primary">Next question →</button></div>'+
  '</section>';
 }
@@ -512,14 +516,14 @@ function moveQuestion(n,keepPage=false){
  else if(page==="try")page="work";
  stepIndex=0;expanded=false;feedback="";
  const q=selected();
- draftText=q?(state.responses[q.id]||""):"";
+ draftText=q?(state.responses[progressKey(q)]||""):"";
  currentAnswer=draftText;answerDirty=false;
  state.lastTopic=topic;state.lastIndex=currentIndex;save();show();
  const heading=find(".av-workbook-heading h2",host);
  if(heading){heading.setAttribute("tabindex","-1");heading.focus({preventScroll:true});}
  find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});
 }
-function rating(x){const q=selected();if(!q)return;if(x==="know"&&(answerDirty||!state.assessments[q.id]||state.assessments[q.id].band!=="likely-correct"))return;state.ratings[q.id]=x;save();if(currentIndex<qset().length-1)moveQuestion(currentIndex+1);else show();}
+function rating(x){const q=selected();if(!q)return;if(x==="know"&&(answerDirty||!state.assessments[progressKey(q)]||state.assessments[progressKey(q)].band!=="likely-correct"))return;state.ratings[progressKey(q)]=x;save();if(currentIndex<qset().length-1)moveQuestion(currentIndex+1);else show();}
 
 function wire(){
  if(CIRCUITSIM)CIRCUITSIM.bind(host,requestedTopic=>requestedTopic?topicOf():activeQuestion());
@@ -554,12 +558,12 @@ function wire(){
  if(randBtn)randBtn.onclick=()=>{
   const q=selected();if(!q)return;
   const v=makeRandomVariant(q);
-  if(v){customVariants[q.id]=v;currentAnswer="";answerDirty=false;feedback="";delete state.assessments[q.id];show();}
+  if(v){customVariants[q.id]=v;currentAnswer="";draftText="";answerDirty=false;feedback="";delete state.assessments[progressKey(v)];delete state.ratings[progressKey(v)];delete state.responses[progressKey(v)];save();show();}
  };
  const resetVarBtn=find("#avResetVariant",host);
  if(resetVarBtn)resetVarBtn.onclick=()=>{
   const q=selected();if(!q)return;
-  delete customVariants[q.id];currentAnswer="";answerDirty=false;feedback="";delete state.assessments[q.id];show();
+  delete customVariants[q.id];currentAnswer="";draftText=state.responses[q.id]||"";answerDirty=false;feedback="";show();
  };
  const prev=find("#avQuestionPrevious",host),next=find("#avQuestionNext",host);
  if(prev)prev.onclick=()=>moveQuestion(currentIndex-1,page==="visual"||page==="work");
@@ -585,11 +589,11 @@ function wire(){
  const tryNumber=find("#avTryNumber",host);
  if(tryNumber)tryNumber.onsubmit=e=>{
   e.preventDefault();const q=selected(),input=find("#avValue",host);
-  currentAnswer=input.value.trim();state.responses[q.id]=currentAnswer;
-  state.attempts[q.id]=(state.attempts[q.id]||0)+1;
+  currentAnswer=input.value.trim();state.responses[progressKey(q)]=currentAnswer;
+  state.attempts[progressKey(q)]=(state.attempts[progressKey(q)]||0)+1;
   const result=ASSESS.gradeNumber(q,currentAnswer);
-  state.assessments[q.id]=result;
-  if(result.band!=="likely-correct"&&state.ratings[q.id]==="know")state.ratings[q.id]="again";
+  state.assessments[progressKey(q)]=result;
+  if(result.band!=="likely-correct"&&state.ratings[progressKey(q)]==="know")state.ratings[progressKey(q)]="again";
   save();answerDirty=false;feedback=gradeView(result);show();
  };
  const explain=find("#avExplain",host);
@@ -598,11 +602,11 @@ function wire(){
  if(checkText)checkText.onclick=()=>{
   const q=selected(),t=topicOf();
   draftText=(find("#avExplain",host)?.value||"").trim();
-  state.responses[q.id]=draftText;
-  state.attempts[q.id]=(state.attempts[q.id]||0)+1;
+  state.responses[progressKey(q)]=draftText;
+  state.attempts[progressKey(q)]=(state.attempts[progressKey(q)]||0)+1;
   const result=ASSESS.gradeText(q,t,draftText);
-  state.assessments[q.id]=result;
-  if(result.band!=="likely-correct"&&state.ratings[q.id]==="know")state.ratings[q.id]="again";
+  state.assessments[progressKey(q)]=result;
+  if(result.band!=="likely-correct"&&state.ratings[progressKey(q)]==="know")state.ratings[progressKey(q)]="again";
   save();answerDirty=false;feedback=gradeView(result);show();
  };
  const compare=find("#avCompare",host);
@@ -624,7 +628,7 @@ function wire(){
 
 window.mountAvionicsPractice=function(el){
  if(!el||!ASSESS||TOPICS.length!==23||QUESTIONS.length!==690){if(el)el.textContent="The Avionics question bank did not load correctly.";return}
- host=el;el.dataset.avMounted="yes";const q=selected();if(q){draftText=state.responses[q.id]||"";currentAnswer=draftText;}show();
+ host=el;el.dataset.avMounted="yes";const q=selected();if(q){draftText=state.responses[progressKey(q)]||"";currentAnswer=draftText;}show();
 };
 window.avionicsWorkbookV2={
  getQuestionCount:()=>QUESTIONS.length,
