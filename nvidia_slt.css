@@ -1,0 +1,82 @@
+/* NVIDIA SLT academy: fully scoped; no visual changes to the Muon study tab. */
+#nvidiaView{--nvs-ink:#173352;--nvs-line:#d9e3f1;--nvs-blue:#244f9d;--nvs-soft:#eef3fc;color:var(--nvs-ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#nvidiaView *{box-sizing:border-box}
+#nvidiaView [hidden]{display:none!important}
+#nvidiaView .nvs-app{max-width:1480px;margin:22px auto 60px}
+#nvidiaView .nvs-hero{display:flex;justify-content:space-between;align-items:center;gap:30px;padding:30px 34px;background:linear-gradient(115deg,#172e53,#284e8c 62%,#325e83);color:#fff;border-radius:20px;box-shadow:0 14px 38px #1d3b5a23}
+#nvidiaView .nvs-hero h2{font-size:clamp(1.5rem,2.5vw,2.4rem);margin:7px 0;letter-spacing:-.04em;color:white}
+#nvidiaView .nvs-hero p{max-width:640px;line-height:1.65;color:#e0ebff;font-size:15px}
+#nvidiaView .nvs-eyebrow{font-size:.68rem;font-weight:800;letter-spacing:.13em;color:#cce9ed}
+#nvidiaView .nvs-stats{background:#ffffff16;border:1px solid #ffffff40;padding:22px;border-radius:14px;min-width:182px;display:flex;flex-direction:column;gap:7px;flex-shrink:0}
+#nvidiaView .nvs-stats strong{font-size:1.85rem;font-variant-numeric:tabular-nums}
+#nvidiaView .nvs-stats span,#nvidiaView .nvs-stats small{font-size:12px;color:#dbeafb}
+#nvidiaView .nvs-layout{display:grid;grid-template-columns:minmax(255px,320px) minmax(0,1fr);gap:18px;margin-top:20px}
+#nvidiaView .nvs-side,#nvidiaView .nvs-main{border:1px solid var(--nvs-line);background:#fff;border-radius:17px;padding:22px;min-width:0;box-shadow:0 4px 20px #123b6310}
+#nvidiaView .nvs-side{align-self:start;position:sticky;top:15px;max-height:90vh;overflow-y:auto}
+#nvidiaView label{display:block;font-weight:750;font-size:13px;margin:10px 0}
+#nvidiaView select,#nvidiaView input,#nvidiaView textarea{width:100%;background:white;color:var(--nvs-ink);border:1px solid #b7cbe3;padding:12px;border-radius:9px;max-width:100%;font:inherit}
+#nvidiaView input:focus-visible,#nvidiaView select:focus-visible,#nvidiaView textarea:focus-visible{outline:3px solid #ffce6a}
+#nvidiaView button{background:#f0f5ff;border:1px solid #cad9ef;padding:9px 12px;border-radius:9px;color:#1d467b;font-size:13px;font-weight:700}
+#nvidiaView button:focus-visible{outline:3px solid #edb640;outline-offset:2px}
+#nvidiaView button[disabled]{opacity:.42}
+#nvidiaView .nvs-primary{background:#2258ac!important;color:#fff!important;border-color:#2258ac!important}
+#nvidiaView .nvs-track{margin:16px 0;padding:15px;background:#f3f6fc;border:1px solid #e1e9f4;border-radius:12px;font-size:13px}
+#nvidiaView .nvs-track strong{font-size:19px}
+#nvidiaView .nvs-trackbar{height:7px;background:#dfe6f3;border-radius:8px;margin-top:10px;overflow:hidden}
+#nvidiaView .nvs-trackbar span{height:100%;display:block;background:#159c87}
+#nvidiaView .nvs-side>p{line-height:1.7;font-size:13px}
+#nvidiaView .nvs-phase-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+#nvidiaView #nvsExport{width:100%;margin:10px 0}
+#nvidiaView .nvs-references{font-size:12px;line-height:1.6;margin-top:15px;padding:10px;background:#f6f8fc;border-radius:10px}
+#nvidiaView .nvs-references summary{cursor:pointer;font-weight:750}
+#nvidiaView .nvs-references a{color:#174a9e}
+#nvidiaView .nvs-toolbar{display:flex;justify-content:space-between;align-items:start;gap:10px}
+#nvidiaView .nvs-toolbar span{font-size:11px;letter-spacing:.1em;font-weight:800;color:#5173a2;white-space:nowrap}
+#nvidiaView .nvs-toolbar h3{font-size:clamp(1.2rem,2vw,1.65rem);margin:6px 0}
+#nvidiaView .nvs-toolbar p{font-size:14px;line-height:1.55;color:#4a6280;margin:5px 0}
+#nvidiaView .nvs-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:16px 0 11px}
+#nvidiaView .nvs-nav span{font-size:12px;line-height:1.5;text-align:center;font-weight:750;color:#315e89}
+#nvidiaView .nvs-numbers{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px;margin-bottom:16px}
+#nvidiaView .nvs-numbers button{padding:8px 0;font-size:12px;font-variant-numeric:tabular-nums}
+#nvidiaView .nvs-numbers button.selected{background:#265cbb;color:#fff;border-color:#265cbb}
+#nvidiaView .nvs-numbers button.mastered:not(.selected){color:#11654e;background:#d9f4e7;border-color:#8cceb0}
+#nvidiaView .nvs-dice{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px dashed #a1bcdf;border-radius:10px;padding:10px;margin-bottom:13px;background:#f8fbff}
+#nvidiaView .nvs-dice small{font-size:11px;color:#546d86}
+#nvidiaView .nvs-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:2px solid #d6e3f5;gap:7px;margin-top:14px}
+#nvidiaView .nvs-tabs button{border-radius:10px 10px 0 0;font-size:12px;padding:11px 5px;background:#f7f9fc;border-bottom:0}
+#nvidiaView .nvs-tabs button[aria-selected=true]{color:#fff;background:#1d528e}
+#nvidiaView .nvs-lesson{padding:16px 1px 5px}
+#nvidiaView .nvs-kicker{font-weight:850;letter-spacing:.1em;font-size:11px;color:#4779ae;text-transform:uppercase;margin:8px 0}
+#nvidiaView .nvs-lesson h3{font-size:clamp(1.2rem,2vw,1.5rem);line-height:1.35;margin:9px 0 15px}
+#nvidiaView .nvs-question{border-left:4px solid #437cbe;border-radius:0 8px 8px 0;padding:16px 18px;background:#f1f6fc;font-size:15px;line-height:1.8;word-break:break-word;margin:12px 0 18px}
+#nvidiaView .nvs-two{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+#nvidiaView .nvs-two section{border:1px solid #e1e7f1;border-radius:12px;padding:17px;background:#fff}
+#nvidiaView h4{font-size:14px;margin:4px 0 9px}
+#nvidiaView p,#nvidiaView li,#nvidiaView dd{line-height:1.75;overflow-wrap:anywhere}
+#nvidiaView p{font-size:14px}
+#nvidiaView dl{margin:0}
+#nvidiaView dt{font-weight:800;font-size:12px;margin-top:9px}
+#nvidiaView dd{margin:3px 0 7px;font-size:13px;color:#4d6177}
+#nvidiaView .nvs-flow{width:100%;height:auto;display:block;margin:18px 0;border-radius:10px;border:1px solid #e0e9f5}
+#nvidiaView .nvs-math{border:1px solid #d6e3ef;background:#f8fafc;padding:15px;border-radius:12px;margin:18px 0}
+#nvidiaView .nvs-math strong{display:block;margin:10px 0 6px;font-size:13px}
+#nvidiaView .nvs-math code{display:block;white-space:pre-wrap;overflow-wrap:anywhere;background:#e5eefb;border:1px solid #d2e2f4;padding:12px;font-size:13px;border-radius:7px;color:#244d76}
+#nvidiaView .nvs-inline-actions{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0}
+#nvidiaView .nvs-stepbar{height:9px;background:#e1e9f4;border-radius:8px;overflow:hidden}
+#nvidiaView .nvs-stepbar span{height:100%;background:#2a9d88;display:block}
+#nvidiaView .nvs-step{border-radius:12px;padding:26px;margin:15px 0;background:linear-gradient(130deg,#eef5ff,#f4fafb);border:1px solid #c5d9f1}
+#nvidiaView .nvs-step strong{color:#22539a}
+#nvidiaView .nvs-step p{font-size:15px;line-height:1.9}
+#nvidiaView .nvs-steps-all{padding:15px 22px 15px 35px;background:#fafcff;border:1px solid #e0e9f3;border-radius:11px}
+#nvidiaView .nvs-steps-all li{margin-bottom:14px;font-size:14px}
+#nvidiaView #nvsReference{padding:14px;background:#f8fbff;border:1px solid #dce8f3;border-radius:12px;margin-top:20px}
+#nvidiaView #nvsReference summary{cursor:pointer;font-weight:750}
+#nvidiaView #nvsReference li{margin-bottom:13px}
+#nvidiaView .nvs-rating{padding:15px;background:#f6f9fc;border:1px solid #d7e6f0;border-radius:12px;margin-top:19px}
+#nvidiaView .nvs-rating button{margin-right:8px}
+#nvidiaView .nvs-hint{border-left:4px solid #e1a42a;background:#fff9ea;padding:12px 16px;margin:15px 0;font-size:13px}
+#nvidiaView .nvs-feedback{margin:15px 0;padding:13px 16px;border-radius:9px;background:#eaf4fc;border:1px solid #a7cae8;font-size:14px}
+#nvidiaView .nvs-review-msg{font-size:13px;color:#406479}
+#nvidiaView .nvs-foot{margin:20px 2px;font-size:12px;color:#637589;line-height:1.7}
+@media(max-width:980px){#nvidiaView .nvs-layout{grid-template-columns:1fr}#nvidiaView .nvs-side{position:static;max-height:none}#nvidiaView .nvs-hero{padding:22px}#nvidiaView .nvs-side{padding:18px}}
+@media(max-width:640px){#nvidiaView .nvs-hero{display:block}#nvidiaView .nvs-stats{margin-top:17px;min-width:0}#nvidiaView .nvs-main{padding:13px}#nvidiaView .nvs-two{grid-template-columns:1fr}#nvidiaView .nvs-numbers{grid-template-columns:repeat(5,minmax(0,1fr))}#nvidiaView .nvs-tabs{grid-template-columns:1fr 1fr}#nvidiaView .nvs-nav{gap:6px}#nvidiaView .nvs-nav button{padding:8px}#nvidiaView .nvs-toolbar{display:block}#nvidiaView .nvs-step{padding:18px}#nvidiaView .nvs-question{font-size:14px;padding:12px}}
