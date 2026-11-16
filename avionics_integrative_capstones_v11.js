@@ -110,18 +110,32 @@ for(const t of T){
  if(q.length!==10)throw Error("Missing diagnostic slots "+t.id);
  for(let i=0;i<10;i++){
   const x=q[i],phase=moves[i],caseRow=t.cases[i%5],skill=t.skills[(i+1)%5];
+  // Q21–25 isolate one real fault. Q26–29 combine TWO different observations,
+  // instead of recycling the same source case as a stand-alone exercise.
+  const secondCase=i>=5&&i<9?t.cases[(i+2)%5]:null;
+  const extra=secondCase
+   ?" A second potentially related observation is: "+secondCase[0]+" Determine whether these symptoms share a root cause or require separate fault trees."
+   :"";
   const title=i===9?block[0]:phase[0]+" · "+skill[0];
-  const question=i===9?block[1]:phase[1]+caseRow[0]+phase[2]+" Specific related concept: "+skill[0]+".";
-  const result=i===9?block[2]:"Start with "+caseRow[1]+" Then assess "+caseRow[2]+" and independently verify "+caseRow[3]+". Use "+skill[1];
+  const question=i===9?block[1]:phase[1]+caseRow[0]+extra+" "+phase[2].replace(/^\./,"")+" Specific related concept: "+skill[0]+".";
+  const result=i===9?block[2]:"Start with "+caseRow[1]+" Then assess "+caseRow[2]+" and independently verify "+caseRow[3]+". "
+   +(secondCase?"For the second observation, separately check "+secondCase[1]+" Assess "+secondCase[2]+" and verify "+secondCase[3]+". Compare both before claiming a common root cause. ":"")
+   +"Use "+skill[1];
   x.originalMasteryQuestion=x.question;
   x.question=question;x.learningObjective=title;x.auditSkill=title;x.skillName=title;
   x.steps=["Stage "+(i+1)+": "+question,
-   "Ground this in source-defined signals and risks: "+caseRow[0]+" "+skill[1],
+   "Ground the primary case in source-defined signals and risks: "+caseRow[0]+" "+skill[1],
+   ...(secondCase?[
+    "Trace the second symptom to its own signal and reference: "+secondCase[0],
+    "Design a discriminating independent check: "+secondCase[3]+" Compare with the first test: "+caseRow[3]
+   ]:[]),
    "Reason about the physical result rather than naming the part: "+result,
-   "Write the concrete test and falsifiable expected observation: "+caseRow[3],
+   "Write a falsifiable expected observation for the primary test: "+caseRow[3],
    "Record units, calibration, configuration and a reproducible disposition."];
-  x.lesson={title,summary:result,example:caseRow[3],why:"The final decision must be backed by independent measurements and a documented test condition.",
-   vocab:[[skill[0],skill[1]],["Observed failure",caseRow[0]],["Verification",caseRow[3]]]};
+  x.lesson={title,summary:result,example:secondCase?caseRow[3]+" Also: "+secondCase[3]:caseRow[3],
+   why:"An integrated diagnosis must distinguish competing fault hypotheses with independent measurements and a documented test condition.",
+   vocab:[[skill[0],skill[1]],["Observed failure",caseRow[0]],
+    ...(secondCase?[["Second observation",secondCase[0]]]:[]),["Verification",caseRow[3]]]};
   x.formula=i===9?block[3]:"";x.sub=i===9?block[4]:"";x.unitConv=null;
   if(i===9&&(t.id==="power"||t.id==="kcl-kvl")){
     x.network={kind:"mixed4",values:{v:12,a:100,b:200,c:300,d:80},focus:"system-capstone",illustrative:false};

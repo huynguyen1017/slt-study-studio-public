@@ -81,6 +81,22 @@ for(const topic of t){
   assert(arr.slice(20).every(x=>x.expected===undefined&&x.lesson),topic.id+" advanced staged analysis missing");
  }
 }
+let compoundCaseCount=0;
+for(const topic of t.filter(x=>x.id!=="series"&&x.id!=="parallel")){
+ const steps=q.filter(x=>x.topic===topic.id);
+ for(let j=0;j<5;j++){
+  assert(!steps[20+j].question.includes("A second potentially related observation"),topic.id+" Q"+(21+j)+" should isolate one fault first");
+ }
+ for(let j=5;j<9;j++){
+  const current=steps[20+j],first=topic.cases[j%5][0],second=topic.cases[(j+2)%5][0];
+  assert.notEqual(first,second,topic.id+" paired case must be distinct");
+  assert(current.question.includes(first)&&current.question.includes(second),current.id+" must combine TWO different fault observations");
+  assert(current.question.includes("share a root cause"),current.id+" must demand causal distinction");
+  assert(current.steps.length>=7&&current.lesson.summary.includes("second observation"),current.id+" missing independent second verification");
+  compoundCaseCount++;
+ }
+}
+assert.equal(compoundCaseCount,84,"21 topics should each have four compound late-diagnostic scenarios");
 const ser=q.filter(x=>x.topic==="series"),par=q.filter(x=>x.topic==="parallel");
 assert(ser[11].question.includes("SAME nodes"),"Q12 must teach parallel topology, not another pure series sum");
 assert(ser[12].question.includes("IN SERIES"),"Q13 must introduce series+parallel");
