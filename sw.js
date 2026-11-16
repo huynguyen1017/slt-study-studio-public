@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v23-avionics-question-and-math-refresh';
+const CACHE = 'slt-study-studio-v23-avionics-question-and-math-refresh-r2';
 const CORE = [
   "./",
   "./index.html",

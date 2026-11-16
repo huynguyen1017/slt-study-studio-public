@@ -51,25 +51,25 @@ const rawDeep={
 "units:Milli prefix":{
  plain:"The prefix 'milli' (symbol m) means one thousandth, or 10⁻³ (0.001). Every 1,000 milliamps equals 1 ampere.",
  analogy:"Just as 1,000 millimeters equal 1 meter, 1,000 mA equal 1 A and 1,000 mV equal 1 V.",
- why:"Avionics current draws and shunt drops are almost always read in mA or mV on a DMM, whereas formulas like P = V × I expect base amperes and volts.",
+ why:"Avionics current draws and shunt drops are almost always read in mA or mV on a DMM, whereas formulas like P = V × I expect unprefixed amperes and volts.",
  example:"Convert 25 mA into amperes: 25 × 10⁻³ A = 0.025 A. Convert 8 mA: 8 × 10⁻³ A = 0.008 A.",
- formula:"X_base = X_milli * 10^(-3)",
+ formula:"X_unit = X_milli * 10^(-3)",
  sub:"25 mA = 25 * 10^(-3) = 0.025",
- words:[["Milli (m)","Multiplier 10⁻³ = 0.001."],["Conversion","Multiply milli-values by 10⁻³ (divide by 1000) to get base units."]],
- recap:"Milli always means 10⁻³: move the decimal 3 places left to convert to the base unit."
+ words:[["Milli (m)","Multiplier 10⁻³ = 0.001."],["Conversion","Multiply milli-values by 10⁻³ (divide by 1,000) to get unprefixed units (e.g., A, V, W)."]],
+ recap:"Milli always means 10⁻³: move the decimal 3 places left to convert to the unprefixed unit."
 },
 "units:Micro prefix":{
  plain:"The prefix 'micro' (symbol µ) means one millionth, or 10⁻⁶ (0.000001). One million microfarads equal 1 farad.",
  analogy:"One microsecond (µs) is to one second what one penny is to ten thousand dollars—one part in a million.",
  why:"Decoupling capacitors on flight PCBAs are nearly always labeled in µF (microfarads) and oscilloscope pulse widths in µs; forgetting 10⁻⁶ throws τ = R·C off by a factor of a million.",
  example:"Convert 4.7 µF into farads: 4.7 × 10⁻⁶ F = 0.0000047 F.",
- formula:"X_base = X_micro * 10^(-6)",
+ formula:"X_unit = X_micro * 10^(-6)",
  sub:"4.7 uF = 4.7 * 10^(-6)",
- words:[["Micro (µ)","Multiplier 10⁻⁶ = 0.000001."],["Farad (F)","Base unit of capacitance; most board caps are µF or nF."]],
- recap:"Micro always means 10⁻⁶: move the decimal 6 places left to convert to base units."
+ words:[["Micro (µ)","Multiplier 10⁻⁶ = 0.000001."],["Farad (F)","SI derived unit of capacitance (C/V); most board caps are µF or nF."]],
+ recap:"Micro always means 10⁻⁶: move the decimal 6 places left to convert to the unprefixed unit."
 },
 "units:Mega prefix":{
- plain:"The prefix 'mega' (symbol M) means one million times the base unit, or 10⁶ (1,000,000).",
+ plain:"The prefix 'mega' (symbol M) means one million times the unprefixed unit, or 10⁶ (1,000,000).",
  analogy:"Notice capitalization matters: lowercase 'm' is milli (10⁻³), while uppercase 'M' is mega (10⁶)—a difference of a billion times!",
  why:"Pull-up/bleeder resistors and insulation checks use MΩ, while processor clocks and RF signals use MHz. Mixing up mΩ (milliohm shunt) and MΩ (megohm) ruins every calculation.",
  example:"A 4.7 MΩ resistor from Floyd & Buchla Figure 3-9 equals 4.7 × 10⁶ Ω = 4,700,000 Ω.",
@@ -128,7 +128,7 @@ const rawDeep={
  formula:"I = V / R",
  sub:"I = 3.3 / 330 = 10e-3",
  words:[["V","Voltage across that specific resistor in volts (V)."],["I","Current flowing through that same resistor in amperes (A)."],["R","Resistance in ohms (Ω)."]],
- recap:"Always use base SI units (V, A, Ω) in V = I × R, then convert to mA or kΩ at the end."
+ recap:"Always convert prefixes (mA, kΩ, MΩ) to unprefixed SI units (V, A, Ω) in V = I × R, then convert to mA or kΩ at the end."
 },
 "ohm:Polarity":{
  plain:"Polarity tells you which probe is positive (+) and which is negative (−) when measuring a potential difference.",
@@ -719,7 +719,7 @@ const rawDeep={
  analogy:"A hinged pet door that swings freely open inward (+ to −) but slams shut if pushed backward.",
  why:"Installing a reverse-polarity protection diode or TVS backwards creates a dead short across the power rail during bring-up!",
  example:"Before powering a new board, inspect the cathode stripe on every diode against the schematic.",
- formula:"I_diode > 0  when  V_A - V_K >= V_f",
+ formula:"V_A - V_K >= V_f => I_diode > 0",
  sub:"V_drop = 0.7",
  words:[["Anode / Cathode","Positive input side (A) vs negative striped side (K)."],["V_f","Forward voltage drop required for conduction."]],
  recap:"Current flows Anode → Cathode (stripe); always inspect diode orientation before first power-on."
@@ -749,7 +749,7 @@ const rawDeep={
  analogy:"A referee calling fair/foul: anything clearly inside the line (≥ V_IH) counts as '1'; anything clearly outside (≤ V_IL) counts as '0'; the gray zone in between is unpredictable.",
  why:"Connecting a 1.8 V FPGA output directly to a 3.3 V input with V_IH = 2.3 V sits right in the forbidden gray zone and fails intermittently across temperature.",
  example:"For 3.3 V CMOS (V_IH ≈ 0.7 × 3.3 = 2.31 V, V_IL ≈ 0.3 × 3.3 = 0.99 V), a 1.2 V logic signal is invalid!",
- formula:"V_OH >= V_IH   and   V_OL <= V_IL",
+ formula:"V_OH >= V_IH , V_OL <= V_IL",
  sub:"V_IH = 0.7 * 3.3 = 2.31",
  words:[["V_IH / V_IL","Receiver minimum valid HIGH and maximum valid LOW voltage."],["Level shifter","Translator bridging 1.8 V and 3.3 V logic domains."]],
  recap:"Never assume '1' or '0'—measure actual rail voltage against datasheet V_IH and V_IL thresholds."
@@ -863,7 +863,7 @@ const rawDeep={
  analogy:"If a lamp doesn't light, try the bulb in a working lamp (KGS) and try a working bulb (KGB) in your socket before throwing out the lamp.",
  why:"Worn test-fixture pogo pins, a swapped USB/UART node, or an A0 vs B0 firmware image mismatch imitate broken PCBAs constantly.",
  example:"In DRAM qualification, single-lane `0x101` failure stayed with the fixture socket while `0x1FF` saturation across all lanes at −25 °C followed temperature.",
- formula:"Fault_location = A - B - A swap",
+ formula:"Isolate(DUT, Rack) = Swap(A, B, A)",
  sub:"Follows_DUT => PCBA  |  Stays_in_rack => EGSE",
  words:[["KGB / KGS","Known-Good Board / Known-Good Setup."],["One variable at a time","Change only board, firmware, or cable per trial so root cause is unambiguous."]],
  recap:"Use A-B-A swapping to prove whether the defect follows the DUT or stays with the test rack."
@@ -906,7 +906,7 @@ const rawDeep={
  why:"Probing a crystal oscillator with a 15 pF passive 1×/10× probe can stop the crystal from oscillating! Use an active FET probe (<1 pF) for clocks and 10× setting matched in the scope.",
  example:"If a 10× probe is plugged in while scope channel attenuation is left at 1×, every reading displays 10× too small!",
  formula:"Z_probe = R_p || (1 / (j * 2 * pi * f * C_p))",
- sub:"V_shown = V_true / 10  (if 10x vs 1x mismatch)",
+ sub:"V_shown = V_true / 10",
  words:[["10× setting","Must match between physical probe switch and scope channel menu."],["Active FET probe","Sub-pF capacitance probe for fast clocks and high-impedance nodes."]],
  recap:"Match probe attenuation (1× vs 10×), minimize C_load on clocks, and shorten ground loops."
 },
@@ -1072,7 +1072,7 @@ const rawDeep={
  why:"A loose USB cable during an automated thermal run must abort safely and log the rack fault without corrupting board yield statistics.",
  example:"Wrap measurement loops in `try...except (pyvisa.VisaIOError, serial.SerialException) as e:` with a `finally:` block disabling power outputs.",
  formula:"Status = PASS | FAIL_DUT | ERROR_STATION",
- sub:"try { measure() } finally { supply_off() }",
+ sub:"VisaIOError => Safe_off(Supply)",
  words:[["Safe state","Turning power outputs OFF in a `finally:` block when scripts crash."],["Station vs DUT","Separating rack cable/timeout errors from true flight hardware failures."]],
  recap:"Always catch communication exceptions, power down safely in `finally`, and never mask station faults as passes."
 },
@@ -1103,8 +1103,8 @@ const rawDeep={
  analogy:"A silent thumbs-up (0) or error code slip (non-zero) handed back to the test orchestrator when a sub-program finishes.",
  why:"A Bash pipe like `run_test | tee log.txt` masks failures because `tee` exits `0`! Always enable `set -euo pipefail` in Bash automation.",
  example:"Check `echo $?` after any flash or test command, and keep `set -o pipefail` at the top of automation scripts.",
- formula:"Exit_code = 0 (PASS)  |  != 0 (FAIL)",
- sub:"set -euo pipefail",
+ formula:"Exit_code = 0  |  Exit_code != 0",
+ sub:"Exit_code != 0 => Fail_run",
  words:[["pipefail","Bash option ensuring a pipeline fails if ANY command inside it fails."],["stderr (2)","Error stream that should be logged alongside stdout (`2>&1`)."]],
  recap:"Always check exit codes and set `pipefail` so piped logs never mask failing tests."
 },
@@ -1123,8 +1123,8 @@ const rawDeep={
  analogy:"A restaurant health sign saying 'A' taped over an inspection log listing 2 violations—always read the raw inspection log.",
  why:"In real DRAM qualification, a script bug printed `'No fail directories needed'` even though raw logs showed `Pass count: 0, Fail count: 2`! Always audit failure-latching logic.",
  example:"Write unit tests injecting synthetic failures (`Fail count: 2`, `ASSERT`, `NaN`) into your log parser to prove it flags NO-GO.",
- formula:"Verdict = FAIL  if  (N_fail > 0) OR (N_pass == 0)",
- sub:"Pass:0, Fail:2 => NO-GO (Mirrored)",
+ formula:"(N_fail > 0) | (N_pass == 0) => Verdict = NO_GO",
+ sub:"N_pass = 0 , N_fail = 2 => Verdict = NO_GO",
  words:[["Failure latching","Once any failure occurs, overall verdict latches to FAIL and cannot be cleared."],["False clean","Worst possible test bug—reporting PASS on failing hardware."]],
  recap:"Verify raw logs against automated summaries and unit-test parser failure latching."
 },
@@ -1207,7 +1207,7 @@ const rawDeep={
  why:"Real Muon Space interview favorite! If a unit passes an ambient thermal chamber (+85 °C) yet fails in TVAC, look for loss of convection cooling (local component overheating), vacuum outgassing/corona, or vacuum feedthrough harness issues.",
  example:"Correlate chamber pressure, thermocouple temps on hot ICs, current draw, and telemetry timestamps to isolate pump-down vs thermal soak failures.",
  formula:"Q_rad = epsilon * sigma * A * (T_hw^4 - T_wall^4)",
- sub:"No convection in vacuum => Delta_T_local rises",
+ sub:"h_conv = 0 => Delta_T_local > Delta_T_ambient",
  words:[["Convection loss","No air cooling in vacuum—heat moves ONLY by PCB conduction and radiation."],["Outgassing","Trapped volatile gases venting in vacuum and risking high-voltage arc/corona."]],
  recap:"In TVAC, vacuum eliminates air convection, exposes thermal-conduction defects, and triggers outgassing/corona."
 },
@@ -1217,7 +1217,7 @@ const rawDeep={
  why:"A passing test run executed with unapproved debug firmware or an expired DMM calibration sticker cannot sign off a flight unit.",
  example:"Require automated script startup checks to record `git rev-parse HEAD`, `fw_sha256`, `dut_serial`, and `*IDN?` into the run report.",
  formula:"Config_ID = {HW_rev, Serial, FW_hash, Git_SHA, Cal_due}",
- sub:"Any mismatch => Invalid qualification evidence",
+ sub:"Sha_actual != Sha_ref => Invalid_config",
  words:[["ECO","Engineering Change Order documenting board rework."],["Traceability","Ability to reconstruct exact hardware/software/instrument state months later."]],
  recap:"Never release flight hardware from tests with missing serials, unapproved firmware, or expired calibrations."
 },

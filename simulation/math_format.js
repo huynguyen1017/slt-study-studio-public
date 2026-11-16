@@ -4,11 +4,16 @@
 (function(){
 const enc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const subs={"₀":"0","₁":"1","₂":"2","₃":"3","₄":"4","₅":"5","₆":"6","₇":"7","₈":"8","₉":"9"};
-const pat=/[A-Za-zΓγΔδθτπΩΣλφωμℓ]+(?:_[A-Za-z0-9₀₁₂₃₄₅₆₇₈₉]+)*[₀₁₂₃₄₅₆₇₈₉]*|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|[ΓγΔδθτπΩΣλφωμ∫ln]+|[₀₁₂₃₄₅₆₇₈₉]+|[=≈≥≤≠<>+\-−*/×·^()√→⇒\|]|./gu;
+const pat=/[A-Za-zΓγΔδθτπΩΣλφωμµℓ][A-Za-z0-9Ωμµ₀₁₂₃₄₅₆₇₈₉]*(?:_[A-Za-z0-9Ωμµ₀₁₂₃₄₅₆₇₈₉]+)*|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|[ΓγΔδθτπΩΣλφωμ∫]+|[₀₁₂₃₄₅₆₇₈₉]+|\|\||>>|<<|==|[=≈≥≤≠≪≫<>+\-−*/×·^(),;:|{}\[\]√∥→⇒]|./gu;
+const UNIT_EXPLICIT=new Set(["Ω","MΩ","kΩ","mΩ","μF","mF","nF","pF","uF","μH","mH","nH","pH","μA","mA","nA","pA","mV","kV","MV","μV","nV","μW","mW","kW","MW","μs","ms","ns","ps","μJ","mJ","kJ","μC","mC","nC","pC","Hz","kHz","MHz","GHz","dB","dBm","dBc","kg","Wb","At","rad","sr","mol","cd"]);
+const UNIT_SINGLE=new Set(["A","V","W","F","H","C","J","S","s","m","K","g","N","T"]);
+const UNIT_AFTER_NUM=new Set([...UNIT_EXPLICIT,...UNIT_SINGLE]);
+const ROMAN_WORDS=new Set(["ln","log","sin","cos","tan","max","min","exp","PASS","FAIL","FAIL_DUT","ERROR_STATION","NO_GO","PCBA","EGSE","DUT","KGB","KGS","HITL","Verify","Validate","Isolate","Abort","sha256","Invalid_config"]);
 
 function normalizeFormula(src){
  let s=String(src??"").trim();
  s=s
+  .replace(/µ/g,"μ")
   .replace(/\bGamma_L\b|\bGammaL\b/g,"Γ_L")
   .replace(/\bGamma_S\b|\bGammaS\b/g,"Γ_S")
   .replace(/\bGamma\b/g,"Γ")
@@ -16,6 +21,7 @@ function normalizeFormula(src){
   .replace(/\bDelta_I\b|\bDeltaI\b/g,"ΔI")
   .replace(/\bDelta_t\b|\bDeltat\b/g,"Δt")
   .replace(/\bDelta_f\b|\bDeltaf\b/g,"Δf")
+  .replace(/\bDelta_T/g,"ΔT")
   .replace(/\bDelta\b/g,"Δ")
   .replace(/\bomega_0\b|\bomega0\b/g,"ω₀")
   .replace(/\bomega\b/g,"ω")
@@ -23,6 +29,9 @@ function normalizeFormula(src){
   .replace(/\bpi\b/g,"π")
   .replace(/\btheta\b/g,"θ")
   .replace(/\bsigma\b/g,"σ")
+  .replace(/\bepsilon\b/g,"ε")
+  .replace(/\bzeta\b/g,"ζ")
+  .replace(/\beta\b/g,"η")
   .replace(/\bMOhm\b/g,"MΩ")
   .replace(/\bkOhm\b/g,"kΩ")
   .replace(/\bmOhm\b/g,"mΩ")
@@ -46,6 +55,10 @@ function normalizeFormula(src){
   .replace(/\blog10\b/g,"log_10")
   .replace(/\blog2\b/g,"log_2")
   .replace(/\bsqrt\s*\(/g,"√(")
+  .replace(/\|\|/g,"∥")
+  .replace(/>>/g,"≫")
+  .replace(/<</g,"≪")
+  .replace(/==/g,"=")
   .replace(/<=/g,"≤")
   .replace(/>=/g,"≥")
   .replace(/!=/g,"≠")
@@ -68,7 +81,7 @@ function mi(s){
  }
  if(/^\d+(?:\.\d+)?$/.test(s))return "<mn>"+enc(s)+"</mn>";
  if(s==="√"||s==="∫")return "<mo>"+enc(s)+"</mo>";
- if(s==="ln"||s==="log"||s==="sin"||s==="cos"||s==="max"||s==="min")return '<mi mathvariant="normal">'+enc(s)+"</mi>";
+ if(UNIT_EXPLICIT.has(s)||ROMAN_WORDS.has(s))return '<mi mathvariant="normal">'+enc(s)+"</mi>";
  if(s==="log_10"||s==="log_2")return '<msub><mi mathvariant="normal">log</mi><mn>'+s.split("_")[1]+'</mn></msub>';
  let base=s,under="";
  if(s.includes("_")){
@@ -78,11 +91,22 @@ function mi(s){
  }else{
   let m=s.match(/^([A-Za-zΓγΔδθτπΩΣω]+)([₀₁₂₃₄₅₆₇₈₉]+)$/u);
   if(m){base=m[1];under=[...m[2]].map(x=>subs[x]).join("");}
+  else{
+   let md=s.match(/^([A-Za-z]+)(\d+)$/);
+   if(md&&md[1].length<=2){base=md[1];under=md[2];}
+  }
+ }
+ if(!under){
+  let md=base.match(/^([A-Za-z]+)(\d+)$/);
+  if(md&&md[1].length<=2){base=md[1];under=md[2];}
+ }else{
+  let md=base.match(/^([A-Za-z]+)(\d+)$/);
+  if(md&&md[1].length<=2){base=md[1];under=md[2]+","+under;}
  }
  if(under.includes("_")){
   under=under.replace(/_/g,",");
  }
- const root="<mi>"+enc(base)+"</mi>";
+ const root=(ROMAN_WORDS.has(base)||UNIT_EXPLICIT.has(base))?'<mi mathvariant="normal">'+enc(base)+"</mi>":"<mi>"+enc(base)+"</mi>";
  return under?"<msub>"+root+"<mtext>"+enc(under)+"</mtext></msub>":root;
 }
 
@@ -106,12 +130,39 @@ function stripOuterParens(xml){
 function build(src){
  const a=tokens(src);
  let i=0;
+ function hasClosingBar(pos){
+  let d=0;
+  for(let j=pos;j<a.length;j++){
+   const tok=a[j];
+   if(tok==="("||tok==="{"||tok==="[")d++;
+   else if(tok===")"||tok==="}"||tok==="]"){if(d===0)return false;d--;}
+   else if(d===0&&tok==="|"&&j>pos)return true;
+   else if(d===0&&[";",",","=","≈","≥","≤","≠","≪","≫","→","⇒"].includes(tok))return false;
+  }
+  return false;
+ }
+ function commaList(){
+  let inner=cmp();
+  while(a[i]===","){i++;inner="<mrow>"+inner+'<mo>,</mo><mspace width="0.2em"/>'+cmp()+"</mrow>";}
+  return inner;
+ }
  function prim(){
   let t=a[i++];if(t===undefined)return "<mrow/>";
   if(t==="("){
-   let inner=cmp();
+   if(a[i]===")"){i++;return "<mrow><mo>(</mo><mo>)</mo></mrow>";}
+   let inner=commaList();
    if(a[i]===")")i++;
    return "<mrow><mo>(</mo>"+inner+"<mo>)</mo></mrow>";
+  }
+  if(t==="{"){
+   let inner=commaList();
+   if(a[i]==="}")i++;
+   return "<mrow><mo>{</mo>"+inner+"<mo>}</mo></mrow>";
+  }
+  if(t==="|"&&hasClosingBar(i)){
+   let inner=cmp();
+   if(a[i]==="|")i++;
+   return "<mrow><mo>|</mo>"+inner+"<mo>|</mo></mrow>";
   }
   if(t==="√")return "<msqrt>"+stripOuterParens(prim())+"</msqrt>";
   if(t==="∫")return "<mrow><mo>∫</mo>"+prim()+"</mrow>";
@@ -121,9 +172,12 @@ function build(src){
    let node=mi(t);
    while(a[i]==="("){
     i++;
-    let inner=cmp();
-    if(a[i]===")")i++;
-    node="<mrow>"+node+"<mo>(</mo>"+inner+"<mo>)</mo></mrow>";
+    if(a[i]===")"){i++;node="<mrow>"+node+"<mo>(</mo><mo>)</mo></mrow>";}
+    else{
+     let inner=commaList();
+     if(a[i]===")")i++;
+     node="<mrow>"+node+"<mo>(</mo>"+inner+"<mo>)</mo></mrow>";
+    }
    }
    return node;
   }
@@ -132,16 +186,20 @@ function build(src){
  function pow(){
   let v=prim();
   while(a[i]==="^"){i++;v="<msup>"+v+stripOuterParens(prim())+"</msup>";}
+  if(a[i]&&UNIT_AFTER_NUM.has(a[i])&&/<(?:mn|msup)\b/.test(v)){
+   v="<mrow>"+v+'<mspace width="0.22em"/><mi mathvariant="normal">'+enc(a[i++])+"</mi></mrow>";
+  }
   return v;
  }
  function mult(){
   let v=pow();
-  while(["/","*","×","·"].includes(a[i])){
+  while(["/","*","×","·","∥"].includes(a[i])){
    let op=a[i++],next=pow();
    if(op==="/"){
     v="<mfrac>"+stripOuterParens(v)+stripOuterParens(next)+"</mfrac>";
    }else{
-    v="<mrow>"+v+"<mo>"+(op==="*"||op==="×"?"×":"·")+"</mo>"+next+"</mrow>";
+    const sym=op==="∥"?"∥":(op==="*"||op==="×"?"×":"·");
+    v="<mrow>"+v+"<mo>"+sym+"</mo>"+next+"</mrow>";
    }
   }
   return v;
@@ -155,12 +213,21 @@ function build(src){
  }
  function cmp(){
   let v=add();
-  while(["=","≈","≥","≤","≠","<",">","→","⇒"].includes(a[i])){
+  while(["=","≈","≥","≤","≠","<",">","≫","≪","→","⇒"].includes(a[i])){
    let op=a[i++];v="<mrow>"+v+"<mo>"+enc(op)+"</mo>"+add()+"</mrow>";
   }
   return v;
  }
- let body=cmp();
+ function seq(){
+  let v=cmp();
+  while([",",";","|",":"].includes(a[i])){
+   let op=a[i++];
+   const sp=op===","?'<mspace width="0.55em"/>':'<mspace width="0.35em"/>';
+   v="<mrow>"+v+"<mo>"+enc(op)+"</mo>"+sp+cmp()+"</mrow>";
+  }
+  return v;
+ }
+ let body=seq();
  while(i<a.length)body+="<mo>"+enc(a[i++])+"</mo>";
  return body;
 }

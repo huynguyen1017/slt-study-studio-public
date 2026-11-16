@@ -4,7 +4,8 @@ math.math-display{display:block math;overflow-x:auto;max-width:100%;padding:.28e
 math mfrac{padding:0}
 math mfrac > *:first-child{padding:0}
 math mfrac > *:last-child{padding:0}
-math mi{font-style:italic}
+math mi:not([mathvariant="normal"]){font-style:italic}
+math mi[mathvariant="normal"],math mtext,math mn,math mo{font-style:normal}
 .math-panel{display:flex;flex-wrap:wrap;justify-content:space-evenly;gap:15px;align-items:center;padding:13px 14px!important}
 .math-panel math{min-width:170px;flex:1}
 .ink-equation{align-items:center;justify-items:center}
