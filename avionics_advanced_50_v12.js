@@ -141,6 +141,12 @@ for(const t of T){
     hint:"First define '"+t.skills[k][0]+"' in plain words, then separate the observation from a possible cause. "+t.cases[k][1],
     formula:field.formula,sub:field.sub,lesson:field.lesson,sourceType:"original education case; hypothetical training specifications",
     advancedStage:31+i};
+  // Connected, question-exact series/parallel schematics for new Q37 math.
+  // All other Q31–50 graphics are conceptual illustrations, not a
+  // hardware netlist to auto-wire onto a live STM32 board.
+  if(i===6&&t.id==="series")question.network={kind:"mixed4",values:{v:12,a:100,b:200,c:300,d:80}};
+  if(i===6&&t.id==="parallel")question.network={kind:"parallel",values:{v:5,b:150,c:300}};
+  if(i===6&&t.id==="thevenin")question.network={kind:"loadedDivider",values:{v:5,top:1000,bot:1000,load:1000}};
   if(field.expected!==undefined){question.expected=field.expected;question.unit=field.unit;}
   if(!question.steps.length||question.steps.length<8||!question.lesson)throw Error("Missing detailed worked guidance: "+id);
   seen.add(id);newQuestions.push(question);
