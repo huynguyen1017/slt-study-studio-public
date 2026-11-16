@@ -97,7 +97,7 @@ function selected(q,t){
  return sources.slice(0,2).map((source,i)=>{
    const exact=curated.find(x=>x[1]===source);
    const link=exact?"https://www.youtube.com/watch?v="+exact[2]:searchLink(target,source);
-   return {source,title:exact?exact[0]:target,kind:exact?"verified-video":"source-filtered-search",
+   return {source,title:exact?exact[0]:target,kind:exact?"verified-video":"source-targeted-search",
     relevance:exact?exact[3]:"A channel-specific video search for this question; individual video rankings and availability have not been independently verified.",
     url:link,
     searchUrl:searchLink(target,source)};
@@ -115,7 +115,7 @@ function render(q,t){
   '<a href="'+esc(v.url)+'" target="_blank" rel="noopener noreferrer">'+(v.kind==="verified-video"?"Watch verified video ↗":"Find matching videos from this source ↗")+'</a>'+
   '<a class="av-video-search" href="'+esc(v.searchUrl)+'" target="_blank" rel="noopener noreferrer">Search exact question concept ↗</a></article>'
  ).join("")+'</div>'+
- '<p class="av-video-note">Video pages are provided by their publishers. A verified link confirms the video's subject and source, not that its ranking is currently the highest.</p>'+
+ '<p class="av-video-note">Video pages are provided by their publishers. A verified link confirms the video subject and source, not that its ranking is currently the highest.</p>'+
  '</section>';
 }
 window.avionicsVideoLessons={render,selected,channels};
