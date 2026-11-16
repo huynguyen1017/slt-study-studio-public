@@ -114,7 +114,7 @@ function mathPage(t,i){
  const formula=kind==="max"?"Margin = Maximum_limit - (Measured + Uncertainty)":"Margin = (Measured - Uncertainty) - Minimum_limit";
  const sub=kind==="max"?"Margin = "+limit+" - ("+measured+" + "+uncertainty+") = "+fmt(margin)+" "+unit:"Margin = ("+measured+" - "+uncertainty+") - "+limit+" = "+fmt(margin)+" "+unit;
  const verdict=margin>=-1e-12?"PASS on this single numerical requirement (if the station and configuration are valid)":"FAIL/NO-GO on this requirement despite the nominal reading";
- const question="Q44 — Guardband and uncertainty. For a hypothetical "+t.title+" acceptance measurement, "+what+" has a "+kind+"imum permitted value of "+limit+" "+unit+". The meter reads "+measured+" "+unit+" with a worst-case uncertainty of ±"+uncertainty+" "+unit+". Calculate signed guardband margin in "+unit+" and state whether the requirement passes. These are fictional training limits, NOT Muon hardware specifications.";
+ const question="Q44 — Guardband and uncertainty. In a hypothetical "+t.title+" bench exercise, "+what+" has a "+kind+"imum permitted value of "+limit+" "+unit+". The meter reads "+measured+" "+unit+" with a worst-case uncertainty of ±"+uncertainty+" "+unit+". Calculate signed guardband margin in "+unit+" and state whether the requirement passes. These are fictional training limits, NOT Muon hardware specifications.";
  const steps=[
   "Understand the words: a "+kind+"imum requirement means "+(kind==="max"?"the worst credible measured value must not exceed the limit.":"the lowest credible measured value must not fall below the limit."),
   "List the quantities: limit="+limit+" "+unit+", measured="+measured+" "+unit+", uncertainty=±"+uncertainty+" "+unit+". Match units before adding.",
@@ -141,6 +141,41 @@ for(const t of T){
     hint:"First define '"+t.skills[k][0]+"' in plain words, then separate the observation from a possible cause. "+t.cases[k][1],
     formula:field.formula,sub:field.sub,lesson:field.lesson,sourceType:"original education case; hypothetical training specifications",
     advancedStage:31+i};
+  // Make key test-software cases operational and teachable, not only a generic plan.
+  if(i===14&&t.id==="python-scpi"){
+   question.question="Advanced Q45 — Python automated acceptance: an instrument query may return '3.28', 'nan', an empty string or time out. Write and explain a beginner-friendly function that converts the response to V, verifies it is finite, then returns PASS for a valid 3.1–3.5 V reading, FAIL for a valid outside-range reading, and INVALID for missing/malformed/untrusted measurements. Explain why a timeout must never be reported as PASS.";
+   question.steps=[
+    "Define input and output: raw SCPI response is a string, expected units are volts, and the three outcomes are PASS, FAIL or INVALID. Never assume every returned string is a measurement.",
+    "Initialize your instrument session with an explicit transport, query timeout, required firmware/configuration and calibrated channel. A cable disconnect or unknown configuration makes the measurement INVALID.",
+    "Parse carefully using try: measured=float(raw.strip()); except (ValueError,TypeError): return INVALID. Empty text and damaged strings are not acceptable floating-point measurements.",
+    "Check math.isfinite(measured). Python float('nan') and infinities are legal floats but have no physical electrical meaning, so return INVALID instead of comparing them to thresholds.",
+    "Apply the agreed training band only after validation: if 3.1 <= measured <= 3.5, return PASS; otherwise return FAIL. Preserve the raw string and numeric result separately.",
+    "Introduce negative tests for raw values 'nan', '', 'bad', '3.8', '3.28', and a simulated timeout. Expected classifications are INVALID, INVALID, INVALID, FAIL, PASS and INVALID.",
+    "Log UTC timestamp, instrument identity, calibration due date, station revision, board/firmware revision, limits and raw response before displaying any verdict. Never discard first-fail records on retry.",
+    "Re-run the complete station test using a known-good source and known-bad source. Only release after the PASS/FAIL/INVALID behavior is independently reproducible and documented."
+   ];
+   question.lesson={title:"Python SCPI: finite-value parser and tri-state result",
+    summary:"A test script is part of the safety boundary: an absent, malformed, stale or NaN voltage reading is INVALID, not a valid PASS. Only after independent validation should numeric limits be applied.",
+    example:"Example beginner pseudocode: try: v = float(raw.strip()); except (ValueError, TypeError): return 'INVALID'; if not math.isfinite(v): return 'INVALID'; return 'PASS' if 3.1 <= v <= 3.5 else 'FAIL'. Test 3.28 -> PASS, 3.8 -> FAIL, 'nan' -> INVALID.",
+    why:"Instrument, protocol, limit and parsing errors can otherwise create a false hardware PASS; automation must preserve raw data and distinguish invalid tests.",
+    vocab:[["SCPI","Standard Commands for Programmable Instruments"],["Finite number","Not NaN or positive/negative infinity"],["PASS","Valid reading inside approved training range"],["FAIL","Valid reading outside range"],["INVALID","Untrusted or missing measurement, not a hardware failure"]] };
+  }
+  if(i===14&&t.id==="linux"){
+   question.question="Advanced Q45 — Linux validation log triage: a test suite reports PASS in summary.json, yet scattered raw console logs contain 'ERROR: bus timeout', 'failed: DRAM' and mixed-case 'Failure' strings. Write a shell-based procedure to search case-insensitively with file name and line number, explain grep exit statuses, protect raw evidence and decide whether the reported PASS is trustworthy.";
+   question.steps=[
+    "Explain the evidence hierarchy: summary.json is a derived report; preserve the raw immutable device and station logs before doing any text filtering.",
+    "List the exact run, hardware serial, firmware and station revisions; separate two different runs so you do not accidentally attribute another DUT's errors.",
+    "Choose a safe broad command, for example grep -RniE 'error|fail|timeout' logs/. The -R scans folders, -n prints line number, -i ignores case, and -E permits alternatives.",
+    "Read every hit in surrounding context and distinguish test-injected failure labels from actual assertion failures; do not count a simple keyword as proof of defective silicon.",
+    "Check grep exit status: 0 means at least one match, 1 means no match, and 2 means command/file error; a status of 2 must be INVALID rather than a clean PASS.",
+    "Correlate the failing timestamp with kernel dmesg, UART capture, power rails and temperature records while keeping raw originals unchanged.",
+    "Re-run the exact firmware and workload with independently captured console logs, then compare first-failure signatures across runs and known-good controls.",
+    "Close the investigation with documented PASS, FAIL or INVALID based on a published requirement and a complete raw audit trail. Never override an unresolved failure with a PASS summary."
+   ];
+   question.lesson={title:"Linux grep and evidence reconciliation",summary:"grep -RniE 'error|fail|timeout' logs/ finds mixed-case failure indicators with file names and line numbers, but the engineer must read context and distinguish grep process errors from an actual clean run.",
+   example:"Command: grep -RniE 'error|fail|timeout' logs/ ; exit 0=matches, 1=none, 2=I/O/grep error. Match evidence to the correct device and timestamps before overriding a summary.",
+   why:"Production testers can report misleading PASS states if the summary parser drops or misclassifies lower-level failures. Provenance and reproducibility matter.",vocab:[["grep","Search line-oriented files"],["-RniE","Recursive, show line numbers, ignore case, extended regex"],["Exit code","0=match; 1=none; 2=error"],["Raw evidence","Original unedited capture"]]};
+  }
   // Connected, question-exact series/parallel schematics for new Q37 math.
   // All other Q31–50 graphics are conceptual illustrations, not a
   // hardware netlist to auto-wire onto a live STM32 board.
