@@ -73,13 +73,14 @@ function svg(q,mode){
    s+=zigV(705,149,410,"R3",num(c)+" Ω");
    s+=line(465,410,850,410)+node(465,410,"B");
    s+=zigH(115,355,410,"R4",num(d)+" Ω")+line(355,410,465,410);
- }else if(kind==="loadedDivider"){
+ }else if(kind==="loadedDivider"||kind==="loadedDual"){
    s+=line(115,149,450,149)+zigV(450,149,278,"Rtop",num(top)+" Ω",-1)+node(450,287,"A · Vout");
-   s+=line(450,278,450,287)+line(450,287,725,287);
+   s+=line(450,278,450,287)+line(450,287,kind==="loadedDual"?925:725,287);
    s+=zigV(450,287,410,"Rbottom",num(bot)+" Ω",-1);
    const isMeter=n.focus==="probe"||q.learningObjective?.toLowerCase().includes("meter");
    s+=zigV(720,287,410,isMeter?"Rmeter":"Rload",num(isMeter?meter:load)+" Ω");
-   s+=line(115,410,735,410);
+   if(kind==="loadedDual")s+=zigV(900,287,410,"Rmeter",num(meter)+" Ω");
+   s+=line(115,410,kind==="loadedDual"?930:735,410);
  }else {
   return "";
  }
