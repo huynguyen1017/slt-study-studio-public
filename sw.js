@@ -1,11 +1,15 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v15-electronics-academy-r2';
+const CACHE = 'slt-study-studio-v16-avionics-ee-academy-r1';
 const CORE = [
   "./",
   "./index.html",
   "./style.css",
   "./notebook.css",
   "./app.js",
+  "./avionics_data.js",
+  "./avionics_questions.js",
+  "./avionics_practice.js",
+  "./avionics_practice.css",
   "./cards.js",
   "./labs.js",
   "./notebook.js",
