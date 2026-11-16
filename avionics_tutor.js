@@ -94,11 +94,18 @@ function makeRandomVariant(q){
  const randInt=(lo,hi)=>lo+Math.floor(Math.random()*(hi-lo+1));
  const m=(prompt,answer,unit,formula,sub,steps,extra={})=>({
  ...q,...extra,question:prompt,expected:Number(answer.toPrecision(10)),unit,formula,sub,
- steps:(Array.isArray(steps)&&steps.length)?steps:(Array.isArray(q.steps)?q.steps:[]),
- numericOperation:"Fresh-number calculation (Drill #"+roll+")",learningObjective:"Practice new numbers",
- lesson:{title:"Fresh-number calculation",summary:"This is an optional NEW-NUMBERS drill (#"+roll+"), not another numbered curriculum task. "+prompt,
- example:"Compute the expected value in "+unit+" and verify each quantity and its unit.",
- why:"Rotates related single-concept variations and fresh numbers without repeating slots inside the 30-question ladder.",
+ steps:(Array.isArray(steps)&&steps.length)?steps:[
+  "Identify the NEW numerical inputs and the desired output in "+unit+".",
+  "Write the governing relationship for this same solving method: "+formula+".",
+  "Substitute the variant values: "+sub+".",
+  "Evaluate the shown expression carefully: "+sub+".",
+  "Check engineering units, sign, magnitude and physical plausibility."
+ ],
+ numericOperation:q.numericOperation||"Fresh-number calculation",learningObjective:"🎲 "+(q.numericOperation||q.learningObjective),
+ lesson:{title:q.numericOperation||"Fresh-number calculation",
+ summary:"Optional same-method new-numbers drill (#"+roll+"), scored separately. "+prompt,
+ example:"New substitution: "+sub+". Expected answer: "+answer+" "+unit+".",
+ why:"Repeat the current skill with new numerical inputs, never an unrelated older calculation family.",
  vocab:[["Target",prompt],["Engineering units",unit],["Validation","Check the answer against the governing physical model."]]},
  isCustomVariant:true,
  variantPool:q.variantPool,

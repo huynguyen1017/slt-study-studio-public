@@ -106,7 +106,7 @@ assert.equal(c.window.avionicsAnswerCheck.gradeText(sample,unit,"Ampere measures
 assert.equal(c.window.avionicsAnswerCheck.gradeText(sample,unit,"The volt is an SI base unit.").band,"needs-correction");
 const testHtml=read("index.html"),sw=read("sw.js");
 assert(testHtml.includes("avionics_si_lesson.js?v=2")&&testHtml.includes("avionics_si.css?v=2"));
-assert(sw.includes("v31-integrated-mixed-networks"));
+assert(sw.includes("v32-method-safe-dice"));
 assert(c.window.AVIONICS_TEXTBOOK_TOC.chapters.length===21);
 assert(c.window.AVIONICS_SI_LESSON.baseFormulaMathml.includes("<mfrac>"));
 assert(c.window.avionicsWorkbookV2.stepsForQuestion("units-F1").every(x=>!x.formula||x.formula!=="V = I * R"));

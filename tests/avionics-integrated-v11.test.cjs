@@ -3,7 +3,7 @@ const assert=require("node:assert/strict"),fs=require("node:fs"),vm=require("nod
 const root=path.resolve(__dirname,".."),read=p=>fs.readFileSync(path.join(root,p),"utf8");
 const ctx={window:{},Math,console};vm.createContext(ctx);
 const files=["avionics_data.js","avionics_questions.js","avionics_distinct_labs_v10.js","avionics_distinct_math_v10.js",
-"avionics_distinct_reasoning_v10.js","avionics_integrative_capstones_v11.js","avionics_mixed_networks_v11.js",
+"avionics_dice_methods_v12.js","avionics_distinct_reasoning_v10.js","avionics_integrative_capstones_v11.js","avionics_mixed_networks_v11.js",
 "avionics_visuals.js","avionics_mixed_visuals_v11.js","avionics_assessor.js","avionics_circuit_simulator.js","avionics_nucleo_workbench.js"];
 for(const p of files)vm.runInContext(read(p),ctx,{filename:p});
 const t=ctx.window.AVIONICS_TOPICS,q=ctx.window.AVIONICS_QUESTIONS,net=ctx.window.avionicsMixedCircuitCurriculum,
@@ -112,7 +112,7 @@ const html=read("index.html"),cache=read("sw.js");
 for(const file of ["avionics_integrative_capstones_v11.js","avionics_mixed_networks_v11.js","avionics_mixed_visuals_v11.js"]){
  assert(html.includes(file),file+" must load online");assert(cache.includes(file),file+" must be cached offline");
 }
-assert(cache.includes("v31-integrated-mixed-networks"));
+assert(cache.includes("v32-method-safe-dice"));
 assert(html.indexOf("avionics_mixed_networks_v11.js")<html.indexOf("avionics_tutor.js"),"new source must load before workbook");
 assert(html.indexOf("avionics_mixed_visuals_v11.js")>html.indexOf("avionics_visuals.js"),"diagram wrapper should load after base");
 assert(read("avionics_tutor.js").includes("MIXED.reroll(q)"),"dice must use live network values");
