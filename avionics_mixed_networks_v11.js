@@ -111,7 +111,7 @@ function evaluate(kind,input){
   set("MISWIRE: intended "+a+" Ω + ("+b+" Ω || "+c+" Ω) + "+d+" Ω is accidentally wired ALL SERIES. What equivalent resistance does a powered-OFF DMM show?",z,"Ω",
   "R_bad = R_1 + R_2 + R_3 + R_4",
   "R_bad = "+a+" + "+b+" + "+c+" + "+d+" = "+f(z),
-  ["Map the actual breadboard connections first.","The mistaken wiring has no branch split.","All four resistors add to "+f(z)+" Ω (healthy "+f(rt)+" Ω).","Repair only after power-off continuity measurements."],"series","Connectivity controls the formula, not the visual proximity of parts.");break;}
+  ["Map the actual breadboard connections first.","The mistaken wiring has no branch split.","All four resistors add to "+f(z)+" Ω (healthy "+f(rt)+" Ω).","Repair only after power-off continuity measurements."],"miswire","Connectivity controls the formula, not the visual proximity of parts.");break;}
  case "probe":{
   const low=par(bot,meter),z=v*low/(top+low);
   set("A high-impedance "+top+" Ω / "+bot+" Ω voltage divider uses source "+v+" V. A voltmeter of "+meter+" Ω input is attached MIDPOINT to return. Find the new measured output in V.",z,"V",
@@ -181,6 +181,7 @@ function textCase(q,data,stage){
  const givenV=question.match(/\b(\d+(?:\.\d+)?)\s*V\b/);
  const values={...defaults};
  if(givenV)values.v=Number(givenV[1]);
+ if(title==="Cross-check ADC and instrument loading"){kind="loadedDual";values.top=100000;values.bot=100000;values.load=200000;values.meter=1000000;}
  if(title==="Verify one-loop continuity")kind="series2";
  if(title==="Define one current path"||title==="Use a signed voltage loop")kind="series2";
  q.network={kind,values,focus:stage,illustrative:!givenV};q.steps=[
@@ -195,7 +196,7 @@ function textCase(q,data,stage){
 function numericCase(q,kind,values,topic){
  const m=evaluate(kind,values);
  q.originalMasteryQuestion=q.question;q.originalNumeric={question:q.question,expected:q.expected,unit:q.unit,formula:q.formula};
- Object.assign(q,m);q.calcFamily=null;q.unitConv=null;q.roll={kind,base:{...values},topic};
+ Object.assign(q,m);q.network.illustrative=!/\b\d+(?:\.\d+)?\s*V\b/.test(q.question);q.calcFamily=null;q.unitConv=null;q.roll={kind,base:{...values},topic};
 }
 const listSeries=["series","parallel","mixed3","branches","mixed4","sourceCurrent","parallelVoltage","branchCurrent","loaded","power","kcl","deviation","open","short","miswire","probe","droop"];
 const listParallel=["parallel","parallel3","mixed3","branches","mixed4","branchCurrent","sourceCurrent","kcl","loaded","power","deviation","open","short","miswire","probe","parallelVoltage","droop"];
