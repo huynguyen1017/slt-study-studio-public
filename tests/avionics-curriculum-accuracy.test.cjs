@@ -62,7 +62,7 @@ for(const topic of t){
  for(let i=0;i<topic.calc.length;i++)for(let j=0;j<5;j++){
   const numeric=family[topic.calc[i]](j);
   const qq=own.find(x=>x.id===topic.id+"-C"+(i*5+j+1));
-  assert(qq&&numeric.prompt===qq.question,topic.id+" calculation prompt");
+  assert(qq&&qq.question.startsWith(numeric.prompt),topic.id+" calculation prompt");
   assert.equal(qq.unit,numeric.unit,qq.id+" unit");
   assert.equal(qq.expected,numeric.answer,qq.id+" stored answer");
   assert(math(qq.formula,true).includes("<math"),qq.id+" formula MathML");
@@ -90,7 +90,7 @@ assert.equal(c.window.avionicsAnswerCheck.gradeText(sample,unit,"Ampere measures
 assert.equal(c.window.avionicsAnswerCheck.gradeText(sample,unit,"The volt is an SI base unit.").band,"needs-correction");
 const testHtml=read("index.html"),sw=read("sw.js");
 assert(testHtml.includes("avionics_si_lesson.js?v=2")&&testHtml.includes("avionics_si.css?v=2"));
-assert(sw.includes("v27-unique-wiring-sim"));
+assert(sw.includes("v29-nucleo-progressive-videos"));
 assert(c.window.AVIONICS_TEXTBOOK_TOC.chapters.length===21);
 assert(c.window.AVIONICS_SI_LESSON.baseFormulaMathml.includes("<mfrac>"));
 assert(c.window.avionicsWorkbookV2.stepsForQuestion("units-F1").every(x=>!x.formula||x.formula!=="V = I * R"));

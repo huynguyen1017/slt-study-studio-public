@@ -10,6 +10,7 @@ on:
       - fix/si-and-curriculum-accuracy-audit-v5
       - fix/mathml-layout-and-textbook-map-v6
       - feature/coursework-circuit-notebook-labs-v7
+      - feature/nucleo-fullboard-progressive-video-v9
       - fix/question-specific-wiring-circuitjs-v8
   pull_request:
     paths:
@@ -22,6 +23,7 @@ on:
       - 'tests/avionics-curriculum-accuracy.test.cjs'
       - 'tests/avionics-notebook.test.cjs'
       - 'tests/avionics-live-wiring.test.cjs'
+      - 'tests/avionics-progressive-nucleo-videos.test.cjs'
 permissions:
   contents: read
 jobs:
@@ -42,6 +44,8 @@ jobs:
           node --check avionics_beginner_lessons.js
           node --check avionics_tutor.js
           node --check avionics_visuals.js
+          node --check avionics_nucleo_workbench.js
+          node --check avionics_video_lessons.js
           node --check avionics_circuit_simulator.js
           node --check avionics_assessor.js
           node --check avionics_si_lesson.js
@@ -53,6 +57,7 @@ jobs:
           node tests/avionics-curriculum-accuracy.test.cjs
           node tests/avionics-notebook.test.cjs
           node tests/avionics-live-wiring.test.cjs
+          node tests/avionics-progressive-nucleo-videos.test.cjs
       - name: Install headless browser for desktop and mobile smoke tests
         run: |
           npm install --no-save playwright@1.56.1

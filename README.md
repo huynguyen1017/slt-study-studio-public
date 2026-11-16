@@ -1,3 +1,20 @@
+## Beginner-to-advanced Avionics Workbooks with STM32 Nucleo and video resources (v9)
+
+The 23 topics now each have 30 original questions ordered progressively: 1–5 explain/differentiate/draw/predict, 6–10 set up lab experiments, 11–20 calculate with units, and 21–30 isolate faults with controlled evidence. Existing question identifiers and stored numerical answers are retained.
+
+STM32 NUCLEO-L476RG connector truth comes from the official STMicroelectronics UM1724 Rev 17 manual (Figure 23, Arduino Table 23 and Morpho Table 32): https://www.st.com/resource/en/user_manual/dm00105823.pdf . Representative connectors: PA0/A0 CN6 28; +3V3 CN6 16; GND CN6 20; PA5/D13 CN10 11; PB8/SCL CN10 3; PB9/SDA CN10 5; PA2/USART2 TX CN10 35; PA3/USART2 RX CN10 37. Actual alternate-function availability and solder-bridge configuration must be checked with device and board documentation.
+
+The question-specific educational layouts include GPIO LED/resistor, voltage divider/ADC, resistance, 2/3 branch networks, KVL series drops, RC low/high-pass, bypass capacitors, generic logic and MOSFET modules, external pushbutton, oscilloscope, and UART/SPI/I2C peripherals with their signal nets. Generic external module connector assignments are teaching assumptions, not independently verified commercial breakout pinouts. Never connect a physical device just from the drawing.
+
+The detailed 63-row breadboard view is accompanied by a separately expandable overview of the actual 3220 tie-point large-board architecture: four 630-point terminal strips and seven 100-point distribution strips, with four binding posts. Manufacturer: https://makeronics.com/product/makeronics-3220-point-solderless-breadboard/ . Separate terminal and distribution sections must be bridged deliberately; never assume their power rails are electrically continuous. The large image loads only when expanded to keep the workbook responsive.
+
+Voltage examples above the STM32 3.3 V GPIO range are not presented as safe direct Nucleo input wiring. MCU pinout diagrams are not proof of a connected lab circuit. STM32CubeMX and STM32CubeIDE are linked to their official ST product pages as downloadable desktop tools rather than misrepresented as in-page simulators.
+
+Every Understand page now presents two distinct educational video sources. Individually verified URLs include Khan Academy, The Organic Chemistry Tutor, DigiKey's NUCLEO-L476RG STM32CubeIDE tutorials, and Keysight Labs; where an exact video has not been verified, a targeted YouTube search is labeled as a search rather than claiming it is a highly rated video. No direct YouTube playback or external tracking is initialized by default.
+
+The test file tests/avionics-progressive-nucleo-videos.test.cjs checks every 30-step topic, two distinct video sources, ST pin mappings, a 3220-hole large-board overview, engineering SVG output, and GPIO voltage limits. Existing browser and problem-bank regression tests remain included.
+
+
 ## Question-driven 3-panel wiring and optional live simulator (v8)
 
 Source audit, before changes: the 690 questions used only 66 distinct physical wiring configurations across the existing panel templates. The dedicated question-aware wiring model now modifies the fixture category, measured quantity, matched current/voltage/continuity instrument mode, chosen measurement nodes, connected breadboard rows, component values (if provided), optional parallel branch count for conceptual examples, diagnostic fault focus, and per-question wiring arrangements. A standalone test verifies 690 configurations across 23 topics, at least 550 distinct non-ID-only design signatures, and no out-of-range breadboard coordinates. Not all 690 questions describe unique physical circuits; this is variation in meaningful layouts and measurement focus rather than a claim that all circuit topologies differ.
