@@ -37,7 +37,7 @@ for(const topic of t){
  assert.equal(topic.skills.length,5,topic.id+" skill count");
  assert.equal(topic.cases.length,5,topic.id+" case count");
  assert.equal(topic.calc.length,2,topic.id+" calc families");
- for(const s of topic.skills)assert(s.length===4&&s.every(v=>v&&v.length>=5),topic.id+" incomplete definition");
+ for(const s of topic.skills)assert(s.length===4&&s[0].length>=2&&s.slice(1).every(v=>v&&v.length>=5),topic.id+" incomplete definition");
  for(const s of topic.cases)assert(s.length===4&&s.every(v=>v&&v.length>=7),topic.id+" incomplete case");
  const own=q.filter(x=>x.topic===topic.id);assert.equal(own.length,30,topic.id);
  for(let i=0;i<5;i++){
