@@ -7,6 +7,7 @@ on:
       - feature/avionics-baby-steps-workbook-v2
       - feature/avionics-question-specific-visuals-v3
       - fix/avionics-browser-feedback-guided-circuits-v4
+      - fix/si-and-curriculum-accuracy-audit-v5
   pull_request:
     paths:
       - 'index.html'
@@ -36,6 +37,7 @@ jobs:
           node --check avionics_tutor.js
           node --check avionics_visuals.js
           node --check avionics_assessor.js
+          node --check avionics_si_lesson.js
           node tests/avionics-academy.test.cjs
           node tests/avionics-assessor.test.cjs
       - name: Install headless browser for desktop and mobile smoke tests
