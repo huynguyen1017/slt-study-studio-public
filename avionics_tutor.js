@@ -30,6 +30,17 @@ if(!state.ratings||typeof state.ratings!=="object")state.ratings={};
 if(!state.attempts||typeof state.attempts!=="object")state.attempts={};
 if(!state.assessments||typeof state.assessments!=="object")state.assessments={};
 if(!state.responses||typeof state.responses!=="object")state.responses={};
+/* Question meanings changed in v10. Archive previous mastery and explanations
+   before resetting only their status, so a correct old answer is not displayed
+   as already mastered for a new problem with the same stable ID. */
+if(window.AVIONICS_DISTINCT_CURRICULUM_VERSION===10&&state.curriculumVersion!==10){
+ const old={ratings:state.ratings,assessments:state.assessments,responses:state.responses,attempts:state.attempts,version:state.curriculumVersion||9};
+ const had=Object.keys(old.ratings).length+Object.keys(old.responses).length+Object.keys(old.assessments).length>0;
+ if(had)state.priorProgressV9=old;
+ state.ratings={};state.assessments={};state.responses={};state.attempts={};state.curriculumVersion=10;
+ try{localStorage.setItem(STORE,JSON.stringify(state))}catch(e){console.warn("Could not persist curriculum migration",e);}
+}
+
 
 let host=null,topic=TOPICS.some(t=>t.id===state.lastTopic)?state.lastTopic:"ohm";
 let currentIndex=Number.isInteger(state.lastIndex)?state.lastIndex:0;
@@ -488,7 +499,7 @@ function show(){
  full30.map((p,i)=>'<button data-qid="'+esc(p.id)+'" class="av-browse-card '+(q&&q.id===p.id?"active ":"")+(state.ratings[p.id]==="know"?"done":state.ratings[p.id]==="again"?"retry":"")+'" aria-current="'+(q&&q.id===p.id?"true":"false")+'" aria-label="Open question '+(i+1)+': '+esc(p.question)+'">'+
  '<span class="av-browse-meta"><b>Q'+(i+1)+'</b><em>'+esc(p.level)+'</em></span><span class="av-browse-title">'+esc(p.question)+'</span>'+
  '<small>'+(state.ratings[p.id]==="know"?"✓ Mastered":state.ratings[p.id]==="again"?"↻ Review needed":state.assessments[p.id]?"◈ Checked":"○ Open question")+'</small></button>').join("")+'</div>'+
- '<small class="av-browse-legend">Blue = selected · Green = mastered · Amber = review needed. Progress stays saved in your browser.</small></details>'+
+ '<small class="av-browse-legend">Blue = selected · Green = mastered · Amber = review needed. Progress for the revised curriculum is saved locally; older mastery is archived in your exported progress record.</small></details>'+
  '<p class="av-footnote">All problems and visual schematics are original educational exercises aligned to Floyd &amp; Buchla and Muon Space avionics test engineering requirements.</p>'+
  '</div></div><dialog class="av-zoom-dialog" id="avVisualZoom" aria-label="Expanded circuit figure"><div class="av-zoom-top"><strong>Expanded engineering diagram</strong><button class="av-light" type="button" id="avZoomClose">Close ×</button></div><div id="avZoomBody"></div></dialog></div>';
  wire();
