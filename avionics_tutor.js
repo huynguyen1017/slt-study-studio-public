@@ -259,6 +259,19 @@ function siChapterPanel(){
  '<p>'+SI.links.map(a=>'<a target="_blank" rel="noopener noreferrer" href="'+esc(a[1])+'">'+esc(a[0])+'</a>').join(" · ")+'</p></div></section>';
 }
 
+function textbookPanel(t){
+ if(!BOOK)return "";
+ const matched=BOOK.chapters.filter(c=>c.topics.includes(t.id));
+ return '<details class="av-chapter-map"><summary>Floyd &amp; Buchla chapter cross-reference ('+matched.length+' matching headings)</summary>'+
+ '<p><strong>'+esc(BOOK.title)+'</strong> — '+esc(BOOK.authors)+'</p>'+
+ '<p>'+esc(BOOK.evidence)+'</p>'+
+ (matched.length?'<p><strong>Related sections by chapter title:</strong> '+matched.map(c=>'Ch. '+c.number+' '+esc(c.title)).join(' · ')+'</p>':
+ '<p>Applied avionics skills not explicitly titled as a chapter of this foundational circuit textbook.</p>')+
+ '<details><summary>View all 21 chapter names and starting pages</summary><ol>'+
+ BOOK.chapters.map(c=>'<li>Ch. '+c.number+': '+esc(c.title)+' (p. '+c.startPage+')</li>').join('')+
+ '</ol></details></details>';
+}
+
 function lessonPage(q,t,f){
  const item=f.deep,guide=LESSONS[t.id]||{lead:t.goal,analogy:"",example:"",terms:[]};
  const glossary=item?item.words:guide.terms;
@@ -275,6 +288,7 @@ function lessonPage(q,t,f){
  glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+rich(p[1])+'</td></tr>').join("")+
  '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(item?item.analogy:guide.analogy)+'</p><h4>Why Muon Space engineers care</h4><p>'+rich(item?item.why:f.why)+'</p></section></div>'+
  (f.label==="SI base unit"?siChapterPanel():"")+
+ textbookPanel(t)+
  '<h4 class="av-figure-heading">Interactive circuit, graph &amp; 3-panel breadboard connection for '+esc(q.id.toUpperCase())+'</h4>'+
  visualSwitcherBar(inlineVisualMode)+illustration+
  '<div class="av-actions-bottom"><button id="avGoVisual" class="av-light">See all 3 large visuals stacked →</button><button id="avGoWork" class="av-primary">See all 6 baby steps + worked MathML →</button></div>'+
