@@ -38,3 +38,7 @@
 
 #avionicsView .av-visual-question-line{padding:11px 15px;background:#fafcff;border-top:1px solid #e3edf3;font-size:12px;color:#33546a;line-height:1.65}
 #avionicsView .av-visual-question-line strong{color:#0c5976}
+
+#avionicsView .av-visual-focus{background:#f1faf6;border-top:1px solid #d0e7da;color:#315748;font-size:12px;padding:12px 15px;line-height:1.7}
+#avionicsView .av-visual-focus strong{color:#0b6550}
+#avionicsView .av-visual-focus em{display:block;font-style:normal;color:#486e60;margin-top:3px}
