@@ -9,6 +9,7 @@ on:
       - fix/avionics-browser-feedback-guided-circuits-v4
       - fix/si-and-curriculum-accuracy-audit-v5
       - fix/mathml-layout-and-textbook-map-v6
+      - feature/coursework-circuit-notebook-labs-v7
   pull_request:
     paths:
       - 'index.html'
@@ -18,6 +19,7 @@ on:
       - 'tests/avionics-academy.test.cjs'
       - 'tests/avionics-assessor.test.cjs'
       - 'tests/avionics-curriculum-accuracy.test.cjs'
+      - 'tests/avionics-notebook.test.cjs'
 permissions:
   contents: read
 jobs:
@@ -41,9 +43,12 @@ jobs:
           node --check avionics_assessor.js
           node --check avionics_si_lesson.js
           node --check avionics_textbook_toc.js
+          node --check avionics_notebook_cases.js
+          node --check avionics_notebook_labs.js
           node tests/avionics-academy.test.cjs
           node tests/avionics-assessor.test.cjs
           node tests/avionics-curriculum-accuracy.test.cjs
+          node tests/avionics-notebook.test.cjs
       - name: Install headless browser for desktop and mobile smoke tests
         run: |
           npm install --no-save playwright@1.56.1
