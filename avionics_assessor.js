@@ -87,6 +87,14 @@ function rubric(q,topic){
    item("Propose confirming evidence","Verify using: "+(st[3]||st[2]||"a repeatable measurement."),[[...new Set(norm(st[3]||st[2]||"repeat measurement").filter(w=>w.length>4&&!stop.has(w)).slice(0,9))]])
   ].map(x=>({...x,requiredHits:2}));
  }
+ if(q.level==="Application"&&q.lesson){
+  const tokens=s=>[...new Set(norm(s).filter(w=>w.length>=4&&!stop.has(w)))].slice(0,11);
+  return [
+   item("State the expected physical result",q.steps[2], [tokens(q.steps[2])]),
+   item("Explain the measurement or circuit method",q.steps[1],[tokens(q.steps[1])]),
+   item("Describe independent verification / safety",q.steps[3],[tokens(q.steps[3])])
+  ].map(x=>({...x,requiredHits:2}));
+ }
  if(q.level==="Application"){
   const base=selected?selected.map(x=>({...x})):defaultCriteria(q,topic,idx);
   // Application questions require a way to demonstrate the idea.

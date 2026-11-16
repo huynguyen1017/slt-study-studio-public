@@ -2,7 +2,7 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),vm=require("node:vm"),path=require("node:path");
 const root=path.resolve(__dirname,".."),read=x=>fs.readFileSync(path.join(root,x),"utf8");
 const c={window:{},console,Math};vm.createContext(c);
-for(const file of ["avionics_data.js","avionics_questions.js","avionics_visuals.js","avionics_circuit_simulator.js"])
+for(const file of ["avionics_data.js","avionics_questions.js","avionics_distinct_labs_v10.js","avionics_distinct_math_v10.js","avionics_distinct_reasoning_v10.js","avionics_visuals.js","avionics_circuit_simulator.js"])
  vm.runInContext(read(file),c,{filename:file});
 const tops=c.window.AVIONICS_TOPICS,qs=c.window.AVIONICS_QUESTIONS,vis=c.window.avionicsVisuals,sim=c.window.avionicsCircuitSimulator;
 assert.equal(tops.length,23);assert.equal(qs.length,690);
@@ -52,6 +52,6 @@ assert(par.comps.some(x=>x.label==="R1"));
 assert(!sim.build(question("rf-F1"),topic("rf")),"VNA and RF fixtures must not be presented as DC resistor circuit simulations");
 const html=read("index.html"),sw=read("sw.js"),ui=read("avionics_tutor.js");
 assert(html.includes("avionics_circuit_simulator.js?v=1")&&html.includes("avionics_visuals.js?v=10"));
-assert(sw.includes("v29-nucleo-progressive-videos")&&sw.includes("avionics_circuit_simulator.js"));
+assert(sw.includes("v30-distinct-690-curriculum")&&sw.includes("avionics_circuit_simulator.js"));
 assert(ui.includes("CIRCUITSIM.render(q,t)")&&ui.includes("CIRCUITSIM.bind(host"));
 console.log("PASS: "+total+" question-level wiring diagrams, "+all.size+" distinct layouts/focus designs, "+supported+" CircuitJS-ready examples, correct KVL routing, privacy and offline initial state.");

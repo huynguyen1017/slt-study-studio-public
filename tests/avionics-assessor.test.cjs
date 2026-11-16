@@ -7,7 +7,7 @@ const base=path.resolve(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(base,p),"utf8");
 const ctx={window:{},Math,document:{querySelector:()=>null},console};
 vm.createContext(ctx);
-for(const file of ["avionics_data.js","avionics_questions.js","avionics_assessor.js"]){
+for(const file of ["avionics_data.js","avionics_questions.js","avionics_distinct_labs_v10.js","avionics_distinct_math_v10.js","avionics_distinct_reasoning_v10.js","avionics_assessor.js"]){
  vm.runInContext(read(file),ctx,{filename:file});
 }
 const topics=ctx.window.AVIONICS_TOPICS,questions=ctx.window.AVIONICS_QUESTIONS,A=ctx.window.avionicsAnswerCheck;
@@ -48,8 +48,8 @@ assert.equal(A.gradeNumber(numeric,"9.6").band,"partial");
 assert.equal(A.gradeNumber(numeric,"10 bananas").band,"needs-correction");
 assert.equal(A.gradeNumber(numeric,"not a number").band,"insufficient");
 const site=read("index.html"),sw=read("sw.js"),ui=read("avionics_tutor.js");
-assert(site.includes("avionics_assessor.js?v=6")&&site.includes("avionics_feedback.css?v=4"));
-assert(sw.includes("avionics_assessor.js")&&sw.includes("v29-nucleo-progressive-videos"));
+assert(site.includes("avionics_assessor.js?v=7")&&site.includes("avionics_feedback.css?v=4"));
+assert(sw.includes("avionics_assessor.js")&&sw.includes("v30-distinct-690-curriculum"));
 assert(ui.includes("av-question-gallery")&&ui.includes("data-qid="));
 assert(ui.includes("ASSESS.gradeText")&&ui.includes("inlineStepVisual(q,t,stepIndex)"));
 console.log("PASS: 690 questions with rubrics or numerics; SI grading good/partial/wrong; units; question gallery and step visuals");

@@ -2,7 +2,7 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),vm=require("node:vm"),path=require("node:path");
 const root=path.resolve(__dirname,".."),read=x=>fs.readFileSync(path.join(root,x),"utf8");
 const c={window:{},console,Math};vm.createContext(c);
-for(const file of ["avionics_data.js","avionics_questions.js","avionics_nucleo_workbench.js","avionics_video_lessons.js","avionics_visuals.js"])
+for(const file of ["avionics_data.js","avionics_questions.js","avionics_distinct_labs_v10.js","avionics_distinct_math_v10.js","avionics_distinct_reasoning_v10.js","avionics_nucleo_workbench.js","avionics_video_lessons.js","avionics_visuals.js"])
  vm.runInContext(read(file),c,{filename:file});
 const topics=c.window.AVIONICS_TOPICS,qs=c.window.AVIONICS_QUESTIONS,N=c.window.avionicsNucleoWorkbench,V=c.window.avionicsVideoLessons,visual=c.window.avionicsVisuals;
 const get=id=>qs.find(q=>q.id===id),topic=id=>topics.find(t=>t.id===id);
@@ -67,6 +67,6 @@ assert.equal(N.setup(get("series-C7"),topic("series")),null,"5V+ divider must NO
 assert.equal(N.setup(get("ohm-C3"),topic("ohm")),null,"12V example must NOT connect to STM32");
 const site=read("index.html"),cache=read("sw.js"),tutor=read("avionics_tutor.js");
 assert(site.includes("avionics_nucleo_workbench.js?v=1")&&site.includes("avionics_video_lessons.js?v=1"));
-assert(cache.includes("v29-nucleo-progressive-videos")&&cache.includes("avionics_progressive_videos.css"));
+assert(cache.includes("v30-distinct-690-curriculum")&&cache.includes("avionics_progressive_videos.css"));
 assert(tutor.includes("VIDEO.render(q,t)")&&tutor.includes("Build your skills in order"));
 console.log("PASS "+qs.length+" progressive questions, "+full+" full Nucleo-board scenarios, "+physical.size+" circuit kit families, "+videoDirect+" verified direct and "+videoSearch+" source-targeted video links.");

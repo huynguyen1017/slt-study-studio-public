@@ -9,7 +9,7 @@ const store=new Map();
 const storage={getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)};
 const context={window:{},Math,console,localStorage:storage,document:{}};
 vm.createContext(context);
-for(const p of ["avionics_data.js","avionics_questions.js","simulation/math_format.js","avionics_beginner_lessons.js","avionics_si_lesson.js","avionics_textbook_toc.js","avionics_visuals.js","avionics_tutor.js"]){
+for(const p of ["avionics_data.js","avionics_questions.js","avionics_distinct_labs_v10.js","avionics_distinct_math_v10.js","avionics_distinct_reasoning_v10.js","simulation/math_format.js","avionics_beginner_lessons.js","avionics_si_lesson.js","avionics_textbook_toc.js","avionics_visuals.js","avionics_tutor.js"]){
  vm.runInContext(load(p),context,{filename:p});
 }
 const topics=context.window.AVIONICS_TOPICS,questions=context.window.AVIONICS_QUESTIONS;
@@ -55,7 +55,7 @@ for(const s of ["avionics_beginner_lessons.js","avionics_tutor.js","avionics_tut
  assert(html.includes(s),s);
  assert(service.includes(s),"offline cache missing "+s);
 }
-assert(service.includes("v29-nucleo-progressive-videos"));
+assert(service.includes("v30-distinct-690-curriculum"));
 assert(service.includes("avionics_si_lesson.js")&&service.includes("avionics_si.css"));
 assert(service.includes("avionics_simulator.js")&&service.includes("avionics_simulator.css"));
 const ohm=topics.find(t=>t.id==="ohm"),ohmCalc=questions.find(q=>q.id==="ohm-C1");
@@ -215,6 +215,15 @@ console.log("PASS: 690 questions retained; 23 beginner lessons; six-step guides;
   await page.locator('[data-page="learn"]').click();
   assert.equal(await page.locator('[data-video-question="buses-F2"] .av-video-card').count(),2,"Switching questions must replace both video sources");
   await page.locator("#avTopicList").selectOption("units");
+  await page.locator('[data-quick-qid="units-F2"]').click();
+  assert((await page.locator(".av-active-banner").textContent()).includes("25 mA"),"Q2 must explain the meaning of a milliampere");
+  await page.locator('[data-quick-qid="units-A2"]').click();
+  assert((await page.locator(".av-page h3").first().textContent()).includes("Convert a real shunt measurement"),"Q7 must no longer repeat the Milli prefix lesson");
+  assert((await page.locator(".av-lede").textContent()).includes("0.025 A = 25 mA"),"Q7 Understand lesson must show correct shunt result");
+  assert(!(await page.locator(".av-lede").textContent()).includes("The prefix 'milli'"),"Q7 must not display the old prefix-only definition");
+  await page.locator('[data-page="work"]').click();
+  assert((await page.locator(".av-all-steps").textContent()).includes("0.25 V"),"Q7 six-step solution must use the shunt measurement");
+  await page.locator('[data-page="learn"]').click();
   const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   await mobile.goto("http://127.0.0.1:8765/#avionics",{waitUntil:"load"});
   await mobile.locator("#avionicsView .av-tutor").waitFor();

@@ -30,6 +30,17 @@ if(!state.ratings||typeof state.ratings!=="object")state.ratings={};
 if(!state.attempts||typeof state.attempts!=="object")state.attempts={};
 if(!state.assessments||typeof state.assessments!=="object")state.assessments={};
 if(!state.responses||typeof state.responses!=="object")state.responses={};
+/* Question meanings changed in v10. Archive previous mastery and explanations
+   before resetting only their status, so a correct old answer is not displayed
+   as already mastered for a new problem with the same stable ID. */
+if(window.AVIONICS_DISTINCT_CURRICULUM_VERSION===10&&state.curriculumVersion!==10){
+ const old={ratings:state.ratings,assessments:state.assessments,responses:state.responses,attempts:state.attempts,version:state.curriculumVersion||9};
+ const had=Object.keys(old.ratings).length+Object.keys(old.responses).length+Object.keys(old.assessments).length>0;
+ if(had)state.priorProgressV9=old;
+ state.ratings={};state.assessments={};state.responses={};state.attempts={};state.curriculumVersion=10;
+ try{localStorage.setItem(STORE,JSON.stringify(state))}catch(e){console.warn("Could not persist curriculum migration",e);}
+}
+
 
 let host=null,topic=TOPICS.some(t=>t.id===state.lastTopic)?state.lastTopic:"ohm";
 let currentIndex=Number.isInteger(state.lastIndex)?state.lastIndex:0;
@@ -57,6 +68,7 @@ function matchingSkill(q,t){
  return 0;
 }
 function focus(q,t){
+ if(q.lesson)return {label:q.lesson.title,definition:q.lesson.summary,why:q.lesson.why,test:q.lesson.example,deep:null};
  const s=t.skills[matchingSkill(q,t)]||t.skills[0];
  const deep=DEEP[t.id+":"+s[0]]||DEEP[s[0]]||null;
  return {label:s[0],definition:s[1],why:s[2],test:s[3],deep};
@@ -75,7 +87,15 @@ function makeRandomVariant(q){
  if(!fam)return null;
  const pick=(arr)=>arr[Math.floor(Math.random()*arr.length)];
  const randInt=(lo,hi)=>lo+Math.floor(Math.random()*(hi-lo+1));
- const m=(prompt,answer,unit,formula,sub,steps)=>({...q,question:prompt,expected:Number(answer.toPrecision(10)),unit,formula,sub,steps,isCustomVariant:true});
+ const m=(prompt,answer,unit,formula,sub,steps)=>({
+ ...q,question:prompt,expected:Number(answer.toPrecision(10)),unit,formula,sub,steps,
+ numericOperation:"Fresh-number calculation",learningObjective:"Practice new numbers",
+ lesson:{title:"Fresh-number calculation",summary:"This is an optional NEW-NUMBERS drill, not another numbered curriculum task. "+prompt,
+ example:"Compute the expected value in "+unit+" and verify each quantity and its unit.",
+ why:"Use this separately from the 30 distinct fixed lessons.",
+ vocab:[["Target",prompt],["Engineering units",unit],["Validation","Check the answer against the governing physical model."]]},
+ isCustomVariant:true
+});
  if(fam==="milli"){const x=randInt(3,850);return m(`Convert ${x} mA into amperes (A).`,x*1e-3,"A","I_A = I_mA * 10^(-3)",`I_A = ${x} * 10^(-3) = ${fmt(x*1e-3)}`,["Milli means 10^(-3).","Multiply "+x+" by 10^(-3) (move decimal 3 places left).","Report in amperes (A)."]);}
  if(fam==="micro"){const x=pick([1.5,3.3,6.8,15,22,33,68,220]);return m(`Express a ${x} µF capacitor in farads (F).`,x*1e-6,"F","C_F = C_uF * 10^(-6)",`C_F = ${x} * 10^(-6) = ${fmt(x*1e-6)}`,["Micro means 10^(-6).","Multiply "+x+" by 10^(-6) (shift decimal 6 places left).","Report in farads (F)."]);}
  if(fam==="ohmI"){const v=pick([1.8,3.3,5,9,12,15,24,28]);const r=pick([120,220,330,470,680,1000,1500,2200,4700]);const ia=v/r,ima=1000*ia;return m(`A ${r} Ω resistor has ${v} V across it. Find current in mA.`,ima,"mA","I = V / R",`I = ${v} / ${r} = ${fmt(ia)} = ${fmt(ima)} * 10^(-3)`,["Read V and R in base units.","Compute I = V / R in amperes.","Multiply by 10^(3) to report milliamps (mA)."]);}
@@ -98,18 +118,19 @@ function makeRandomVariant(q){
 function stepsFor(q,t,f){
  const st=q.steps||[];
  const beginner=f.deep;
+ const guided=q.lesson||null;
  const out=[];
  const formulaStr=q.formula||(beginner&&beginner.formula)||null;
  const subStr=q.sub||(beginner&&beginner.sub)||null;
  if(q.level==="Foundations"||q.level==="Application"){
   out.push({
    title:"Understand the question in everyday words",
-   body:`This question asks about "${f.label}". In simple words: ${beginner?beginner.plain:f.definition}`,
+   body:`This question specifically asks about "${f.label}". In simple words: ${guided?guided.summary:beginner?beginner.plain:f.definition}`,
    kind:"text"
   });
   out.push({
    title:"Connect it to a real-world picture",
-   body:`Picture it like this: ${beginner?beginner.analogy:LESSONS[t.id].analogy}`,
+   body:`Picture it like this: ${guided?guided.example:beginner?beginner.analogy:LESSONS[t.id].analogy}`,
    kind:"text"
   });
   out.push({
@@ -120,13 +141,13 @@ function stepsFor(q,t,f){
   });
   out.push({
    title:subStr?"Work through the given numbers":"Use a concrete example without assuming numbers",
-   body:subStr?((beginner?beginner.example:LESSONS[t.id].example)+" Substitute the stated values in the equation."):((beginner?beginner.example:LESSONS[t.id].example)+" This is a qualitative example, not a measured dataset or a calculation."),
+   body:subStr?((guided?guided.example:beginner?beginner.example:LESSONS[t.id].example)+" Substitute the stated values in the equation."):((guided?guided.example:beginner?beginner.example:LESSONS[t.id].example)+" This is a qualitative example, not a measured dataset or a calculation."),
    kind:subStr?"formula":"text",
    formula:subStr
   });
   out.push({
    title:"Why Muon Space avionics engineers care on the bench",
-   body:`${beginner?beginner.why:f.why} On a real test station: ${f.test}`,
+   body:`${guided?guided.why:beginner?beginner.why:f.why} On a real test station: ${f.test}`,
    kind:"text"
   });
   if(f.label==="SI base unit"&&SI){
@@ -138,7 +159,7 @@ function stepsFor(q,t,f){
   }
   out.push({
    title:"Speak this answer in an interview",
-   body:`${st[0]||f.definition} ${st[1]||""} ${st[2]||""} Takeaway: ${beginner?beginner.recap:LESSONS[t.id].lead}`,
+   body:`${st[0]||f.definition} ${st[1]||""} ${st[2]||""} Takeaway: ${guided?guided.summary:beginner?beginner.recap:LESSONS[t.id].lead}`,
    kind:"answer"
   });
  }else if(q.level==="Calculation"){
@@ -310,8 +331,9 @@ function digitalLogicPanel(t){
 
 function lessonPage(q,t,f){
  const item=f.deep,guide=LESSONS[t.id]||{lead:t.goal,analogy:"",example:"",terms:[]};
- const glossary=item?item.words:guide.terms;
- const summary=item?item.plain:f.definition;
+ const lesson=q.lesson||null;
+ const glossary=lesson&&lesson.vocab?lesson.vocab:item?item.words:guide.terms;
+ const summary=lesson?lesson.summary:item?item.plain:f.definition;
  const illustration=VIS?VIS.render(q,t,inlineVisualMode):"";
  const formulaSrc=q.formula||(item&&item.formula)||null;
  const subSrc=q.sub||(item&&item.sub)||"";
@@ -323,7 +345,7 @@ function lessonPage(q,t,f){
  '<div class="av-lede"><strong>In very simple words (Zero prior EE assumed)</strong><p>'+rich(summary)+'</p></div>'+
  '<div class="av-two-up"><section><h4>Words you need first</h4><table class="av-vocab"><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody>'+
  glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+rich(p[1])+'</td></tr>').join("")+
- '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(item?item.analogy:guide.analogy)+'</p><h4>Why Muon Space engineers care</h4><p>'+rich(item?item.why:f.why)+'</p></section></div>'+
+ '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(lesson?lesson.example:item?item.analogy:guide.analogy)+'</p><h4>Why Muon Space engineers care</h4><p>'+rich(lesson?lesson.why:item?item.why:f.why)+'</p></section></div>'+
  (f.label==="SI base unit"?siChapterPanel():"")+
  textbookPanel(t)+
  courseworkBridge(t)+
@@ -338,8 +360,8 @@ function lessonPage(q,t,f){
  '<div class="av-actions-bottom"><button id="avGoVisual" class="av-light">See all 3 large visuals stacked →</button><button id="avGoWork" class="av-primary">See all 6 baby steps + worked MathML →</button></div>'+
  (formulaSrc?equation(formulaSrc,"1. ENGINEERING EQUATION (MATHML)"):"")+
  (subSrc?equation(subSrc,"2. WORKED EXAMPLE / SUBSTITUTION (ENGINEERING NOTATION)"):"")+
- '<div class="av-worked-mini"><strong>One real-life bench example</strong><p>'+rich(item?item.example:guide.example)+'</p></div>'+
- '<div class="av-takeaway"><strong>Remember this:</strong> '+rich(item?item.recap:guide.lead)+'</div>'+
+ '<div class="av-worked-mini"><strong>Worked evidence / expected result</strong><p>'+rich(lesson?lesson.example:item?item.example:guide.example)+'</p></div>'+
+ '<div class="av-takeaway"><strong>Remember this:</strong> '+rich(lesson?lesson.summary:item?item.recap:guide.lead)+'</div>'+
  '</section>';
 }
 
@@ -477,7 +499,7 @@ function show(){
  full30.map((p,i)=>'<button data-qid="'+esc(p.id)+'" class="av-browse-card '+(q&&q.id===p.id?"active ":"")+(state.ratings[p.id]==="know"?"done":state.ratings[p.id]==="again"?"retry":"")+'" aria-current="'+(q&&q.id===p.id?"true":"false")+'" aria-label="Open question '+(i+1)+': '+esc(p.question)+'">'+
  '<span class="av-browse-meta"><b>Q'+(i+1)+'</b><em>'+esc(p.level)+'</em></span><span class="av-browse-title">'+esc(p.question)+'</span>'+
  '<small>'+(state.ratings[p.id]==="know"?"✓ Mastered":state.ratings[p.id]==="again"?"↻ Review needed":state.assessments[p.id]?"◈ Checked":"○ Open question")+'</small></button>').join("")+'</div>'+
- '<small class="av-browse-legend">Blue = selected · Green = mastered · Amber = review needed. Progress stays saved in your browser.</small></details>'+
+ '<small class="av-browse-legend">Blue = selected · Green = mastered · Amber = review needed. Progress for the revised curriculum is saved locally; older mastery is archived in your exported progress record.</small></details>'+
  '<p class="av-footnote">All problems and visual schematics are original educational exercises aligned to Floyd &amp; Buchla and Muon Space avionics test engineering requirements.</p>'+
  '</div></div><dialog class="av-zoom-dialog" id="avVisualZoom" aria-label="Expanded circuit figure"><div class="av-zoom-top"><strong>Expanded engineering diagram</strong><button class="av-light" type="button" id="avZoomClose">Close ×</button></div><div id="avZoomBody"></div></dialog></div>';
  wire();
