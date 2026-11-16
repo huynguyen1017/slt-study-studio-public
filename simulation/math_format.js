@@ -4,7 +4,7 @@
 (function(){
 const enc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const subs={"₀":"0","₁":"1","₂":"2","₃":"3","₄":"4","₅":"5","₆":"6","₇":"7","₈":"8","₉":"9"};
-const pat=/[A-Za-zΓγΔδθτπΩΣλφωμ]+(?:_[A-Za-z0-9₀₁₂₃₄₅₆₇₈₉]+)*[₀₁₂₃₄₅₆₇₈₉]*|\d+(?:\.\d+)?|[ΓγΔδθτπΩΣλφωμ∫ln]+|[₀₁₂₃₄₅₆₇₈₉]+|[=≈≥≤≠<>+\-−*/×·^()√→⇒\|]|./gu;
+const pat=/[A-Za-zΓγΔδθτπΩΣλφωμℓ]+(?:_[A-Za-z0-9₀₁₂₃₄₅₆₇₈₉]+)*[₀₁₂₃₄₅₆₇₈₉]*|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|[ΓγΔδθτπΩΣλφωμ∫ln]+|[₀₁₂₃₄₅₆₇₈₉]+|[=≈≥≤≠<>+\-−*/×·^()√→⇒\|]|./gu;
 
 function normalizeFormula(src){
  let s=String(src??"").trim();
@@ -42,6 +42,9 @@ function normalizeFormula(src){
   .replace(/\bRT\b/g,"R_T")
   .replace(/\bR23\b/g,"R₂₃")
   .replace(/\bl_crit\b/g,"ℓ_crit")
+  .replace(/\bexp\s*\(/g,"e^(")
+  .replace(/\blog10\b/g,"log_10")
+  .replace(/\blog2\b/g,"log_2")
   .replace(/\bsqrt\s*\(/g,"√(")
   .replace(/<=/g,"≤")
   .replace(/>=/g,"≥")
@@ -57,9 +60,16 @@ function tokens(src){
 }
 
 function mi(s){
+ const sci=s.match(/^(\d+(?:\.\d+)?)[eE]([+-]?\d+)$/);
+ if(sci){
+  const exp=Number(sci[2]);
+  const expXml=exp<0?"<mrow><mo>−</mo><mn>"+Math.abs(exp)+"</mn></mrow>":"<mn>"+exp+"</mn>";
+  return "<mrow><mn>"+enc(sci[1])+"</mn><mo>×</mo><msup><mn>10</mn>"+expXml+"</msup></mrow>";
+ }
  if(/^\d+(?:\.\d+)?$/.test(s))return "<mn>"+enc(s)+"</mn>";
  if(s==="√"||s==="∫")return "<mo>"+enc(s)+"</mo>";
  if(s==="ln"||s==="log"||s==="sin"||s==="cos"||s==="max"||s==="min")return '<mi mathvariant="normal">'+enc(s)+"</mi>";
+ if(s==="log_10"||s==="log_2")return '<msub><mi mathvariant="normal">log</mi><mn>'+s.split("_")[1]+'</mn></msub>';
  let base=s,under="";
  if(s.includes("_")){
   let n=s.indexOf("_");
@@ -107,7 +117,16 @@ function build(src){
   if(t==="∫")return "<mrow><mo>∫</mo>"+prim()+"</mrow>";
   if(t==="-"||t==="−")return "<mrow><mo>−</mo>"+prim()+"</mrow>";
   if(t==="+")return prim();
-  if(/^[A-Za-zΓγΔδθτπΩΣλφωμℓ]/u.test(t)||/^\d/.test(t))return mi(t);
+  if(/^[A-Za-zΓγΔδθτπΩΣλφωμℓ]/u.test(t)||/^\d/.test(t)){
+   let node=mi(t);
+   while(a[i]==="("){
+    i++;
+    let inner=cmp();
+    if(a[i]===")")i++;
+    node="<mrow>"+node+"<mo>(</mo>"+inner+"<mo>)</mo></mrow>";
+   }
+   return node;
+  }
   return "<mo>"+enc(t)+"</mo>";
  }
  function pow(){
@@ -237,7 +256,22 @@ const patterns=[
  [/VRX\s*\/\s*200/g,"V_RX/200"],
  [/Vsource\s*[−-]\s*VTX/g,"V_source − V_TX"],
  [/VTX\s*[−-]\s*VbeforeL/g,"V_TX − V_beforeL"],
- [/VbeforeL\s*[−-]\s*VRX/g,"V_beforeL − V_RX"]
+ [/VbeforeL\s*[−-]\s*VRX/g,"V_beforeL − V_RX"],
+ [/\bI\s*=\s*V\s*\/\s*R\b/g,"I = V / R"],
+ [/\bV\s*=\s*I\s*[×*·]\s*R\b/g,"V = I * R"],
+ [/\bR\s*=\s*V\s*\/\s*I\b/g,"R = V / I"],
+ [/\bQ\s*=\s*C\s*[×*·]?\s*V\b/g,"Q = C * V"],
+ [/\bτ\s*=\s*R\s*[×*·]?\s*C\b/g,"τ = R * C"],
+ [/\bτ\s*=\s*L\s*\/\s*R\b/g,"τ = L / R"],
+ [/\bV\s*=\s*L\s*[×*·]?\s*dI\s*\/\s*dt\b/g,"V = L * (dI / dt)"],
+ [/1\s*\/\s*\(2\s*π\s*R\s*C\)/g,"1 / (2 * π * R * C)"],
+ [/1\s*\/\s*\(2\s*π\s*√\(?L\s*[×*·]?\s*C\)?\)/g,"1 / (2 * π * √(L * C))"],
+ [/\bI_N\s*=\s*V_th\s*\/\s*R_th\b/g,"I_N = V_th / R_th"],
+ [/\bV_s\s*\/\s*V_p\s*=\s*N_s\s*\/\s*N_p\b/g,"V_s / V_p = N_s / N_p"],
+ [/\bI²R\b|\bI\^2\s*[×*·]?\s*R\b/g,"I^2 * R"],
+ [/10\^\(?([+-]?\d+)\)?/g,(m)=>m],
+ [/\d+(?:\.\d+)?[eE][+-]?\d+\b/g,(m)=>m],
+ [/1\s*[−-]\s*e(?:⁻¹|\^\(?-1\)?)/g,"1 - e^(-1)"]
 ];
 
 function textMath(s){
@@ -245,7 +279,10 @@ function textMath(s){
  let matches=[];
  for(let [regex,formula] of patterns){
   regex.lastIndex=0;
-  for(const m of s.matchAll(regex))matches.push({start:m.index,end:m.index+m[0].length,formula});
+  for(const m of s.matchAll(regex)){
+   const f=typeof formula==="function"?formula(m[0]):formula;
+   matches.push({start:m.index,end:m.index+m[0].length,formula:f});
+  }
  }
  matches.sort((a,b)=>a.start-b.start || b.end-a.end);
  let out="",end=0;
@@ -257,8 +294,33 @@ function textMath(s){
  return out+enc(s.slice(end));
 }
 
+const ENG_PREFIX={12:"T",9:"G",6:"M",3:"k",0:"","-3":"m","-6":"µ","-9":"n","-12":"p"};
+function formatEngineeringParts(val){
+ if(!Number.isFinite(val))return null;
+ if(val===0)return {mantissa:"0",exp:0,prefix:""};
+ const sign=val<0?-1:1;
+ const abs=Math.abs(val);
+ let exp3=Math.floor(Math.log10(abs)/3)*3;
+ if(exp3>12)exp3=12;
+ if(exp3<-12)exp3=-12;
+ const scaled=sign*(abs/Math.pow(10,exp3));
+ const mantissa=Number(scaled.toPrecision(4)).toString();
+ return {mantissa,exp:exp3,prefix:ENG_PREFIX[String(exp3)]||""};
+}
+
+function formatEngineeringMath(val,unit=""){
+ const p=formatEngineeringParts(val);
+ if(!p)return render("0");
+ const u=String(unit||"").trim();
+ const expr=p.exp===0?p.mantissa:`${p.mantissa} * 10^(${p.exp})`;
+ const inner=build(expr)+(u?'<mspace width="0.28em"/><mtext>'+enc(u)+'</mtext>':"");
+ return '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline" class="math-inline" aria-label="'+enc(expr+(u?" "+u:""))+'">'+inner+'</math>';
+}
+
 window.studyMath=render;
 window.studyMathText=textMath;
 window.studyMathEquationCard=renderEquationCard;
 window.studyMathPatterns=patterns.length;
+window.formatEngineeringParts=formatEngineeringParts;
+window.formatEngineeringMath=formatEngineeringMath;
 })();

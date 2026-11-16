@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v21-si-curriculum-audit';
+const CACHE = 'slt-study-studio-v21-si-curriculum-audit-r2';
 const CORE = [
   "./",
   "./index.html",

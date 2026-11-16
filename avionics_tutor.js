@@ -1,6 +1,7 @@
 "use strict";
-/* Beginner-first workbook UI for the existing 690-question bank.
-   Preserves 'slt-avionics-ee-practice-v1' mastery data. */
+/* Beginner-first 4-page visual workbook UI for the 690-question avionics curriculum.
+   Features 1-30 quick-jump + 30-card gallery, native MathML engineering notation,
+   6-step beginner guides, 3-panel board/breadboard visuals, and rubric/numeric grading. */
 (function(){
 const TOPICS=window.AVIONICS_TOPICS||[];
 const QUESTIONS=window.AVIONICS_QUESTIONS||[];
@@ -14,23 +15,32 @@ const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const find=(s,r=document)=>r.querySelector(s);
 const fmt=x=>Math.abs(x)>0&&Math.abs(x)<0.0001?Number(x).toExponential(3):Number(x.toPrecision(5)).toString();
 const eq=x=>window.studyMath?window.studyMath(x,true):'<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mtext>'+esc(x)+'</mtext></math>';
+const rich=x=>window.studyMathText?window.studyMathText(String(x??"")):esc(x);
+const engVal=(x,u)=>window.formatEngineeringMath?window.formatEngineeringMath(x,u):esc(fmt(x)+" "+u);
+
 let remembered={};try{remembered=JSON.parse(localStorage.getItem(STORE)||"{}")||{}}catch{}
 const state={ratings:{},attempts:{},assessments:{},responses:{},...remembered};
 if(!state.ratings||typeof state.ratings!=="object")state.ratings={};
 if(!state.attempts||typeof state.attempts!=="object")state.attempts={};
 if(!state.assessments||typeof state.assessments!=="object")state.assessments={};
 if(!state.responses||typeof state.responses!=="object")state.responses={};
+
 let host=null,topic=TOPICS.some(t=>t.id===state.lastTopic)?state.lastTopic:"ohm";
 let currentIndex=Number.isInteger(state.lastIndex)?state.lastIndex:0;
 let filter="All",query="",page="learn",stepIndex=0,expanded=false,feedback="",draftText="",currentAnswer="",answerDirty=false;
+let inlineVisualMode="schematic",customVariants={};
+
 const save=()=>{try{localStorage.setItem(STORE,JSON.stringify(state))}catch{}};
 const topicOf=()=>TOPICS.find(t=>t.id===topic)||TOPICS[0];
 const qset=()=>QUESTIONS.filter(x=>x.topic===topic&&(filter==="All"||x.level===filter)&&(!query||(x.question+" "+x.steps.join(" ")).toLowerCase().includes(query)));
-const selected=()=>{const a=qset();currentIndex=Math.max(0,Math.min(a.length-1,currentIndex));return a[currentIndex]};
+const activeQuestion=()=>{const a=qset();currentIndex=Math.max(0,Math.min(a.length-1,currentIndex));const base=a[currentIndex];return base?(customVariants[base.id]||base):null;};
+const selected=activeQuestion;
 const cnt=id=>QUESTIONS.filter(x=>x.topic===id&&state.ratings[x.id]==="know").length;
 const allTopicQuestions=()=>QUESTIONS.filter(x=>x.topic===topic);
+
 function matchingSkill(q,t){
  if(!q||!t)return 0;
+ if(Number.isInteger(q.skillIndex))return q.skillIndex;
  const m=q.id.match(/-([FADC])(\d+)$/);
  if(!m)return 0;
  const n=Number(m[2])-1;
@@ -42,75 +52,182 @@ function matchingSkill(q,t){
 }
 function focus(q,t){
  const s=t.skills[matchingSkill(q,t)]||t.skills[0];
- return {label:s[0],definition:s[1],why:s[2],test:s[3],deep:s[0]==="SI base unit"&&SI?SI:(DEEP[s[0]]||null)};
+ const deep=DEEP[t.id+":"+s[0]]||DEEP[s[0]]||null;
+ return {label:s[0],definition:s[1],why:s[2],test:s[3],deep};
 }
-function iconLine(k,text){return '<div class="av-mini"><strong>'+esc(k)+'</strong><span>'+esc(text)+'</span></div>'}
-function equation(source,label){return '<div class="av-math"><div class="av-math-label">'+esc(label)+'</div>'+eq(source)+'</div>'}
-function diagram(t,s){
- if(t.id==="ohm"){
-  return '<figure class="av-diagram" aria-label="Circuit showing a 5 volt source, a resistor and a multimeter comparing the supply node with ground">'+
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 650 252" role="img" aria-label="5 volt source and meter probes">'+
-  '<rect width="650" height="252" rx="14" fill="#f8fbff"/>'+
-  '<path d="M75 112 V48 H350 V112 M75 170 V207 H350 V170" fill="none" stroke="#173b55" stroke-width="4" stroke-linecap="round"/>'+
-  '<path d="M61 112 H89 M65 123 H85 M75 123 V139 M61 139 H89 M65 150 H85 M75 150 V170" stroke="#173b55" stroke-width="3" fill="none"/>'+
-  '<text x="19" y="123" font-size="14" fill="#21547e">+5 V</text><text x="20" y="162" font-size="13" fill="#486477">0 V</text>'+
-  '<path d="M350 112 V120 H365 V159 H335 V120 H350 V112" fill="none" stroke="#173b55" stroke-width="3"/>'+
-  '<rect x="321" y="111" width="58" height="66" rx="5" fill="#fff6dd" stroke="#b58b32" stroke-width="3"/>'+
-  '<text x="350" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#734f19">1 kΩ</text><text x="350" y="155" text-anchor="middle" font-size="10" fill="#734f19">Load</text>'+
-  '<circle cx="350" cy="48" r="7" fill="#c83e3e"/><circle cx="350" cy="207" r="7" fill="#2a455a"/>'+
-  '<path d="M350 48 H470 V98" fill="none" stroke="#d84942" stroke-width="2.8"/>'+
-  '<path d="M350 207 H505 V176" fill="none" stroke="#405061" stroke-width="2.8"/>'+
-  '<rect x="450" y="98" width="105" height="78" rx="10" fill="white" stroke="#2a5571" stroke-width="2.6"/>'+
-  '<text x="502" y="124" text-anchor="middle" font-size="12" font-weight="700" fill="#22455b">DMM</text>'+
-  '<rect x="470" y="133" width="66" height="29" rx="4" fill="#e4f1ea" stroke="#7aaf93"/>'+
-  '<text x="503" y="152" text-anchor="middle" font-size="15" font-weight="700" fill="#165b47">+5.0 V</text>'+
-  '<text x="361" y="29" font-size="12" fill="#ba3333" font-weight="700">Red probe</text>'+
-  '<text x="356" y="231" font-size="12" fill="#405061" font-weight="700">Black probe / reference</text>'+
-  '<text x="93" y="35" font-size="12" fill="#173b55" font-weight="600">Supply node (+5 V)</text>'+
-  '<path d="M75 207 V221 M60 221 H90 M65 229 H85 M70 237 H80" stroke="#173b55" stroke-width="2.4" fill="none"/>'+
-  '<text x="103" y="233" font-size="12" fill="#486477">Ground = 0 V</text>'+
-  '</svg><figcaption>Conceptual example: voltage is measured BETWEEN the red and black points. For this ideal 5 V source, the 1 kΩ load carries 5 mA.</figcaption></figure>';
- }
- if(t.id==="units")return '<div class="av-unit-ladder"><div><strong>1 A</strong><small>ampere</small></div><span>× 1000 →</span><div><strong>1000 mA</strong><small>milliamperes</small></div><span>× 1000 →</span><div><strong>1,000,000 µA</strong><small>microamperes</small></div></div>';
- return '<div class="av-system-figure" role="img" aria-label="Conceptual engineering test signal path">'+
- '<div><span>01</span><strong>Stimulus</strong><small>Power or signal applied</small></div>'+
- '<b aria-hidden="true">→</b><div><span>02</span><strong>Device under test</strong><small>Board / circuit behavior</small></div>'+
- '<b aria-hidden="true">→</b><div><span>03</span><strong>Measurement</strong><small>Instrument + reference</small></div>'+
- '<b aria-hidden="true">→</b><div><span>04</span><strong>Decision</strong><small>Compare to requirement</small></div></div>';
+function equation(source,label){
+ return '<div class="av-math"><div class="av-math-label">'+esc(label)+'</div>'+eq(source)+'</div>';
 }
 function knownValues(text){
- const pairs=String(text).match(/(?:\d+(?:\.\d+)?(?:e[+-]?\d+)?\s*(?:µF|µH|µs|MHz|GHz|mH|mA|mV|mΩ|kΩ|Ω|V|A|W|Hz|ms|ns|µJ|J|s|kW|dB|bytes|seconds|turns|%))/gi)||[];
+ const pairs=String(text).match(/(?:\d+(?:\.\d+)?(?:e[+-]?\d+)?\s*(?:µF|µH|µs|MHz|GHz|kHz|mH|mA|mV|mΩ|MΩ|kΩ|Ω|V|A|W|Hz|ms|ns|µJ|µC|J|s|kW|dB|bytes|seconds|turns|%))/gi)||[];
  return [...new Set(pairs)].slice(0,8);
 }
+
+/* Dynamic fresh-number variant generator for Calculation questions */
+function makeRandomVariant(q){
+ const fam=q.calcFamily;
+ if(!fam)return null;
+ const pick=(arr)=>arr[Math.floor(Math.random()*arr.length)];
+ const randInt=(lo,hi)=>lo+Math.floor(Math.random()*(hi-lo+1));
+ const m=(prompt,answer,unit,formula,sub,steps)=>({...q,question:prompt,expected:Number(answer.toPrecision(10)),unit,formula,sub,steps,isCustomVariant:true});
+ if(fam==="milli"){const x=randInt(3,850);return m(`Convert ${x} mA into amperes (A).`,x*1e-3,"A","I_A = I_mA * 10^(-3)",`I_A = ${x} * 10^(-3) = ${fmt(x*1e-3)}`,["Milli means 10^(-3).","Multiply "+x+" by 10^(-3) (move decimal 3 places left).","Report in amperes (A)."]);}
+ if(fam==="micro"){const x=pick([1.5,3.3,6.8,15,22,33,68,220]);return m(`Express a ${x} µF capacitor in farads (F).`,x*1e-6,"F","C_F = C_uF * 10^(-6)",`C_F = ${x} * 10^(-6) = ${fmt(x*1e-6)}`,["Micro means 10^(-6).","Multiply "+x+" by 10^(-6) (shift decimal 6 places left).","Report in farads (F)."]);}
+ if(fam==="ohmI"){const v=pick([1.8,3.3,5,9,12,15,24,28]);const r=pick([120,220,330,470,680,1000,1500,2200,4700]);const ia=v/r,ima=1000*ia;return m(`A ${r} Ω resistor has ${v} V across it. Find current in mA.`,ima,"mA","I = V / R",`I = ${v} / ${r} = ${fmt(ia)} = ${fmt(ima)} * 10^(-3)`,["Read V and R in base units.","Compute I = V / R in amperes.","Multiply by 10^(3) to report milliamps (mA)."]);}
+ if(fam==="ohmR"){const v=pick([3.3,5,9,12,24]);const i=pick([4,5,8,12,15,25,30]);return m(`A branch has ${v} V and should draw ${i} mA. What resistance in Ω gives that current?`,v/(i*1e-3),"Ω","R = V / I",`R = ${v} / (${i} * 10^(-3)) = ${fmt(v/(i*1e-3))}`,["Convert mA to A using 10^(-3).","Divide V by I: R = V / I.","Verify standard resistor sizing."]);}
+ if(fam==="powerDC"){const v=pick([1.2,1.8,3.3,5,12,28]);const i=pick([0.5,1.2,1.5,2.5,3.0,4.0]);return m(`A DC board rail is ${v} V at ${i} A. Find consumed power in W.`,v*i,"W","P = V * I",`P = ${v} * ${i} = ${fmt(v*i)}`,["Read rail V and I.","Multiply P = V * I.","Report in watts (W)."]);}
+ if(fam==="seriesR"){const a=pick([100,150,220,330]),b=pick([470,680,1000]),c=pick([100,220,330,470]);return m(`Three series resistors are ${a} Ω, ${b} Ω and ${c} Ω. Find total resistance in Ω.`,a+b+c,"Ω","R_T = R_1 + R_2 + R_3",`R_T = ${a} + ${b} + ${c} = ${a+b+c}`,["Confirm single series loop.","Add all three resistor values.","Report R_T in ohms."]);}
+ if(fam==="divider"){const v=pick([3.3,5,9,12,24,28]),r1=pick([1000,2200,3300,4700]),r2=pick([1000,2000,3300,4700]);return m(`Unloaded divider: ${v} V input, top ${r1} Ω, bottom ${r2} Ω. Find voltage at midpoint in V.`,v*r2/(r1+r2),"V","V_out = V_in * (R_2 / (R_1 + R_2))",`V_out = ${v} * (${r2} / (${r1} + ${r2})) = ${fmt(v*r2/(r1+r2))}`,["Sum R_1 + R_2.","Divide R_2 by total R.","Multiply by V_in."]);}
+ if(fam==="parallelR"){const a=pick([150,220,330,470,1000]),b=pick([220,330,470,680,1000]);return m(`Calculate the equivalent resistance of ${a} Ω and ${b} Ω in parallel, in Ω.`,a*b/(a+b),"Ω","R_eq = (R_1 * R_2) / (R_1 + R_2)",`R_eq = (${a} * ${b}) / (${a} + ${b}) = ${fmt(a*b/(a+b))}`,["Parallel paths share Node A & B.","Compute (R_1 * R_2) / (R_1 + R_2).","Verify R_eq is smaller than both resistors."]);}
+ if(fam==="rcTau"){const r=pick([1.5,2.2,3.3,4.7,10,15]),c=pick([1,2.2,4.7,10,22]);return m(`A first-order RC circuit uses R=${r} kΩ and C=${c} µF. Find τ in ms.`,r*c,"ms","tau = R * C",`tau = (${r} * 10^(3)) * (${c} * 10^(-6)) = ${fmt(r*c)} * 10^(-3)`,["Convert kΩ (10^3) and µF (10^(-6)).","Multiply R * C: 10^3 × 10^(-6) = 10^(-3) s = ms.","Report τ in ms."]);}
+ if(fam==="shunt"){const r=pick([2,4,5,10]),v=pick([12,20,35,50,65,80]);return m(`A current-sense shunt of ${r} mΩ has a measured differential voltage of ${v} mV. Find current in A.`,v/r,"A","I = V_sense / R_shunt",`I = (${v} * 10^(-3)) / (${r} * 10^(-3)) = ${fmt(v/r)}`,["Convert mV and mΩ with 10^(-3).","Divide V_sense by R_shunt (10^(-3) cancels!).","Report current in amperes (A)."]);}
+ if(fam==="clockPeriod"){const f=pick([4,8,12,20,40,80,125]);const ts=1/(f*1e6),tns=ts*1e9;return m(`A digital clock runs at ${f} MHz. Find full clock period in ns.`,tns,"ns","T = 1 / f",`T = 1 / (${f} * 10^(6)) = ${fmt(ts)} = ${fmt(tns)} * 10^(-9)`,["Convert MHz using 10^(6) Hz.","Compute T = 1 / f in seconds.","Multiply by 10^(9) for nanoseconds (ns)."]);}
+ const nextIdx=((q.variantIndex||0)+1+Math.floor(Math.random()*4))%5;
+ if(window.AVIONICS_CALC_FAMILIES?.[fam]){
+  const n=window.AVIONICS_CALC_FAMILIES[fam](nextIdx);
+  return m(n.prompt,n.answer,n.unit,n.formula,n.sub,n.steps);
+ }
+ return null;
+}
+
 function stepsFor(q,t,f){
  const st=q.steps||[];
  const beginner=f.deep;
  const out=[];
+ const formulaStr=q.formula||(beginner?beginner.formula:"V = I * R");
+ const subStr=q.sub||(beginner?beginner.sub:"V = 5.0");
  if(q.level==="Foundations"||q.level==="Application"){
-   out.push({title:"Read the exact question",body:"This question asks about "+f.label+". We will identify its meaning, understand why the distinction matters, and give a real engineering example.",kind:"text"});
-   out.push({title:"Give the textbook-style definition first",body:beginner?beginner.plain:f.definition,kind:"text"});
-   out.push({title:"Understand the key difference",body:f.why,kind:"text"});
-   out.push({title:"Connect it to a practical example",body:beginner?beginner.example:f.test,kind:"text"});
-   out.push({title:"Explain with a visual comparison",body:beginner?beginner.analogy:(LESSONS[t.id]?.analogy||f.definition),kind:"text"});
-   if(f.label==="SI base unit"&&SI)out.push({title:"Name the seven base units and separate derived units",body:"The seven SI base units are meter (m), kilogram (kg), second (s), ampere (A), kelvin (K), mole (mol) and candela (cd). The volt (V) and ohm (Ω) are derived units. Radian and steradian were called supplementary units in the older textbook; their separate SI class was eliminated in 1995.",kind:"text"});
-   out.push({title:"Build your own complete answer",body:(beginner?beginner.recap:f.definition)+" "+f.why+" Example: "+f.test,kind:"answer"});
+  out.push({
+   title:"Understand the question in everyday words",
+   body:`This question asks about "${f.label}". In simple words: ${beginner?beginner.plain:f.definition}`,
+   kind:"text"
+  });
+  out.push({
+   title:"Connect it to a real-world picture",
+   body:`Picture it like this: ${beginner?beginner.analogy:LESSONS[t.id].analogy}`,
+   kind:"text"
+  });
+  out.push({
+   title:"Engineering equation in MathML notation",
+   body:`Here is the mathematical relationship that governs "${f.label}". Notice how each symbol maps directly to a measurable physical quantity.`,
+   kind:"formula",
+   formula:formulaStr
+  });
+  out.push({
+   title:"Worked numerical example (with engineering units)",
+   body:`${beginner?beginner.example:LESSONS[t.id].example} Substituting real bench values gives:`,
+   kind:"formula",
+   formula:subStr
+  });
+  out.push({
+   title:"Why Muon Space avionics engineers care on the bench",
+   body:`${beginner?beginner.why:f.why} On a real test station: ${f.test}`,
+   kind:"text"
+  });
+  if(f.label==="SI base unit"&&SI){
+   out.push({
+    title:"Name the seven base units and separate derived units",
+    body:"The seven SI base units are meter (m), kilogram (kg), second (s), ampere (A), kelvin (K), mole (mol) and candela (cd). The volt (V) and ohm (Ω) are derived units. Radian and steradian were called supplementary units in the older textbook; their separate SI class was eliminated in 1995.",
+    kind:"text"
+   });
+  }
+  out.push({
+   title:"Speak this answer in an interview",
+   body:`${st[0]||f.definition} ${st[1]||""} ${st[2]||""} Takeaway: ${beginner?beginner.recap:LESSONS[t.id].lead}`,
+   kind:"answer"
+  });
  }else if(q.level==="Calculation"){
-   out.push({title:"Read the question slowly",body:"You are asked to find a numerical answer in "+q.unit+". Underline the quantity being requested. Do not start calculating yet.",kind:"text"});
-   const vals=knownValues(q.question);
-   out.push({title:"Write down the GIVEN measurements",body:vals.length?"Given values: "+vals.join(" · ")+". Keep the units beside the numbers.":q.question,kind:"given"});
-   out.push({title:"Choose the equation",body:st[0]||"Use the correct physical relationship between the quantities.",kind:"formula",formula:q.formula});
-   out.push({title:"Substitute the numbers",body:st[1]||"Insert the known values; convert units consistently first.",kind:"formula",formula:q.sub});
-   out.push({title:"Finish the arithmetic",body:"Calculate carefully. Enter only the numerical value in the requested unit when checking your answer.",kind:"answer",answer:fmt(q.expected)+" "+q.unit});
-   out.push({title:"Check whether your answer makes sense",body:st[2]||"Estimate the scale and check whether the result is physically reasonable.",kind:"text"});
+  const vals=knownValues(q.question);
+  out.push({
+   title:"Read slowly: what is known vs. what are we solving for?",
+   body:`Goal: compute a numerical value in "${q.unit}". First look at the circuit diagram above and trace what each component represents before touching a calculator.`,
+   kind:"text"
+  });
+  out.push({
+   title:"List the GIVEN values and convert engineering prefixes (10^(3n))",
+   body:vals.length?`Given in question: ${vals.join(" · ")}. Always rewrite milli (10^(-3)), micro (10^(-6)), kilo (10^(3)), and mega (10^(6)) into powers of 10 before calculating.`:q.question,
+   kind:"given",
+   formula:q.unitConv||null
+  });
+  out.push({
+   title:"Select the physical equation (MathML)",
+   body:st[0]||"Write the governing electrical law before plugging in numbers.",
+   kind:"formula",
+   formula:q.formula
+  });
+  out.push({
+   title:"Substitute the converted numbers step by step",
+   body:st[1]||"Plug your base SI values (V, A, Ω, F, H, Hz) into the formula carefully.",
+   kind:"formula",
+   formula:q.sub
+  });
+  out.push({
+   title:"Final engineering result & unit check",
+   body:`Compare both the decimal/unit answer and its engineering-notation form (${q.unit}). Type only the numeric value (scientific notation like 2.5e-3 is accepted) on Page 4.`,
+   kind:"answer",
+   answer:fmt(q.expected)+" "+q.unit,
+   engHtml:engVal(q.expected,q.unit)
+  });
+  out.push({
+   title:"Sanity check & physical plausibility",
+   body:st[2]||"Pause and verify order of magnitude: does the current, voltage, or frequency make physical sense on a real avionics board?",
+   kind:"text"
+  });
  }else{
-   out.push({title:"Describe the symptom in simple words",body:"Do not decide that a board is defective before checking the observation. "+q.question,kind:"text"});
-   out.push({title:"Check safety before touching the circuit",body:"If a fault could create excessive current or unsafe voltage, stop or current-limit the source. Do not change live wiring without an approved procedure.",kind:"text"});
-   out.push({title:"Identify the first controlled check",body:st[1]||st[0]||"Check the test setup and one likely cause.",kind:"text"});
-   out.push({title:"Understand WHY that check helps",body:st[2]||f.why,kind:"text"});
-   out.push({title:"Collect evidence to confirm the cause",body:st[3]||f.test,kind:"text"});
-   out.push({title:"State the diagnosis without guessing",body:"Explain the observation, test you performed, and conclusion. If the test is not decisive, report the result as unconfirmed rather than calling it a pass.",kind:"answer"});
+  out.push({
+   title:"Separate symptom from assumption (Never blame the PCBA first!)",
+   body:`Reported observation: ${q.question} First verify whether the fault lies in the test rack, cable harness, Linux host, probe setup, or flight DUT.`,
+   kind:"text"
+  });
+  out.push({
+   title:"Safety check before touching live hardware",
+   body:`Check bench power-supply current limits and voltage ratings first. Never measure resistance with power ON, and never attach a grounded scope clip across a live high-side shunt.`,
+   kind:"text"
+  });
+  out.push({
+   title:"Engineering check & governing equation",
+   body:`Safest first action: ${st[1]||st[0]}. Use the governing physical relationship below to predict what a healthy reading must look like:`,
+   kind:"formula",
+   formula:formulaStr
+  });
+  out.push({
+   title:"Expected healthy vs. fault signature",
+   body:`Why this isolates the root cause: ${st[2]||f.why} Compare measured telemetry against nominal behavior:`,
+   kind:"formula",
+   formula:subStr
+  });
+  out.push({
+   title:"Collect independent confirming evidence (A-B-A / KGB swap)",
+   body:`Verify with independent measurement: ${st[3]||f.test}`,
+   kind:"text"
+  });
+  out.push({
+   title:"Go / No-Go diagnosis summary",
+   body:`State: (1) exact symptom observed, (2) controlled isolation test performed, and (3) root-cause proof. Never declare PASS on unconfirmed or intermittent evidence.`,
+   kind:"answer"
+  });
  }
  return out;
+}
+
+function visualSwitcherBar(activeMode){
+ const modes=[["schematic","1. Circuit Schematic"],["concept","2. Graph / Waveform"],["wiring","3. Board & Breadboard (3-Panel)"]];
+ return '<div class="av-vis-switch" role="group" aria-label="Switch diagram view">'+
+  modes.map(m=>`<button type="button" class="av-vis-pill ${activeMode===m[0]?"active":""}" data-vismode="${m[0]}">${esc(m[1])}</button>`).join("")+
+  `<button type="button" class="av-vis-pill av-vis-zoom-btn" data-zoom="${activeMode}">↗ Enlarge</button>`+
+ '</div>';
+}
+
+function activeBanner(q,t){
+ const idx=qset().findIndex(x=>x.id===q.id);
+ const total=qset().length||1;
+ const variantBtn=q.level==="Calculation"?`<div class="av-variant-bar">
+   <button type="button" id="avRandomize" class="av-light">🎲 Practice New Numbers</button>
+   ${q.isCustomVariant?`<button type="button" id="avResetVariant" class="av-light">↺ Restore Canonical Question</button>`:""}
+  </div>`:"";
+ return `<div class="av-question av-active-banner">
+  <div class="av-q-head"><span>ACTIVE QUESTION ${(idx>=0?idx+1:currentIndex+1)} / ${total} · ${esc(q.id.toUpperCase())} · ${esc(q.level.toUpperCase())}${q.isCustomVariant?" · CUSTOM NUMBERS":""}</span>${variantBtn}</div>
+  <p>${esc(q.question)}</p>
+ </div>`;
 }
 
 function unitTable(title,rows){
@@ -143,64 +260,85 @@ function siChapterPanel(){
 
 function lessonPage(q,t,f){
  const item=f.deep,guide=LESSONS[t.id]||{lead:t.goal,analogy:"",example:"",terms:[]};
- const glossary=item?item.words:[[f.label,f.definition],...(guide.terms||[]).filter(p=>p[0].toLowerCase()!==f.label.toLowerCase())];
+ const glossary=item?item.words:guide.terms;
  const summary=item?item.plain:f.definition;
- const illustration=VIS?VIS.render(q,t,"schematic"):diagram(t,f);
- const equationBox=item&&item.formula?equation(item.formula,"PHYSICAL RELATIONSHIP · ENGINEERING NOTATION"):"";
+ const illustration=VIS?VIS.render(q,t,inlineVisualMode):"";
+ const formulaSrc=q.formula||(item&&item.formula)||"V = I * R";
+ const subSrc=q.sub||(item&&item.sub)||"";
  return '<section class="av-page" aria-label="Understand the concept">'+
- '<div class="av-eyebrow">PAGE 1 / 4 · LEARN THE IDEA</div>'+
+ '<div class="av-eyebrow">PAGE 1 / 4 · UNDERSTAND THE QUESTION &amp; CIRCUIT</div>'+
  '<h3>Start here: '+esc(f.label)+'</h3>'+
- '<div class="av-lede"><strong>In very simple words</strong><p>'+esc(summary)+'</p></div>'+
+ activeBanner(q,t)+
+ '<div class="av-lede"><strong>In very simple words (Zero prior EE assumed)</strong><p>'+rich(summary)+'</p></div>'+
  '<div class="av-two-up"><section><h4>Words you need first</h4><table class="av-vocab"><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody>'+
- glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+esc(p[1])+'</td></tr>').join("")+
- '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+esc(item?item.analogy:guide.analogy)+'</p><h4>Why an engineer cares</h4><p>'+esc(item?item.why:f.why)+'</p></section></div>'+ 
+ glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+rich(p[1])+'</td></tr>').join("")+
+ '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(item?item.analogy:guide.analogy)+'</p><h4>Why Muon Space engineers care</h4><p>'+rich(item?item.why:f.why)+'</p></section></div>'+
  (f.label==="SI base unit"?siChapterPanel():"")+
- '<h4 class="av-figure-heading">'+(t.id==="units"?"Your SI units concept illustration":"Your question’s circuit illustration")+'</h4>'+illustration+
- '<div class="av-actions-bottom"><button id="avGoVisual" class="av-primary">See full circuit, graph and wiring →</button></div>'+
- equationBox+
- '<div class="av-worked-mini"><strong>One real-life example</strong><p>'+esc(item?item.example:guide.example)+'</p></div>'+
- '<div class="av-takeaway"><strong>Remember this:</strong> '+esc(item?item.recap:guide.lead)+'</div>'+
- '<div class="av-actions-bottom"><button id="avGoWork" class="av-primary">Now solve this question together →</button></div>'+
+ '<h4 class="av-figure-heading">Interactive circuit, graph &amp; 3-panel breadboard connection for '+esc(q.id.toUpperCase())+'</h4>'+
+ visualSwitcherBar(inlineVisualMode)+illustration+
+ '<div class="av-actions-bottom"><button id="avGoVisual" class="av-light">See all 3 large visuals stacked →</button><button id="avGoWork" class="av-primary">See all 6 baby steps + worked MathML →</button></div>'+
+ equation(formulaSrc,"1. ENGINEERING EQUATION (MATHML)")+
+ (subSrc?equation(subSrc,"2. WORKED EXAMPLE / SUBSTITUTION (ENGINEERING NOTATION)"):"")+
+ '<div class="av-worked-mini"><strong>One real-life bench example</strong><p>'+rich(item?item.example:guide.example)+'</p></div>'+
+ '<div class="av-takeaway"><strong>Remember this:</strong> '+rich(item?item.recap:guide.lead)+'</div>'+
  '</section>';
 }
 
 function visualPage(q,t,f){
  const info=VIS?VIS.describe(q,t):null;
- const pics=[["schematic","01 · Circuit schematic","Follow the current path. Find the source, components, unknown quantity and measured values."],["concept","02 · Graph / signal behavior","Compare voltage, current, timing or frequency. All curves are explicitly illustrative."],["wiring","03 · "+(info?info.wiring:"Connection diagram"),"Learn which points connect and where the source, return and instrument belong. Never assume an unspecified pin number."]];
+ const pics=[
+  ["schematic","01 · Full Circuit Schematic (Textbook & Current Loop)","Trace conventional current from (+) through every component back to (−) and locate the unknown quantity."],
+  ["concept","02 · Question-Specific Graph / Waveform","Inspect the I-V operating point, transient exponential curve, frequency cutoff, or 4-channel oscilloscope trace."],
+  ["wiring","03 · "+(info?info.wiring:"3-Panel Board, Solderless Breadboard & Circuit Symbols"),"Left: Avionics/Nucleo pin headers · Right: Exact breadboard holes (a–e | f–j, rows 9–17) · Bottom: Matching circuit symbols."]
+ ];
  return '<section class="av-page av-visual-page" aria-label="Question-specific visual laboratory">'+
- '<div class="av-eyebrow">PAGE 2 / 4 · SEE THE CIRCUIT IN DETAIL</div>'+
- '<h3>Draw it first. Then solve it.</h3>'+
- '<p class="av-explain">These figures are generated from <strong>this exact question</strong>. The schematic uses known values when they are supplied; any missing values are shown symbolically. Breadboards use conceptual low-voltage layouts; instrument and development-board wiring diagrams use generic signal names, not manufacturer pin numbers.</p>'+
- '<div class="av-question"><span>QUESTION '+esc(q.id)+'</span><p>'+esc(q.question)+'</p></div>'+
+ '<div class="av-eyebrow">PAGE 2 / 4 · SEE THE FULL CIRCUIT, GRAPH &amp; BOARD WIRING</div>'+
+ '<h3>Draw it first. Then connect it safely.</h3>'+
+ activeBanner(q,t)+
+ '<p class="av-explain">Every diagram below is tailored specifically to <strong>'+esc(q.id.toUpperCase())+'</strong>. Notice how the board header pins, solderless breadboard rows (`a10↔a15`, `b10`, `b15`), and schematic symbols map 1-to-1.</p>'+
  '<div class="av-visual-nav">'+pics.map(x=>'<a href="#avVisual-'+x[0]+'">'+esc(x[1])+'</a>').join("")+'</div>'+
  pics.map(x=>'<section class="av-visual-panel" id="avVisual-'+x[0]+'"><div class="av-visual-panel-head"><div><h4>'+esc(x[1])+'</h4><p>'+esc(x[2])+'</p></div><button class="av-light" data-zoom="'+x[0]+'" aria-label="Enlarge '+esc(x[1])+'">↗ Enlarge</button></div>'+
  (VIS?VIS.render(q,t,x[0]):'<p>Visuals are unavailable.</p>')+'</section>').join("")+
- '<div class="av-takeaway"><strong>Before continuing:</strong> Trace the positive-to-return path with your finger, identify the relevant nodes and explain which signal the instrument measures.</div>'+
- '<div class="av-actions-bottom"><button id="avVisualBack" class="av-light">← Review the idea</button><button id="avVisualForward" class="av-primary">Now solve it in baby steps →</button></div></section>';
+ '<div class="av-takeaway"><strong>Before continuing:</strong> Trace the positive-to-return current loop with your finger, identify which breadboard rows share a metal strip (`a–e`), and verify where DMM/scope probes belong.</div>'+
+ '<div class="av-actions-bottom"><button id="avVisualBack" class="av-light">← Review the idea</button><button id="avVisualForward" class="av-primary">Now solve it in 6 baby steps →</button></div></section>';
+}
+
+function inlineStepVisual(q,t,step){
+ if(!VIS)return "";
+ const topicGraph=/^(ac|rc|capacitors|inductors|filters|timing|rf|power-rails)$/.test(t.id);
+ let secondary=null;
+ if(q.level==="Troubleshooting" && step>=2)secondary="wiring";
+ else if(topicGraph && step>=3)secondary="concept";
+ const activeMode=(inlineVisualMode==="wiring"||inlineVisualMode==="concept")?inlineVisualMode:"schematic";
+ return '<div class="av-solution-circuit"><h4>Follow the circuit, graph &amp; breadboard connection while reading this step</h4>'+
+ visualSwitcherBar(activeMode)+
+ VIS.render(q,t,activeMode)+
+ (secondary?'<details class="av-step-extra"><summary>'+(secondary==="concept"?"Show the response graph":"Show the 3-panel board &amp; breadboard setup")+'</summary>'+VIS.render(q,t,secondary)+'</details>':"")+
+ '<button id="avStepVisual" class="av-light" type="button">Open all three large visual views ↗</button></div>';
 }
 
 function solvePage(q,t,f){
  const steps=stepsFor(q,t,f),step=steps[stepIndex]||steps[0];
  return '<section class="av-page" aria-label="Guided worked answer">'+
- '<div class="av-eyebrow">PAGE 3 / 4 · WORK IT OUT WITH ME</div>'+
- '<h3>Answer in tiny steps — not all at once</h3>'+
- '<p class="av-explain">Only one step is shown at a time. Read it, think about it, then press <strong>Next baby step</strong>. There is no timer.</p>'+
- '<div class="av-question"><span>YOUR QUESTION</span><p>'+esc(q.question)+'</p></div>'+
+ '<div class="av-eyebrow">PAGE 3 / 4 · BABY-STEP WORKED SOLUTION (MATHML ENGINEERING NOTATION)</div>'+
+ '<h3>Every step explained from zero — with equations &amp; visuals</h3>'+
+ '<p class="av-explain">Step through one card at a time above, or read the complete 6-step walkthrough already expanded directly below.</p>'+
+ activeBanner(q,t)+
  inlineStepVisual(q,t,stepIndex)+
  '<div class="av-step-counter"><strong>Step '+(stepIndex+1)+' of '+steps.length+'</strong><span>'+esc(step.title)+'</span></div>'+
  '<div class="av-steps-rail">'+steps.map((s,i)=>'<span class="'+(i===stepIndex?"here":i<stepIndex?"passed":"")+'" title="'+esc(s.title)+'"></span>').join("")+'</div>'+
  '<article class="av-baby-step"><span class="av-step-icon">'+(stepIndex+1)+'</span>'+
- '<div><h4>'+esc(step.title)+'</h4><p>'+esc(step.body)+'</p>'+
+ '<div><h4>'+esc(step.title)+'</h4><p>'+rich(step.body)+'</p>'+
  (step.kind==="given"?'<div class="av-given"><strong>Problem statement:</strong> '+esc(q.question)+'</div>':"")+
- (step.formula?equation(step.formula,stepIndex===2?"FORMULA":"NUMBER SUBSTITUTION"):"")+
- (step.answer?'<div class="av-final-value">'+esc(step.answer)+'</div>':"")+
+ (step.formula?equation(step.formula,step.kind==="given"?"UNIT PREFIX CONVERSION":stepIndex===2?"ENGINEERING EQUATION (MATHML)":"NUMBER SUBSTITUTION (MATHML)"):"")+
+ (step.answer?'<div class="av-final-value">Final Answer: '+esc(step.answer)+(step.engHtml?' <span class="av-eng-badge">Engineering Notation: '+step.engHtml+'</span>':"")+'</div>':"")+
  '</div></article>'+
  '<div class="av-control-row"><button id="avStepBack" class="av-light" '+(stepIndex===0?"disabled":"")+'>← Previous step</button>'+
- (stepIndex<steps.length-1?'<button id="avStepNext" class="av-primary">Next baby step →</button>':'<button id="avGoTry" class="av-primary">I have read the steps — practice →</button>')+'</div>'+
- '<details class="av-all-steps"><summary>Show the entire solution (optional)</summary><div class="av-all-list">'+
- steps.map((s,i)=>'<div><b>'+(i+1)+'. '+esc(s.title)+'</b><p>'+esc(s.body)+'</p>'+(s.formula?equation(s.formula,"EQUATION"):"")+(s.answer?'<div class="av-final-value">'+esc(s.answer)+'</div>':"")+'</div>').join("")+
+ (stepIndex<steps.length-1?'<button id="avStepNext" class="av-primary">Next baby step →</button>':'<button id="avGoTry" class="av-primary">I have read the steps — try it yourself →</button>')+'</div>'+
+ '<details class="av-all-steps" open><summary>Complete 6-Step Guided Walkthrough (All steps &amp; MathML equations)</summary><div class="av-all-list">'+
+ steps.map((s,i)=>'<div class="'+(i===stepIndex?"av-step-highlight":"")+'"><b>Step '+(i+1)+': '+esc(s.title)+'</b><p>'+rich(s.body)+'</p>'+(s.formula?equation(s.formula,"EQUATION (MATHML)"):"")+(s.answer?'<div class="av-final-value">Final Answer: '+esc(s.answer)+(s.engHtml?' · Engineering Notation: '+s.engHtml:"")+'</div>':"")+'</div>').join("")+
  '</div></details>'+
- '<div class="av-takeaway"><strong>How to speak in an interview:</strong> First define the idea, explain the check you would perform, then say what evidence would make you confident.</div>'+
+ '<div class="av-takeaway"><strong>How to say this in your Muon Space interview:</strong> First state the physical law, describe how you set up the DMM/scope/breadboard, then explain the safety check and Go/No-Go limit.</div>'+
  '</section>';
 }
 
@@ -210,104 +348,143 @@ function gradeView(assessment){
  const score=Number.isFinite(assessment.score)?'<span class="av-score">'+assessment.score+" / "+assessment.max+" key ideas</span>":"";
  return '<section class="av-assessment av-assessment-'+status+'" aria-label="Your answer feedback">'+
  '<div class="av-assessment-heading"><strong>'+esc(assessment.title||"Answer feedback")+'</strong>'+score+'</div>'+
- (assessment.note?'<p>'+esc(assessment.note)+'</p>':"")+
+ (assessment.note?'<p>'+rich(assessment.note)+'</p>':"")+
  ((assessment.met||[]).length?'<div class="av-assess-list"><strong>Ideas recognized</strong><ul>'+assessment.met.map(x=>'<li>'+esc(x.label)+'</li>').join("")+'</ul></div>':"")+
- ((assessment.missing||[]).length?'<div class="av-assess-list"><strong>How to improve your answer</strong><ul>'+assessment.missing.map(x=>'<li><b>'+esc(x.label)+':</b> '+esc(x.hint)+'</li>').join("")+'</ul></div>':"")+
- ((assessment.corrections||[]).length?'<div class="av-assess-list"><strong>Specific correction</strong><ul>'+assessment.corrections.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>':"")+
- '<p class="av-assess-warning">Automated rubric feedback is approximate, especially for original explanations and alternative wording. Review the reference answer and retry. It is not a human or AI semantic evaluation.</p></section>';
-}
-function inlineStepVisual(q,t,step){
- if(!VIS)return "";
- const topicGraph=/^(ac|rc|capacitors|inductors|filters|timing|rf|power-rails)$/.test(t.id);
- let secondary=null;
- if(q.level==="Troubleshooting" && step>=2)secondary="wiring";
- else if(topicGraph && step>=3)secondary="concept";
- return '<div class="av-solution-circuit"><h4>Follow the circuit while reading this step</h4>'+
- VIS.render(q,t,"schematic")+
- (secondary?'<details class="av-step-extra"><summary>'+ (secondary==="concept"?"Show the response graph":"Show the wiring / test setup")+'</summary>'+VIS.render(q,t,secondary)+'</details>':"")+
- '<button id="avStepVisual" class="av-light" type="button">Open all three visual views ↗</button></div>';
+ ((assessment.missing||[]).length?'<div class="av-assess-list"><strong>How to improve your answer</strong><ul>'+assessment.missing.map(x=>'<li><b>'+esc(x.label)+':</b> '+rich(x.hint)+'</li>').join("")+'</ul></div>':"")+
+ ((assessment.corrections||[]).length?'<div class="av-assess-list"><strong>Specific correction</strong><ul>'+assessment.corrections.map(x=>'<li>'+rich(x)+'</li>').join("")+'</ul></div>':"")+
+ '<p class="av-assess-warning">Automated rubric feedback checks your answer against key engineering concepts. Review the worked reference and retry anytime.</p></section>';
 }
 
 function practicePage(q,t,f){
- const result=(q.expected!==undefined)?'The correct result is '+fmt(q.expected)+' '+q.unit+'.':(f.deep?f.deep.recap:q.steps.join(" "));
+ const result=(q.expected!==undefined)?'The exact result is '+fmt(q.expected)+' '+q.unit+'.':(f.deep?f.deep.recap:q.steps.join(" "));
  return '<section class="av-page" aria-label="Practice without the answer">'+
  '<div class="av-eyebrow">PAGE 4 / 4 · TRY IT YOURSELF</div>'+
- '<h3>Your turn — explain it without reading the solution</h3>'+
- '<p class="av-explain">Your answer will be checked against the question’s concepts. You will receive a correct, partially correct, or needs-correction result, with suggestions you can use to retry.</p>'+
- '<div class="av-question"><span>QUESTION '+(currentIndex+1)+' / '+qset().length+'</span><p>'+esc(q.question)+'</p></div>'+
- (q.expected!==undefined?'<form id="avTryNumber" class="av-try-form"><label for="avValue">Enter your calculated answer</label><div class="av-input-row"><input id="avValue" type="text" inputmode="decimal" autocomplete="off" placeholder="Example: 0.025 or 2.5e-2" value="'+esc(currentAnswer)+'" aria-describedby="avRequestedUnit"><span id="avRequestedUnit">'+esc(q.unit)+'</span><button class="av-primary" type="submit">Check answer</button></div></form>':
- '<label class="av-try-label" for="avExplain">Write your explanation in your own words</label><textarea id="avExplain" rows="4" placeholder="I think this means... because... An engineer would test it by...">'+esc(draftText)+'</textarea>'+
+ '<h3>Your turn — test yourself without peeking</h3>'+
+ '<p class="av-explain">Type a calculated number (scientific notation like 2.5e-3 or unit conversion like 0.01 A is accepted!) or explain the concept in your own words.</p>'+
+ activeBanner(q,t)+
+ (q.expected!==undefined?'<form id="avTryNumber" class="av-try-form"><label for="avValue">Enter your calculated answer</label><div class="av-input-row"><input id="avValue" type="text" inputmode="decimal" autocomplete="off" placeholder="Example: 10 or 0.01 A or 2.5e-3" value="'+esc(currentAnswer)+'" aria-describedby="avRequestedUnit"><span id="avRequestedUnit">'+esc(q.unit)+'</span><button class="av-primary" type="submit">Check answer</button></div></form>':
+ '<label class="av-try-label" for="avExplain">Write your explanation in your own words</label><textarea id="avExplain" rows="4" placeholder="I think this means... because... On a Muon Space test bench I would verify it by...">'+esc(draftText)+'</textarea>'+
  '<div class="av-actions-bottom"><button id="avCheckExplanation" class="av-primary" type="button">Check my written answer</button><button id="avCompare" class="av-light">Show reference example</button></div>')+
  '<div id="avFeedback" role="status" aria-live="polite">'+(feedback?feedback:gradeView(state.assessments[q.id]))+'</div>'+
- '<details id="avReference" class="av-reference" '+(expanded?"open":"")+'><summary>Show the worked reference answer</summary><p>'+esc(result)+'</p>'+
- (q.formula?equation(q.formula,"FORMULA")+equation(q.sub,"SUBSTITUTION"):"")+
+ '<details id="avReference" class="av-reference" '+(expanded?"open":"")+'><summary>Show the worked reference answer (MathML)</summary><p>'+rich(result)+'</p>'+
+ (q.expected!==undefined?'<p class="av-ref-eng">Engineering notation: '+engVal(q.expected,q.unit)+'</p>':"")+
+ (q.formula?equation(q.formula,"FORMULA (MATHML)")+(q.sub?equation(q.sub,"SUBSTITUTION (MATHML)"):""):"")+
  '</details>'+
- '<div class="av-self-check"><h4>Learning progress</h4><p>First check your answer. A correct result unlocks mastery; partial or incorrect answers can be revised without losing your work. You may always choose additional practice.</p>'+
+ '<div class="av-self-check"><h4>Learning progress</h4><p>First check your answer. A correct check unlocks the “I can explain it ✓” mastery badge saved on your device.</p>'+
  '<div class="av-control-row"><button id="avNeedReview" class="av-light">I need more practice</button><button id="avUnderstand" class="av-good" '+((state.assessments[q.id]||{}).band!=="likely-correct"||answerDirty?'disabled title="Check and correct your answer first"':'')+'>I can explain it ✓</button></div></div>'+
- '<div class="av-actions-bottom"><button id="avBackLesson" class="av-light">← Review the lesson again</button><button id="avNextQuestion" class="av-primary">Next question →</button></div>'+
+ '<div class="av-actions-bottom"><button id="avBackLesson" class="av-light">← Review Page 1 (Understand)</button><button id="avNextQuestion" class="av-primary">Next question →</button></div>'+
  '</section>';
 }
+
 function show(){
  if(!host)return;
  const t=topicOf(),all=qset();if(currentIndex>=all.length)currentIndex=0;
- const q=all[currentIndex], f=q?focus(q,t):null;
+ const q=activeQuestion(),f=q?focus(q,t):null;
  const allKnown=QUESTIONS.filter(p=>state.ratings[p.id]==="know").length;
  const count=cnt(t.id);
+ const full30=allTopicQuestions();
+
  host.innerHTML='<div class="av-tutor">'+
- '<header class="av-hero"><div><span class="av-eyebrow">BEGINNER ELECTRICAL ENGINEERING · INTERACTIVE WORKBOOK</span><h2>Understand it. See it. Solve it.</h2>'+
- '<p>No prior EE knowledge required. Explore a full circuit schematic, graph and wiring picture for each question before solving the steps.</p></div>'+
+ '<header class="av-hero"><div><span class="av-eyebrow">MUON SPACE AVIONICS TEST READINESS · ZERO TO BENCH FLUENCY</span><h2>Understand it. See it. Solve it in baby steps.</h2>'+
+ '<p>All 23 Floyd &amp; Buchla + Muon Space topics × 30 questions = 690 interactive exercises with MathML engineering equations, custom schematics, operating-point graphs, and 3-panel board/breadboard wiring.</p></div>'+
  '<div class="av-hero-stats"><strong>'+allKnown+' / '+QUESTIONS.length+'</strong><small>questions mastered</small></div></header>'+
  '<div class="av-tutor-layout"><aside class="av-guide-menu"><div class="av-guide-label">YOUR LEARNING PATH</div>'+
- '<label class="av-selector-label" for="avTopicList">Select a topic</label><select id="avTopicList">'+TOPICS.map((x,i)=>'<option value="'+esc(x.id)+'" '+(x.id===topic?"selected":"")+'>Topic '+(i+1)+': '+esc(x.title)+'</option>').join("")+'</select>'+
+ '<label class="av-selector-label" for="avTopicList">Select a topic (23 topics)</label><select id="avTopicList">'+TOPICS.map((x,i)=>'<option value="'+esc(x.id)+'" '+(x.id===topic?"selected":"")+'>Topic '+(i+1)+': '+esc(x.title)+'</option>').join("")+'</select>'+
  '<div class="av-topic-progress"><strong>'+count+' / 30</strong> mastered in this topic<div><span style="width:'+(100*count/30)+'%"></span></div></div>'+
  '<div class="av-guide-label">QUESTION TYPE</div><select id="avLevelList">'+["All","Foundations","Application","Calculation","Troubleshooting"].map(x=>'<option value="'+x+'" '+(x===filter?"selected":"")+'>'+x+'</option>').join("")+'</select>'+
  '<label class="av-selector-label" for="avQuestionSearch">Search questions</label><input id="avQuestionSearch" type="search" placeholder="Voltage, ripple, UART..." value="'+esc(query)+'">'+
- '<div class="av-how"><strong>How this workbook works</strong><ol><li>Learn the basic terms.</li><li>Explore your circuit and board connection diagrams.</li><li>Follow each worked step.</li><li>Try independently.</li></ol></div>'+
+ '<div class="av-how"><strong>How this workbook works</strong><ol><li>Pick any question 1–30 below.</li><li>Inspect its custom circuit, graph &amp; 3-panel breadboard.</li><li>Follow all 6 baby steps in MathML.</li><li>Check your own answer.</li></ol></div>'+
  '<button class="av-light av-export" id="avExportLearning">Export my saved progress</button></aside>'+
  '<div class="av-workbook"><div class="av-workbook-heading"><div><span class="av-eyebrow">'+esc(t.group.toUpperCase())+' · TOPIC '+(TOPICS.indexOf(t)+1)+' OF '+TOPICS.length+'</span>'+
- '<h2>'+esc(t.title)+'</h2><p>'+esc(LESSONS[t.id]?.lead||t.goal)+'</p></div></div>'+
+ '<h2>'+esc(t.title)+'</h2><p>'+rich(LESSONS[t.id]?.lead||t.goal)+'</p></div></div>'+
  '<div class="av-question-controls"><strong>QUESTION '+(all.length?currentIndex+1:0)+' / '+all.length+'</strong>'+
  '<div><button id="avQuestionPrevious" class="av-light" '+(currentIndex<=0?"disabled":"")+'>← Previous</button><button id="avQuestionNext" class="av-light" '+(currentIndex>=all.length-1?"disabled":"")+'>Next →</button></div></div>'+
+ '<div class="av-quick-strip" aria-label="Quick question switcher 1 to 30">'+
+  '<div class="av-quick-head"><span>Jump to any question in this topic (1–30):</span><small>1–10 Concept · 11–20 Math · 21–30 Debug</small></div>'+
+  '<div class="av-number-grid">'+full30.map((p,i)=>'<button type="button" data-quick-qid="'+esc(p.id)+'" class="'+(q&&q.id===p.id?"active ":"")+(state.ratings[p.id]==="know"?"done":state.ratings[p.id]==="again"?"retry":"")+'" title="Q'+(i+1)+' ('+esc(p.level)+'): '+esc(p.question)+'">'+(i+1)+'</button>').join("")+'</div>'+
+ '</div>'+
  (q?'<div class="av-page-tabs" role="tablist" aria-label="Four-page visual guided workbook">'+
- [["learn","1 · Understand"],["visual","2 · Visuals"],["work","3 · Baby steps"],["try","4 · Try it"]].map((x,i)=>'<button role="tab" aria-selected="'+(page===x[0]?"true":"false")+'" data-page="'+x[0]+'" class="'+(page===x[0]?"active":"")+'">'+x[1]+'</button>').join("")+'</div>'+
+ [["learn","1 · Understand"],["visual","2 · Visuals"],["work","3 · Baby steps"],["try","4 · Try it"]].map(x=>'<button role="tab" aria-selected="'+(page===x[0]?"true":"false")+'" data-page="'+x[0]+'" class="'+(page===x[0]?"active":"")+'">'+x[1]+'</button>').join("")+'</div>'+
  (page==="learn"?lessonPage(q,t,f):page==="visual"?visualPage(q,t,f):page==="work"?solvePage(q,t,f):practicePage(q,t,f)):
- '<div class="av-no-result"><h3>No questions found</h3><p>Clear the search or select another question type.</p></div>')+
- '<details class="av-browse-questions" open><summary>Browse all '+allTopicQuestions().length+' actual questions in this topic — select one to open it</summary>'+
- '<p class="av-browse-help">These are the real 30 questions, not generated placeholders. Click a question to load its own explanation, circuit, guided steps and answer checker above. The list stays complete when filters are active.</p>'+
+ '<div class="av-no-result"><h3>No questions match this filter</h3><p>Clear the search or select another question type.</p></div>')+
+ '<details class="av-browse-questions" open><summary>Browse all '+full30.length+' actual questions in this topic — click any card to load it above</summary>'+
+ '<p class="av-browse-help">Every card below loads a unique question with its own MathML engineering equations, 6 baby steps, schematic, graph, and 3-panel board/breadboard wiring.</p>'+
  '<div class="av-question-gallery" role="group" aria-label="All 30 practice question titles">'+
- allTopicQuestions().map((p,i)=>'<button data-qid="'+esc(p.id)+'" class="av-browse-card '+(q&&q.id===p.id?"active ":"")+(state.ratings[p.id]==="know"?"done":state.ratings[p.id]==="again"?"retry":"")+'" aria-current="'+(q&&q.id===p.id?"true":"false")+'" aria-label="Open question '+(i+1)+': '+esc(p.question)+'">'+
+ full30.map((p,i)=>'<button data-qid="'+esc(p.id)+'" class="av-browse-card '+(q&&q.id===p.id?"active ":"")+(state.ratings[p.id]==="know"?"done":state.ratings[p.id]==="again"?"retry":"")+'" aria-current="'+(q&&q.id===p.id?"true":"false")+'" aria-label="Open question '+(i+1)+': '+esc(p.question)+'">'+
  '<span class="av-browse-meta"><b>Q'+(i+1)+'</b><em>'+esc(p.level)+'</em></span><span class="av-browse-title">'+esc(p.question)+'</span>'+
- '<small>'+(state.ratings[p.id]==="know"?"✓ Mastered":state.ratings[p.id]==="again"?"↻ Review needed":state.assessments[p.id]?"◈ Checked":"○ Not answered")+'</small></button>').join("")+'</div>'+
- '<small class="av-browse-legend">Blue: currently open · Green: mastered · Amber: review needed. Your selection opens at the top of the workbook.</small></details>'+
- '<p class="av-footnote">All examples are educational; use approved procedures and actual device specifications for real hardware. Textbook chapter topics inspired the curriculum, but problems and explanations are original.</p>'+
+ '<small>'+(state.ratings[p.id]==="know"?"✓ Mastered":state.ratings[p.id]==="again"?"↻ Review needed":state.assessments[p.id]?"◈ Checked":"○ Open question")+'</small></button>').join("")+'</div>'+
+ '<small class="av-browse-legend">Blue = selected · Green = mastered · Amber = review needed. Progress stays saved in your browser.</small></details>'+
+ '<p class="av-footnote">All problems and visual schematics are original educational exercises aligned to Floyd &amp; Buchla and Muon Space avionics test engineering requirements.</p>'+
  '</div></div><dialog class="av-zoom-dialog" id="avVisualZoom" aria-label="Expanded circuit figure"><div class="av-zoom-top"><strong>Expanded engineering diagram</strong><button class="av-light" type="button" id="avZoomClose">Close ×</button></div><div id="avZoomBody"></div></dialog></div>';
  wire();
 }
+
 function switchPage(p){page=p;stepIndex=0;feedback="";expanded=false;show();find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});}
-function moveQuestion(n){currentIndex=Math.max(0,Math.min(qset().length-1,n));page="learn";stepIndex=0;expanded=false;feedback="";const q=selected();draftText=q?(state.responses[q.id]||""):"";currentAnswer=draftText;answerDirty=false;state.lastTopic=topic;state.lastIndex=currentIndex;save();show();const heading=find(".av-workbook-heading h2",host);if(heading){heading.setAttribute("tabindex","-1");heading.focus({preventScroll:true});}find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});}
+function moveQuestion(n,keepPage=false){
+ currentIndex=Math.max(0,Math.min(qset().length-1,n));
+ if(!keepPage)page="learn";
+ else if(page==="try")page="work";
+ stepIndex=0;expanded=false;feedback="";
+ const q=selected();
+ draftText=q?(state.responses[q.id]||""):"";
+ currentAnswer=draftText;answerDirty=false;
+ state.lastTopic=topic;state.lastIndex=currentIndex;save();show();
+ const heading=find(".av-workbook-heading h2",host);
+ if(heading){heading.setAttribute("tabindex","-1");heading.focus({preventScroll:true});}
+ find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});
+}
 function rating(x){const q=selected();if(!q)return;if(x==="know"&&(answerDirty||!state.assessments[q.id]||state.assessments[q.id].band!=="likely-correct"))return;state.ratings[q.id]=x;save();if(currentIndex<qset().length-1)moveQuestion(currentIndex+1);else show();}
+
 function wire(){
  const el=find("#avTopicList",host);
- if(el)el.onchange=e=>{topic=e.target.value;currentIndex=0;page="learn";stepIndex=0;filter="All";query="";state.lastTopic=topic;state.lastIndex=0;save();show()};
+ if(el)el.onchange=e=>{topic=e.target.value;currentIndex=0;page="learn";stepIndex=0;inlineVisualMode="schematic";filter="All";query="";state.lastTopic=topic;state.lastIndex=0;save();show()};
  const lev=find("#avLevelList",host);
  if(lev)lev.onchange=e=>{filter=e.target.value;currentIndex=0;page="learn";stepIndex=0;show()};
  const search=find("#avQuestionSearch",host);
  if(search)search.onchange=e=>{query=e.target.value.toLowerCase().trim();currentIndex=0;page="learn";stepIndex=0;show()};
  const ex=find("#avExportLearning",host);
  if(ex)ex.onclick=()=>{
-  const b=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),...state},null,2)],{type:"application/json"});
+  const b=new Blob([JSON.stringify({version:3,exportedAt:new Date().toISOString(),...state},null,2)],{type:"application/json"});
   const url=URL.createObjectURL(b),a=document.createElement("a");a.href=url;a.download="avionics-ee-progress.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
  };
  host.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
- host.querySelectorAll("[data-qid]").forEach(b=>b.onclick=()=>{const id=b.dataset.qid;filter="All";query="";const idx=allTopicQuestions().findIndex(x=>x.id===id);if(idx>=0)moveQuestion(idx);});
+ host.querySelectorAll("[data-qid]").forEach(b=>b.onclick=()=>{
+  const id=b.dataset.qid;filter="All";query="";
+  const idx=allTopicQuestions().findIndex(x=>x.id===id);
+  if(idx>=0)moveQuestion(idx,false);
+ });
+ host.querySelectorAll("[data-quick-qid]").forEach(b=>b.onclick=()=>{
+  const id=b.dataset.quickQid;filter="All";query="";
+  const idx=allTopicQuestions().findIndex(x=>x.id===id);
+  if(idx>=0)moveQuestion(idx,page==="visual"||page==="work");
+ });
+ host.querySelectorAll("[data-vismode]").forEach(b=>b.onclick=()=>{
+  inlineVisualMode=b.dataset.vismode;show();
+ });
+ const randBtn=find("#avRandomize",host);
+ if(randBtn)randBtn.onclick=()=>{
+  const q=selected();if(!q)return;
+  const v=makeRandomVariant(q);
+  if(v){customVariants[q.id]=v;currentAnswer="";answerDirty=false;feedback="";delete state.assessments[q.id];show();}
+ };
+ const resetVarBtn=find("#avResetVariant",host);
+ if(resetVarBtn)resetVarBtn.onclick=()=>{
+  const q=selected();if(!q)return;
+  delete customVariants[q.id];currentAnswer="";answerDirty=false;feedback="";delete state.assessments[q.id];show();
+ };
  const prev=find("#avQuestionPrevious",host),next=find("#avQuestionNext",host);
- if(prev)prev.onclick=()=>moveQuestion(currentIndex-1);
- if(next)next.onclick=()=>moveQuestion(currentIndex+1);
+ if(prev)prev.onclick=()=>moveQuestion(currentIndex-1,page==="visual"||page==="work");
+ if(next)next.onclick=()=>moveQuestion(currentIndex+1,page==="visual"||page==="work");
  const work=find("#avGoWork",host);if(work)work.onclick=()=>switchPage("work");
  const visual=find("#avGoVisual",host);if(visual)visual.onclick=()=>switchPage("visual");
  const visBack=find("#avVisualBack",host);if(visBack)visBack.onclick=()=>switchPage("learn");
  const visNext=find("#avVisualForward",host);if(visNext)visNext.onclick=()=>switchPage("work");
- host.querySelectorAll("[data-zoom]").forEach(b=>b.onclick=()=>{const q=selected(),t=topicOf(),dialog=find("#avVisualZoom",host),body=find("#avZoomBody",host);if(!q||!VIS||!dialog||!body)return;body.innerHTML=VIS.render(q,t,b.dataset.zoom);dialog.showModal()});
+ host.querySelectorAll("[data-zoom]").forEach(b=>b.onclick=()=>{
+  const q=selected(),t=topicOf(),dialog=find("#avVisualZoom",host),body=find("#avZoomBody",host);
+  if(!q||!VIS||!dialog||!body)return;
+  body.innerHTML=VIS.render(q,t,b.dataset.zoom);
+  if(typeof dialog.showModal==="function")dialog.showModal();
+ });
  const zoomClose=find("#avZoomClose",host);if(zoomClose)zoomClose.onclick=()=>find("#avVisualZoom",host)?.close();
  const zoomDialog=find("#avVisualZoom",host);if(zoomDialog)zoomDialog.onclick=e=>{if(e.target===zoomDialog)zoomDialog.close()};
  const stepBack=find("#avStepBack",host);if(stepBack)stepBack.onclick=()=>{stepIndex=Math.max(0,stepIndex-1);show()};
@@ -317,45 +494,61 @@ function wire(){
  const numberInput=find("#avValue",host);if(numberInput)numberInput.oninput=e=>{currentAnswer=e.target.value;answerDirty=true;const btn=find("#avUnderstand",host);if(btn)btn.disabled=true;const fb=find("#avFeedback",host);if(fb)fb.innerHTML='<p class="av-message">Answer changed. Recheck the calculation to update your result.</p>';};
  const tryNumber=find("#avTryNumber",host);
  if(tryNumber)tryNumber.onsubmit=e=>{
-   e.preventDefault();const q=selected(),input=find("#avValue",host);
-   currentAnswer=input.value.trim();state.responses[q.id]=currentAnswer;
-   state.attempts[q.id]=(state.attempts[q.id]||0)+1;
-   const result=ASSESS.gradeNumber(q,currentAnswer);
-   state.assessments[q.id]=result;
-   if(result.band!=="likely-correct"&&state.ratings[q.id]==="know")state.ratings[q.id]="again";
-   save();answerDirty=false;feedback=gradeView(result);show();
+  e.preventDefault();const q=selected(),input=find("#avValue",host);
+  currentAnswer=input.value.trim();state.responses[q.id]=currentAnswer;
+  state.attempts[q.id]=(state.attempts[q.id]||0)+1;
+  const result=ASSESS.gradeNumber(q,currentAnswer);
+  state.assessments[q.id]=result;
+  if(result.band!=="likely-correct"&&state.ratings[q.id]==="know")state.ratings[q.id]="again";
+  save();answerDirty=false;feedback=gradeView(result);show();
  };
  const explain=find("#avExplain",host);
  if(explain)explain.oninput=e=>{draftText=e.target.value;answerDirty=true;const btn=find("#avUnderstand",host);if(btn)btn.disabled=true;const fb=find("#avFeedback",host);if(fb)fb.innerHTML='<p class="av-message">Answer changed. Check this revised answer to receive updated feedback.</p>';};
  const checkText=find("#avCheckExplanation",host);
  if(checkText)checkText.onclick=()=>{
-   const q=selected(),t=topicOf();
-   draftText=(find("#avExplain",host)?.value||"").trim();
-   state.responses[q.id]=draftText;
-   state.attempts[q.id]=(state.attempts[q.id]||0)+1;
-   const result=ASSESS.gradeText(q,t,draftText);
-   state.assessments[q.id]=result;
-   if(result.band!=="likely-correct"&&state.ratings[q.id]==="know")state.ratings[q.id]="again";
-   save();answerDirty=false;feedback=gradeView(result);show();
+  const q=selected(),t=topicOf();
+  draftText=(find("#avExplain",host)?.value||"").trim();
+  state.responses[q.id]=draftText;
+  state.attempts[q.id]=(state.attempts[q.id]||0)+1;
+  const result=ASSESS.gradeText(q,t,draftText);
+  state.assessments[q.id]=result;
+  if(result.band!=="likely-correct"&&state.ratings[q.id]==="know")state.ratings[q.id]="again";
+  save();answerDirty=false;feedback=gradeView(result);show();
  };
  const compare=find("#avCompare",host);
  if(compare)compare.onclick=()=>{
-   draftText=find("#avExplain",host)?.value||draftText;expanded=true;
-   const ref=find("#avReference",host);if(ref)ref.open=true;
-   const f=find("#avFeedback",host);
-   if(f&&!state.assessments[selected().id])f.innerHTML='<div class="av-message">The reference is for comparison. Use Check my written answer to see your rubric feedback and missing ideas.</div>';
+  draftText=find("#avExplain",host)?.value||draftText;expanded=true;
+  const ref=find("#avReference",host);if(ref)ref.open=true;
+  const f=find("#avFeedback",host);
+  if(f&&!state.assessments[selected().id])f.innerHTML='<div class="av-message">The reference is for comparison. Use Check my written answer to see your rubric feedback and missing ideas.</div>';
  };
  const under=find("#avUnderstand",host);if(under)under.onclick=()=>rating("know");
  const retry=find("#avNeedReview",host);if(retry)retry.onclick=()=>rating("again");
  const back=find("#avBackLesson",host);if(back)back.onclick=()=>switchPage("learn");
  const nxt=find("#avNextQuestion",host);if(nxt)nxt.onclick=()=>moveQuestion(currentIndex+1);
 }
+
 window.mountAvionicsPractice=function(el){
  if(!el||!ASSESS||TOPICS.length!==23||QUESTIONS.length!==690){if(el)el.textContent="The Avionics question bank did not load correctly.";return}
  host=el;el.dataset.avMounted="yes";const q=selected();if(q){draftText=state.responses[q.id]||"";currentAnswer=draftText;}show();
 };
-window.avionicsWorkbookV2={getQuestionCount:()=>QUESTIONS.length,getTopics:()=>TOPICS.length,stepsForQuestion:id=>{
- const q=QUESTIONS.find(x=>x.id===id);if(!q)return null;
- const t=TOPICS.find(x=>x.id===q.topic);return stepsFor(q,t,focus(q,t));
-}};
+window.avionicsWorkbookV2={
+ getQuestionCount:()=>QUESTIONS.length,
+ getTopics:()=>TOPICS.length,
+ stepsForQuestion:id=>{
+  const q=QUESTIONS.find(x=>x.id===id);if(!q)return null;
+  const t=TOPICS.find(x=>x.id===q.topic);return stepsFor(q,t,focus(q,t));
+ }
+};
+
+/* Clean single-owner #avionics activation & legacy-mount override */
+if(typeof window.location!=="undefined"&&window.location.hash==="#avionics"){
+ const activate=()=>{
+  const btn=document.querySelector('[data-mode="avionics"]');
+  if(btn)btn.click();
+  const root=document.getElementById("avionicsRoot");
+  if(root&&!root.querySelector(".av-tutor"))window.mountAvionicsPractice(root);
+ };
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",activate,{once:true});else activate();
+}
 })();

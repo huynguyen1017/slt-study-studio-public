@@ -120,8 +120,4 @@ window.mountAvionicsPractice=function(el){
  if(root===el&&el.dataset.avMounted==="yes")return;
  root=el;el.dataset.avMounted="yes";render();
 };
-if(window.location.hash==="#avionics") {
- const activate=()=>document.querySelector('[data-mode="avionics"]')?.click();
- if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",activate,{once:true});else activate();
-}
 })();
