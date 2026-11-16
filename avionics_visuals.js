@@ -74,7 +74,7 @@ function describe(q,t){
  const id=t.id, v=vals(q);
  return {topic:id,question:q.id,kind:q.level,values:v,schematic:"Circuit diagram",concept: /ac|rc|inductors|filters|timing|rf|capacitors|power-rails|instruments|buses/.test(id)?"Graph / waveform":"Visual explanation",wiring:boards.has(id)?"Breadboard wiring":"Test / system setup",board:boards.has(id)};
 }
-function head(q,t){return text(23,32,"CIRCUIT · "+q.id.toUpperCase(),12,P.blue,"start","800")+text(23,56,units[t.id]||"Electrical measurement",17,P.ink,"start","700");}
+function head(q,t){return text(23,32,(t.id==="units"?"SI UNITS":"CIRCUIT")+" · "+q.id.toUpperCase(),12,P.blue,"start","800")+text(23,56,units[t.id]||"Electrical measurement",17,P.ink,"start","700");}
 function known(q){
  const a=vals(q);let out="";
  if(a.length){out+=text(510,31,"KNOWN VALUES IN THIS QUESTION",10,P.muted,"start","700");a.slice(0,3).forEach((v,i)=>{out+=rect(509+i*71,37,68,26,"#e8f4fa","#bbd8e8",5)+text(543+i*71,55,v,11,P.ink,"middle","700");});}
@@ -145,8 +145,33 @@ function digital(q,t){
  out+=line(100,245,645,245,P.green,3)+text(373,268,type==="rf"?"Reference plane / controlled impedance":type==="qualification"?"Controlled configuration + test evidence":"Ground / return / traceable reference",13,P.green,"middle");
  return out;
 }
+
+function siUnitVisual(q,t,mode){
+ let out=head(q,t)+text(24,80,"Chapter 1 · Base and Derived Units",12,P.muted);
+ if(mode==="schematic"){
+  out+=rect(22,93,694,112,"#f1f8fc","#bddbe7",9)+text(40,116,"SEVEN SI BASE UNITS",14,P.ink,"start","700");
+  const a=[["meter","m"],["kilogram","kg"],["second","s"],["ampere","A"],["kelvin","K"],["mole","mol"],["candela","cd"]];
+  a.forEach((v,i)=>{const x=32+i*97;out+=rect(x,130,91,57,i===3?"#d3f3e9":"#fff",i===3?P.green:"#cbd9e2",7)+text(x+45,150,v[0],11,P.ink,"middle")+text(x+45,173,v[1],18,i===3?P.green:P.ink,"middle","700");});
+  out+=rect(22,217,694,79,"#fff9e9","#ead29c",8)+text(39,237,"DERIVED UNIT EXAMPLE",13,P.ink,"start","700")+
+   text(54,269,"Volt (V)",20,P.blue,"start","700")+text(185,270,"= Watt (W) / Ampere (A)",18,P.ink)+
+   text(54,287,"Not an eighth base unit",11,P.muted);
+ }else if(mode==="concept"){
+  const blocks=[["BASE UNIT","ampere (A)","electric current"],["DERIVED UNIT","volt (V)","potential difference"],["PREFIX","milli (m)","× 0.001"],["PREFIX","micro (µ)","× 0.000001"]];
+  blocks.forEach((v,i)=>{const x=25+(i%2)*350,y=97+Math.floor(i/2)*106;out+=rect(x,y,329,87,i===0?"#e4f7ed":i===1?"#e9f5fc":"#fff8e9","#bbd3df",10)+text(x+16,y+22,v[0],11,P.muted,"start","700")+text(x+16,y+51,v[1],19,P.ink,"start","700")+text(x+16,y+72,v[2],12,P.muted);});
+ }else{
+  out+=rect(42,96,236,156,"#eaf4fa","#a1c4d8",11)+text(160,124,"DMM · VOLTAGE MODE",15,P.ink,"middle","700")+
+  rect(88,143,144,61,"#e2f5e6","#a0cbb0",6)+text(160,180,"5.0 V",25,P.green,"middle","700")+
+  rect(378,96,308,156,"#fff","#bad3df",11)+text(400,132,"Quantity  =  measured number × unit",14,P.ink)+
+  text(400,167,"Voltage: 5.0 V (derived unit)",14,P.blue)+text(400,196,"Current: 25 mA = 0.025 A",14,P.red)+
+  text(400,223,"Base unit for current: A",13,P.green);
+  out+=arrow(279,179,371,179);
+ }
+ return svg(out,"SI base and derived units conceptual learning diagram for question "+q.id+"; ampere is base and volt is derived");
+}
+
 function schematic(q,t){
  const id=t.id;
+ if(id==="units")return siUnitVisual(q,t,"schematic");
  if(id==="series")return svg(series(q,t),"Single-path series schematic with question-specific resistor values and current direction");
  if(id==="parallel")return svg(parallel(q,t),"Parallel resistor circuit with branches and question values");
  if(id==="kcl-kvl")return svg(node(q,t),"Electrical node with total and branch currents");
@@ -162,7 +187,7 @@ function axes(xmin=73,ymin=247,xmax=689,ytop=90){
  text(xmin-12,ytop-11,"Y",12,P.muted)+text(xmax+9,ymin+7,"time / input",11,P.muted,"end");
 }
 function curve(q,t){
- const id=t.id;let out=head(q,t)+known(q);
+ const id=t.id;if(id==="units")return siUnitVisual(q,t,"concept");let out=head(q,t)+known(q);
  const x0=75,x1=688,y0=248,y1=94;
  out+=axes();
  if(["ac","timing","buses"].includes(id)){
@@ -292,10 +317,10 @@ function pinBoard(q,t){
 
 function render(q,t,mode){
  const m=describe(q,t);
- const views={schematic:schematic,concept:curve,wiring:m.board?breadboard:(["buses","instruments","schematics"].includes(t.id)?pinBoard:bench)};
+ const views={schematic:schematic,concept:curve,wiring:t.id==="units"?(q,t)=>siUnitVisual(q,t,"wiring"):m.board?breadboard:(["buses","instruments","schematics"].includes(t.id)?pinBoard:bench)};
  if(!views[mode])return "";
  const figure=views[mode](q,t);
- const label=mode==="schematic"?"Full schematic / signal path":mode==="concept"?"Graph / current-flow explanation":m.wiring;
+ const label=t.id==="units"?(mode==="schematic"?"Seven SI base units":mode==="concept"?"Base, derived, and prefix classification":"Meter example & notation"):mode==="schematic"?"Full schematic / signal path":mode==="concept"?"Graph / current-flow explanation":m.wiring;
  const focus=focusInfo(q,t),check=q.level==="Troubleshooting"?"Recommended verification: "+(q.steps[q.steps.length-1]||"Verify the issue before changing the hardware."):(focus[3]||"");
  const detail=m.values.length?"Given in question: "+m.values.join(" · "):"Conceptual example; labels represent the question's engineering topic.";
  const warning=mode==="wiring"?"Generic teaching illustration, NOT a manufacturer-approved pinout or a complete wiring procedure. For real hardware, verify power-off connections, rail voltage, ratings and common-ground requirements.":mode==="concept"?"Illustrative model / normalized graph; not measured waveform or qualification data.":"Circuit symbols and current arrows are educational diagrams. Any unspecified values are examples, not part of the question.";
