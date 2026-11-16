@@ -247,14 +247,14 @@ function siChapterPanel(){
  unitTable("Common derived units — electric and magnetic",SI.derived)+
  unitTable("Magnetic quantities and their SI-related unit expressions",SI.magnetic)+
  '<p class="av-si-note">'+esc(SI.gaussNote)+'</p>'+
- '<div class="av-math"><div class="av-math-label">EXAMPLE · VOLT EXPRESSED WITH BASE UNITS (NATIVE MATHML)</div>'+SI.formulaMathml+'</div>'+
+ '<div class="av-math"><div class="av-math-label">EXAMPLE · VOLT EXPRESSED IN SI UNITS</div><div class="av-math-scroll">'+SI.formulaMathml+'</div><div class="av-math-scroll">'+SI.baseFormulaMathml+'</div><p class="av-meaning">Two equivalent equations are separated to avoid an overly wide mathematical expression.</p></div>'+
  '<h4>How this textbook labels supplementary units</h4>'+
  unitTable("Historical SI supplementary class",SI.historical)+
  '<p class="av-si-note">'+esc(SI.note)+'</p>'+
  '<p class="av-si-note">'+esc(SI.mksNote)+'</p>'+
  '<h4>Quantity symbols versus unit symbols</h4>'+
  '<p>'+esc(SI.styleNote)+'</p>'+
- '<div class="av-math"><div class="av-math-label">ITALIC QUANTITY VS UPRIGHT UNIT SYMBOL</div>'+SI.symbolMathml+'</div>'+
+ '<div class="av-math"><div class="av-math-label">ITALIC QUANTITY VS UPRIGHT UNIT SYMBOL</div><div class="av-math-scroll">'+SI.symbolMathml+'</div><p class="av-symbol-example">'+esc(SI.symbolNote)+'</p></div>'+
  '<div class="av-si-sources"><strong>Reference scope</strong><p>'+esc(SI.sourceScope)+'</p>'+
  '<p>'+SI.links.map(a=>'<a target="_blank" rel="noopener noreferrer" href="'+esc(a[1])+'">'+esc(a[0])+'</a>').join(" · ")+'</p></div></section>';
 }
