@@ -501,6 +501,7 @@ function rating(x){const q=selected();if(!q)return;if(x==="know"&&(answerDirty||
 
 function wire(){
  if(CIRCUITSIM)CIRCUITSIM.bind(host,requestedTopic=>requestedTopic?topicOf():activeQuestion());
+ if(NUCLEO)NUCLEO.bind(host,()=>activeQuestion());
  if(NOTEBOOK)NOTEBOOK.bind(host);
  const el=find("#avTopicList",host);
  if(el)el.onchange=e=>{topic=e.target.value;currentIndex=0;page="learn";stepIndex=0;filter="All";query="";state.lastTopic=topic;state.lastIndex=0;save();show()};
