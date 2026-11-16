@@ -370,6 +370,20 @@ function digitalLogicPanel(t){
   '<div class="av-course-grid"><section><h4>Small combinational building blocks</h4><p>Half adder: <code>SUM = A XOR B</code>, <code>CARRY = A AND B</code>. A full adder adds <code>C_in</code>; a decoder selects an output line; a comparator reports less/equal/greater; a multiplexer routes the selected data input.</p></section><section class="av-course-lab"><h4>Bench check</h4><p>Use current-limited logic levels, keep every input defined, probe the output relative to the correct ground, and compare measured HIGH/LOW voltages with the receiving device’s VIH/VIL limits.</p></section></div></details>';
 }
 
+function muonInterviewGuidePanel(){
+ return '<details class="av-course-bridge av-muon-guide"><summary>🚀 Muon Space Avionics Test Engineer — Hiring Manager Expectations, Test Tools &amp; Glassdoor Interview Deep Dive <span class="av-course-scope">JD &amp; Company Guide</span></summary>'+
+  '<p><strong>Avionics Test Engineer / Senior Avionics Test Engineer — Muon Space (Mountain View / San Jose, CA)</strong> — Muon Space (founded 2021) designs, manufactures, tests, and operates turn-key LEO satellite constellations for Earth Observation (EO), remote sensing, and national security using its vertically integrated Halo™ spacecraft platform and Mission Foundry™ (136,000 sq ft San Jose facility scaling to up to 500 satellites/year; MuSat-1/2, FireSat thermal IR, Vindlér 2.0, Hubble Network BLE).</p>'+
+  '<div class="av-course-grid">'+
+   '<section><h4>1. First-Principles EE &amp; Safe Hardware Bring-Up</h4><p>Ohm’s/Watt’s/Kirchhoff’s laws, Thevenin loading, RC/RL transients, power-rail sequencing, LDO/buck ripple, 4-wire Kelvin current sensing, and safe current-limited first power-on of flight PCBAs.</p></section>'+
+   '<section><h4>2. Test Bench Instrumentation Mastery</h4><p>Hands-on fluency with DMMs (2-wire/4-wire), 4-channel oscilloscopes (10× probe compensation, tip-and-barrel ground springs, single/pulse/runt triggers), DC supplies, electronic loads, logic analyzers, and RF VNAs/spectrum analyzers.</p></section>'+
+   '<section><h4>3. Avionics Bus Physical + Protocol Debugging</h4><p>Separating electrical signal-integrity faults (missing termination, wrong pull-ups, ground bounce, TX/RX swap) from protocol/firmware errors across UART, SPI, I²C, CAN, RS-422/485, LVDS, and Ethernet.</p></section>'+
+   '<section><h4>4. Python + SCPI/PyVISA &amp; TVAC Qualification</h4><p>Writing fail-closed Python (pytest, pyvisa, pyserial, socketcan) scripts with try/finally safe power-down, *IDN?/SYST:ERR? checks, guard-banded limits, Linux sysfs/hwmon/dmesg auditing, and TVAC/vibe qualification.</p></section>'+
+  '</div>'+
+  '<div class="av-worked-mini"><strong>Reported Glassdoor Technical Question #1: Satellite passes in ambient thermal chamber, then FAILS in TVAC chamber — why?</strong><p>1) Zero convection in vacuum (h = 0 at &lt;10⁻⁵ Torr): heat transfers only via conduction through bolted baseplates/TIM and thermal radiation (ε·σ·A·(T₁⁴ − T₂⁴)), so poor TIM/torque causes localized thermal runaway. 2) Paschen’s law corona/arcing (~0.001–100 Torr during pump-down) and multipaction. 3) Outgassing volatiles condensing on cold payloads.</p></div>'+
+  '<div class="av-worked-mini"><strong>Reported Glassdoor Technical Question #2: Verification vs. Validation (V&amp;V)</strong><p>Verification (“Did we build the system right?”) proves through objective measurements that hardware/firmware meets its specified requirements and ICD limits. Validation (“Did we build the right system?”) proves that the integrated spacecraft survives and accomplishes its actual operational mission in a flight-like environment (e.g., FlatSat/HIL mission simulation in TVAC).</p></div>'+
+  '</details>';
+}
+
 function lessonPage(q,t,f){
  const item=f.deep,guide=LESSONS[t.id]||{lead:t.goal,analogy:"",example:"",terms:[]};
  const lesson=q.lesson||null;
@@ -391,6 +405,7 @@ function lessonPage(q,t,f){
  textbookPanel(t)+
  courseworkBridge(t)+
  digitalLogicPanel(t)+
+ muonInterviewGuidePanel()+
  (NOTEBOOK?NOTEBOOK.render(t.id):"")+
  (VIDEO?VIDEO.render(q,t):"")+
  '<h4 class="av-figure-heading">Interactive circuit, graph &amp; '+(VIS&&VIS.describe(q,t).board?'breadboard':'test fixture')+' wiring for '+esc(q.id.toUpperCase())+'</h4>'+
@@ -496,6 +511,7 @@ function practicePage(q,t,f){
  '<details id="avReference" class="av-reference" '+(expanded?"open":"")+'><summary>Show the worked reference answer (MathML)</summary><p>'+rich(result)+'</p>'+
  (q.expected!==undefined?'<p class="av-ref-eng">Engineering notation: '+engVal(q.expected,q.unit)+'</p>':"")+
  (q.formula?equation(q.formula,"FORMULA (MATHML)")+(q.sub?equation(q.sub,"SUBSTITUTION (MATHML)"):""):"")+
+ ((q.steps&&q.steps.length)?'<ol class="av-ref-steps">'+q.steps.map(s=>'<li>'+rich(s)+'</li>').join("")+'</ol>':"")+
  '</details>'+
  '<div class="av-self-check"><h4>Learning progress</h4><p>First check your answer. A correct check unlocks the “I can explain it ✓” mastery badge saved on your device.</p>'+
  '<div class="av-control-row"><button id="avNeedReview" class="av-light">I need more practice</button><button id="avUnderstand" class="av-good" '+((state.assessments[progressKey(q)]||{}).band!=="likely-correct"||answerDirty?'disabled title="Check and correct your answer first"':'')+'>I can explain it ✓</button></div></div>'+
