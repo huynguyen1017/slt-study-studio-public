@@ -19,12 +19,12 @@ const numbers=(q,u)=>{
 };
 const safe=(v,min,max,def)=>Number.isFinite(v)&&v>=min&&v<=max?v:def;
 const a=(q,t)=>{
- if(!VIS||!VIS.getWiringSetup)return null;
+ if(!VIS||!VIS.getWiringSetup||t.id==="units")return null;
  const c=VIS.getWiringSetup(q,t),key=c.key,rs=numbers(q,"R");
  const qr=q.id.match(/-([FACD])(\d+)/),index=qr?Number(qr[2]):1;
  // Only families for which the equivalent ideal CircuitJS topology is explicitly defined.
  const one=new Set(["ammeter-series","voltmeter-parallel","dc-power","energy-log","thermal-load"]);
- const chain=new Set(["series-chain","voltage-divider","loaded-divider","kvl-mesh"]);
+ const chain=new Set(["series-chain","voltage-divider","loaded-divider","kvl-mesh","thevenin-port"]);
  const parallel=new Set(["parallel-network","kcl-junction"]);
  const rc=new Set(["rc-charge","rc-discharge","rc-probe-load","filter-lpf","filter-hpf","cap-charge","cap-decoupling"]);
  if(!(one.has(key)||chain.has(key)||parallel.has(key)||rc.has(key)))return null;
