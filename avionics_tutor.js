@@ -21,7 +21,7 @@ if(!state.assessments||typeof state.assessments!=="object")state.assessments={};
 if(!state.responses||typeof state.responses!=="object")state.responses={};
 let host=null,topic=TOPICS.some(t=>t.id===state.lastTopic)?state.lastTopic:"ohm";
 let currentIndex=Number.isInteger(state.lastIndex)?state.lastIndex:0;
-let filter="All",query="",page="learn",stepIndex=0,expanded=false,feedback="",draftText="",currentAnswer="";
+let filter="All",query="",page="learn",stepIndex=0,expanded=false,feedback="",draftText="",currentAnswer="",answerDirty=false;
 const save=()=>{try{localStorage.setItem(STORE,JSON.stringify(state))}catch{}};
 const topicOf=()=>TOPICS.find(t=>t.id===topic)||TOPICS[0];
 const qset=()=>QUESTIONS.filter(x=>x.topic===topic&&(filter==="All"||x.level===filter)&&(!query||(x.question+" "+x.steps.join(" ")).toLowerCase().includes(query)));
@@ -211,7 +211,7 @@ function practicePage(q,t,f){
  (q.formula?equation(q.formula,"FORMULA")+equation(q.sub,"SUBSTITUTION"):"")+
  '</details>'+
  '<div class="av-self-check"><h4>Learning progress</h4><p>First check your answer. A correct result unlocks mastery; partial or incorrect answers can be revised without losing your work. You may always choose additional practice.</p>'+
- '<div class="av-control-row"><button id="avNeedReview" class="av-light">I need more practice</button><button id="avUnderstand" class="av-good" '+((state.assessments[q.id]||{}).band!=="likely-correct"?'disabled title="Check and correct your answer first"':'')+'>I can explain it ✓</button></div></div>'+
+ '<div class="av-control-row"><button id="avNeedReview" class="av-light">I need more practice</button><button id="avUnderstand" class="av-good" '+((state.assessments[q.id]||{}).band!=="likely-correct"||answerDirty?'disabled title="Check and correct your answer first"':'')+'>I can explain it ✓</button></div></div>'+
  '<div class="av-actions-bottom"><button id="avBackLesson" class="av-light">← Review the lesson again</button><button id="avNextQuestion" class="av-primary">Next question →</button></div>'+
  '</section>';
 }
@@ -252,8 +252,8 @@ function show(){
  wire();
 }
 function switchPage(p){page=p;stepIndex=0;feedback="";expanded=false;show();find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});}
-function moveQuestion(n){currentIndex=Math.max(0,Math.min(qset().length-1,n));page="learn";stepIndex=0;expanded=false;feedback="";const q=selected();draftText=q?(state.responses[q.id]||""):"";currentAnswer=draftText;state.lastTopic=topic;state.lastIndex=currentIndex;save();show();const heading=find(".av-workbook-heading h2",host);if(heading){heading.setAttribute("tabindex","-1");heading.focus({preventScroll:true});}find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});}
-function rating(x){const q=selected();if(!q)return;if(x==="know"&&(!state.assessments[q.id]||state.assessments[q.id].band!=="likely-correct"))return;state.ratings[q.id]=x;save();if(currentIndex<qset().length-1)moveQuestion(currentIndex+1);else show();}
+function moveQuestion(n){currentIndex=Math.max(0,Math.min(qset().length-1,n));page="learn";stepIndex=0;expanded=false;feedback="";const q=selected();draftText=q?(state.responses[q.id]||""):"";currentAnswer=draftText;answerDirty=false;state.lastTopic=topic;state.lastIndex=currentIndex;save();show();const heading=find(".av-workbook-heading h2",host);if(heading){heading.setAttribute("tabindex","-1");heading.focus({preventScroll:true});}find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});}
+function rating(x){const q=selected();if(!q)return;if(x==="know"&&(answerDirty||!state.assessments[q.id]||state.assessments[q.id].band!=="likely-correct"))return;state.ratings[q.id]=x;save();if(currentIndex<qset().length-1)moveQuestion(currentIndex+1);else show();}
 function wire(){
  const el=find("#avTopicList",host);
  if(el)el.onchange=e=>{topic=e.target.value;currentIndex=0;page="learn";stepIndex=0;filter="All";query="";state.lastTopic=topic;state.lastIndex=0;save();show()};
@@ -282,6 +282,7 @@ function wire(){
  const stepNext=find("#avStepNext",host);if(stepNext)stepNext.onclick=()=>{stepIndex++;show()};
  const goTry=find("#avGoTry",host);if(goTry)goTry.onclick=()=>switchPage("try");
  const stepVis=find("#avStepVisual",host);if(stepVis)stepVis.onclick=()=>switchPage("visual");
+ const numberInput=find("#avValue",host);if(numberInput)numberInput.oninput=e=>{currentAnswer=e.target.value;answerDirty=true;const btn=find("#avUnderstand",host);if(btn)btn.disabled=true;const fb=find("#avFeedback",host);if(fb)fb.innerHTML='<p class="av-message">Answer changed. Recheck the calculation to update your result.</p>';};
  const tryNumber=find("#avTryNumber",host);
  if(tryNumber)tryNumber.onsubmit=e=>{
    e.preventDefault();const q=selected(),input=find("#avValue",host);
@@ -290,10 +291,10 @@ function wire(){
    const result=ASSESS.gradeNumber(q,currentAnswer);
    state.assessments[q.id]=result;
    if(result.band!=="likely-correct"&&state.ratings[q.id]==="know")state.ratings[q.id]="again";
-   save();feedback=gradeView(result);show();
+   save();answerDirty=false;feedback=gradeView(result);show();
  };
  const explain=find("#avExplain",host);
- if(explain)explain.oninput=e=>{draftText=e.target.value};
+ if(explain)explain.oninput=e=>{draftText=e.target.value;answerDirty=true;const btn=find("#avUnderstand",host);if(btn)btn.disabled=true;const fb=find("#avFeedback",host);if(fb)fb.innerHTML='<p class="av-message">Answer changed. Check this revised answer to receive updated feedback.</p>';};
  const checkText=find("#avCheckExplanation",host);
  if(checkText)checkText.onclick=()=>{
    const q=selected(),t=topicOf();
