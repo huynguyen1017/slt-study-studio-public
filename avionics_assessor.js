@@ -104,7 +104,7 @@ function gradeText(q,topic,raw){
  const answer=String(raw||"").trim(),txt=norm(answer);
  const criteria=rubric(q,topic);
  const contradictionHits=contradiction.filter(x=>x.test.test(answer)).map(x=>x.msg);
- if(!answer||txt.length<4)return {band:"insufficient",title:"Not enough to assess",score:0,max:criteria.length,met:[],missing:criteria.map(c=>({label:c.label,hint:c.hint})),corrections:[],note:"Write at least one complete thought. You can use your own words."};
+ if(!answer||txt.length<2)return {band:"insufficient",title:"Not enough to assess",score:0,max:criteria.length,met:[],missing:criteria.map(c=>({label:c.label,hint:c.hint})),corrections:[],note:"Write at least one complete thought. You can use your own words."};
  const met=[],missing=[];
  criteria.forEach(c=>{(checkCriterion(txt,c)?met:missing).push({label:c.label,hint:c.hint})});
  let band;
