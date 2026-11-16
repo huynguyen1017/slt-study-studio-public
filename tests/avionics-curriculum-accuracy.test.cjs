@@ -60,7 +60,9 @@ for(const topic of t){
   const row=topic.cases[i];
   for(const id of [topic.id+"-D"+(i*2+1),topic.id+"-D"+(i*2+2)]){
    const question=own.find(x=>x.id===id);
-   assert(question&&question.question.includes(row[0]),id+" wrong scenario");
+   assert(question,id+" missing scenario");
+   if(id.endsWith("D"+(i*2+1)))assert(question.question.includes(row[0]),id+" initial symptom missing");
+   else assert(question.question.includes(row[3]),id+" must ask an independent confirmation rather than repeat symptom");
    assert(question.steps.some(v=>v.includes(row[1])),id+" missing diagnostic");
    assert(question.steps.some(v=>v.includes(row[3])),id+" missing verification");
    sourced++;
