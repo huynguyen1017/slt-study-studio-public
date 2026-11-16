@@ -7,10 +7,10 @@ const lines=s=>s.trim().split("\n").map(x=>x.trim()).filter(Boolean).map(x=>x.sp
 const T=(id,title,group,goal,skills,cases,calc)=>({id,title,group,goal,skills:lines(skills),cases:lines(cases),calc});
 window.AVIONICS_TOPICS=[
 T("units","SI Units, Prefixes & Measurement","Foundations","Learn to read units and choose meaningful precision before calculating.",
-`SI base unit | The ampere is an SI base unit for electric current; the volt is an SI derived unit measuring electric potential difference. | Confusing units makes otherwise correct arithmetic unusable. | Label every probe channel and report with its unit.
-Milli prefix | Milli means one thousandth of the base unit. | Mixing milliamps with amps creates a thousand-fold mistake. | Convert 25 mA to 0.025 A before substituting.
-Micro prefix | Micro means one millionth of the base unit. | Capacitors are often labelled in microfarads. | A 47 µF capacitor equals 0.000047 F.
-Mega prefix | Mega means one million times the base unit. | Resistance and frequency often use large prefixes. | A 2 MΩ resistor is 2,000,000 Ω.
+`SI base unit | An SI base unit is one of seven fundamental units: meter, kilogram, second, ampere, kelvin, mole, and candela; the ampere is the base unit for electric current, while the volt is a derived unit. | A base unit identifies a fundamental physical quantity; derived units are combinations of base units, so confusing them obscures a measurement's meaning. | Identify A as the SI base unit for current, V as a derived unit, and label each instrument reading with the correct symbol.
+Milli prefix | Milli means one thousandth of the unit it prefixes (10^-3), whether that unit is base or derived. | Mixing milliamps with amps creates a thousand-fold mistake. | Convert 25 mA to 0.025 A before substituting.
+Micro prefix | Micro means one millionth (10^-6) of whichever SI unit it prefixes. | Capacitors are often labelled in microfarads. | A 47 µF capacitor equals 0.000047 F.
+Mega prefix | Mega means one million times (10^6) the unit it prefixes. | Resistance and frequency often use large prefixes. | A 2 MΩ resistor is 2,000,000 Ω.
 Measurement uncertainty | A reading has finite accuracy, resolution and repeatability. | Passing a limit at the measurement uncertainty boundary is unsafe. | Record instrument range, precision and calibration status.`,
 `A technician substitutes 6 mA as 6 A. | Convert milli into the base unit first. | Prefixes must be resolved before using an equation. | Check whether expected current is plausible for the rail.
 A DMM shows 0.0000047 F but the schematic says µF. | Express both readings in the same unit. | Unit consistency is needed before comparing values. | Convert 0.0000047 F into 4.7 µF.
@@ -19,7 +19,7 @@ A report labels a signal as 100 without units. | Stop and attach the physical qu
 A calculated answer differs by six orders of magnitude. | Inspect micro and mega conversions. | Opposite prefixes produce a factor of 10^12 when confused. | Estimate the expected order of magnitude first.`,["milli","micro"]),
 T("ohm","Voltage, Current, Resistance & Ohm's Law","Foundations","Understand the electrical quantities used in every bring-up measurement.",
 `Voltage | Voltage is the electric potential difference between two nodes. | A voltage reading must identify both points. | Measure a regulator output with respect to its return.
-Current | Current is charge flow per unit time. | Excess current can indicate a short or unexpected load. | Set a current limit on the bench supply.
+Current | Electric current is the rate of electric charge transfer through a surface, I = dQ/dt; its SI base unit is the ampere (A). | Excess current can indicate a short or unexpected load. | Set a current limit on the bench supply.
 Resistance | Resistance opposes current flow in an ohmic element. | Resistance and voltage together determine current. | Measure an unpowered resistor with a DMM.
 Ohm's law | For an ohmic resistor, voltage equals current multiplied by resistance. | It links three directly measurable quantities. | Compare calculated branch current with a shunt measurement.
 Polarity | A signed voltage depends on the positive and negative probe connection. | Reversed leads invert the reading. | Identify ground before attaching the DMM.`,
@@ -86,7 +86,7 @@ An open-circuit output is correct but load voltage is low. | Calculate the volta
 T("ac","AC, Frequency, RMS & Impedance","Circuit Analysis","Read sinusoidal waveforms and relate peak, RMS and timing.",
 `Frequency | Frequency counts waveform cycles per second. | It determines clock and stimulus timing. | Convert hertz into period.
 Period | Period is the time for one complete repetition. | Oscilloscope timebases are calibrated in seconds per division. | Measure two consecutive rising edges.
-RMS voltage | RMS expresses equivalent heating effect of an AC waveform. | RMS and peak voltage are not interchangeable. | For a sine wave use peak divided by square root of two.
+RMS voltage | RMS is the square root of the mean of the square of a signal; for voltage across a fixed resistor it produces the same average power as an equal DC voltage. | RMS and peak voltage are not interchangeable. | For a sine wave use peak divided by square root of two.
 Phase shift | Relative timing between waveforms can be described as angle. | Timing differences matter for mixed signal analysis. | Compare channel edges or sinusoid zero crossings.
 Impedance | AC opposition can combine resistance and reactance. | Frequency changes capacitive and inductive behavior. | Check frequency before interpreting an AC load.`,
 `A sine wave peak is 10 V and someone claims 10 V RMS. | Apply the sinusoidal peak-to-RMS relation. | Peak and RMS differ by a factor of square root two. | Inspect the instrument's measurement mode.
@@ -141,7 +141,7 @@ An RLC response rings less after resistance increases. | Recognize increased dam
 T("magnetics","Magnetism, Transformers & Three-Phase","Circuit Analysis","Learn transformer ratios and the basic power equation of balanced three-phase systems.",
 `Transformer ratio | Ideal voltage ratio equals the secondary-to-primary turns ratio. | Converters and isolation stages rely on magnetic transfer. | Use V_s/V_p = N_s/N_p.
 Isolation | Isolation breaks a direct conductive path between circuits. | It is important for safety and noise control. | Check isolation boundaries in schematics.
-Magnetic saturation | A magnetic core can reach flux-density limits. | Saturation raises magnetizing current and heating. | Inspect current waveform for unexpected steep rises.
+Magnetic saturation | A magnetic core can enter saturation when additional magnetizing force produces comparatively little extra flux density, potentially increasing magnetizing current. | Saturation raises magnetizing current and heating. | Inspect current waveform for unexpected steep rises.
 Three-phase voltage | Line-to-line and line-to-neutral voltage differ in balanced wye systems. | Confusing them produces power mistakes. | Identify connection type before calculation.
 Power factor | Real power depends on phase alignment between voltage and current. | Apparent volt-amperes are not equal to real watts. | Include PF in three-phase power calculations.`,
 `A transformer secondary is half the predicted voltage. | Confirm turns ratio, loading and input waveform. | Winding or measurement assumptions may be wrong. | Compare unloaded and loaded outputs safely.
@@ -240,7 +240,7 @@ A device log cannot be reproduced by another engineer. | Preserve command, envir
 T("rf","RF Fundamentals & Test Instruments","RF & Flight Systems","Learn spectrum analyzers, VNAs, decibels and wavelength before hands-on RF testing.",
 `Spectrum analyzer | A spectrum analyzer measures signal power versus frequency. | It reveals harmonics, spurs and occupied bandwidth. | Check center frequency, span and reference level.
 Vector network analyzer | A VNA characterizes reflection and transmission through S-parameters. | It supports impedance and loss characterization. | Calibrate the measurement plane before S11/S21 tests.
-S11 return loss | S11 describes input reflection relative to reference impedance. | Mismatch wastes power and affects RF sensitivity. | Use return loss to compare matching designs.
+S11 and return loss | S11 is the complex input reflection coefficient of an RF port; return loss in dB equals minus twenty times log10 of the magnitude of S11 (when the port's reference impedance is specified). | Mismatch wastes power and affects RF sensitivity. | Use return loss to compare matching designs.
 dB power ratio | Ten times the base-10 logarithm of a power ratio gives dB. | RF gains and losses combine conveniently in dB. | 10x power corresponds to +10 dB.
 Wavelength | Free-space wavelength equals propagation speed divided by frequency. | Transmission lines and antenna dimensions depend on it. | Convert GHz into wavelength in meters.`,
 `An RF output has a large unexpected harmonic. | Inspect spectrum with appropriate span and front-end attenuation. | A single-frequency amplitude reading can miss spurs. | Compare spectral lines with expected emission limits.

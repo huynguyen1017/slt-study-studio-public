@@ -1,0 +1,18 @@
+/* Chapter 1 textbook-grounded SI reference panels; scoped to the academy */
+#avionicsView .av-si-chapter{margin:22px 0;padding:20px;background:#fbfdff;border:1px solid #bed4e3;border-radius:15px}
+#avionicsView .av-si-chapter h3{color:#1a4b67;margin:10px 0}
+#avionicsView .av-si-chapter h4{color:#1a5675;margin:17px 0 10px}
+#avionicsView .av-si-chapter p{font-size:14px;line-height:1.75;color:#3b5265}
+#avionicsView .av-chapter-tag{font-size:11px;font-weight:850;letter-spacing:1.1px;color:#136d89;padding:7px 0}
+#avionicsView .av-table-scroll{width:100%;overflow-x:auto}
+#avionicsView .av-si-table{margin:14px 0}
+#avionicsView .av-si-table table{min-width:420px}
+#avionicsView .av-si-table td:last-child{font-variant-numeric:tabular-nums;color:#18536c}
+#avionicsView .av-si-highlight{background:#e3f4ea;border-left:5px solid #1c906a;padding:14px 17px;border-radius:0 10px 10px 0;color:#14503e;line-height:1.65;margin:17px 0}
+#avionicsView .av-si-note{background:#fff5e6;border-left:5px solid #d89a39;padding:14px 16px;border-radius:0 9px 9px 0;color:#694c21!important}
+#avionicsView .av-si-sources{border-top:1px solid #d7e4ed;margin-top:20px;padding-top:15px}
+#avionicsView .av-si-sources strong{color:#225573}
+#avionicsView .av-si-sources p{font-size:12px!important}
+#avionicsView .av-si-sources a{display:inline-block;color:#185c88;margin:5px 12px 0 0;word-break:break-word;font-size:12px}
+#avionicsView .av-si-chapter .av-math math{font-size:clamp(16px,2vw,25px)}
+@media(max-width:620px){#avionicsView .av-si-chapter{padding:13px}#avionicsView .av-si-chapter .av-math{padding:10px;overflow-x:auto}}

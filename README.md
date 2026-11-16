@@ -1,3 +1,14 @@
+### SI textbook accuracy review (Chapter 1)
+
+The original SI base-unit question previously defined *ampere* and *volt* without defining what makes a **base** unit fundamental. The dedicated Chapter 1 teaching panel now distinguishes all **seven SI base units** (m, kg, s, A, K, cd, mol), common derived units (including volt, ohm and watt), historical supplementary units (radian, steradian), and quantity symbols in italic versus unit symbols in upright roman type. Native MathML is used for relationships such as 1 V = 1 W/A. The definition/rubric and visual illustrations were corrected together.
+
+**Source distinction:** The supplied Floyd/Buchla excerpt calls radian and steradian supplementary units (historically correct); this separate SI classification was abolished in 1995. The excerpt also calls gauss a magnetic-flux unit, while NIST/NBS tables identify gauss as **magnetic flux density** and maxwell as **magnetic flux**. The lesson explicitly labels these discrepancies instead of silently rewriting the excerpt.
+
+**Scope:** The user-supplied textbook excerpt covers Chapter 1's *Base and Derived Units* section. Other chapters' complete textbook or lecture pages were not accessible for page-by-page comparison; their lessons remain original engineering explanations, not verified quotations. The automated curriculum audit checks internal alignment of all 23 topics and 690 generated questions, independently evaluates 230 numerical substitutions, and checks the SI distinctions; it is not a claim that every original chapter exercise was matched against the book.
+
+Sources: [BIPM SI Brochure](https://www.bipm.org/en/publications/si-brochure) · [BIPM supplementary-unit reclassification](https://www.bipm.org/en/publications/si-brochure/annex-1/derived-units) · [NIST base units](https://www.nist.gov/si-redefinition/definitions-si-base-units) · [NIST/NBS magnetic units](https://www.govinfo.gov/content/pkg/GOVPUB-C13-aaf879474ebe03fd4c45a247d099163e/pdf/GOVPUB-C13-aaf879474ebe03fd4c45a247d099163e.pdf)
+
+
 # Open SLT Study Studio
 
 ## Avionics EE Practice Academy (23 topics × 30 original questions)

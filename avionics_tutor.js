@@ -6,6 +6,7 @@ const TOPICS=window.AVIONICS_TOPICS||[];
 const QUESTIONS=window.AVIONICS_QUESTIONS||[];
 const LESSONS=window.AVIONICS_BEGINNER_LESSONS||{};
 const DEEP=window.AVIONICS_CONCEPT_DEEP_DIVE||{};
+const SI=window.AVIONICS_SI_LESSON||null;
 const VIS=window.avionicsVisuals;
 const ASSESS=window.avionicsAnswerCheck;
 const STORE="slt-avionics-ee-practice-v1";
@@ -41,7 +42,7 @@ function matchingSkill(q,t){
 }
 function focus(q,t){
  const s=t.skills[matchingSkill(q,t)]||t.skills[0];
- return {label:s[0],definition:s[1],why:s[2],test:s[3],deep:DEEP[s[0]]||null};
+ return {label:s[0],definition:s[1],why:s[2],test:s[3],deep:s[0]==="SI base unit"&&SI?SI:(DEEP[s[0]]||null)};
 }
 function iconLine(k,text){return '<div class="av-mini"><strong>'+esc(k)+'</strong><span>'+esc(text)+'</span></div>'}
 function equation(source,label){return '<div class="av-math"><div class="av-math-label">'+esc(label)+'</div>'+eq(source)+'</div>'}
@@ -86,12 +87,13 @@ function stepsFor(q,t,f){
  const beginner=f.deep;
  const out=[];
  if(q.level==="Foundations"||q.level==="Application"){
-   out.push({title:"Translate the question into everyday language",body:"We are learning what "+f.label+" means, not asking you to memorize complicated vocabulary yet. "+(beginner?beginner.plain:f.definition),kind:"text"});
-   out.push({title:"Learn the key words",body:beginner?beginner.why:LESSONS[t.id].lead,kind:"text"});
-   out.push({title:"Use a picture or everyday comparison",body:beginner?beginner.analogy:LESSONS[t.id].analogy,kind:"text"});
-   out.push({title:"Connect the idea to one concrete example",body:beginner?beginner.example:LESSONS[t.id].example,kind:"text"});
-   out.push({title:"Explain the engineering reason",body:f.why+" "+f.test,kind:"text"});
-   out.push({title:"Answer the original question",body:beginner?beginner.recap:(st[0]||f.definition)+" "+(st[2]||f.test),kind:"answer"});
+   out.push({title:"Read the exact question",body:"This question asks about "+f.label+". We will identify its meaning, understand why the distinction matters, and give a real engineering example.",kind:"text"});
+   out.push({title:"Give the textbook-style definition first",body:beginner?beginner.plain:f.definition,kind:"text"});
+   out.push({title:"Understand the key difference",body:f.why,kind:"text"});
+   out.push({title:"Connect it to a practical example",body:beginner?beginner.example:f.test,kind:"text"});
+   out.push({title:"Explain with a visual comparison",body:beginner?beginner.analogy:(LESSONS[t.id]?.analogy||f.definition),kind:"text"});
+   if(f.label==="SI base unit"&&SI)out.push({title:"Name the seven base units and separate derived units",body:"The seven SI base units are meter (m), kilogram (kg), second (s), ampere (A), kelvin (K), mole (mol) and candela (cd). The volt (V) and ohm (Ω) are derived units. Radian and steradian were called supplementary units in the older textbook; their separate SI class was eliminated in 1995.",kind:"text"});
+   out.push({title:"Build your own complete answer",body:(beginner?beginner.recap:f.definition)+" "+f.why+" Example: "+f.test,kind:"answer"});
  }else if(q.level==="Calculation"){
    out.push({title:"Read the question slowly",body:"You are asked to find a numerical answer in "+q.unit+". Underline the quantity being requested. Do not start calculating yet.",kind:"text"});
    const vals=knownValues(q.question);
@@ -110,9 +112,38 @@ function stepsFor(q,t,f){
  }
  return out;
 }
+
+function unitTable(title,rows){
+ return '<section class="av-si-table"><h4>'+esc(title)+'</h4><div class="av-table-scroll"><table class="av-vocab"><thead><tr><th>Physical quantity</th><th>SI unit</th><th>Symbol</th></tr></thead><tbody>'+
+ rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td><strong>'+esc(r[2])+'</strong></td></tr>').join("")+
+ '</tbody></table></div></section>';
+}
+function siChapterPanel(){
+ if(!SI)return "";
+ return '<section class="av-si-chapter" aria-label="SI base units and derived units from Chapter 1">'+
+ '<div class="av-chapter-tag">TEXTBOOK-ALIGNED · CHAPTER 1 · BASE AND DERIVED UNITS</div>'+
+ '<h3>Seven base units — the complete definition</h3>'+
+ '<p>Every SI base quantity has one base unit. An SI derived unit combines base units. The ampere is the electrical base unit; the volt, ohm and watt are electrical derived units.</p>'+
+ unitTable("The seven SI base units",SI.base)+
+ '<div class="av-si-highlight"><strong>Only one base unit here is an electrical unit:</strong> ampere (A) measures electric current. The volt (V) measures potential difference, but it is a derived unit.</div>'+
+ unitTable("Common derived units — electric and magnetic",SI.derived)+
+ unitTable("Magnetic quantities and their SI-related unit expressions",SI.magnetic)+
+ '<p class="av-si-note">'+esc(SI.gaussNote)+'</p>'+
+ '<div class="av-math"><div class="av-math-label">EXAMPLE · VOLT EXPRESSED WITH BASE UNITS (NATIVE MATHML)</div>'+SI.formulaMathml+'</div>'+
+ '<h4>How this textbook labels supplementary units</h4>'+
+ unitTable("Historical SI supplementary class",SI.historical)+
+ '<p class="av-si-note">'+esc(SI.note)+'</p>'+
+ '<p class="av-si-note">'+esc(SI.mksNote)+'</p>'+
+ '<h4>Quantity symbols versus unit symbols</h4>'+
+ '<p>'+esc(SI.styleNote)+'</p>'+
+ '<div class="av-math"><div class="av-math-label">ITALIC QUANTITY VS UPRIGHT UNIT SYMBOL</div>'+SI.symbolMathml+'</div>'+
+ '<div class="av-si-sources"><strong>Reference scope</strong><p>'+esc(SI.sourceScope)+'</p>'+
+ '<p>'+SI.links.map(a=>'<a target="_blank" rel="noopener noreferrer" href="'+esc(a[1])+'">'+esc(a[0])+'</a>').join(" · ")+'</p></div></section>';
+}
+
 function lessonPage(q,t,f){
  const item=f.deep,guide=LESSONS[t.id]||{lead:t.goal,analogy:"",example:"",terms:[]};
- const glossary=item?item.words:guide.terms;
+ const glossary=item?item.words:[[f.label,f.definition],...(guide.terms||[]).filter(p=>p[0].toLowerCase()!==f.label.toLowerCase())];
  const summary=item?item.plain:f.definition;
  const illustration=VIS?VIS.render(q,t,"schematic"):diagram(t,f);
  const equationBox=item&&item.formula?equation(item.formula,"PHYSICAL RELATIONSHIP · ENGINEERING NOTATION"):"";
@@ -122,8 +153,9 @@ function lessonPage(q,t,f){
  '<div class="av-lede"><strong>In very simple words</strong><p>'+esc(summary)+'</p></div>'+
  '<div class="av-two-up"><section><h4>Words you need first</h4><table class="av-vocab"><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody>'+
  glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+esc(p[1])+'</td></tr>').join("")+
- '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+esc(item?item.analogy:guide.analogy)+'</p><h4>Why an engineer cares</h4><p>'+esc(item?item.why:f.why)+'</p></section></div>'+
- '<h4 class="av-figure-heading">Your question’s circuit illustration</h4>'+illustration+
+ '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+esc(item?item.analogy:guide.analogy)+'</p><h4>Why an engineer cares</h4><p>'+esc(item?item.why:f.why)+'</p></section></div>'+ 
+ (f.label==="SI base unit"?siChapterPanel():"")+
+ '<h4 class="av-figure-heading">'+(t.id==="units"?"Your SI units concept illustration":"Your question’s circuit illustration")+'</h4>'+illustration+
  '<div class="av-actions-bottom"><button id="avGoVisual" class="av-primary">See full circuit, graph and wiring →</button></div>'+
  equationBox+
  '<div class="av-worked-mini"><strong>One real-life example</strong><p>'+esc(item?item.example:guide.example)+'</p></div>'+

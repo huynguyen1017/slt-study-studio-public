@@ -19,9 +19,9 @@ const matching=(txt,variants)=>variants.some(v=>{const r=norm(v);return r.every(
 const item=(label,hint,sets)=>({label,hint,sets});
 const definitions={
  "units:0":[
-  item("Identify an SI base unit","The ampere (A) is an SI base unit for electric current.",[["ampere","amp","amps"],["current","electric current","charge flow"]]),
-  item("Distinguish the volt from the ampere","The volt measures potential difference and is an SI derived unit, not a base unit.",[["volt","voltage"],["difference","potential difference","potential","derived"]]),
-  item("Explain why units matter","A number needs a unit so the reading and any conversion are meaningful.",[["unit","label","measurement","measure"],["correct","conversion","avoid","report","misread","mistake","error","compare"]])
+  item("Define what SI base unit means","A base unit is one of seven fundamental SI units, not simply any electrical measurement unit.",[["base","fundamental"],["seven","7","fundamental"]]),
+  item("Identify the electrical SI base unit","The ampere (A) is the SI base unit for electric current.",[["ampere","amp","amps"],["current","electric current","charge flow"]]),
+  item("Distinguish derived units","The volt (V) is a derived SI unit for potential difference; it is not an eighth base unit.",[["volt","voltage"],["derived"]])
  ],
  "units:1":[item("Define milli","Milli means one thousandth (10^-3).",[["milli","ma","milliamps"],["thousandth","0.001","1000","10 3"]]),
   item("Explain a conversion","Convert mA to A by dividing by 1000.",[["convert","divide","change","scale","ma"],["1000","0.001","ampere","amp"]]),
