@@ -178,7 +178,12 @@ const capstones={
 function textCase(q,data,stage){
  const [title,question,answer,kind]=data;
  q.originalMasteryQuestion=q.question;q.question=question;q.learningObjective=title;q.auditSkill=title;q.skillName=title;
- q.network={kind,values:{...defaults},focus:stage};q.steps=[
+ const givenV=question.match(/\b(\d+(?:\.\d+)?)\s*V\b/);
+ const values={...defaults};
+ if(givenV)values.v=Number(givenV[1]);
+ if(title==="Verify one-loop continuity")kind="series2";
+ if(title==="Define one current path"||title==="Use a signed voltage loop")kind="series2";
+ q.network={kind,values,focus:stage,illustrative:!givenV};q.steps=[
   "Read the real circuit and label its source, reference and nodes: "+question,
   "Separate series paths from parallel branches; never choose an equation by the drawing alone.",
   "Compare your reasoning with the physical reference: "+answer,
