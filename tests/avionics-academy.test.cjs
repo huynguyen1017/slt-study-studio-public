@@ -124,6 +124,7 @@ console.log("PASS: 690 questions retained; 23 beginner lessons; six-step guides;
   await mobile.locator('[data-page="visual"]').click();
   assert.equal(await mobile.locator(".av-visual-panel svg").count(),3);
   assert.equal(await mobile.locator("#avionicsView").isVisible(),true);
+  await mobile.locator('[data-page="learn"]').click();
   assert((await mobile.locator(".av-lede").textContent()).includes("TWO electrical points"));
   await mobile.close();
   console.log("PASS: desktop/mobile, 690 questions x 3 SVG views, circuit labels, breadboard, zoom, MathML and persisted ratings");
