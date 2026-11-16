@@ -204,13 +204,56 @@ function buildSvg(q,t){
  s+=txt(1040,1012,"POWER OFF when wiring · Never apply 5 V to GPIO",13,"#a04438","start",700);
  s+=txt(1040,1036,"See UM1724 Table 32 and the MCU datasheet.",11,"#647b8c");
  s+=txt(29,1087,"MODE: "+c.key+" · QUESTION: "+q.id+" · connector schematic + training breadboard (illustrative, not a verified hardware build)",13,"#47667b");
- return '<svg class="av-nucleo-full-svg" viewBox="0 0 1380 1122" role="img" xmlns="http://www.w3.org/2000/svg" aria-label="'+esc("Full 63-row breadboard and Nucleo STM32L476RG pin-mapped exercise for "+q.id)+'">'+s+'</svg>';
+ return '<svg class="av-visual-svg av-nucleo-full-svg" viewBox="0 0 1380 1122" role="img" xmlns="http://www.w3.org/2000/svg" aria-label="'+esc("Full 63-row breadboard and Nucleo STM32L476RG pin-mapped exercise for "+q.id)+'">'+s+'</svg>';
 }
+
+/* 3220-point Makeronics-style assembly overview: four 630-contact terminal
+   strips and seven separate 100-contact power distribution strips.
+   The source manufacturer lists 504 separately connected five-contact banks.
+   Rail split continuity varies by exact product and must be checked physically. */
+function full3220(q){
+ let s=rect(1,1,1600,1240,"#fafdff","#c6d4df",16);
+ s+=txt(28,43,"3220-POINT ASSEMBLY OVERVIEW · 4 × 630 + 7 × 100",21,"#244d6c","start",800);
+ s+=txt(29,69,"Four 63-row double terminal strips, seven distribution strips, four binding posts (manufacturer layout schematic, not a photo)",12,"#567284");
+ const bx=[36,104,172,240],bc=[C.red,C.black,C.gold,C.green];
+ for(let i=0;i<4;i++){
+  s+='<circle cx="'+bx[i]+'" cy="113" r="15" fill="'+bc[i]+'" stroke="#324f65" stroke-width="2"/>';
+  s+=txt(bx[i],143,["V1","V2","V3","GND"][i],11,"#3d5a70","middle",700);
+ }
+ // Seven independent distribution rows. Neither common rail connectivity nor
+ // end-to-end continuity is asserted without direct product verification.
+ for(let rail=0;rail<7;rail++){
+  const y=169+rail*23;
+  s+=rect(29,y-12,1540,23,rail%2?"#eaf3f7":"#fff1f3","#d7e0e5",4);
+  s+=txt(42,y+4,"P"+(rail+1),12,rail%2?C.blue:C.red,"start",800);
+  for(let hole=0;hole<100;hole++)s+='<circle cx="'+(83+hole*14.7)+'" cy="'+y+'" r="3.4" fill="'+(rail%2?C.blue:C.red)+'" opacity=".78"/>';
+ }
+ for(let g=0;g<4;g++){
+  const x=32+g*392;
+  s+=rect(x,338,372,875,g===0?"#eef8fe":"#f6f7f5",g===0?"#569ec4":"#c3ccd0",11);
+  s+=txt(x+13,360,"STRIP "+String.fromCharCode(65+g)+" · 630 POINTS",15,"#284f67","start",800);
+  const cols=[x+35,x+64,x+93,x+122,x+151,x+215,x+244,x+273,x+302,x+331];
+  for(let i=0;i<10;i++)s+=txt(cols[i],376,"abcdefghij"[i],9,"#425a69","middle",700);
+  s+=rect(x+167,390,34,803,"#e4e4dc","#e4e4dc",2);
+  for(let row=1;row<=63;row++){
+   const y=396+(row-1)*12.5;
+   if(row===1||row%5===0||row===63)s+=txt(x+17,y+3,String(row),8,"#5d6e7b");
+   for(let i=0;i<10;i++)s+='<circle cx="'+cols[i]+'" cy="'+y+'" r="2.9" fill="#586777"/>';
+  }
+  if(g===0){
+   s+=rect(x+4,1196,363,15,"#d5efff","#80bfd7",4);
+   s+=txt(x+185,1207,"Question "+q.id+" uses a detail from strip A",9,"#1c6283","middle",800);
+  }
+ }
+ return '<svg class="av-3220-overview" viewBox="0 0 1600 1245" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3220-point breadboard assembly overview with four 630-point terminal strips and seven 100-point distribution rows">'+s+'</svg>';
+}
+
 function render(q,t){
  const c=setup(q,t);if(!c)return "";
  return '<section class="av-nucleo-lesson" data-nucleo-q="'+esc(q.id)+'"><h4>Full STM32 Nucleo-64 + solderless breadboard circuit</h4>'+
  '<p>All 63 terminal rows and power rails shown, not the former 9–17 row crop. This illustrates one 830-point breadboard module, NOT a verified 3220-point Makeronics internal layout. Wires follow the selected question and its practice setup.</p>'+
  '<div class="av-nucleo-stage" tabindex="0">'+buildSvg(q,t)+'</div>'+
+ '<details class="av-3220-details"><summary>Show full Makeronics-style 3220-point assembly (4 terminal strips + 7 power strips)</summary><div class="av-nucleo-stage" tabindex="0">'+full3220(q)+'</div><p>The highlighted first strip corresponds to the detailed practice module above. The other strips and distribution lanes are intentionally unconnected until you explicitly wire them. Verify internal rail breaks using continuity mode.</p></details>'+
  '<p><strong>Selected probe node(s):</strong> '+esc((c.bench.length?c.bench.map(x=>x[1]):c.links.map(x=>x[1])).filter(x=>/^[a-j]\d+$/.test(x)).slice(0,3).join(" · ")||"Use approved ground/reference measurements")+'</p>'+
  '<p class="av-nucleo-warning">Read the official ST UM1724 board connector table before any physical wiring. Board power, GPIO level limits, jumper configuration, module pinouts and current limits must be independently checked. Never connect powered circuits based only on this illustration.</p>'+
  '<p class="av-nucleo-resources"><a href="https://www.st.com/resource/en/user_manual/dm00105823.pdf" target="_blank" rel="noopener noreferrer">ST UM1724 official connector manual</a> · '+
@@ -222,5 +265,5 @@ function render(q,t){
  c.parts.map(([name,kind,a,b,v])=>'<li>'+esc(name)+' ('+esc(kind)+', '+esc(v)+'): '+esc(a)+' ↔ '+esc(b)+'</li>').join("")+
  '</ol></details></section>';
 }
-window.avionicsNucleoWorkbench={render,buildSvg,setup,choose,includesNucleo:t=>!!t&&["units","ohm","power","series","parallel","kcl-kvl","capacitors","rc","filters","components","power-rails","schematics","instruments","timing","buses"].includes(t.id),pin};
+window.avionicsNucleoWorkbench={render,buildSvg,full3220,setup,choose,includesNucleo:t=>!!t&&["units","ohm","power","series","parallel","kcl-kvl","capacitors","rc","filters","components","power-rails","schematics","instruments","timing","buses"].includes(t.id),pin};
 })();
