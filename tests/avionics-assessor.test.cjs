@@ -29,7 +29,7 @@ for(const q of questions){
 }
 const si=questions.find(q=>q.id==="units-F1"),siTopic=topics.find(t=>t.id==="units");
 assert(si&&siTopic);
-const good=A.gradeText(si,siTopic,"The ampere is an SI base unit of electric current. The volt is a derived unit measuring potential difference. Correct units on a meter prevent conversion errors.");
+const good=A.gradeText(si,siTopic,"Of the seven fundamental SI base units, the ampere is the unit of electric current. The volt is a derived unit measuring potential difference. Correct units on a meter prevent conversion errors.");
 assert.equal(good.band,"likely-correct",JSON.stringify(good));
 const partial=A.gradeText(si,siTopic,"Ampere measures current.");
 assert.equal(partial.band,"partial",JSON.stringify(partial));
@@ -49,7 +49,7 @@ assert.equal(A.gradeNumber(numeric,"10 bananas").band,"needs-correction");
 assert.equal(A.gradeNumber(numeric,"not a number").band,"insufficient");
 const site=read("index.html"),sw=read("sw.js"),ui=read("avionics_tutor.js");
 assert(site.includes("avionics_assessor.js?v=4")&&site.includes("avionics_feedback.css?v=4"));
-assert(sw.includes("avionics_assessor.js")&&sw.includes("v20-feedback-recheck"));
+assert(sw.includes("avionics_assessor.js")&&sw.includes("v21-si-curriculum-audit"));
 assert(ui.includes("av-question-gallery")&&ui.includes("data-qid="));
 assert(ui.includes("ASSESS.gradeText")&&ui.includes("inlineStepVisual(q,t,stepIndex)"));
 console.log("PASS: 690 questions with rubrics or numerics; SI grading good/partial/wrong; units; question gallery and step visuals");
