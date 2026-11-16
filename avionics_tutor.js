@@ -394,7 +394,7 @@ function lessonPage(q,t,f){
  (NOTEBOOK?NOTEBOOK.render(t.id):"")+
  (VIDEO?VIDEO.render(q,t):"")+
  '<h4 class="av-figure-heading">Interactive circuit, graph &amp; '+(VIS&&VIS.describe(q,t).board?'breadboard':'test fixture')+' wiring for '+esc(q.id.toUpperCase())+'</h4>'+
- visualSwitcherBar(inlineVisualMode)+illustration+
+ (q.advancedStage>=31&&!q.network?'<p class="av-sim-note">Advanced case diagrams illustrate concepts only; they are not a verified physical DUT netlist or automatically safe STM32 wiring. Use the actual question values and check your own approved schematic.</p>':"")+visualSwitcherBar(inlineVisualMode)+illustration+
  (inlineVisualMode==="wiring"
   ?'<div class="av-sim-host" data-sim-page="learn"></div>'
   :'<div class="av-sim-compact-strip"><span>Open <strong>3. Board &amp; Breadboard</strong> to run the interactive multimeter bench, live scope &amp; Online CircuitJS1 for <strong>'+esc(q.id.toUpperCase())+'</strong>.</span><button type="button" class="av-vis-pill" data-vismode="wiring">⚡ Open Live Simulator</button></div>')+
