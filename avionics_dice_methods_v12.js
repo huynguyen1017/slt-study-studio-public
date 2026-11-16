@@ -101,7 +101,7 @@
  for(const q of Q.filter(q=>q.level==="Calculation"&&q.originalNumeric)){
   const key=q.topic+"::"+q.calcFamily, disallowed=baseByFamily.get(key)||new Set();
   const before=q.variantPool||[];
-  q.variantPool=before.filter(v=>v.question&&!disallowed.has(v.question));
+  q.variantPool=before.filter(v=>v.question&&!disallowed.has(v.question)).map(v=>({...v}));
   removed+=before.length-q.variantPool.length;
   const cfg=configs[q.id];
   if(cfg){
