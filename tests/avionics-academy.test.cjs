@@ -196,6 +196,25 @@ console.log("PASS: 690 questions retained; 23 beginner lessons; six-step guides;
   await page.locator('[data-page="visual"]').click();
   assert((await page.locator("#avVisual-wiring").textContent()).includes("KVL"),"KVL must show a voltage loop");
   await page.locator("#avTopicList").selectOption("units");
+  // Every question should update its video sources and real Nucleo circuit.
+  await page.locator("#avTopicList").selectOption("buses");
+  await page.locator('[data-quick-qid="buses-F3"]').click(); // I2C hardware
+  await page.locator('[data-page="learn"]').click();
+  assert.equal(await page.locator('[data-video-question="buses-F3"] .av-video-card').count(),2,"I2C question has two distinct video-learning sources");
+  assert.equal(await page.locator('[data-video-question="buses-F3"] .av-video-card strong').first().textContent(),"A · DigiKey");
+  await page.locator('[data-page="visual"]').click();
+  assert.equal(await page.locator("#avVisual-wiring .av-nucleo-full-svg").count(),1,"I2C uses full Nucleo breadboard, not a cropped crop");
+  assert((await page.locator("#avVisual-wiring").textContent()).includes("PB9"),"I2C board must show PB9 SDA");
+  await page.locator("#avVisual-wiring .av-3220-details summary").click();
+  await page.locator("#avVisual-wiring .av-3220-overview").waitFor();
+  assert.equal(await page.locator("#avVisual-wiring .av-3220-overview").count(),1,"Full 3220 point assembly expands only on demand");
+  await page.locator('[data-quick-qid="buses-F2"]').click(); // SPI hardware
+  assert.equal(await page.locator("#avVisual-wiring .av-nucleo-full-svg").count(),1,"Switching questions must replace full diagram");
+  assert((await page.locator("#avVisual-wiring").textContent()).includes("MOSI"),"Next question uses SPI wiring");
+  assert.equal(await page.locator("#avVisual-wiring .av-3220-overview").count(),0,"Huge assembly is not eagerly loaded after question switch");
+  await page.locator('[data-page="learn"]').click();
+  assert.equal(await page.locator('[data-video-question="buses-F2"] .av-video-card').count(),2,"Switching questions must replace both video sources");
+  await page.locator("#avTopicList").selectOption("units");
   const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   await mobile.goto("http://127.0.0.1:8765/#avionics",{waitUntil:"load"});
   await mobile.locator("#avionicsView .av-tutor").waitFor();
