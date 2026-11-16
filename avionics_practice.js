@@ -42,7 +42,7 @@ function render(){
        <label>Find a question<input id="avSearch" type="search" placeholder="e.g. ripple" value="${esc(filterText)}"/></label>
       </div>
       <div class="av-topics">
-       ${TOPICS.map((t,i)=>`<button class="av-topic ${t.id===topic?"active":""}" data-topic="${esc(t.id)}" aria-pressed="${String(t.id===topic)}"><strong>${i+1}. ${esc(t.title)}</strong><small>${completeCount(t.id)} of 30 mastered · ${esc(t.group)}</small><span class="av-track"><i style="width:${100*completeCount(t.id)/30}%"></i></span></button>`).join("")}
+       ${TOPICS.map((t,i)=>`<button class="av-topic ${t.id===topic?"active":""}" data-topic="${esc(t.id)}" aria-pressed="${String(t.id===topic)}"><strong>${i+1}. ${esc(t.title)}</strong><small>${completeCount(t.id)} of 50 mastered · ${esc(t.group)}</small><span class="av-track"><i style="width:${100*completeCount(t.id)/30}%"></i></span></button>`).join("")}
       </div>
     </aside>
     <div class="av-main">
