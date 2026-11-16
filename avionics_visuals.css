@@ -1,0 +1,44 @@
+/* Question-specific vector diagrams and full-screen view. */
+#avionicsView .av-visual-figure{margin:16px 0 19px;background:#fff;border:1px solid #d0e1eb;border-radius:14px;overflow:hidden}
+#avionicsView .av-visual-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:11px 15px;background:#eef7fb;border-bottom:1px solid #d7e9f0;color:#20536c;font-size:12px}
+#avionicsView .av-visual-top strong{font-size:13px}
+#avionicsView .av-visual-top span{font-size:11px;color:#5c7182}
+#avionicsView .av-visual-svg{display:block;width:100%;height:auto;max-height:none;background:#fff}
+#avionicsView .av-visual-figure figcaption{font-size:12px;color:#526779;line-height:1.65;padding:12px 15px;border-top:1px solid #e1ebf1}
+#avionicsView .av-visual-page{background:#fbfdff}
+#avionicsView .av-visual-nav{display:flex;gap:8px;flex-wrap:wrap;margin:19px 0}
+#avionicsView .av-visual-nav a{border-radius:30px;border:1px solid #bdd7e4;background:#ecf5fa;padding:10px 12px;color:#185976;text-decoration:none;font-size:12px;font-weight:700}
+#avionicsView .av-visual-nav a:focus-visible{outline:3px solid #dfb557;outline-offset:2px}
+#avionicsView .av-visual-panel{background:#fff;border:1px solid #d4e5ed;border-radius:14px;padding:15px;margin:18px 0;scroll-margin-top:18px;box-shadow:0 3px 12px #14446307}
+#avionicsView .av-visual-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+#avionicsView .av-visual-panel-head h4{margin:3px 0 7px;color:#224e6a}
+#avionicsView .av-visual-panel-head p{font-size:13px;margin:2px 0 10px;max-width:590px}
+#avionicsView .av-visual-panel-head button{min-width:95px;flex-shrink:0}
+#avionicsView .av-page-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+#avionicsView .av-zoom-dialog{box-sizing:border-box;width:min(96vw,1250px);max-height:92vh;border:1px solid #b4d3e0;border-radius:14px;padding:19px;background:#fff;box-shadow:0 24px 100px #12283a65;color:#23455b}
+#avionicsView .av-zoom-dialog::backdrop{background:#102a3dba}
+#avionicsView .av-zoom-top{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:10px;font-size:17px}
+#avionicsView .av-zoom-dialog .av-visual-figure{max-width:100%;margin:0}
+#avionicsView .av-zoom-dialog .av-visual-svg{width:100%;max-height:68vh;min-height:300px}
+#avionicsView .av-zoom-dialog .av-visual-figure figcaption{font-size:13px}
+@media(max-width:620px){
+ #avionicsView .av-visual-panel{padding:10px}
+ #avionicsView .av-visual-top{padding:9px}
+ #avionicsView .av-visual-figure figcaption{font-size:11px}
+ #avionicsView .av-visual-panel-head{flex-direction:column}
+ #avionicsView .av-visual-panel-head button{width:100%}
+ #avionicsView .av-page-tabs{padding:6px 4px 0}
+ #avionicsView .av-tutor .av-page-tabs button{font-size:10px;letter-spacing:-.1px;padding:7px 2px}
+ #avionicsView .av-visual-svg{min-width:510px}
+ #avionicsView .av-visual-figure{overflow-x:auto}
+ #avionicsView .av-zoom-dialog{padding:10px}
+ #avionicsView .av-zoom-dialog .av-visual-svg{min-width:680px}
+ #avionicsView .av-zoom-dialog .av-visual-figure{overflow-x:auto}
+}
+
+#avionicsView .av-visual-question-line{padding:11px 15px;background:#fafcff;border-top:1px solid #e3edf3;font-size:12px;color:#33546a;line-height:1.65}
+#avionicsView .av-visual-question-line strong{color:#0c5976}
+
+#avionicsView .av-visual-focus{background:#f1faf6;border-top:1px solid #d0e7da;color:#315748;font-size:12px;padding:12px 15px;line-height:1.7}
+#avionicsView .av-visual-focus strong{color:#0b6550}
+#avionicsView .av-visual-focus em{display:block;font-style:normal;color:#486e60;margin-top:3px}

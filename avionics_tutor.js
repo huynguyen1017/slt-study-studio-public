@@ -6,6 +6,7 @@ const TOPICS=window.AVIONICS_TOPICS||[];
 const QUESTIONS=window.AVIONICS_QUESTIONS||[];
 const LESSONS=window.AVIONICS_BEGINNER_LESSONS||{};
 const DEEP=window.AVIONICS_CONCEPT_DEEP_DIVE||{};
+const VIS=window.avionicsVisuals;
 const STORE="slt-avionics-ee-practice-v1";
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const find=(s,r=document)=>r.querySelector(s);
@@ -109,26 +110,43 @@ function lessonPage(q,t,f){
  const item=f.deep,guide=LESSONS[t.id]||{lead:t.goal,analogy:"",example:"",terms:[]};
  const glossary=item?item.words:guide.terms;
  const summary=item?item.plain:f.definition;
- const illustration=diagram(t,f);
+ const illustration=VIS?VIS.render(q,t,"schematic"):diagram(t,f);
  const equationBox=item&&item.formula?equation(item.formula,"PHYSICAL RELATIONSHIP · ENGINEERING NOTATION"):"";
  return '<section class="av-page" aria-label="Understand the concept">'+
- '<div class="av-eyebrow">PAGE 1 / 3 · LEARN THE IDEA</div>'+
+ '<div class="av-eyebrow">PAGE 1 / 4 · LEARN THE IDEA</div>'+
  '<h3>Start here: '+esc(f.label)+'</h3>'+
  '<div class="av-lede"><strong>In very simple words</strong><p>'+esc(summary)+'</p></div>'+
  '<div class="av-two-up"><section><h4>Words you need first</h4><table class="av-vocab"><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody>'+
  glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+esc(p[1])+'</td></tr>').join("")+
  '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+esc(item?item.analogy:guide.analogy)+'</p><h4>Why an engineer cares</h4><p>'+esc(item?item.why:f.why)+'</p></section></div>'+
- '<h4 class="av-figure-heading">Look at the labelled illustration</h4>'+illustration+
+ '<h4 class="av-figure-heading">Your question’s circuit illustration</h4>'+illustration+
+ '<div class="av-actions-bottom"><button id="avGoVisual" class="av-primary">See full circuit, graph and wiring →</button></div>'+
  equationBox+
  '<div class="av-worked-mini"><strong>One real-life example</strong><p>'+esc(item?item.example:guide.example)+'</p></div>'+
  '<div class="av-takeaway"><strong>Remember this:</strong> '+esc(item?item.recap:guide.lead)+'</div>'+
  '<div class="av-actions-bottom"><button id="avGoWork" class="av-primary">Now solve this question together →</button></div>'+
  '</section>';
 }
+
+function visualPage(q,t,f){
+ const info=VIS?VIS.describe(q,t):null;
+ const pics=[["schematic","01 · Circuit schematic","Follow the current path. Find the source, components, unknown quantity and measured values."],["concept","02 · Graph / signal behavior","Compare voltage, current, timing or frequency. All curves are explicitly illustrative."],["wiring","03 · "+(info?info.wiring:"Connection diagram"),"Learn which points connect and where the source, return and instrument belong. Never assume an unspecified pin number."]];
+ return '<section class="av-page av-visual-page" aria-label="Question-specific visual laboratory">'+
+ '<div class="av-eyebrow">PAGE 2 / 4 · SEE THE CIRCUIT IN DETAIL</div>'+
+ '<h3>Draw it first. Then solve it.</h3>'+
+ '<p class="av-explain">These figures are generated from <strong>this exact question</strong>. The schematic uses known values when they are supplied; any missing values are shown symbolically. Breadboards use conceptual low-voltage layouts; instrument and development-board wiring diagrams use generic signal names, not manufacturer pin numbers.</p>'+
+ '<div class="av-question"><span>QUESTION '+esc(q.id)+'</span><p>'+esc(q.question)+'</p></div>'+
+ '<div class="av-visual-nav">'+pics.map(x=>'<a href="#avVisual-'+x[0]+'">'+esc(x[1])+'</a>').join("")+'</div>'+
+ pics.map(x=>'<section class="av-visual-panel" id="avVisual-'+x[0]+'"><div class="av-visual-panel-head"><div><h4>'+esc(x[1])+'</h4><p>'+esc(x[2])+'</p></div><button class="av-light" data-zoom="'+x[0]+'" aria-label="Enlarge '+esc(x[1])+'">↗ Enlarge</button></div>'+
+ (VIS?VIS.render(q,t,x[0]):'<p>Visuals are unavailable.</p>')+'</section>').join("")+
+ '<div class="av-takeaway"><strong>Before continuing:</strong> Trace the positive-to-return path with your finger, identify the relevant nodes and explain which signal the instrument measures.</div>'+
+ '<div class="av-actions-bottom"><button id="avVisualBack" class="av-light">← Review the idea</button><button id="avVisualForward" class="av-primary">Now solve it in baby steps →</button></div></section>';
+}
+
 function solvePage(q,t,f){
  const steps=stepsFor(q,t,f),step=steps[stepIndex]||steps[0];
  return '<section class="av-page" aria-label="Guided worked answer">'+
- '<div class="av-eyebrow">PAGE 2 / 3 · WORK IT OUT WITH ME</div>'+
+ '<div class="av-eyebrow">PAGE 3 / 4 · WORK IT OUT WITH ME</div>'+
  '<h3>Answer in tiny steps — not all at once</h3>'+
  '<p class="av-explain">Only one step is shown at a time. Read it, think about it, then press <strong>Next baby step</strong>. There is no timer.</p>'+
  '<div class="av-question"><span>YOUR QUESTION</span><p>'+esc(q.question)+'</p></div>'+
@@ -151,7 +169,7 @@ function solvePage(q,t,f){
 function practicePage(q,t,f){
  const result=(q.expected!==undefined)?'The correct result is '+fmt(q.expected)+' '+q.unit+'.':(f.deep?f.deep.recap:q.steps.join(" "));
  return '<section class="av-page" aria-label="Practice without the answer">'+
- '<div class="av-eyebrow">PAGE 3 / 3 · TRY IT YOURSELF</div>'+
+ '<div class="av-eyebrow">PAGE 4 / 4 · TRY IT YOURSELF</div>'+
  '<h3>Your turn — explain it without reading the solution</h3>'+
  '<p class="av-explain">It is okay to get this wrong. This is practice, not a graded exam.</p>'+
  '<div class="av-question"><span>QUESTION '+(currentIndex+1)+' / '+qset().length+'</span><p>'+esc(q.question)+'</p></div>'+
@@ -175,28 +193,28 @@ function show(){
  const count=cnt(t.id);
  host.innerHTML='<div class="av-tutor">'+
  '<header class="av-hero"><div><span class="av-eyebrow">BEGINNER ELECTRICAL ENGINEERING · INTERACTIVE WORKBOOK</span><h2>Understand it. See it. Solve it.</h2>'+
- '<p>No prior EE knowledge required. Learn the words first, study a labeled drawing, and reveal one small step at a time.</p></div>'+
+ '<p>No prior EE knowledge required. Explore a full circuit schematic, graph and wiring picture for each question before solving the steps.</p></div>'+
  '<div class="av-hero-stats"><strong>'+allKnown+' / '+QUESTIONS.length+'</strong><small>questions mastered</small></div></header>'+
  '<div class="av-tutor-layout"><aside class="av-guide-menu"><div class="av-guide-label">YOUR LEARNING PATH</div>'+
  '<label class="av-selector-label" for="avTopicList">Select a topic</label><select id="avTopicList">'+TOPICS.map((x,i)=>'<option value="'+esc(x.id)+'" '+(x.id===topic?"selected":"")+'>Topic '+(i+1)+': '+esc(x.title)+'</option>').join("")+'</select>'+
  '<div class="av-topic-progress"><strong>'+count+' / 30</strong> mastered in this topic<div><span style="width:'+(100*count/30)+'%"></span></div></div>'+
  '<div class="av-guide-label">QUESTION TYPE</div><select id="avLevelList">'+["All","Foundations","Application","Calculation","Troubleshooting"].map(x=>'<option value="'+x+'" '+(x===filter?"selected":"")+'>'+x+'</option>').join("")+'</select>'+
  '<label class="av-selector-label" for="avQuestionSearch">Search questions</label><input id="avQuestionSearch" type="search" placeholder="Voltage, ripple, UART..." value="'+esc(query)+'">'+
- '<div class="av-how"><strong>How this workbook works</strong><ol><li>Learn basic words and concepts.</li><li>Follow the worked answer one step at a time.</li><li>Try answering without looking.</li></ol></div>'+
+ '<div class="av-how"><strong>How this workbook works</strong><ol><li>Learn the basic terms.</li><li>Explore your circuit and board connection diagrams.</li><li>Follow each worked step.</li><li>Try independently.</li></ol></div>'+
  '<button class="av-light av-export" id="avExportLearning">Export my saved progress</button></aside>'+
  '<div class="av-workbook"><div class="av-workbook-heading"><div><span class="av-eyebrow">'+esc(t.group.toUpperCase())+' · TOPIC '+(TOPICS.indexOf(t)+1)+' OF '+TOPICS.length+'</span>'+
  '<h2>'+esc(t.title)+'</h2><p>'+esc(LESSONS[t.id]?.lead||t.goal)+'</p></div></div>'+
  '<div class="av-question-controls"><strong>QUESTION '+(all.length?currentIndex+1:0)+' / '+all.length+'</strong>'+
  '<div><button id="avQuestionPrevious" class="av-light" '+(currentIndex<=0?"disabled":"")+'>← Previous</button><button id="avQuestionNext" class="av-light" '+(currentIndex>=all.length-1?"disabled":"")+'>Next →</button></div></div>'+
- (q?'<div class="av-page-tabs" role="tablist" aria-label="Three-page guided workbook">'+
- [["learn","1 · Understand"],["work","2 · Baby steps"],["try","3 · Try it"]].map((x,i)=>'<button role="tab" aria-selected="'+(page===x[0]?"true":"false")+'" data-page="'+x[0]+'" class="'+(page===x[0]?"active":"")+'">'+x[1]+'</button>').join("")+'</div>'+
- (page==="learn"?lessonPage(q,t,f):page==="work"?solvePage(q,t,f):practicePage(q,t,f)):
+ (q?'<div class="av-page-tabs" role="tablist" aria-label="Four-page visual guided workbook">'+
+ [["learn","1 · Understand"],["visual","2 · Visuals"],["work","3 · Baby steps"],["try","4 · Try it"]].map((x,i)=>'<button role="tab" aria-selected="'+(page===x[0]?"true":"false")+'" data-page="'+x[0]+'" class="'+(page===x[0]?"active":"")+'">'+x[1]+'</button>').join("")+'</div>'+
+ (page==="learn"?lessonPage(q,t,f):page==="visual"?visualPage(q,t,f):page==="work"?solvePage(q,t,f):practicePage(q,t,f)):
  '<div class="av-no-result"><h3>No questions found</h3><p>Clear the search or select another question type.</p></div>')+
  '<details class="av-browse-questions"><summary>Browse all '+all.length+' questions in this topic</summary><div class="av-number-grid">'+
  all.map((p,i)=>'<button data-qindex="'+i+'" class="'+(currentIndex===i?"active ":"")+(state.ratings[p.id]==="know"?"done":state.ratings[p.id]==="again"?"retry":"")+'" aria-label="Question '+(i+1)+' '+esc(p.level)+'">'+(i+1)+'</button>').join("")+'</div>'+
  '<small>Blue: current · Green: mastered · Amber: review needed.</small></details>'+
  '<p class="av-footnote">All examples are educational; use approved procedures and actual device specifications for real hardware. Textbook chapter topics inspired the curriculum, but problems and explanations are original.</p>'+
- '</div></div></div>';
+ '</div></div><dialog class="av-zoom-dialog" id="avVisualZoom" aria-label="Expanded circuit figure"><div class="av-zoom-top"><strong>Expanded engineering diagram</strong><button class="av-light" type="button" id="avZoomClose">Close ×</button></div><div id="avZoomBody"></div></dialog></div>';
  wire();
 }
 function switchPage(p){page=p;stepIndex=0;feedback="";expanded=false;show();find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});}
@@ -220,6 +238,12 @@ function wire(){
  if(prev)prev.onclick=()=>moveQuestion(currentIndex-1);
  if(next)next.onclick=()=>moveQuestion(currentIndex+1);
  const work=find("#avGoWork",host);if(work)work.onclick=()=>switchPage("work");
+ const visual=find("#avGoVisual",host);if(visual)visual.onclick=()=>switchPage("visual");
+ const visBack=find("#avVisualBack",host);if(visBack)visBack.onclick=()=>switchPage("learn");
+ const visNext=find("#avVisualForward",host);if(visNext)visNext.onclick=()=>switchPage("work");
+ host.querySelectorAll("[data-zoom]").forEach(b=>b.onclick=()=>{const q=selected(),t=topicOf(),dialog=find("#avVisualZoom",host),body=find("#avZoomBody",host);if(!q||!VIS||!dialog||!body)return;body.innerHTML=VIS.render(q,t,b.dataset.zoom);dialog.showModal()});
+ const zoomClose=find("#avZoomClose",host);if(zoomClose)zoomClose.onclick=()=>find("#avVisualZoom",host)?.close();
+ const zoomDialog=find("#avVisualZoom",host);if(zoomDialog)zoomDialog.onclick=e=>{if(e.target===zoomDialog)zoomDialog.close()};
  const stepBack=find("#avStepBack",host);if(stepBack)stepBack.onclick=()=>{stepIndex=Math.max(0,stepIndex-1);show()};
  const stepNext=find("#avStepNext",host);if(stepNext)stepNext.onclick=()=>{stepIndex++;show()};
  const goTry=find("#avGoTry",host);if(goTry)goTry.onclick=()=>switchPage("try");
