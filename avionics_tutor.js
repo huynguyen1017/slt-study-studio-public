@@ -8,6 +8,7 @@ const QUESTIONS=window.AVIONICS_QUESTIONS||[];
 const LESSONS=window.AVIONICS_BEGINNER_LESSONS||{};
 const DEEP=window.AVIONICS_CONCEPT_DEEP_DIVE||{};
 const SI=window.AVIONICS_SI_LESSON||null;
+const BOOK=window.AVIONICS_TEXTBOOK_TOC||null;
 const VIS=window.avionicsVisuals;
 const ASSESS=window.avionicsAnswerCheck;
 const STORE="slt-avionics-ee-practice-v1";
@@ -93,8 +94,8 @@ function stepsFor(q,t,f){
  const st=q.steps||[];
  const beginner=f.deep;
  const out=[];
- const formulaStr=q.formula||(beginner?beginner.formula:"V = I * R");
- const subStr=q.sub||(beginner?beginner.sub:"V = 5.0");
+ const formulaStr=q.formula||(beginner&&beginner.formula)||null;
+ const subStr=q.sub||(beginner&&beginner.sub)||null;
  if(q.level==="Foundations"||q.level==="Application"){
   out.push({
    title:"Understand the question in everyday words",
@@ -263,7 +264,7 @@ function lessonPage(q,t,f){
  const glossary=item?item.words:guide.terms;
  const summary=item?item.plain:f.definition;
  const illustration=VIS?VIS.render(q,t,inlineVisualMode):"";
- const formulaSrc=q.formula||(item&&item.formula)||"V = I * R";
+ const formulaSrc=q.formula||(item&&item.formula)||null;
  const subSrc=q.sub||(item&&item.sub)||"";
  return '<section class="av-page" aria-label="Understand the concept">'+
  '<div class="av-eyebrow">PAGE 1 / 4 · UNDERSTAND THE QUESTION &amp; CIRCUIT</div>'+
@@ -277,7 +278,7 @@ function lessonPage(q,t,f){
  '<h4 class="av-figure-heading">Interactive circuit, graph &amp; 3-panel breadboard connection for '+esc(q.id.toUpperCase())+'</h4>'+
  visualSwitcherBar(inlineVisualMode)+illustration+
  '<div class="av-actions-bottom"><button id="avGoVisual" class="av-light">See all 3 large visuals stacked →</button><button id="avGoWork" class="av-primary">See all 6 baby steps + worked MathML →</button></div>'+
- equation(formulaSrc,"1. ENGINEERING EQUATION (MATHML)")+
+ (formulaSrc?equation(formulaSrc,"1. ENGINEERING EQUATION (MATHML)"):"")+
  (subSrc?equation(subSrc,"2. WORKED EXAMPLE / SUBSTITUTION (ENGINEERING NOTATION)"):"")+
  '<div class="av-worked-mini"><strong>One real-life bench example</strong><p>'+rich(item?item.example:guide.example)+'</p></div>'+
  '<div class="av-takeaway"><strong>Remember this:</strong> '+rich(item?item.recap:guide.lead)+'</div>'+
