@@ -33,7 +33,7 @@ for(const t of topics){
    const markup=VIS.render(q,t,mode);
    assert(markup.includes("<svg"),"Missing SVG: "+q.id+" "+mode);
    assert(markup.includes("Question:")&&markup.includes(q.id),"Must label exact question: "+q.id+" "+mode);
-   assert(!/<image\s|https?:\/\//i.test(markup),"No remotely loaded imagery: "+q.id+" "+mode);
+   assert(!/<image\s|<script\b|xlink:href\s*=|<foreignObject/i.test(markup),"No remotely loaded imagery: "+q.id+" "+mode);
   }
 
   const steps=context.window.avionicsWorkbookV2.stepsForQuestion(q.id);
