@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v31-integrated-mixed-networks-r3';
+const CACHE = 'slt-study-studio-v32-method-safe-dice-r1';
 const CORE = [
   "./",
   "./index.html",
