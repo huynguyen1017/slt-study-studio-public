@@ -198,6 +198,64 @@ for(const topic of window.AVIONICS_TOPICS){
  const actual=questions.filter(q=>q.topic===topic.id).length;
  if(actual!==30)throw Error("Expected 30, got "+actual+" for "+topic.id);
 }
+
+// Progression by cognitive load rather than repeating the same question twice.
+// Existing question IDs and numerical answer keys are deliberately preserved.
+for(const topic of window.AVIONICS_TOPICS){
+ const sub=questions.filter(q=>q.topic===topic.id);
+ const F=[
+ "Define {term} to someone who has never studied electrical engineering. Identify its measurement unit and one everyday example.",
+ "Contrast {term} against a related concept. Explain what physically differs and what remains constant.",
+ "Sketch a small safe demonstration for {term}. Name the source, return path, component and measurement nodes.",
+ "Predict how a meter or scope would respond if {term} changes. Explain the direction of change before using equations.",
+ "Identify a common misconception or limitation of {term}. Describe an observation that could disprove your explanation."
+ ];
+ const P=[
+ "Build a low-voltage demonstration of {term}; list parts, connection order and the expected observation.",
+ "Choose an instrument and its configuration to measure {term}. Identify two probe points and one safety check.",
+ "Create a pre-power-on checklist for {term}: connector identity, source, GND, polarity and limits.",
+ "Plan an experiment to compare predicted and measured behavior of {term}, including uncertainty and specifications.",
+ "Design a controlled A/B comparison to distinguish wiring, probe, software and DUT causes when testing {term}."
+ ];
+ const D=[
+ "Select two independent measurements to distinguish an open path from a setup fault in this case.",
+ "Compare expected and measured voltage/current at two reference points before changing the DUT.",
+ "Build an A/B/A isolation test with a known-good cable, fixture or board and explain what it proves.",
+ "Investigate an intermittent recurrence using the same stimulus, timestamps, firmware and raw logs.",
+ "Decide what evidence and signed disposition are necessary before a qualification GO decision."
+ ];
+ for(const q of sub){
+  const idx=q.skillIndex||0;
+  const sk=topic.skills[idx]||topic.skills[0];
+  if(q.level==="Foundations"){
+    q.question=F[idx].replace("{term}",sk[0]);q.difficulty=idx+1;
+    q.learningObjective=["Name and recognize","Contrast","Sketch","Predict","Challenge assumptions"][idx];
+    q.steps=["Start with the exact concept: "+sk[1],"Explain why it changes what we measure: "+sk[2],"Point to the actual component or reading: "+sk[3],"Practice speaking the complete answer without looking."];
+  }else if(q.level==="Application"){
+    q.question=P[idx].replace("{term}",sk[0])+" Real-world context: "+sk[3];q.difficulty=idx+6;
+    q.learningObjective=["Demonstrate","Instrument","Preflight","Validate","Isolate"][idx];
+    q.steps=["State the electrical principle: "+sk[1],"Check engineering risk: "+sk[2],"Identify observable evidence: "+sk[3],"Verify safe conditions, units, expected results and uncertainties."];
+  }else if(q.level==="Calculation"){
+    const n=Number(q.id.match(/-C(\d+)$/)[1]);q.difficulty=10+n;
+    q.learningObjective=n<=3?"First numerical steps":n<=6?"Conversions and equivalent models":"Applied calculations and plausibility";
+    if(n>=7){q.question+=" Afterward, explain a unit check and a way to verify the result independently.";q.steps=[...q.steps,"Confirm the physical units and compare the magnitude against the circuit's expected behavior."];}
+  }else if(q.level==="Troubleshooting"){
+    const n=Number(q.id.match(/-D(\d+)$/)[1]);q.difficulty=20+n;
+    const c=topic.cases[Math.floor((n-1)/2)],symptom=c[0];
+    if(n%2===0){
+      q.question=D[Math.floor((n-1)/2)]+" Reported observation: "+symptom;
+      q.steps=["Preserve the symptom and conditions: "+symptom,"Record or repeat the first comparison safely: "+c[1],"Identify competing explanations: "+c[2],"Gather independent proof before changing hardware: "+c[3]];
+    }else{
+      q.question="A technician reports '"+symptom+"'. What is the safest FIRST test or isolation step, and what result would you expect?";
+    }
+    q.learningObjective=["Observe","Measure","Isolate","Reproduce","Disposition"][Math.floor((n-1)/2)];
+  }
+ }
+ sub.sort((a,b)=>a.difficulty-b.difficulty);
+ const offset=questions.findIndex(q=>q.topic===topic.id);
+ questions.splice(offset,sub.length,...sub);
+}
+
 if(questions.length!==window.AVIONICS_TOPICS.length*30)throw Error("Question-bank count mismatch");
 window.AVIONICS_QUESTIONS=questions;
 window.AVIONICS_CALC_FAMILIES=A;
