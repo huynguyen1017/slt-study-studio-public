@@ -100,6 +100,7 @@ function guided(q){
  '<article class="nvs-step"><strong>STEP '+(step+1)+' / '+total+'</strong><p>'+esc(q.steps[step])+'</p></article>'+
  '<div class="nvs-inline-actions"><button type="button" id="nvsPrevStep" '+(!step?'disabled':'')+'>← Prior step</button><button type="button" id="nvsNextStep" '+(step>=total-1?'disabled':'')+'>Next step →</button><button type="button" id="nvsAllSteps">'+(showAll?'Hide':'Show')+' all steps</button></div>'+
  (showAll?'<ol class="nvs-steps-all">'+q.steps.map(s=>'<li>'+esc(s)+'</li>').join("")+'</ol>':"")+
+ (q.code?'<section class="nvs-code"><h4>Runnable teaching example (code is not executed on your device)</h4><pre><code>'+esc(q.code)+'</code></pre><p>Trace each line against the expected result and test negative cases before copying into a real lab system.</p></section>':"")+
  '<div class="nvs-math"><strong>Interview-style proposed explanation</strong><p>'+esc(q.interviewAnswer)+'</p>'+
  (q.expected!==undefined?'<strong>Answer</strong><code>'+esc(fmt(q.expected)+" "+q.unit)+'</code><strong>New substitution</strong><code>'+esc(q.sub)+'</code>':"")+'</div>'+
  '<div class="nvs-inline-actions"><button type="button" data-screen="practice" class="nvs-primary">Now check my understanding →</button></div></div>';
