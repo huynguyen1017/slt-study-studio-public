@@ -29,6 +29,7 @@ on:
       - 'tests/avionics-curriculum-distinct-v10.test.cjs'
       - 'tests/avionics-integrated-v11.test.cjs'
       - 'tests/avionics-dice-methods-v12.test.cjs'
+      - 'tests/avionics-advanced-50-v12.test.cjs'
 permissions:
   contents: read
 jobs:
@@ -51,6 +52,7 @@ jobs:
           node --check avionics_distinct_reasoning_v10.js
           node --check avionics_integrative_capstones_v11.js
           node --check avionics_mixed_networks_v11.js
+          node --check avionics_advanced_50_v12.js
           node --check avionics_mixed_visuals_v11.js
           node --check avionics_practice.js
           node --check avionics_beginner_lessons.js
@@ -73,6 +75,7 @@ jobs:
           node tests/avionics-curriculum-distinct-v10.test.cjs
           node tests/avionics-integrated-v11.test.cjs
           node tests/avionics-dice-methods-v12.test.cjs
+          node tests/avionics-advanced-50-v12.test.cjs
       - name: Install headless browser for desktop and mobile smoke tests
         run: |
           npm install --no-save playwright@1.56.1
