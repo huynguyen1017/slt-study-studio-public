@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v26-coursework-notebook-labs';
+const CACHE = 'slt-study-studio-v27-unique-wiring-sim';
 const CORE = [
   "./",
   "./index.html",
@@ -25,6 +25,8 @@ const CORE = [
   "./avionics_feedback.css",
   "./avionics_tutor.css",
   "./avionics_visuals.js",
+  "./avionics_circuit_simulator.js",
+  "./avionics_circuit_simulator.css",
   "./avionics_visuals.css",
   "./cards.js",
   "./labs.js",
