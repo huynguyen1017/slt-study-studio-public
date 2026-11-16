@@ -304,7 +304,7 @@ function wire(){
    const result=ASSESS.gradeText(q,t,draftText);
    state.assessments[q.id]=result;
    if(result.band!=="likely-correct"&&state.ratings[q.id]==="know")state.ratings[q.id]="again";
-   save();feedback=gradeView(result);show();
+   save();answerDirty=false;feedback=gradeView(result);show();
  };
  const compare=find("#avCompare",host);
  if(compare)compare.onclick=()=>{
