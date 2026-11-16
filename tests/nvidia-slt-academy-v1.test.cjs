@@ -95,7 +95,7 @@ console.log("PASS: 12 topics ×50 =600; 120 distinct topic methods; 840 method-c
   const storage=await page.evaluate(()=>Object.keys(localStorage));
   assert(storage.includes("slt-nvidia-soc-academy-v1"),"NVIDIA progress must save to distinct key");
   await page.locator("#nvidiaView [data-goto='49']").last().click();
-  assert((await page.locator("#nvidiaView .nvs-question").textContent()).includes("three"));
+  assert((await page.locator("#nvidiaView .nvs-question").textContent()).includes("third subsystem"));
   await page.locator("#nvidiaView #nvsTopics").selectOption("dram");
   assert((await page.locator("#nvidiaView .nvs-toolbar").textContent()).includes("DDR"));
   await page.locator('[data-mode="avionics"]').click();
