@@ -67,6 +67,9 @@ console.log("PASS: 12 topics ×50 =600; 120 distinct topic methods; 840 method-c
   assert.equal(await page.locator("#nvidiaView .nvs-numbers button").count(),50);
   assert((await page.locator("#nvidiaView .nvs-hero").textContent()).includes("600"));
   assert((await page.locator("#nvidiaView .nvs-toolbar").textContent()).includes("Electrical Foundations"));
+  await page.locator("#nvidiaView [data-goto='21']").last().click();
+  assert.equal(await page.locator("#nvidiaView .nvs-exact-circuit").count(),1,"Series-parallel mixed circuit needs exact connected SVG");
+  assert((await page.locator("#nvidiaView .nvs-exact-circuit").textContent()).includes("Ra 175 Ω"));
   await page.locator("#nvidiaView [data-goto='20']").last().click();
   const canonical=await page.locator("#nvidiaView .nvs-question").textContent();
   assert((await page.locator("#nvidiaView .nvs-toolbar").textContent()).includes("21 / 50"));
