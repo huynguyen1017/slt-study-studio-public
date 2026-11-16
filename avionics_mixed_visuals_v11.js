@@ -37,18 +37,18 @@ function svg(q,mode){
  s+=line(115,250,115,410);
  s+=line(92,217,138,217,"#1f3548",4)+line(100,229,130,229,"#1f3548",4)+line(92,241,138,241,"#1f3548",4);
  s+=txt(64,205,"+",23,"#cc327b","middle")+txt(64,267,"−",23,"#cc327b","middle");
- s+=txt(29,300, "Vₛ = "+num(supply)+" V",17,"#1b5b83");
+ s+=txt(29,300, n.illustrative?"Vₛ: illustrative "+num(supply)+" V":"Vₛ = "+num(supply)+" V",14,"#1b5b83");
  s+=node(115,149,"+");
  s+=node(115,410,"B · GND");
- if(kind==="series"||kind==="divider"||kind==="miswire"){
+ if(kind==="series"||kind==="series2"||kind==="divider"||kind==="miswire"){
   if(kind==="divider"){
    s+=line(115,149,430,149)+zigV(430,165,264,"Rtop",num(top)+" Ω");
    s+=line(430,149,430,165)+node(430,285,"A · Vout");
    s+=line(430,264,430,285)+zigV(430,296,399,"Rbottom",num(bot)+" Ω");
    s+=line(430,285,430,296)+line(430,399,430,410)+line(115,410,430,410);
   }else{
-   const vals=kind==="miswire"?[a,b,c,d]:[a,b,d];
-   const starts=kind==="miswire"?[185,345,505,665]:[205,425,645];
+   const vals=kind==="miswire"?[a,b,c,d]:kind==="series2"?[a,b]:[a,b,d];
+   const starts=kind==="miswire"?[185,345,505,665]:kind==="series2"?[260,590]:[205,425,645];
    const ends=starts.map(x=>x+125);
    let x=115;
    for(let i=0;i<vals.length;i++){s+=zigH(x,ends[i],149,"R"+(i+1),num(vals[i])+" Ω");x=ends[i];}
