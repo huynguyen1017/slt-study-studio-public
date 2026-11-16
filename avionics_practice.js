@@ -88,10 +88,10 @@ function render(){
         <p>Original explanations aligned to the chapter sequence of Floyd &amp; Buchla and the Muon Space avionics test job requirements. Not copied from the textbook and not actual Muon flight specifications.</p>
         <button id="avExport" class="outline">Export my progress</button>
       </div>
-    </main>
+    </div>
   </div>`;
  $('[id=avLevel]',root).onchange=e=>{level=e.target.value;index=0;resetQuestion();render()};
- $('#avSearch',root).oninput=e=>{filterText=e.target.value.toLowerCase().trim();index=0;resetQuestion();render()};
+ $('#avSearch',root).oninput=e=>{const cursor=e.target.selectionStart;filterText=e.target.value.toLowerCase().trim();index=0;resetQuestion();render();const field=$('#avSearch',root);field.focus();field.setSelectionRange(cursor,cursor)};
  root.querySelectorAll('[data-topic]').forEach(b=>b.onclick=()=>{topic=b.dataset.topic;index=0;resetQuestion();render()});
  $('#avExport',root).onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),questionCount:ITEMS.length,...state},null,2)],{type:"application/json"});const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="avionics-ee-progress.json";a.click();setTimeout(()=>URL.revokeObjectURL(u),1500)};
  if(!q)return;
