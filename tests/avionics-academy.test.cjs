@@ -9,7 +9,7 @@ const store=new Map();
 const storage={getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)};
 const context={window:{},Math,console,localStorage:storage,document:{}};
 vm.createContext(context);
-for(const p of ["avionics_data.js","avionics_questions.js","simulation/math_format.js","avionics_beginner_lessons.js","avionics_si_lesson.js","avionics_textbook_toc.js","avionics_visuals.js","avionics_tutor.js"]){
+for(const p of ["avionics_data.js","avionics_questions.js","avionics_distinct_labs_v10.js","avionics_distinct_math_v10.js","avionics_distinct_reasoning_v10.js","simulation/math_format.js","avionics_beginner_lessons.js","avionics_si_lesson.js","avionics_textbook_toc.js","avionics_visuals.js","avionics_tutor.js"]){
  vm.runInContext(load(p),context,{filename:p});
 }
 const topics=context.window.AVIONICS_TOPICS,questions=context.window.AVIONICS_QUESTIONS;
@@ -55,7 +55,7 @@ for(const s of ["avionics_beginner_lessons.js","avionics_tutor.js","avionics_tut
  assert(html.includes(s),s);
  assert(service.includes(s),"offline cache missing "+s);
 }
-assert(service.includes("v29-nucleo-progressive-videos"));
+assert(service.includes("v30-distinct-690-curriculum"));
 assert(service.includes("avionics_si_lesson.js")&&service.includes("avionics_si.css"));
 assert(service.includes("avionics_simulator.js")&&service.includes("avionics_simulator.css"));
 const ohm=topics.find(t=>t.id==="ohm"),ohmCalc=questions.find(q=>q.id==="ohm-C1");
