@@ -262,9 +262,37 @@ function focusInfo(q,t){
  const idx=match[1]==="D"?Math.floor(n/2):match[1]==="F"||match[1]==="A"?n:Math.min(4,1+Math.floor(n/5));
  return t.skills[idx]||t.skills[0];
 }
+
+function pinBoard(q,t){
+ const id=t.id,question=q.question;
+ let pins=[["3V3","3V3"],["GND","GND"],["A0","Signal input"],["RESET","RESET"]];
+ if(id==="buses"){
+  if(/UART/i.test(question))pins=[["3V3","3V3"],["GND","GND"],["TX","RX"],["RX","TX"]];
+  else if(/SPI/i.test(question))pins=[["3V3","3V3"],["GND","GND"],["MOSI","MOSI"],["MISO","MISO"],["SCLK","SCLK"],["CS","CS"]];
+  else if(/CAN/i.test(question))pins=[["GND","GND"],["CAN_H","CAN_H"],["CAN_L","CAN_L"]];
+  else pins=[["3V3","3V3"],["GND","GND"],["SDA","SDA"],["SCL","SCL"]];
+ }
+ if(id==="schematics")pins=[["3V3","3V3"],["GND","GND"],["RESET","RESET"],["CLK","CLK"]];
+ if(id==="instruments")pins=[["3V3","3V3"],["GND","DMM COM"],["TP1","Scope CH1"],["TP2","Scope CH2"]];
+ let o=head(q,t);
+ o+=rect(36,73,287,231,"#eff7fc","#91bcd1",14)+rect(101,141,100,90,"#244d67","#355d73",9)+
+ text(151,178,"MCU",22,"#fff","middle","700")+text(151,199,"Generic DUT",12,"#dceff9","middle");
+ o+=rect(470,73,230,231,"#f5f7f0","#aac4a7",14)+text(585,99,id==="buses"?"PERIPHERAL / BUS":id==="instruments"?"MEASUREMENT LEADS":"TEST / BREAKOUT",15,P.ink,"middle","700");
+ o+=text(166,98,"DEV BOARD (ILLUSTRATIVE)",12,P.blue,"middle","700");
+ pins.forEach((p,i)=>{
+  const y=119+i*29;
+  const colors=[P.red,P.ink,P.blue,P.gold,P.green,"#95539d"];
+  const c=colors[i]||P.blue;
+  o+=dot(310,y,c,6)+text(295,y+5,p[0],12,c,"end","700")+
+   line(320,y,483,y,c,3)+dot(484,y,c,5)+text(503,y+5,p[1],12,c,"start","700");
+ });
+ o+=text(358,318,"Generic signal names only: check your actual board's pinout, level and ground.",12,P.muted,"middle");
+ return svg(o,"Generic development board showing "+pins.map(p=>p[0]+" to "+p[1]).join(", ")+" wiring relationships");
+}
+
 function render(q,t,mode){
  const m=describe(q,t);
- const views={schematic:schematic,concept:curve,wiring:m.board?breadboard:bench};
+ const views={schematic:schematic,concept:curve,wiring:m.board?breadboard:(["buses","instruments","schematics"].includes(t.id)?pinBoard:bench)};
  if(!views[mode])return "";
  const figure=views[mode](q,t);
  const label=mode==="schematic"?"Full schematic / signal path":mode==="concept"?"Graph / current-flow explanation":m.wiring;
