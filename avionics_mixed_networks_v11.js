@@ -176,7 +176,7 @@ const capstones={
  ]
 };
 function textCase(q,data,stage){
- const [title,question,answer,kind]=data;
+ let [title,question,answer,kind]=data;
  q.originalMasteryQuestion=q.question;q.question=question;q.learningObjective=title;q.auditSkill=title;q.skillName=title;
  const givenV=question.match(/\b(\d+(?:\.\d+)?)\s*V\b/);
  const values={...defaults};
