@@ -2,6 +2,18 @@
 
 ## Avionics EE Practice Academy (23 topics × 30 original questions)
 
+### Per-question original SVG visual explorer (v3)
+
+Every existing Avionics EE Practice question now has a **four-page** guided workbook: Understand → Visuals → Baby Steps → Try It. The Visuals page contains three independently zoomable, accessible SVG figures:
+
+- **Circuit schematic:** resistor/source, series/parallel, reactive components, signals or an engineering test-system path; labels reflect known quantities from the question, with unknowns shown symbolically.
+- **Concept graph:** source/signal behavior, current-flow illustration or response curve. Simulated/normalized plots are explicitly marked as illustrative rather than real instrument captures.
+- **Breadboard or bench wiring:** labeled breadboard rows/columns for simple low-voltage topologies; otherwise a relevant instrument/DUT connection diagram. Generic drawings **are not verified manufacturer pinouts or safe build instructions**.
+
+The original 690 questions, numerical MathML equations, grading, review status and browser-local progress key remain unchanged. Everything renders locally without uploading user data, downloading image assets or reproducing textbook figures. Renderer: `avionics_visuals.js` and `avionics_visuals.css`. Regression verifies all 690 × 3 SVGs and desktop/mobile visual navigation.
+
+
+
 Open [Avionics EE Practice](https://huynguyen1017.github.io/slt-study-studio-public/#avionics) in the navigation bar.
 
 - 690 original practice exercises: five foundations, five applications, ten numerical calculations, and ten troubleshooting scenarios per topic.
