@@ -129,7 +129,7 @@ function evidence(q){
 }
 function render(){
  if(!root)return;
- const t=track(),q=getQ(),base=getBase(),done=Object.values(state.mastered).filter(Boolean).length;
+ const t=track(),q=getQ(),base=getBase(),done=Q.filter(item=>state.mastered[item.id]).length;
  root.innerHTML='<div class="nvs-app"><div class="nvs-hero"><div><small class="nvs-eyebrow">LTTS · NVIDIA CUSTOMER · SANTA CLARA · EDUCATIONAL PRACTICE</small><h2>System Level Test Engineer Academy</h2><p>From zero EE foundations to post-silicon troubleshooting and evidence-based yield improvement. Distinct from the Muon Avionics Academy.</p></div><div class="nvs-stats"><strong>'+done+' / '+Q.length+'</strong><span>canonical questions mastered</span><small>12 tracks · 50 questions each</small></div></div>'+
  '<div class="nvs-layout"><aside class="nvs-side"><label for="nvsTopics">Choose learning track</label><select id="nvsTopics">'+T.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===state.topic?'selected':'')+'>'+esc(x.title)+'</option>').join("")+'</select>'+
  '<div class="nvs-track"><strong>'+count(state.topic)+' / 50</strong><span> mastered in this track</span><div class="nvs-trackbar"><span style="width:'+(2*count(state.topic))+'%"></span></div></div>'+
