@@ -127,10 +127,13 @@ function siChapterPanel(){
  unitTable("The seven SI base units",SI.base)+
  '<div class="av-si-highlight"><strong>Only one base unit here is an electrical unit:</strong> ampere (A) measures electric current. The volt (V) measures potential difference, but it is a derived unit.</div>'+
  unitTable("Common derived units — electric and magnetic",SI.derived)+
+ unitTable("Magnetic quantities and their SI-related unit expressions",SI.magnetic)+
+ '<p class="av-si-note">'+esc(SI.gaussNote)+'</p>'+
  '<div class="av-math"><div class="av-math-label">EXAMPLE · VOLT EXPRESSED WITH BASE UNITS (NATIVE MATHML)</div>'+SI.formulaMathml+'</div>'+
  '<h4>How this textbook labels supplementary units</h4>'+
  unitTable("Historical SI supplementary class",SI.historical)+
  '<p class="av-si-note">'+esc(SI.note)+'</p>'+
+ '<p class="av-si-note">'+esc(SI.mksNote)+'</p>'+
  '<h4>Quantity symbols versus unit symbols</h4>'+
  '<p>'+esc(SI.styleNote)+'</p>'+
  '<div class="av-math"><div class="av-math-label">ITALIC QUANTITY VS UPRIGHT UNIT SYMBOL</div>'+SI.symbolMathml+'</div>'+
