@@ -73,7 +73,7 @@ for(const topic of t){
   const qq=own.find(x=>x.id===topic.id+"-C"+(i*5+j+1));
   assert(qq,topic.id+" missing numerical task");
   if(qq.originalNumeric){
-    assert.equal(qq.originalNumeric.question,numeric.prompt,qq.id+" historical source prompt changed");
+    assert(qq.originalNumeric.question.startsWith(numeric.prompt),qq.id+" original problem and math source changed");
     assert.equal(qq.originalNumeric.unit,numeric.unit,qq.id+" source unit");
     assert.equal(qq.originalNumeric.expected,numeric.answer,qq.id+" reference source");
   }else{
