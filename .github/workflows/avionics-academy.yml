@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/avionics-ee-practice-academy
+      - feature/avionics-baby-steps-workbook-v2
   pull_request:
     paths:
       - 'index.html'
@@ -27,6 +28,8 @@ jobs:
           node --check avionics_data.js
           node --check avionics_questions.js
           node --check avionics_practice.js
+          node --check avionics_beginner_lessons.js
+          node --check avionics_tutor.js
           node tests/avionics-academy.test.cjs
       - name: Install headless browser for desktop and mobile smoke tests
         run: |
