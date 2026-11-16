@@ -1516,31 +1516,31 @@ function threePanelBoardAndBreadboard(q,t){
   text(702,281,tgt1,7.5,P.ink,"start","600")+
   text(702,293,tgt2||("Topic: "+c.topic.toUpperCase()),7.2,P.muted,"start","500");
 
- // Panel 3: Compact ANSI/IEEE Electrical Equivalent Circuit (all inside y=346..426)
+ // Panel 3: Compact ANSI/IEEE Electrical Equivalent Circuit (all inside y=346..428)
  s+=rect(14,320,832,126,"#fff","#cbdce7",11,1.4)+
-  text(28,340,"3 · MATCHING ELECTRICAL CONNECTION",12,P.ink,"start","800")+
-  text(832,340,"Question "+q.id.toUpperCase()+" · "+c.sch.toUpperCase(),9.5,P.blue,"end","700");
+  text(28,339,"3 · MATCHING ELECTRICAL CONNECTION",11.8,P.ink,"start","800")+
+  text(832,339,"Question "+q.id.toUpperCase()+" · "+c.sch.toUpperCase(),9.5,P.blue,"end","700");
 
  const zH=(x1,x2,y,lab)=>{
   const n=6,dx=(x2-x1)/n;let d="M"+x1+" "+y;
-  for(let i=0;i<n;i++)d+=" L"+(x1+(i+.5)*dx)+" "+(y+(i%2?-7:7));
-  return path(d+" L"+x2+" "+y,P.ink,2.2)+text((x1+x2)/2,y-11,lab,8.5,P.navy,"middle","700");
+  for(let i=0;i<n;i++)d+=" L"+(x1+(i+.5)*dx)+" "+(y+(i%2?-6.5:6.5));
+  return path(d+" L"+x2+" "+y,P.ink,2.2)+text((x1+x2)/2,y-10,lab,8.3,P.navy,"middle","700");
  };
  const zV=(x,y1,y2,lab)=>{
   const n=5,dy=(y2-y1)/n;let d="M"+x+" "+y1;
   for(let i=0;i<n;i++)d+=" L"+(x+(i%2?6:-6))+" "+(y1+(i+.5)*dy);
-  return path(d+" L"+x+" "+y2,P.ink,2.2)+text(x+11,(y1+y2)/2+3,lab,8.5,P.navy,"start","700");
+  return path(d+" L"+x+" "+y2,P.ink,2.2)+text(x+11,(y1+y2)/2+3,lab,8.3,P.navy,"start","700");
  };
- const gnd=(x,y)=>line(x,y,x,y+6,P.ink,2)+line(x-11,y+6,x+11,y+6,P.ink,2)+line(x-7,y+10,x+7,y+10,P.ink,1.8)+line(x-3,y+14,x+3,y+14,P.ink,1.6);
+ const gnd=(x,y)=>line(x,y,x,y+5,P.ink,2)+line(x-10,y+5,x+10,y+5,P.ink,2)+line(x-6,y+9,x+6,y+9,P.ink,1.8)+line(x-2.5,y+13,x+2.5,y+13,P.ink,1.6);
  const miniBat=(x,yT,yB,lab)=>{
   const m=(yT+yB)/2;
   return line(x,yT,x,m-7,P.ink,2.2)+line(x-13,m-7,x+13,m-7,P.ink,2.8)+line(x-7,m-1,x+7,m-1,P.ink,2)+
    line(x-13,m+4,x+13,m+4,P.ink,2.8)+line(x-7,m+10,x+7,m+10,P.ink,2)+line(x,m+10,x,yB,P.ink,2.2)+
-   text(x-17,m-7,"+",11,P.ink,"end","700")+text(x-17,m+13,"−",11,P.ink,"end","700")+text(x-20,m+3,lab,8.5,P.red,"end","700");
+   text(x-17,m-6,"+",10.5,P.ink,"end","700")+text(x-17,m+13,"−",10.5,P.ink,"end","700")+text(x-20,m+3,lab,8.5,P.red,"end","700");
  };
- const meter=(mx,my,sym,col=P.teal)=>rect(mx-13,my-13,26,26,"#fff",col,13,2)+text(mx,my+4,sym,10.5,col,"middle","800");
- const capH=(x1,x2,y,lab)=>{const m=(x1+x2)/2;return line(x1,y,m-4,y,P.ink,2.2)+line(m-4,y-10,m-4,y+10,P.ink,2.6)+line(m+4,y-10,m+4,y+10,P.ink,2.6)+line(m+4,y,x2,y,P.ink,2.2)+text(m,y-14,lab,8.5,P.navy,"middle","700");};
- const indH=(x1,x2,y,lab)=>{const m=(x1+x2)/2;return line(x1,y,m-18,y,P.ink,2.2)+path("M"+(m-18)+" "+y+" C"+(m-18)+" "+(y-12)+" "+(m-6)+" "+(y-12)+" "+(m-6)+" "+y+" C"+(m-6)+" "+(y-12)+" "+(m+6)+" "+(y-12)+" "+(m+6)+" "+y+" C"+(m+6)+" "+(y-12)+" "+(m+18)+" "+(y-12)+" "+(m+18)+" "+y,P.ink,2.2)+line(m+18,y,x2,y,P.ink,2.2)+text(m,y-15,lab,8.5,P.navy,"middle","700");};
+ const meter=(mx,my,sym,col=P.teal)=>rect(mx-12,my-12,24,24,"#fff",col,12,2)+text(mx,my+3.8,sym,10,col,"middle","800");
+ const capH=(x1,x2,y,lab)=>{const m=(x1+x2)/2;return line(x1,y,m-4,y,P.ink,2.2)+line(m-4,y-10,m-4,y+10,P.ink,2.6)+line(m+4,y-10,m+4,y+10,P.ink,2.6)+line(m+4,y,x2,y,P.ink,2.2)+text(m,y-13,lab,8.3,P.navy,"middle","700");};
+ const indH=(x1,x2,y,lab)=>{const m=(x1+x2)/2;return line(x1,y,m-18,y,P.ink,2.2)+path("M"+(m-18)+" "+y+" C"+(m-18)+" "+(y-11)+" "+(m-6)+" "+(y-11)+" "+(m-6)+" "+y+" C"+(m-6)+" "+(y-11)+" "+(m+6)+" "+(y-11)+" "+(m+6)+" "+y+" C"+(m+6)+" "+(y-11)+" "+(m+18)+" "+(y-11)+" "+(m+18)+" "+y,P.ink,2.2)+line(m+18,y,x2,y,P.ink,2.2)+text(m,y-14,lab,8.3,P.navy,"middle","700");};
  const diodeH=(x1,x2,y,lab,led=false)=>{
   const m=(x1+x2)/2;
   return line(x1,y,m-8,y,P.ink,2.2)+path("M"+(m-8)+" "+(y-8)+" L"+(m+7)+" "+y+" L"+(m-8)+" "+(y+8)+" Z",P.ink,2,"#fce7f3")+
@@ -1549,39 +1549,39 @@ function threePanelBoardAndBreadboard(q,t){
    text(m,y+18,lab,8.2,P.navy,"middle","700");
  };
 
- const yM=381,yT=359,yB=405,{R0,R1,R2,V0,I0,C0,L0,F0}=c;
+ const yM=387,yT=367,yB=409,{R0,R1,R2,V0,I0,C0,L0,F0}=c;
  if(c.sch==="ohmmeter"){
-  s+=meter(140,yM,"Ω",P.red)+line(153,yM,340,yM,P.ink,2.2)+zH(340,480,yM,"R1 "+R0)+line(480,yM,650,yM,P.ink,2.2)+
-   line(650,yM,650,yB,P.ink,2.2)+line(140,yM+13,140,yB,P.ink,2.2)+line(140,yB,650,yB,P.ink,2.2)+
-   text(678,yM+3,"POWER OFF · OHMMETER MODE",8.8,"#a84619","start","800");
+  s+=meter(140,yM,"Ω",P.red)+line(152,yM,340,yM,P.ink,2.2)+zH(340,480,yM,"R1 "+R0)+line(480,yM,650,yM,P.ink,2.2)+
+   line(650,yM,650,yB,P.ink,2.2)+line(140,yM+12,140,yB,P.ink,2.2)+line(140,yB,650,yB,P.ink,2.2)+
+   text(678,yM+3,"POWER OFF · OHMMETER MODE",8.6,"#a84619","start","800");
  }else if(c.sch==="continuity"){
-  s+=meter(120,yM,"Ω",P.red)+line(133,yM,270,yM,P.ink,2.2)+rect(270,yM-11,120,22,"#fef9c3",P.gold,5,1.4)+
+  s+=meter(120,yM,"Ω",P.red)+line(132,yM,270,yM,P.ink,2.2)+rect(270,yM-11,120,22,"#fef9c3",P.gold,5,1.4)+
    text(330,yM+3,"BRIDGE e11↔f11",8,"#854d0e","middle","800")+line(390,yM,480,yM,P.ink,2.2)+
    zH(480,620,yM,"R_trace "+R0)+line(620,yM,690,yM,P.ink,2.2)+gnd(690,yM);
  }else if(c.sch==="ammeter"){
-  s+=miniBat(115,yT,yB,V0)+line(115,yT,250,yT,P.ink,2.2)+meter(263,yT,"A",P.gold)+text(263,yT-15,"SERIES",7.2,P.gold,"middle","800")+
-   line(276,yT,440,yT,P.ink,2.2)+zH(440,580,yT,"R_load "+R0)+line(580,yT,670,yT,P.ink,2.2)+
+  s+=miniBat(115,yT,yB,V0)+line(115,yT,250,yT,P.ink,2.2)+meter(262,yT,"A",P.gold)+text(262,yT-14,"SERIES",7,P.gold,"middle","800")+
+   line(274,yT,440,yT,P.ink,2.2)+zH(440,580,yT,"R_load "+R0)+line(580,yT,670,yT,P.ink,2.2)+
    line(670,yT,670,yB,P.ink,2.2)+line(115,yB,670,yB,P.ink,2.2)+gnd(670,yB)+
-   arrow(315,yT-9,385,yT-9,P.pink,1.8)+text(350,yT-14,"I = "+I0,8,P.pink,"middle","700");
+   arrow(315,yT-8,385,yT-8,P.pink,1.8)+text(350,yT-13,"I = "+I0,7.8,P.pink,"middle","700");
  }else if(c.sch==="voltmeter"){
   s+=miniBat(120,yT,yB,V0)+line(120,yT,380,yT,P.ink,2.2)+dot(380,yT,P.blue,4)+
    zV(380,yT+4,yB-4,"R "+R0)+line(120,yB,580,yB,P.ink,2.2)+dot(380,yB,P.ink,4)+
-   line(380,yT,540,yT,P.blue,2)+line(380,yB,540,yB,P.ink,2)+line(540,yT,540,yM-13,P.blue,2)+
-   meter(540,yM,"V",P.blue)+line(540,yM+13,540,yB,P.ink,2)+text(566,yM+3,"IN PARALLEL",8.5,P.blue,"start","700")+gnd(580,yB);
+   line(380,yT,540,yT,P.blue,2)+line(380,yB,540,yB,P.ink,2)+line(540,yT,540,yM-12,P.blue,2)+
+   meter(540,yM,"V",P.blue)+line(540,yM+12,540,yB,P.ink,2)+text(566,yM+3,"IN PARALLEL",8.5,P.blue,"start","700")+gnd(580,yB);
  }else if(c.sch==="series-2"||c.sch==="series-3"){
-  s+=text(78,yM-11,V0,8.8,P.red,"middle","800")+dot(78,yM,P.red,4)+line(78,yM,140,yM,P.ink,2.2)+
+  s+=text(78,yM-11,V0,8.6,P.red,"middle","800")+dot(78,yM,P.red,4)+line(78,yM,140,yM,P.ink,2.2)+
    zH(140,260,yM,"R1 "+R0)+line(260,yM,320,yM,P.ink,2.2)+dot(290,yM,P.blue,4)+text(290,yM+14,"TP1",7.8,P.blue,"middle","700")+
    zH(320,440,yM,"R2 "+R1)+line(440,yM,500,yM,P.ink,2.2);
   if(c.sch==="series-3")s+=zH(500,620,yM,"R3 "+R2)+line(620,yM,700,yM,P.ink,2.2)+gnd(700,yM);
   else s+=line(500,yM,660,yM,P.ink,2.2)+gnd(660,yM);
  }else if(c.sch==="divider"||c.sch==="loaded-divider"){
-  s+=text(95,yT+4,V0,9,P.red,"middle","800")+dot(120,yT,P.red,4)+line(120,yT,280,yT,P.ink,2.2)+
-   zH(280,410,yT,"R1 "+R0)+line(410,yT,460,yT,P.ink,2.2)+dot(460,yT,P.blue,4.5)+text(460,yT-9,"Vout (A0)",8.2,P.blue,"middle","800")+
+  s+=text(95,yT+4,V0,8.8,P.red,"middle","800")+dot(120,yT,P.red,4)+line(120,yT,280,yT,P.ink,2.2)+
+   zH(280,410,yT,"R1 "+R0)+line(410,yT,460,yT,P.ink,2.2)+dot(460,yT,P.blue,4.5)+text(460,yT-9,"Vout (A0)",8,P.blue,"middle","800")+
    zV(460,yT+4,yB-4,"R2 "+R1)+line(460,yB-4,460,yB,P.ink,2.2)+line(120,yB,680,yB,P.ink,2.2)+gnd(680,yB);
   if(c.sch==="loaded-divider")s+=line(460,yT,600,yT,P.blue,2)+dot(600,yT,P.blue,4)+zV(600,yT+4,yB-4,"RL "+R2)+line(600,yB-4,600,yB,P.ink,2)+text(685,yM,"RL PARALLEL",8,P.teal,"start","700");
  }else if(c.sch==="parallel"||c.sch==="cap-parallel"||c.sch==="can"){
-  s+=text(105,yT+4,c.sch==="can"?"CAN_H":"Node A",8.8,P.blue,"middle","800")+line(130,yT,680,yT,P.blue,2.6)+
-   text(105,yB+5,c.sch==="can"?"CAN_L":"Node B / GND",8.8,P.teal,"middle","800")+line(130,yB,680,yB,P.teal,2.6);
+  s+=text(105,yT+4,c.sch==="can"?"CAN_H":"Node A",8.6,P.blue,"middle","800")+line(130,yT,680,yT,P.blue,2.6)+
+   text(105,yB+5,c.sch==="can"?"CAN_L":"Node B / GND",8.6,P.teal,"middle","800")+line(130,yB,680,yB,P.teal,2.6);
   const bx=c.comps.length>=3?[250,410,570]:[290,510];
   c.comps.forEach((o,i)=>{
    const x=bx[i]||510;
@@ -1589,48 +1589,48 @@ function threePanelBoardAndBreadboard(q,t){
    if(o.kind==="C")s+=line(x,yT,x,yM-4,P.ink,2.2)+line(x-12,yM-4,x+12,yM-4,P.ink,2.8)+line(x-12,yM+4,x+12,yM+4,P.ink,2.8)+line(x,yM+4,x,yB,P.ink,2.2)+text(x+16,yM+3,o.label+" "+o.val,8.2,P.navy,"start","700");
    else s+=zV(x,yT+4,yB-4,o.label+" "+o.val);
   });
-  s+=arrow(155,yT-9,220,yT-9,P.pink,1.8)+text(188,yT-13,c.sch==="can"?"60 Ω eq":"Split I",7.8,P.pink,"middle","700");
+  s+=arrow(155,yT-8,220,yT-8,P.pink,1.8)+text(188,yT-12,c.sch==="can"?"60 Ω eq":"Split I",7.6,P.pink,"middle","700");
  }else if(c.sch==="kcl"){
-  s+=text(80,yM-11,"I_in",8.8,P.red,"middle","800")+line(80,yM,210,yM,P.ink,2.2)+zH(210,330,yM,"Rin "+R0)+line(330,yM,405,yM,P.ink,2.2)+
-   dot(405,yM,P.blue,5)+text(405,yM-11,"NODE X (Row 13)",8.2,P.blue,"middle","800")+
+  s+=text(80,yM-11,"I_in",8.6,P.red,"middle","800")+line(80,yM,210,yM,P.ink,2.2)+zH(210,330,yM,"Rin "+R0)+line(330,yM,405,yM,P.ink,2.2)+
+   dot(405,yM,P.blue,5)+text(405,yM-11,"NODE X (Row 13)",8,P.blue,"middle","800")+
    line(405,yM,465,yT,P.ink,2)+zH(465,585,yT,"R1 "+R1)+line(585,yT,670,yT,P.ink,2)+
    line(405,yM,465,yB,P.ink,2)+zH(465,585,yB,"R2 "+R2)+line(585,yB,670,yB,P.ink,2)+line(670,yT,670,yB,P.ink,2.2)+gnd(670,yB);
  }else if(c.sch==="kvl-mesh"){
   s+=miniBat(100,yT,yB,V0)+line(100,yT,190,yT,P.ink,2.2)+zH(190,320,yT,"R1 "+R0)+line(320,yT,620,yT,P.ink,2.2)+
    zV(380,yT+4,yB-4,"Rm (Shared)")+line(380,yT,380,yT+4,P.ink,2)+line(380,yB-4,380,yB,P.ink,2)+
    zV(620,yT+4,yB-4,"R3 "+R2)+line(100,yB,680,yB,P.ink,2.2)+gnd(680,yB)+
-   rect(210,yM-10,74,18,"#fdf2f8",P.pink,8,1.2)+text(247,yM+2,"LOOP 1: ΣV=0",7.2,P.pink,"middle","800")+
-   rect(470,yM-10,74,18,"#eff6ff",P.blue,8,1.2)+text(507,yM+2,"LOOP 2: ΣV=0",7.2,P.blue,"middle","800");
+   rect(210,yM-9,74,18,"#fdf2f8",P.pink,8,1.2)+text(247,yM+3,"LOOP 1: ΣV=0",7.2,P.pink,"middle","800")+
+   rect(470,yM-9,74,18,"#eff6ff",P.blue,8,1.2)+text(507,yM+3,"LOOP 2: ΣV=0",7.2,P.blue,"middle","800");
  }else if(c.sch==="thevenin"||c.sch==="norton"){
-  s+=path("M95 349 L395 349 L395 415 L95 415 Z",P.blue,1.4,"#f8fafc","5 4")+
-   text(108,361,c.sch==="norton"?"NORTON SOURCE":"THEVENIN EQUIVALENT",7.8,P.blue,"start","800")+
+  s+=path("M95 352 L395 352 L395 418 L95 418 Z",P.blue,1.4,"#f8fafc","5 4")+
+   text(108,363,c.sch==="norton"?"NORTON SOURCE":"THEVENIN EQUIVALENT",7.6,P.blue,"start","800")+
    miniBat(140,yT+10,yB,"Vth")+line(140,yT+10,210,yT+10,P.ink,2.2)+zH(210,340,yT+10,"Rth / Rn")+line(340,yT+10,490,yT+10,P.ink,2.2)+
-   dot(435,yT+10,P.blue,4)+text(435,yT,"Port A",8,P.blue,"middle","700")+
+   dot(435,yT+10,P.blue,4)+text(435,yT+1,"Port A",7.8,P.blue,"middle","700")+
    zV(490,yT+14,yB-4,"RL "+R2)+line(490,yT+10,490,yT+14,P.ink,2)+line(490,yB-4,490,yB,P.ink,2)+
-   line(140,yB,580,yB,P.ink,2.2)+dot(435,yB,P.ink,4)+text(435,yB+13,"Port B",8,P.ink,"middle","700")+gnd(580,yB);
+   line(140,yB,580,yB,P.ink,2.2)+dot(435,yB,P.ink,4)+text(435,yB+12,"Port B",7.8,P.ink,"middle","700")+gnd(580,yB);
  }else if(c.sch==="ac-sine"||c.sch==="rc-lpf"||c.sch==="rc-hpf"||c.sch==="probe-load"){
-  s+=rect(80,yM-15,30,30,"#fff",P.pink,15,2)+path("M85 "+yM+" Q90 "+(yM-9)+" 95 "+yM+" T105 "+yM,P.pink,2)+text(95,yM+25,"AC "+F0,7.8,P.pink,"middle","700")+
+  s+=rect(80,yM-15,30,30,"#fff",P.pink,15,2)+path("M85 "+yM+" Q90 "+(yM-9)+" 95 "+yM+" T105 "+yM,P.pink,2)+text(95,yM+25,"AC "+F0,7.6,P.pink,"middle","700")+
    line(110,yM,220,yM,P.ink,2.2);
   if(c.sch==="rc-hpf")s+=capH(220,340,yM,"C "+C0)+line(340,yM,460,yM,P.ink,2.2)+dot(460,yM,P.gold,4)+zV(460,yM+4,yB,"R "+R0)+line(460,yB,620,yB,P.ink,2.2)+gnd(620,yB);
-  else if(c.sch==="ac-sine")s+=zH(220,380,yM,"R "+R0)+line(380,yM,560,yM,P.ink,2.2)+meter(573,yM,"CH1",P.blue);
-  else s+=zH(220,350,yM,"R "+R0)+line(350,yM,460,yM,P.ink,2.2)+dot(460,yM,P.gold,4)+text(460,yM-10,"Vc / Vout",8.2,P.gold,"middle","700")+
+  else if(c.sch==="ac-sine")s+=zH(220,380,yM,"R "+R0)+line(380,yM,560,yM,P.ink,2.2)+meter(572,yM,"CH1",P.blue);
+  else s+=zH(220,350,yM,"R "+R0)+line(350,yM,460,yM,P.ink,2.2)+dot(460,yM,P.gold,4)+text(460,yM-10,"Vc / Vout",8,P.gold,"middle","700")+
    line(460,yM,460,yM+6,P.ink,2.2)+line(447,yM+6,473,yM+6,P.ink,2.6)+line(447,yM+13,473,yM+13,P.ink,2.6)+line(460,yM+13,460,yB,P.ink,2.2)+text(480,yM+12,"C "+C0,8,P.navy,"start","700")+
    (c.sch==="probe-load"?line(460,yM,610,yM,P.gold,1.8)+zV(610,yM+4,yB,"10MΩ Probe")+line(460,yB,690,yB,P.ink,2)+gnd(690,yB):line(460,yB,620,yB,P.ink,2)+gnd(620,yB));
  }else if(c.sch==="rl-series"||c.sch==="flyback"||c.sch==="rlc"){
-  s+=text(80,yM-11,V0,8.8,P.red,"middle","800")+line(80,yM,180,yM,P.ink,2.2)+indH(180,310,yM,"L "+L0)+line(310,yM,400,yM,P.ink,2.2);
+  s+=text(80,yM-11,V0,8.6,P.red,"middle","800")+line(80,yM,180,yM,P.ink,2.2)+indH(180,310,yM,"L "+L0)+line(310,yM,400,yM,P.ink,2.2);
   if(c.sch==="flyback")s+=diodeH(180,310,yT-3,"D_fly Clamp",false)+line(180,yM,180,yT-3,P.ink,1.6)+line(310,yM,310,yT-3,P.ink,1.6)+zH(400,530,yM,"Q1 SW")+line(530,yM,640,yM,P.ink,2.2)+gnd(640,yM);
   else if(c.sch==="rlc")s+=capH(400,500,yM,"C "+C0)+line(500,yM,550,yM,P.ink,2.2)+zH(550,670,yM,"R "+R0)+line(670,yM,730,yM,P.ink,2.2)+gnd(730,yM);
   else s+=zH(400,540,yM,"R "+R0)+line(540,yM,660,yM,P.ink,2.2)+gnd(660,yM);
  }else if(c.sch==="transformer"){
-  s+=text(105,yM-11,"AC PRI",8.8,P.red,"middle","800")+indH(150,310,yM,"Np Primary")+
-   line(355,352,355,412,P.teal,2.8)+line(367,352,367,412,P.teal,2.8)+text(361,346,"CORE (TRENCH)",7.2,P.teal,"middle","800")+
+  s+=text(105,yM-11,"AC PRI",8.6,P.red,"middle","800")+indH(150,310,yM,"Np Primary")+
+   line(355,356,355,414,P.teal,2.8)+line(367,356,367,414,P.teal,2.8)+text(361,350,"CORE (TRENCH)",7,P.teal,"middle","800")+
    indH(410,560,yM,"Ns Secondary")+line(560,yM,620,yM,P.ink,2.2)+zH(620,730,yM,"Rsec "+R0)+line(730,yM,770,yM,P.ink,2.2)+gnd(770,yM);
  }else if(c.sch==="three-phase"){
-  const cx=390,cy=384;
+  const cx=390,cy=387;
   s+=dot(cx,cy,"#1e293b",4.5)+text(cx+10,cy+13,"Neutral (0V)",8,P.ink,"start","800")+
-   line(cx,cy,cx-140,cy-20,P.red,2.4)+text(cx-150,cy-20,"ØA (0°)",8.8,P.red,"end","800")+
-   line(cx,cy,cx+130,cy-20,P.gold,2.4)+text(cx+140,cy-20,"ØB (120°)",8.8,P.gold,"start","800")+
-   line(cx,cy,cx,cy+25,P.blue,2.4)+text(cx-10,cy+27,"ØC (240°)",8.8,P.blue,"end","800");
+   line(cx,cy,cx-140,cy-18,P.red,2.4)+text(cx-150,cy-18,"ØA (0°)",8.6,P.red,"end","800")+
+   line(cx,cy,cx+130,cy-18,P.gold,2.4)+text(cx+140,cy-18,"ØB (120°)",8.6,P.gold,"start","800")+
+   line(cx,cy,cx,cy+23,P.blue,2.4)+text(cx-10,cy+25,"ØC (240°)",8.6,P.blue,"end","800");
  }else if(c.sch==="logic-gates"){
   const gate=logicGateForQuestion(q),inv=/NAND|NOR|XNOR/.test(gate),isOr=/OR|XOR/.test(gate);
   const gatePath=isOr?'M218 355 Q254 381 218 407 Q263 396 304 381 Q263 366 218 355 Z':'M218 355 H258 A36 26 0 0 1 258 407 H218 Z';
@@ -1647,52 +1647,53 @@ function threePanelBoardAndBreadboard(q,t){
    text(462,yT-3,"Rlim",7.5,P.navy,"middle","700")+text(262,419,"GND pin 7",7.2,P.ink,"middle","700")+
    text(390,430,"Walk 00, 01, 10, 11; verify the complete "+gate+" truth table",8.2,P.muted,"middle","600");
  }else if(c.sch==="led-diode"){
-  s+=text(95,yM-11,V0,8.8,P.red,"middle","800")+line(95,yM,180,yM,P.ink,2.2)+zH(180,330,yM,"Rlim "+R0)+
+  s+=text(95,yM-11,V0,8.6,P.red,"middle","800")+line(95,yM,180,yM,P.ink,2.2)+zH(180,330,yM,"Rlim "+R0)+
    line(330,yM,390,yM,P.ink,2.2)+diodeH(390,540,yM,"LED / D1 (Vf)",true)+line(540,yM,670,yM,P.ink,2.2)+gnd(670,yM);
  }else if(c.sch==="mosfet"){
-  s+=text(80,yM+3,"PWM",8.8,P.blue,"middle","800")+line(105,yM,170,yM,P.blue,2.2)+zH(170,290,yM,"Rg 100Ω")+
+  s+=text(80,yM+3,"PWM",8.6,P.blue,"middle","800")+line(105,yM,170,yM,P.blue,2.2)+zH(170,290,yM,"Rg 100Ω")+
    dot(320,yM,P.ink,4)+line(320,yM,320,yB,P.ink,1.8)+text(308,yB-6,"Rpd 10k",7.5,P.muted,"end","700")+
-   rect(370,yM-15,72,30,"#e8f3fb",P.navy,6,1.6)+text(406,yM+3,"Q1 N-MOS",8.5,P.navy,"middle","800")+
-   line(320,yM,370,yM,P.blue,2.2)+line(442,yM,510,yM,P.gold,2.2)+zH(510,640,yM,"RL "+R0)+text(660,yM+3,"+12V",8.8,P.red,"start","800")+gnd(320,yB);
+   rect(370,yM-14,72,28,"#e8f3fb",P.navy,6,1.6)+text(406,yM+3,"Q1 N-MOS",8.3,P.navy,"middle","800")+
+   line(320,yM,370,yM,P.blue,2.2)+line(442,yM,510,yM,P.gold,2.2)+zH(510,640,yM,"RL "+R0)+text(660,yM+3,"+12V",8.6,P.red,"start","800")+gnd(320,yB);
  }else if(c.sch==="power-tree"||c.sch==="rail-seq"||c.sch==="ripple"||c.sch==="open-drain"){
-  s+=text(78,yM-11,V0,8.8,P.red,"middle","800")+line(78,yM,190,yM,P.ink,2.2)+
-   rect(190,yM-15,134,30,"#e8f3fb",P.navy,6,1.6)+text(257,yM+3,c.sch==="open-drain"?"OPEN-DRAIN DUT":c.sch==="rail-seq"?"EN → SEQ / REG":"BUCK / LDO REG",8.5,P.navy,"middle","800")+
-   line(324,yM,440,yM,P.ink,2.2)+dot(440,yM,P.blue,4.5)+text(440,yM-11,"VOUT / TP",8.2,P.blue,"middle","800")+
+  s+=text(78,yM-11,V0,8.6,P.red,"middle","800")+line(78,yM,190,yM,P.ink,2.2)+
+   rect(190,yM-14,134,28,"#e8f3fb",P.navy,6,1.6)+text(257,yM+3,c.sch==="open-drain"?"OPEN-DRAIN DUT":c.sch==="rail-seq"?"EN → SEQ / REG":"BUCK / LDO REG",8.3,P.navy,"middle","800")+
+   line(324,yM,440,yM,P.ink,2.2)+dot(440,yM,P.blue,4.5)+text(440,yM-11,"VOUT / TP",8,P.blue,"middle","800")+
    zH(440,580,yM,"Load / Rpu "+R0)+line(580,yM,680,yM,P.ink,2.2)+gnd(680,yM);
  }else if(c.sch==="kelvin"){
-  s+=text(74,yM-11,"I_BUS",8.8,P.red,"middle","800")+line(74,yM,210,yM,P.ink,2.6)+zH(210,360,yM,"Rshunt "+R0)+line(360,yM,530,yM,P.ink,2.6)+
-   dot(230,yM,P.blue,4)+dot(340,yM,P.teal,4)+path("M230 "+yM+" L230 "+(yT-2)+" L420 "+(yT-2)+" L420 "+(yM-13),P.blue,1.7)+
-   path("M340 "+yM+" L340 "+(yT+4)+" L450 "+(yT+4)+" L450 "+(yM-13),P.teal,1.7)+meter(435,yM-18,"INA",P.blue)+
-   zH(530,660,yM,"Load "+R1)+line(660,yM,710,yM,P.ink,2.2)+gnd(710,yM);
+  const yK=yM+8;
+  s+=text(74,yK-11,"I_BUS",8.6,P.red,"middle","800")+line(74,yK,210,yK,P.ink,2.6)+zH(210,360,yK,"Rshunt "+R0)+line(360,yK,530,yK,P.ink,2.6)+
+   dot(230,yK,P.blue,4)+dot(340,yK,P.teal,4)+path("M230 "+yK+" L230 "+(yT-5)+" L422 "+(yT-5),P.blue,1.7)+
+   path("M340 "+yK+" L340 "+(yT+2)+" L422 "+(yT+2),P.teal,1.7)+meter(436,yT-1,"INA",P.blue)+
+   zH(530,660,yK,"Load "+R1)+line(660,yK,710,yK,P.ink,2.2)+gnd(710,yK);
  }else if(c.sch==="i2c"){
-  s+=text(95,yT,"3V3",8.8,P.red,"middle","800")+line(95,yT+4,660,yT+4,P.red,2)+
-   rect(140,yM-14,105,32,"#f1f5f9",P.ink,5,1.4)+text(192,yM+5,"MCU I²C",8.5,P.navy,"middle","800")+
-   line(245,yM-4,560,yM-4,P.blue,2.2)+text(390,yM-9,"SDA (Row 12 + Rpu1)",7.5,P.blue,"middle","700")+
+  s+=text(95,yT,"3V3",8.6,P.red,"middle","800")+line(95,yT+4,660,yT+4,P.red,2)+
+   rect(140,yM-12,105,30,"#f1f5f9",P.ink,5,1.4)+text(192,yM+6,"MCU I²C",8.4,P.navy,"middle","800")+
+   line(245,yM-3,560,yM-3,P.blue,2.2)+text(390,yM-8,"SDA (Row 12 + Rpu1)",7.5,P.blue,"middle","700")+
    line(245,yM+11,560,yM+11,P.gold,2.2)+text(390,yM+21,"SCL (Row 14 + Rpu2)",7.5,P.gold,"middle","700")+
-   rect(560,yM-14,105,32,"#e8f3fb",P.blue,5,1.4)+text(612,yM+5,"SENSOR DUT",8.5,P.navy,"middle","800");
+   rect(560,yM-12,105,30,"#e8f3fb",P.blue,5,1.4)+text(612,yM+6,"SENSOR DUT",8.4,P.navy,"middle","800");
  }else if(c.sch==="spi"){
-  s+=rect(100,yT,110,46,"#f1f5f9",P.ink,5,1.4)+text(155,yM+3,"HOST SPI",8.8,P.navy,"middle","800")+
-   rect(560,yT,110,46,"#e8f3fb",P.blue,5,1.4)+text(615,yM+3,"SPI FLASH",8.8,P.navy,"middle","800")+
-   line(210,yT+6,560,yT+6,P.blue,2)+text(385,yT+3,"MOSI (Row 11)",7.5,P.blue,"middle","700")+
-   line(210,yT+19,560,yT+19,P.teal,2)+text(385,yT+16,"MISO (Row 12)",7.5,P.teal,"middle","700")+
-   line(210,yT+32,560,yT+32,P.gold,2)+text(385,yT+29,"SCLK (Row 13)",7.5,P.gold,"middle","700")+
-   line(210,yT+44,560,yT+44,"#7c3aed",2)+text(385,yT+54,"CS_N (Row 14)",7.5,"#7c3aed","middle","700");
+  s+=rect(100,yT,110,44,"#f1f5f9",P.ink,5,1.4)+text(155,yM+4,"HOST SPI",8.6,P.navy,"middle","800")+
+   rect(560,yT,110,44,"#e8f3fb",P.blue,5,1.4)+text(615,yM+4,"SPI FLASH",8.6,P.navy,"middle","800")+
+   line(210,yT+6,560,yT+6,P.blue,2)+text(385,yT+3,"MOSI (Row 11)",7.4,P.blue,"middle","700")+
+   line(210,yT+18,560,yT+18,P.teal,2)+text(385,yT+15,"MISO (Row 12)",7.4,P.teal,"middle","700")+
+   line(210,yT+30,560,yT+30,P.gold,2)+text(385,yT+27,"SCLK (Row 13)",7.4,P.gold,"middle","700")+
+   line(210,yT+42,560,yT+42,"#7c3aed",2)+text(385,yT+51,"CS_N (Row 14)",7.4,"#7c3aed","middle","700");
  }else if(c.sch==="uart"){
-  s+=rect(110,yT,120,46,"#f1f5f9",P.ink,5,1.4)+text(170,yM+3,"HOST UART",8.8,P.navy,"middle","800")+
-   rect(540,yT,120,46,"#e8f3fb",P.blue,5,1.4)+text(600,yM+3,"TARGET / LOOP",8.8,P.navy,"middle","800")+
-   line(230,yT+10,540,yT+10,P.blue,2.2)+text(385,yT+6,"TX → RX (Crossover)",7.8,P.blue,"middle","700")+
-   line(230,yT+27,540,yT+27,P.teal,2.2)+text(385,yT+23,"RX ← TX (8N1)",7.8,P.teal,"middle","700")+
-   line(230,yT+41,540,yT+41,"#1e293b",2)+text(385,yT+52,"COMMON GND",7.5,P.muted,"middle","700");
+  s+=rect(110,yT,120,44,"#f1f5f9",P.ink,5,1.4)+text(170,yM+4,"HOST UART",8.6,P.navy,"middle","800")+
+   rect(540,yT,120,44,"#e8f3fb",P.blue,5,1.4)+text(600,yM+4,"TARGET / LOOP",8.6,P.navy,"middle","800")+
+   line(230,yT+10,540,yT+10,P.blue,2.2)+text(385,yT+6,"TX → RX (Crossover)",7.6,P.blue,"middle","700")+
+   line(230,yT+26,540,yT+26,P.teal,2.2)+text(385,yT+22,"RX ← TX (8N1)",7.6,P.teal,"middle","700")+
+   line(230,yT+40,540,yT+40,"#1e293b",2)+text(385,yT+50,"COMMON GND",7.4,P.muted,"middle","700");
  }else{
   const b1=c.hwTitle.split(" ")[0],b2=c.key==="rf-50ohm"?"50 Ω PI-PAD":c.key==="tvac-env"?"HERMETIC WALL":c.key==="aba-swap"?"SLOT A vs KGB":"DUT FIXTURE";
-  s+=rect(80,yT+2,150,40,"#f1f5f9",P.navy,6,1.4)+text(155,yM+3,clipLabel(b1,16),8.8,P.navy,"middle","800")+
+  s+=rect(80,yT+2,150,38,"#f1f5f9",P.navy,6,1.4)+text(155,yM+2,clipLabel(b1,16),8.6,P.navy,"middle","800")+
    arrow(230,yM,345,yM,P.blue,2.2)+text(288,yM-8,clipLabel(c.pins[0].p,12),7.8,P.blue,"middle","700")+
-   rect(345,yT+2,175,40,"#e8f3fb",P.blue,6,1.6)+text(432,yM+3,b2,8.8,P.navy,"middle","800")+
+   rect(345,yT+2,175,38,"#e8f3fb",P.blue,6,1.6)+text(432,yM+2,b2,8.6,P.navy,"middle","800")+
    arrow(520,yM,630,yM,P.teal,2.2)+text(575,yM-8,"SENSE / TLM",7.8,P.teal,"middle","700")+
-   rect(630,yT+2,150,40,"#f0fdf4",P.teal,6,1.4)+text(705,yM+3,clipLabel(c.hwBadge,16),8.8,P.teal,"middle","800");
+   rect(630,yT+2,150,38,"#f0fdf4",P.teal,6,1.4)+text(705,yM+2,clipLabel(c.hwBadge,16),8.6,P.teal,"middle","800");
  }
 
- s+=text(430,439,clipLabel(c.title+" · Physical row map & circuit diagram auto-update for every question",92),8.5,P.muted,"middle","500");
+ s+=text(430,440,clipLabel(c.title+" · Physical row map & circuit diagram auto-update per question",118),8.3,P.muted,"middle","500");
  return svg(s,"Question-specific "+c.title+" with matched hardware ports, unobstructed 10-column solderless breadboard, build guide, and ANSI/IEEE schematic for "+q.id,860,460);
 }
 
