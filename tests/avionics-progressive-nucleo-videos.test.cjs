@@ -67,6 +67,6 @@ assert.equal(N.setup(get("series-C7"),topic("series")),null,"5V+ divider must NO
 assert.equal(N.setup(get("ohm-C3"),topic("ohm")),null,"12V example must NOT connect to STM32");
 const site=read("index.html"),cache=read("sw.js"),tutor=read("avionics_tutor.js");
 assert(site.includes("avionics_nucleo_workbench.js?v=1")&&site.includes("avionics_video_lessons.js?v=1"));
-assert(cache.includes("v34-nvidia-slt-academy")&&cache.includes("avionics_progressive_videos.css"));
+assert(cache.includes("v35-nvidia-scenario-lab")&&cache.includes("avionics_progressive_videos.css"));
 assert(tutor.includes("VIDEO.render(q,t)")&&tutor.includes("Build your skills in order"));
 console.log("PASS "+qs.length+" progressive questions, "+full+" full Nucleo-board scenarios, "+physical.size+" circuit kit families, "+videoDirect+" verified direct and "+videoSearch+" source-targeted video links.");
