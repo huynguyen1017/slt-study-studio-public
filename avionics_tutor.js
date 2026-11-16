@@ -324,11 +324,11 @@ function visualPage(q,t,f){
  '<div class="av-eyebrow">PAGE 2 / 4 · SEE THE FULL CIRCUIT, GRAPH &amp; BOARD WIRING</div>'+
  '<h3>Draw it first. Then connect it safely.</h3>'+
  activeBanner(q,t)+
- '<p class="av-explain">Every diagram below is tailored specifically to <strong>'+esc(q.id.toUpperCase())+'</strong>. Notice how the board header pins, solderless breadboard rows (`a10↔a15`, `b10`, `b15`), and schematic symbols map 1-to-1.</p>'+
+ '<p class="av-explain">Every diagram below is tailored specifically to <strong>'+esc(q.id.toUpperCase())+'</strong>. The selected board pins, component mix, breadboard holes, and schematic topology follow this question’s circuit setup.</p>'+
  '<div class="av-visual-nav">'+pics.map(x=>'<a href="#avVisual-'+x[0]+'">'+esc(x[1])+'</a>').join("")+'</div>'+
  pics.map(x=>'<section class="av-visual-panel" id="avVisual-'+x[0]+'"><div class="av-visual-panel-head"><div><h4>'+esc(x[1])+'</h4><p>'+esc(x[2])+'</p></div><button class="av-light" data-zoom="'+x[0]+'" aria-label="Enlarge '+esc(x[1])+'">↗ Enlarge</button></div>'+
  (VIS?VIS.render(q,t,x[0]):'<p>Visuals are unavailable.</p>')+'</section>').join("")+
- '<div class="av-takeaway"><strong>Before continuing:</strong> Trace the positive-to-return current loop with your finger, identify which breadboard rows share a metal strip (`a–e`), and verify where DMM/scope probes belong.</div>'+
+ '<div class="av-takeaway"><strong>Before continuing:</strong> Trace the drive and return connections through the shown components, identify which holes share a breadboard row (`a–e`), and verify where the DMM/scope probes belong for this question.</div>'+
  '<div class="av-actions-bottom"><button id="avVisualBack" class="av-light">← Review the idea</button><button id="avVisualForward" class="av-primary">Now solve it in 6 baby steps →</button></div></section>';
 }
 

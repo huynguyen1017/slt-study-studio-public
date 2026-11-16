@@ -417,134 +417,188 @@ function bandColorsFor(resText){
  if(/330/.test(resText))return ["#ea580c","#ea580c","#78350f"];
  if(/2\.2\s*k|2200/.test(resText))return ["#dc2626","#dc2626","#dc2626"];
  if(/4\.7\s*k|4700/.test(resText))return ["#ca8a04","#7c3aed","#dc2626"];
- return ["#78350f","#111827","#dc2626"]; // 1 kΩ brown-black-red
+ if(/(?:^|\s)1\s*k/i.test(resText)||!/[0-9]/.test(resText))return ["#78350f","#111827","#dc2626"];
+ return null; // Do not imply incorrect color bands for unrecognized values.
+}
+
+/* Pick an actual bench topology from the active question. This is deliberately
+   based on the question metadata (and its numerical variant), so moving between
+   cards changes both the component population and the pin/hole map. */
+function boardSetup(q,t){
+ const id=t.id;
+ const qn=Number((q.id.match(/(\d+)$/)||[])[1])||1;
+ const levelOffset={Foundations:0,Application:1,Troubleshooting:2,Calculation:3}[q.level]||0;
+ const idx=q.level==="Calculation"?qn-1:(Number.isFinite(q.skillIndex)?q.skillIndex*3+levelOffset+(q.level==="Troubleshooting"?qn%2:0):qn-1);
+ const v=vals(q),rs=resistance(q),cf=q.calcFamily||"";
+ const types={
+  units:["meter","prefix","unit-check","scale","conversion"],
+  ohm:["resistor-test","current-sense","resistor-test","continuity","load-test"],
+  power:["power-meter","load-step","energy-log","thermal-load","power-meter"],
+  series:["series-chain","divider","series-chain","divider","series-chain"],
+  parallel:["parallel-branches","branch-current","parallel-branches","current-split","parallel-branches"],
+  "kcl-kvl":["node-kcl","loop-kvl","node-reference","mesh","shared-drop"],
+  thevenin:["loaded-source","norton","load-regulation","equivalent-r","source-stack"],
+  ac:["frequency-counter","period-test","rms-test","phase-test","impedance-test"],
+  capacitors:["charge-test","current-ramp","energy-test","decoupling","esr-ripple"],
+  rc:["rc-charge","rc-charge","rc-discharge","settling-test","probe-loading"],
+  inductors:["inductive-step","rl-time-constant","energy-test","flyback-clamp","ground-bounce"],
+  filters:["low-pass","high-pass","cutoff-test","resonant-lc","damping-test"],
+  magnetics:["transformer","isolation-test","magnetic-drive","three-phase","three-phase"],
+  components:["diode-test","led-current","mosfet-load","logic-threshold","pullup-test"],
+  "power-rails":["converter-load","sequence-check","ripple-capture","droop-capture","shunt-sense"],
+  schematics:["net-continuity","ground-reference","shorts-check","clock-reset","ab-isolation"],
+  instruments:["bandwidth-check","scope-sampling","trigger-window","probe-loading","dmm-scope-compare"],
+  timing:["clock-period","duty-cycle","setup-hold","hold-slack","reset-release"],
+  buses:["uart-loopback","spi-capture","i2c-pullup","can-termination","bit-period"],
+  "python-scpi":["automated-sweep","timeout-check","limit-margin","yield-log","safe-state"],
+  linux:["serial-console","failure-rate","exit-code","log-integrity","run-latch"],
+  rf:["power-chain","s21-insertion","s11-match","gain-test","wavelength"],
+  qualification:["margin-test","verification","thermal-cycle","environmental-run","release-gate"]
+ };
+ const calcType={milli:"meter",micro:"charge-test",ohmI:"current-sense",ohmR:"resistor-test",powerDC:"power-meter",joule:"energy-log",seriesR:"series-chain",divider:"divider",parallelR:"parallel-branches",parallelI:"branch-current",kcl:"node-kcl",kvl:"loop-kvl",thev:"loaded-source",norton:"norton",rms:"rms-test",period:"period-test",capQ:"charge-test",capE:"energy-test",rcTau:"rc-charge",rc63:"rc-charge",rlTau:"rl-time-constant",inductorV:"inductive-step",rcFc:"low-pass",lcF0:"resonant-lc",transformer:"transformer",threephase:"three-phase",ledR:"led-current",clockPeriod:"clock-period",railPower:"converter-load",shunt:"shunt-sense",scopeSamples:"scope-sampling",timeDiv:"trigger-window",duty:"duty-cycle",uartTime:"uart-loopback",spiTime:"spi-capture",testThroughput:"automated-sweep",assertMargin:"limit-margin",logRate:"failure-rate",logDuration:"serial-console",wavelength:"wavelength",powerDb:"power-chain",marginPct:"margin-test",yieldPct:"yield-log"};
+ const type=q.level==="Calculation"&&calcType[q.calcFamily]?calcType[q.calcFamily]:(types[id]||["resistor-test"])[idx%((types[id]||["resistor-test"]).length)];
+ const names={
+  "meter":"DMM voltage measurement","prefix":"unit-scaled source check","unit-check":"ampere / volt instrument check","scale":"engineering-prefix test","conversion":"unit conversion setup",
+  "resistor-test":"two-terminal resistor test","current-sense":"series shunt current measurement","continuity":"power-off continuity test","load-test":"resistive load measurement",
+  "power-meter":"DC power measurement","load-step":"programmable load step","energy-log":"power over time energy capture","thermal-load":"resistor dissipation check",
+  "series-chain":"three-element series chain","divider":"loaded voltage divider","parallel-branches":"two-branch parallel network","branch-current":"single branch current test","current-split":"parallel current split",
+  "node-kcl":"three-branch KCL node","loop-kvl":"three-drop KVL loop","node-reference":"differential ground reference","mesh":"two-loop mesh network","shared-drop":"shared-resistor loop network",
+  "loaded-source":"Thevenin source with load","norton":"Norton source conversion","load-regulation":"no-load / full-load comparison","equivalent-r":"parallel equivalent resistance","source-stack":"series source polarity check",
+  "frequency-counter":"AC frequency measurement","period-test":"period and frequency capture","rms-test":"AC peak-to-RMS check","phase-test":"two-channel phase comparison","impedance-test":"AC impedance load",
+  "charge-test":"capacitor charge measurement","current-ramp":"capacitor current ramp","energy-test":"stored energy measurement","decoupling":"rail decoupling capacitor","esr-ripple":"capacitor ESR ripple test",
+  "rc-charge":"RC charge transient","rc-discharge":"RC discharge transient","settling-test":"five-time-constant settling check","probe-loading":"high-impedance node probe test",
+  "inductive-step":"inductor current-step test","rl-time-constant":"RL transient test","flyback-clamp":"inductive flyback clamp","ground-bounce":"ground inductance transient",
+  "low-pass":"RC low-pass filter","high-pass":"RC high-pass filter","cutoff-test":"filter cutoff sweep","resonant-lc":"LC resonance network","damping-test":"RLC damping setup",
+  "transformer":"isolated transformer test","isolation-test":"isolation resistance test","magnetic-drive":"transformer primary drive","three-phase":"three-phase measurement setup",
+  "diode-test":"diode forward-drop test","led-current":"LED current-limiting resistor","mosfet-load":"low-side MOSFET load switch","logic-threshold":"logic-level threshold test","pullup-test":"open-drain pull-up test",
+  "converter-load":"DC/DC converter loaded rail","sequence-check":"power-good sequencing check","ripple-capture":"rail ripple scope capture","droop-capture":"load-step droop capture","shunt-sense":"Kelvin shunt current measurement",
+  "net-continuity":"PCB net continuity check","ground-reference":"ground offset measurement","shorts-check":"unpowered rail-to-ground short check","clock-reset":"clock and reset correlation","ab-isolation":"A-B-A fault isolation setup",
+  "bandwidth-check":"probe bandwidth check","scope-sampling":"scope sample-rate check","trigger-window":"scope pre/post-trigger setup","dmm-scope-compare":"DMM and scope comparison",
+  "clock-period":"clock period measurement","duty-cycle":"clock duty-cycle capture","setup-hold":"setup/hold timing capture","hold-slack":"hold-time slack check","reset-release":"reset release timing",
+  "uart-loopback":"UART TX/RX loopback","spi-capture":"SPI clock/data capture","i2c-pullup":"I²C pull-up rise-time test","can-termination":"CAN differential termination","bit-period":"serial bit-period check",
+  "automated-sweep":"automated instrument sweep","timeout-check":"SCPI timeout / settle check","limit-margin":"measurement guard-band test","yield-log":"automated yield measurement","safe-state":"fault-safe instrument state",
+  "serial-console":"persistent serial console","failure-rate":"repeated-run failure counter","exit-code":"process exit-code gate","log-integrity":"reference log hash check","run-latch":"test-run failure latch",
+  "power-chain":"50 Ω RF power chain","s21-insertion":"S21 insertion-loss setup","s11-match":"S11 return-loss setup","gain-test":"RF gain measurement","wavelength":"frequency / wavelength setup",
+  "margin-test":"environmental margin test","verification":"verification evidence setup","thermal-cycle":"thermal-cycle instrumentation","environmental-run":"environmental run monitor","release-gate":"release go/no-go gate"
+ };
+ let comps=[];
+ const R=rs.length?rs:v.find(x=>/Ω/.test(x))||"1 kΩ", C=v.find(x=>/F/.test(x))||"10 µF", L=v.find(x=>/H/.test(x))||"10 mH";
+ const twoR=(a=R,b=(rs[1]||R))=>[{kind:"R",label:"R₁",value:a,from:10,to:12},{kind:"R",label:"R₂",value:b,from:12,to:14}];
+ if(["series-chain","divider","mesh","shared-drop","loop-kvl"].includes(type))comps=twoR(R,rs[1]||"2.2 kΩ").concat(["series-chain","loop-kvl"].includes(type)?[{kind:"R",label:"R₃",value:rs[2]||"330 Ω",from:14,to:16}]:[]);
+ else if(type==="node-kcl")comps=[{kind:"R",label:"I₁",value:v[0]||"15 mA",from:10,to:14,col:0},{kind:"R",label:"I₂",value:v[1]||"5 mA",from:10,to:14,col:2},{kind:"R",label:"I₃",value:"unknown",from:10,to:14,col:4}];
+ else if(["parallel-branches","branch-current","current-split","equivalent-r"].includes(type))comps=[{kind:"R",label:"R₁",value:R,from:10,to:14,col:0},{kind:"R",label:"R₂",value:rs[1]||"2.2 kΩ",from:10,to:14,col:3}];
+ else if(["rc-charge","rc-discharge","low-pass","high-pass","cutoff-test","probe-loading","settling-test","decoupling"].includes(type))comps=[{kind:"R",label:"R",value:R,from:10,to:12},{kind:"C",label:"C",value:C,from:12,to:14}];
+ else if(["charge-test","current-ramp","energy-test","esr-ripple"].includes(type))comps=[{kind:"C",label:"C",value:C,from:10,to:14},{kind:"R",label:type==="esr-ripple"?"ESR":"Rlimit",value:type==="esr-ripple"?"0.2 Ω":R,from:10,to:12}];
+ else if(["inductive-step","rl-time-constant","flyback-clamp","ground-bounce"].includes(type))comps=[{kind:"L",label:"L",value:L,from:10,to:13},{kind:"R",label:"R",value:R,from:13,to:16}];
+ else if(["resonant-lc","damping-test"].includes(type))comps=[{kind:"L",label:"L",value:L,from:10,to:13,col:0},{kind:"C",label:"C",value:C,from:13,to:16,col:3},{kind:"R",label:"R",value:R,from:10,to:16,col:4}];
+ else if(["diode-test","led-current"].includes(type))comps=[{kind:"R",label:"Rlim",value:R,from:10,to:12},{kind:"D",label:type==="led-current"?"LED":"D1",value:"0.7 V",from:12,to:14}];
+ else if(type==="mosfet-load")comps=[{kind:"R",label:"Rgate",value:"100 Ω",from:10,to:12},{kind:"Q",label:"Q1",value:"N-MOS",from:12,to:15},{kind:"R",label:"Load",value:R,from:15,to:17}];
+ else if(["pullup-test","i2c-pullup","open-drain"].includes(type))comps=[{kind:"R",label:"Rpull",value:rs[0]||"4.7 kΩ",from:10,to:12},{kind:"Q",label:"Open drain",value:"DUT",from:12,to:16}];
+ else if(["loaded-source","norton","load-regulation","converter-load","load-step","power-meter","energy-log","thermal-load","current-sense","shunt-sense","ripple-capture","droop-capture"].includes(type))comps=[{kind:"R",label:"Rload",value:R,from:12,to:16},{kind:"R",label:"Rshunt",value:"5 mΩ",from:10,to:12}];
+ else if(["transformer","isolation-test","magnetic-drive","three-phase"].includes(type))comps=[{kind:"L",label:"Np",value:"Primary",from:10,to:13,col:0},{kind:"L",label:"Ns",value:"Secondary",from:10,to:13,col:3}];
+ else if(["can-termination"].includes(type))comps=[{kind:"R",label:"120 Ω",value:"Term A",from:10,to:14,col:0},{kind:"R",label:"120 Ω",value:"Term B",from:10,to:14,col:3}];
+ else if(["s11-match","s21-insertion","power-chain","gain-test","wavelength"].includes(type))comps=[{kind:"R",label:"50 Ω",value:"Source",from:10,to:12},{kind:"R",label:"DUT",value:"RF load",from:12,to:14}];
+ else if(["clock-period","duty-cycle","setup-hold","hold-slack","reset-release","clock-reset","frequency-counter","period-test","rms-test","phase-test","impedance-test","bandwidth-check","scope-sampling","trigger-window","probe-loading","dmm-scope-compare"].includes(type))comps=[{kind:"Q",label:"Signal",value:"DUT",from:10,to:12},{kind:"R",label:"Probe",value:"10 MΩ",from:12,to:15}];
+ else if(["uart-loopback","spi-capture","net-continuity","ground-reference","shorts-check","ab-isolation","sequence-check","unit-check","meter","prefix","scale","conversion","frequency-counter","automated-sweep","timeout-check","limit-margin","yield-log","safe-state","serial-console","failure-rate","exit-code","log-integrity","run-latch","verification","thermal-cycle","environmental-run","release-gate"].includes(type))comps=[{kind:"Q",label:"DUT",value:cf||"Test point",from:10,to:12},{kind:"R",label:"Sense",value:R,from:12,to:15}];
+ else comps=[{kind:"R",label:"R",value:R,from:10,to:14}];
+ const pinMap={
+  meter:["3V3","TP_V","GND"],"power-meter":["VIN","TP_I","GND"],"load-step":["VIN","LOAD_EN","GND"],"energy-log":["VIN","TP_I","GND"],"thermal-load":["VIN","TP_TEMP","GND"],
+  "series-chain":["3V3","A0","GND"],divider:["3V3","A0","GND"],"parallel-branches":["3V3","A0","GND"],"branch-current":["VIN","TP_I","GND"],"current-split":["VIN","TP_I","GND"],"node-kcl":["VIN","A0","GND"],"loop-kvl":["VIN","A1","GND"],mesh:["VIN","A0","A1"],
+  "rc-charge":["3V3","A0","GND"],"rc-discharge":["3V3","A0","GND"],"low-pass":["SIG_IN","A0","GND"],"high-pass":["SIG_IN","A0","GND"],"cutoff-test":["SIG_IN","A0","GND"],"inductive-step":["VIN","A0","GND"],"rl-time-constant":["VIN","A0","GND"],
+  "diode-test":["3V3","A0","GND"],"led-current":["5V","A0","GND"],"mosfet-load":["5V","PWM","GND"],"pullup-test":["3V3","SDA","GND"],"i2c-pullup":["3V3","SDA","GND"],"can-termination":["CAN_H","CAN_L","GND"],"uart-loopback":["TX","RX","GND"],"spi-capture":["MOSI","SCLK","GND"],"s11-match":["RF_IN","S11","GND"],"s21-insertion":["RF_IN","RF_OUT","GND"],"power-chain":["RF_IN","TP_PWR","GND"],"three-phase":["PH_A","PH_B","PH_C"],"transformer":["PRI","SEC","GND"],
+  "shunt-sense":["VIN","TP_I+","TP_I−","GND"],"ripple-capture":["RAIL","CH1","GND"],"droop-capture":["RAIL","CH1","CH2","GND"],"sequence-check":["PGOOD","RESET_N","GND"],"clock-period":["CLK","TRIG","GND"],"reset-release":["CLK","RESET_N","GND"]
+ };
+ const pins=pinMap[type]||["3V3",type.includes("scope")||type.includes("test")?"TP_V":"A0","GND"];
+ const signalNames=type.includes("parallel")?["Node A","Branch 1","Branch 2"]:type.includes("filter")||type.startsWith("rc-")?["Signal in","Response","Return"]:type.includes("shunt")?["Rail+","Sense+","Sense−","Return"]:type.includes("spi")?["MOSI","SCLK","MISO","CS_N"]:type.includes("can")?["CAN_H","CAN_L","Term"]:["Drive","Measure","Return"];
+ const rowShift=(Math.max(...comps.map(x=>x.to))<17)?idx%2:0;
+ comps=comps.map((c,i)=>({...c,from:c.from+rowShift,to:c.to+rowShift,col:c.col===undefined?([0,2,4][i]||0):c.col}));
+ return {id,type,title:names[type]||type,idx,pins,signalNames,comps,rowA:comps[0].from,rowB:comps[comps.length-1].to,values:v};
 }
 
 function threePanelBoardAndBreadboard(q,t){
- const id=t.id,rs=resistance(q),vSrc=source(q);
- const isPar=id==="parallel",isSeries=id==="series"||id==="thevenin",isReactive=["rc","capacitors","inductors","filters"].includes(id);
- const isBusOrInst=["buses","instruments","schematics","power-rails","timing","components","linux","python-scpi","rf","qualification","ac","magnetics"].includes(id);
- const vNum=parseFloat(vSrc);
- const vLabel=(Number.isFinite(vNum)&&vNum>0&&vNum<=12)?vSrc:"3.3 V";
- const r1Lab=rs[0]||(id==="ohm"?"330 Ω":"1 kΩ"),r2Lab=rs[1]||"1 kΩ";
-
- let s="";
- // Title bar matching user attachment
- s+=text(22,28,"BENCH & BREADBOARD WIRING ("+q.id.toUpperCase()+"): "+units[id],15,P.ink,"start","800");
- s+=text(22,46,"Verify power-off connections and voltage limits before connecting USB/bench supply.",12,"#a84619","start","600");
-
- // PANEL 1 (Left): 1 NUCLEO / AVIONICS DUT BOARD
- s+=rect(20,58,282,250,"#ffffff","#d0dfe9",10,1.4);
- s+=text(34,79,"1 AVIONICS / NUCLEO DUT BOARD",13,P.ink,"start","800");
- s+=text(34,94,"Illustrated top view · Pin names depend on board",10,P.muted);
- // PCB outline
- s+=rect(38,108,215,186,"#f6f8fa","#c7d3dc",8,1.5);
- // USB port at top
- s+=rect(128,100,28,18,"#c5d2de","#7c91a3",3)+text(162,113,"USB / Host",9,"#a84619","start","700");
- s+=text(168,132,"ST-LINK / DBG",10,P.navy,"start","700")+rect(175,137,26,22,"#222c36","#111",3);
- // Buttons
- s+=dot(178,182,"#1d63eb",8)+text(178,198,"USER",8,P.muted,"middle");
- s+=dot(214,182,"#111827",6)+text(214,198,"RST",8,P.muted,"middle");
- // MCU chip
- s+=rect(164,218,52,44,"#222b33","#111",4)+text(190,238,"STM32",9,"#fff","middle","700")+text(190,251,"FLIGHT",8,"#cfe4f2","middle");
-
- // CN6 Power Header + CN8 Signal Header
- const pwrPins=["NC","3V3","5V","GND","VIN"];
- const sigPins=id==="buses"?(/SPI/i.test(q.question)?["MOSI","MISO","SCLK","CS_N"]:/CAN/i.test(q.question)?["CAN_H","CAN_L","GND","5V"]:/I2C/i.test(q.question)?["SDA","SCL","3V3","GND"]:["TX","RX","GND","3V3"]):["A0","A1","TP_V","CLK"];
- s+=text(48,125,"CN6 power",9,P.ink,"start","700");
- s+=rect(78,130,18,74,"#1c252d","#111",3);
- pwrPins.forEach((p,i)=>{
-  const py=140+i*13;
-  s+=text(74,py+3,p,9,P.muted,"end")+dot(87,py,"#4a5b6a",3.5);
- });
- s+=text(48,220,id==="buses"?"Bus Header":"CN8 signal",9,P.ink,"start","700");
- s+=rect(78,225,18,62,"#1c252d","#111",3);
- sigPins.forEach((p,i)=>{
-  const py=235+i*13;
-  s+=text(74,py+3,p,9,P.muted,"end")+dot(87,py,"#4a5b6a",3.5);
- });
-
- // PANEL 2 (Right): 2 SOLDERLESS BREADBOARD (Exact a-e | f-j, rows 9-17)
- s+=rect(322,58,478,250,"#ffffff","#d0dfe9",10,1.4);
- s+=text(336,79,"2 Solderless breadboard (a–e | f–j · rows 9–17)",13,P.ink,"start","800");
- s+=text(336,94,isSeries?"Series path: a10↔a13, a13↔a16":isPar?"Parallel branches: a10↔a15 & d10↔d15":"Resistor: a10 ↔ a15 · Jumpers: b10 and b15",10,P.muted);
-
- s+=rect(336,104,450,174,"#efefe6","#d4d8cc",10,1.2);
- const colsL=["a","b","c","d","e"],colsR=["f","g","h","i","j"];
- const xsL=[376,412,448,484,520],xsR=[592,628,664,700,736];
- colsL.forEach((c,i)=>s+=text(xsL[i],120,c,11,P.ink,"middle","700"));
- colsR.forEach((c,i)=>s+=text(xsR[i],120,c,11,P.ink,"middle","700"));
- s+=rect(546,124,20,145,"#deded4","none",4); // center trench
-
- const ys={};
+ const c=boardSetup(q,t),id=t.id;
+ const lx=[376,412,448,484,520],rx=[592,628,664,700,736],rowY={};
+ for(let n=9;n<=17;n++)rowY[n]=134+(n-9)*16.5;
+ const pinY=i=>143+i*25;
+ let s=text(22,28,"QUESTION-SPECIFIC BENCH SETUP · "+c.title.toUpperCase(),15,P.ink,"start","800")+
+  text(22,46,"Question "+q.id.toUpperCase()+" · variant "+(c.idx+1)+" · confirm ratings and power-off wiring before connection.",11,"#a84619","start","600");
+ // Panel 1: board and the exact header pins used by this setup.
+ s+=rect(14,58,300,250,"#fff","#cbdce7",11,1.4)+text(28,80,"1 · DUT / TEST BOARD",13,P.ink,"start","800")+
+  text(28,97,"Question-mapped pins · conceptual header",10,P.muted)+rect(38,108,220,187,"#f5f8fa","#becdd8",9,1.5)+
+  rect(122,102,48,19,"#c5d2de","#7c91a3",3)+text(178,115,"USB / Host",9,"#a84619","start","700")+
+  rect(160,143,64,50,"#263441","#17232d",5)+text(192,163,"DUT",10,"#fff","middle","800")+text(192,179,id.toUpperCase().slice(0,10),8,"#cfe4f2","middle","600")+
+  dot(184,215,"#1d63eb",7)+text(184,229,"RUN",8,P.muted,"middle")+dot(216,215,"#111827",5)+text(216,229,"RST",8,P.muted,"middle");
+ const headerPins=[...new Set([c.pins[0],c.pins[1],c.pins[2]||"GND","GND"])].slice(0,5);
+ s+=text(32,128,"J1",9,P.ink,"start","700")+rect(65,132,23,headerPins.length*25+8,"#1c252d","#111",3);
+ headerPins.forEach((p,i)=>{const y=143+i*25;s+=text(59,y+4,p,9,P.muted,"end",p==="GND"?"700":"500")+dot(76,y,p==="GND"?"#111827":i===0?P.blue:P.teal,4.5);});
+ s+=text(106,267,"Setup: "+c.title,10,P.navy,"start","700")+text(106,283,"DMM / scope / load points follow the active question",9,P.muted);
+ // Header-to-board lead map.
+ const driveX=lx[c.comps[0].col],senseX=lx[c.comps[0].col],returnX=lx[c.comps[c.comps.length-1].col];
+ s+=path("M76 "+pinY(0)+" C160 "+pinY(0)+",260 126,319 126 C339 126,346 138,"+driveX+" "+rowY[c.comps[0].from],P.blue,3)+dot(76,pinY(0),P.blue,4)+dot(driveX,rowY[c.comps[0].from],P.blue,4);
+ s+=path("M76 "+pinY(Math.min(1,headerPins.length-1))+" C170 218,268 202,319 202 C342 202,350 208,"+senseX+" "+rowY[c.comps[0].to],P.teal,2.5)+dot(76,pinY(Math.min(1,headerPins.length-1)),P.teal,4)+dot(senseX,rowY[c.comps[0].to],P.teal,4);
+ const gndPin=Math.max(0,headerPins.indexOf("GND"));
+ s+=path("M76 "+pinY(gndPin)+" C164 "+pinY(gndPin)+",265 259,319 259 C342 259,350 251,"+returnX+" "+rowY[c.rowB],"#111827",3)+dot(76,pinY(gndPin),"#111827",4)+dot(returnX,rowY[c.rowB],"#111827",4);
+ // Panel 2: breadboard with the chosen components placed across electrically separate rows.
+ s+=rect(322,58,484,250,"#fff","#cbdce7",11,1.4)+text(336,80,"2 · SOLDERLESS BREADBOARD",13,P.ink,"start","800")+
+  text(336,97,c.title+" · rows/columns change with this question",10,P.muted)+rect(336,104,456,174,"#efefe6","#d4d8cc",10,1.2);
+ ["a","b","c","d","e"].forEach((x,i)=>s+=text(lx[i],120,x,10,P.ink,"middle","700"));
+ ["f","g","h","i","j"].forEach((x,i)=>s+=text(rx[i],120,x,10,P.ink,"middle","700"));
+ s+=rect(546,124,20,145,"#deded4","none",4);
  for(let r=9;r<=17;r++){
-  const y=134+(r-9)*16.5;
-  ys[r]=y;
-  const hi=(r===10||r===15||(isSeries&&r===13)||(isReactive&&r===13));
-  s+=rect(362,y-6,172,13,hi?"#d9ebfc":"#f7f7f2",hi?"#9ec6eb":"none",6,1);
-  s+=rect(578,y-6,172,13,"#f7f7f2","none",6,1);
-  s+=text(350,y+4,String(r),10,hi?P.navy:P.muted,"middle",hi?"700":"500");
-  xsL.forEach(x=>s+=dot(x,y,"#475b6d",2.7));
-  xsR.forEach(x=>s+=dot(x,y,"#475b6d",2.7));
+  const active=c.comps.some(x=>x.from===r||x.to===r)||r===c.rowA||r===c.rowB;
+  s+=rect(362,rowY[r]-6,172,13,active?"#d9ebfc":"#f7f7f2",active?"#9ec6eb":"none",6,1)+rect(578,rowY[r]-6,172,13,"#f7f7f2","none",6);
+  s+=text(350,rowY[r]+4,String(r),9,active?P.navy:P.muted,"middle",active?"700":"500");
+  lx.forEach(x=>s+=dot(x,rowY[r],"#475b6d",2.5));rx.forEach(x=>s+=dot(x,rowY[r],"#475b6d",2.5));
  }
-
- // Draw realistic axial resistor(s) on breadboard
- function drawBBResistor(x,yTop,yBot,rTxt){
-  const mid=(yTop+yBot)/2,bc=bandColorsFor(rTxt);
-  s+=path("M"+x+" "+yTop+" Q"+(x+9)+" "+(yTop+10)+" "+x+" "+(mid-15), "#7a828c",2);
-  s+=path("M"+x+" "+(mid+15)+" Q"+(x+9)+" "+(yBot-10)+" "+x+" "+yBot, "#7a828c",2);
-  s+=rect(x-7,mid-15,14,30,"#dfc08b","#9e7238",5,1.2);
-  s+=line(x-7,mid-7,x+7,mid-7,bc[0],3)+line(x-7,mid-1,x+7,mid-1,bc[1],3)+line(x-7,mid+5,x+7,mid+5,bc[2],3);
+ function compDraw(o,i){
+  const x=lx[o.col],y1=rowY[o.from],y2=rowY[o.to],mid=(y1+y2)/2;
+  s+=path("M"+x+" "+y1+" L"+x+" "+(mid-13),"#7a828c",2)+path("M"+x+" "+(mid+13)+" L"+x+" "+y2,"#7a828c",2);
+  if(o.kind==="R"){
+   s+=rect(x-8,mid-13,16,26,"#dfc08b","#9e7238",5,1.2);
+   const bc=bandColorsFor(o.value);if(bc)s+=line(x-8,mid-6,x+8,mid-6,bc[0],2.5)+line(x-8,mid,x+8,mid,bc[1],2.5)+line(x-8,mid+6,x+8,mid+6,bc[2],2.5);
+  }else if(o.kind==="C")s+=line(x-10,mid-3,x+10,mid-3,"#377899",3.5)+line(x-10,mid+3,x+10,mid+3,"#377899",3.5);
+  else if(o.kind==="L")s+=rect(x-9,mid-12,18,24,"#f2dcaa","#99783e",5,1)+text(x,mid+4,"L",11,P.ink,"middle","800");
+  else if(o.kind==="D")s+=rect(x-9,mid-12,18,24,"#f5e7ef","#a74b79",4,1)+text(x,mid+4,"▶|",9,"#8f275c","middle","800");
+  else s+=rect(x-11,mid-12,22,24,"#dfeaf2","#50748a",4,1)+text(x,mid+4,o.kind,10,P.navy,"middle","800");
+  s+=text(x+12,mid-3,o.label,8,P.navy,"start","800")+text(x+12,mid+9,o.value,8,P.muted,"start","600");
  }
-
- const y10=ys[10],y13=ys[13],y15=ys[15],y16=ys[16];
- if(isSeries){
-  drawBBResistor(xsL[0],y10,y13,r1Lab);
-  drawBBResistor(xsL[0],y13,y16,r2Lab);
- }else if(isReactive){
-  drawBBResistor(xsL[0],y10,y13,r1Lab);
-  s+=line(xsL[0],y13,xsL[0],y13+10,"#7a828c",2)+rect(xsL[0]-10,y13+10,20,16,"#d7ecf7","#4e89a8",3)+text(xsL[0],y13+22,id==="inductors"?"L":"C",10,P.navy,"middle","700")+line(xsL[0],y13+26,xsL[0],y16,"#7a828c",2);
+ c.comps.forEach(compDraw);
+ // The blue drive and black return wires shown above land on the actual component terminals.
+ s+=rect(584,136,194,106,"#fff","#d5e2eb",8,1.2)+text(596,155,c.type.toUpperCase().replace(/-/g," "),10,P.navy,"start","800");
+ c.comps.slice(0,3).forEach((o,i)=>s+=text(596,173+i*16,o.label+" · "+o.value+" · a"+o.from+"→a"+o.to,9,P.ink,"start","600"));
+ s+=text(596,226,"Blue: drive / input · black: return",9,P.muted,"start","600")+
+  text(336,296,"Same numbered row connects a–e only; the center trench isolates f–j. Each component spans separate rows.",9,P.muted);
+ // Panel 3: compact electrical equivalent; labels and topology follow panel 2.
+ s+=rect(14,320,792,108,"#fff","#cbdce7",11,1.4)+text(28,342,"3 · MATCHING ELECTRICAL CONNECTION",13,P.ink,"start","800")+
+  text(790,342,"Question "+q.id.toUpperCase(),10,P.blue,"end","700");
+ const y=382,x0=58;
+ if(["parallel-branches","branch-current","current-split","equivalent-r","can-termination","node-kcl"].includes(c.type)){
+  const xA=270,xB=520,yTop=359,yBot=406;
+  s+=text(100,366,c.pins[0],9,P.blue,"middle","700")+dot(100,yTop,P.blue,4)+line(100,yTop,700,yTop,P.ink,2.4)+line(100,yBot,700,yBot,P.ink,2.4)+groundSym(700,yBot);
+  const branchXs=c.comps.length>2?[210,390,570]:[xA,xB];
+  c.comps.forEach((o,i)=>{const x=branchXs[i]||xB;s+=line(x,yTop,x,yTop+7,P.ink,2.4)+zigV(x,yTop+9,yBot-8,o.label+" "+o.value)+line(x,yBot-6,x,yBot,P.ink,2.4)+dot(x,yTop,P.blue,4)+dot(x,yBot,P.teal,4);});
+  s+=text(690,yTop-8,"Node A",9,P.blue,"end","700")+text(690,yBot+28,"Node B / GND",9,P.teal,"end","700");
+ }else if(["transformer","isolation-test","magnetic-drive","three-phase"].includes(c.type)){
+  s+=text(80,366,"PRIMARY",9,P.blue,"middle","700")+inductor(240,382,"Nₚ · "+(c.comps[0]?.value||"drive"))+line(240,330,240,332,P.ink,2)+line(240,432,240,408,P.ink,2);
+  s+=line(370,350,370,414,P.teal,3)+line(382,350,382,414,P.teal,3)+text(376,344,"CORE",8,P.teal,"middle","700");
+  s+=inductor(520,382,"Nₛ · "+(c.comps[1]?.value||"output"))+text(675,387,"ISOLATED OUTPUT",9,P.teal,"middle","700");
  }else{
-  drawBBResistor(xsL[0],y10,y15,r1Lab);
-  if(isPar)drawBBResistor(xsL[3],y10,y15,r2Lab);
+  s+=text(x0,370,c.pins[0],9,P.blue,"middle","700")+dot(x0,y,P.blue,4)+line(x0,y,120,y,P.ink,2.4);
+  let xpos=120;
+  c.comps.forEach((o,i)=>{
+   if(i>0)s+=line(xpos,y,xpos+12,y,P.ink,2.4),xpos+=12;
+   const left=xpos,right=xpos+74;
+   if(o.kind==="R")s+=zigH(left,right,y,o.label+" "+o.value);
+   else if(o.kind==="C"){s+=line(left,y,right-24,y,P.ink,2.4)+line(right-24,y-13,right-24,y+13,P.ink,3)+line(right-13,y-13,right-13,y+13,P.ink,3)+line(right-13,y,right,y,P.ink,2.4);}
+   else if(o.kind==="L")s+=path("M"+left+" "+y+" L"+(left+8)+" "+y+" C"+(left+8)+" "+(y-13)+" "+(left+18)+" "+(y-13)+" "+(left+18)+" "+y+" C"+(left+18)+" "+(y-13)+" "+(left+28)+" "+(y-13)+" "+(left+28)+" "+y+" L"+right+" "+y,P.ink,2.4)+text((left+right)/2,y-17,o.label+" "+o.value,9,P.ink,"middle","700");
+   else s+=rect(left+16,y-13,42,26,"#f5e7ef","#a74b79",4,1)+text(left+37,y+4,o.label,9,P.ink,"middle","700")+line(left,y,left+16,y,P.ink,2.4)+line(left+58,y,right,y,P.ink,2.4);
+   xpos=right;
+  });
+  const end=Math.min(755,xpos+30);s+=line(xpos,y,end,y,P.ink,2.4)+dot(end,y,P.teal,4)+text(end,y-12,c.pins[1]||"TP",9,P.teal,"middle","700")+
+   line(end,y,end,y+14,P.ink,2)+groundSym(end,y+14);
  }
-
- // Jumper wires connecting Panel 1 -> Panel 2 exact holes!
- // Black wire: GND (CN6 pin 4, y=179) -> b10 (xsL[1], y10)
- s+=dot(87,179,"#111827",4.5)+path("M87 179 C170 179, 260 198, 295 162 C318 138, 370 150, "+xsL[1]+" "+y10, "#1c2630",3.2)+dot(xsL[1],y10,"#1c2630",4);
- // Active wire (Blue/Red): CN8 A0/Sig (y=235) or 3V3 -> b15 (or b16 for series/RC)
- const targetBottomY=(isSeries||isReactive)?y16:y15;
- const activePinY=isBusOrInst?235:153; // 3V3 or A0
- s+=dot(87,activePinY,"#1e63e9",4.5)+path("M87 "+activePinY+" C180 "+activePinY+", 245 258, 315 245 C365 236, 385 "+targetBottomY+", "+xsL[1]+" "+targetBottomY, "#1e63e9",3.2)+dot(xsL[1],targetBottomY,"#1e63e9",4);
-
- // Floating callout card inside f-j area (exactly like user's attachment!)
- s+=rect(584,140,186,92,"#ffffff","#d5e2eb",8,1.2);
- s+=text(596,162,r1Lab+(isPar?" & "+r2Lab:""),14,P.ink,"start","800");
- s+=text(596,179,isSeries?"R₁: a10↔a13 · R₂: a13↔a16":isPar?"R₁: a10↔a15 · R₂: d10↔d15":"Component: a10 → a15",11,P.ink);
- s+=text(596,197,"Black jumper: GND → b10",11,"#1c2630","start","700");
- s+=text(596,214,"Blue jumper: "+(isBusOrInst?sigPins[0]:vLabel)+" → b"+((isSeries||isReactive)?"16":"15"),11,"#1e63e9","start","700");
- s+=text(336,295,"Row 10 and row 15 are separate. Holes a–e connect horizontally; center gap breaks f–j.",10,P.muted);
-
- // Wire labels between panels
- s+=rect(248,142,84,32,"#ffffffe8","#d5e2eb",5)+text(290,156,"Black wire",10,"#1c2630","middle","700")+text(290,169,"GND → b10",9,P.muted,"middle");
- s+=rect(248,252,84,32,"#ffffffe8","#d5e2eb",5)+text(290,266,"Blue wire",10,"#1e63e9","middle","700")+text(290,279,"Sig → b"+((isSeries||isReactive)?"16":"15"),9,P.muted,"middle");
-
- // PANEL 3 (Bottom Full-Width): 3 SAME CONNECTION, SHOWN WITH CIRCUIT SYMBOLS
- s+=rect(20,320,780,108,"#ffffff","#d0dfe9",10,1.4);
- s+=text(36,342,"3 Same connection, shown with circuit symbols",13,P.ink,"start","800");
- s+=text(95,368,"Board GND",11,P.ink,"middle","700")+groundSym(95,375);
- s+=line(95,380,320,380,P.ink,2.4);
- if(isSeries){
-  s+=zigH(335,415,380,r1Lab)+line(429,380,455,380,P.ink,2.4)+zigH(469,549,380,r2Lab)+line(563,380,685,380,P.ink,2.4);
- }else if(isReactive){
-  s+=zigH(335,415,380,r1Lab)+line(429,380,505,380,P.ink,2.4)+line(505,365,505,395,P.ink,3.5)+line(518,365,518,395,P.ink,3.5)+line(518,380,685,380,P.ink,2.4);
- }else{
-  s+=zigH(335,445,380,r1Lab)+line(459,380,685,380,P.ink,2.4);
- }
- s+=dot(685,380,"#1e63e9",5.5)+text(685,365,"Board "+(isBusOrInst?sigPins[0]:vLabel)+" / Probe",11,"#1e63e9","middle","700");
- s+=text(390,414,"Physical holes a10–e10 (GND) and a15–e15 (Active node) match the exact circuit nodes above.",10,"#a84619","middle","600");
-
- return svg(s,"Three-panel board, solderless breadboard, and circuit symbol diagram for "+q.id,820,440);
+ s+=text(400,416,c.title+" · physical row map and circuit nodes update together when a new question is selected",9,P.muted,"middle");
+ return svg(s,"Question-specific "+c.title+" with matched DUT pins, breadboard component placement, and circuit topology for "+q.id,820,440);
 }
 
 function focusInfo(q,t){
@@ -563,7 +617,7 @@ function render(q,t,mode){
  const label=mode==="schematic"?"Full circuit schematic / signal path":mode==="concept"?"Operating-point graph / waveform":m.wiring;
  const focus=focusInfo(q,t),check=q.level==="Troubleshooting"?"Recommended verification: "+(q.steps[q.steps.length-1]||"Verify the issue before changing the hardware."):(focus[3]||"");
  const detail=m.values.length?"Given in question: "+m.values.join(" · "):"Conceptual example; labels represent this exact question's topic.";
- const warning=mode==="wiring"?"Generic teaching illustration showing physical breadboard rows, board header wiring, and circuit symbols side by side — NOT a manufacturer-approved flight pinout. Always verify power-off connections and voltage ratings.":mode==="concept"?"Illustrative graph centered on this question's parameters; not measured telemetry.":"Circuit symbols and magenta current loops follow standard textbook conventions.";
+ const warning=mode==="wiring"?"Question-specific conceptual bench layout; board header names and wiring colors are illustrative, not a manufacturer-approved flight pinout. Verify the actual board documentation, power-off connections, and component ratings.":mode==="concept"?"Illustrative graph centered on this question's parameters; not measured telemetry.":"Circuit symbols and magenta current loops follow standard textbook conventions.";
  return '<figure class="av-visual-figure" data-visual-question="'+esc(q.id)+'" data-visual-mode="'+esc(mode)+'">'+
  '<div class="av-visual-top"><strong>'+esc(label)+'</strong><span>Question '+esc(q.id)+' · '+esc(q.level)+'</span></div>'+
  figure+'<div class="av-visual-question-line"><strong>Question:</strong> '+esc(q.question)+'</div><div class="av-visual-focus"><strong>Focus: '+esc(focus[0])+'.</strong> '+esc(focus[1]||'')+' <em>'+esc(check)+'</em></div><figcaption>'+esc(detail)+'. '+esc(warning)+'</figcaption></figure>';
