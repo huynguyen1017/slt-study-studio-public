@@ -211,6 +211,7 @@ function render(q,t){
  return '<section class="av-nucleo-lesson" data-nucleo-q="'+esc(q.id)+'"><h4>Full STM32 Nucleo-64 + solderless breadboard circuit</h4>'+
  '<p>All 63 terminal rows and power rails shown, not the former 9–17 row crop. This illustrates one 830-point breadboard module, NOT a verified 3220-point Makeronics internal layout. Wires follow the selected question and its practice setup.</p>'+
  '<div class="av-nucleo-stage" tabindex="0">'+buildSvg(q,t)+'</div>'+
+ '<p><strong>Selected probe node(s):</strong> '+esc((c.bench.length?c.bench.map(x=>x[1]):c.links.map(x=>x[1])).filter(x=>/^[a-j]\d+$/.test(x)).slice(0,3).join(" · ")||"Use approved ground/reference measurements")+'</p>'+
  '<p class="av-nucleo-warning">Read the official ST UM1724 board connector table before any physical wiring. Board power, GPIO level limits, jumper configuration, module pinouts and current limits must be independently checked. Never connect powered circuits based only on this illustration.</p>'+
  '<p class="av-nucleo-resources"><a href="https://www.st.com/resource/en/user_manual/dm00105823.pdf" target="_blank" rel="noopener noreferrer">ST UM1724 official connector manual</a> · '+
  '<a href="https://www.st.com/en/development-tools/stm32cubeide.html" target="_blank" rel="noopener noreferrer">STM32CubeIDE (desktop software)</a> · '+
