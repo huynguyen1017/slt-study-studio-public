@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v20-feedback-recheck';
+const CACHE = 'slt-study-studio-v21-si-curriculum-audit';
 const CORE = [
   "./",
   "./index.html",
@@ -11,6 +11,8 @@ const CORE = [
   "./avionics_practice.js",
   "./avionics_practice.css",
   "./avionics_beginner_lessons.js",
+  "./avionics_si_lesson.js",
+  "./avionics_si.css",
   "./avionics_tutor.js",
   "./avionics_assessor.js",
   "./avionics_feedback.css",
