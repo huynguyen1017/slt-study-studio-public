@@ -34,8 +34,8 @@ Voltage:{
  analogy:"Imagine a ball at the top of a hill and another at the bottom. Their difference in height gives an energy difference. Voltage similarly describes energy difference per unit electric charge.",
  why:"A board's '5 V rail' is 5 V only relative to a specified return (normally the ground reference). A probe touching one node without a reference has no complete voltage measurement.",
  example:"Place the black DMM probe at circuit ground (0 V) and red probe at a correctly operating +5 V test point. The DMM reads approximately +5 V. Swap probes and it reads approximately −5 V.",
- formula:"V = E / Q",
- words:[["Voltage","Difference in electric potential energy per charge."],["Node","One electrically connected point or network."],["Reference / ground","The point we call 0 V for comparison."],["DMM","Digital multimeter used for reading voltage."]],
+ formula:"ΔV = ΔU / q",
+ words:[["Voltage","Difference in electric potential energy per charge."],["Node","One electrically connected point or network."],["Reference / ground","The point we call 0 V for comparison."],["DMM","Digital multimeter used for reading voltage."],["ΔU","Difference in electrical potential energy, measured in joules."],["q","Electric charge, measured in coulombs."]],
  recap:"Voltage is a comparison between two points. A 5 V measurement always needs its reference."
 },
 Current:{
