@@ -1083,132 +1083,285 @@
     return `<svg class="av-visual-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 460" role="img" aria-label="${esc(headline)}">${body}</svg>`;
   }
 
-  /** Draw interactive live breadboard + voltage heatmap on Canvas. */
+  /** Build authentic STM32 NUCLEO-L476RG (MB1136 / UM1724) CubeMX & HAL profile for the active question. */
+  function buildStm32Profile(spec, sol) {
+    const vOut = Math.max(0, Math.min(3.3, sol.volts.nOut || 0));
+    const adcRaw = Math.round((4095 * vOut) / 3.3);
+    const vddStr = spec.vs <= 3.6 ? "CN6-4 (+3V3)" : "CN6-5 (+5V U5V)";
+    let peripheral = "ADC1_IN5 (Single-Ended 12-bit)";
+    let iocConfig = "RCC: MSI 4MHz->PLL 80MHz | PA0->ADC1_IN5 | PA5->GPIO_Out(LD2) | USART2->115200 8N1";
+    let pins = [
+      { hdr: "CN6-4", pin: "VDD_3V3", role: "3.3V Logic Supply", bus: "+3.3V Top Rail", color: "#dc2626" },
+      { hdr: "CN6-6", pin: "GND", role: "Ground Reference", bus: "GND Bus Rail", color: "#0f172a" },
+      { hdr: "CN8-1 (A0)", pin: "PA0", role: "ADC1_IN5 Sense Node", bus: "Midpoint / DUT Out", color: "#2563eb" },
+      { hdr: "CN5-6 (D13)", pin: "PA5", role: "LD2 Status LED Output", bus: "Indicator LED", color: "#16a34a" },
+      { hdr: "CN9-2 (D1)", pin: "PA2", role: "USART2_TX (ST-LINK VCP)", bus: "PC Serial Log", color: "#7c3aed" }
+    ];
+    let halCode = [
+      "// STM32CubeIDE (UM1724 NUCLEO-L476RG) · " + spec.qId.toUpperCase(),
+      "HAL_ADC_Start(&hadc1);",
+      "HAL_ADC_PollForConversion(&hadc1, 10);",
+      `uint32_t raw = HAL_ADC_GetValue(&hadc1);      // Expected ≈ ${adcRaw} counts (@ ${vOut.toFixed(2)}V)`,
+      "float v_node = (3.3f * raw) / 4095.0f;",
+      `HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, ${vOut > 0.5 && spec.powerOn ? "GPIO_PIN_SET" : "GPIO_PIN_RESET"});`
+    ].join("\n");
+
+    if (spec.topo === "i2c_open_drain" || spec.topicId === "buses") {
+      peripheral = "I2C1 Fast Mode (400 kHz) · USART2 Console";
+      iocConfig = "PB8->I2C1_SCL (AF4 OD+PullUp) | PB9->I2C1_SDA | PA2/PA3->USART2 (115200 8N1) | PA5..PA7->SPI1";
+      pins = [
+        { hdr: "CN6-4", pin: "VDD_3V3", role: "Pull-Up Reference (2.2kΩ)", bus: "+3.3V Bus Rail", color: "#dc2626" },
+        { hdr: "CN5-10 (D15)", pin: "PB8", role: "I2C1_SCL (AF4 Open-Drain)", bus: "SCL Pull-Up Node", color: "#7c3aed" },
+        { hdr: "CN5-9 (D14)", pin: "PB9", role: "I2C1_SDA (AF4 Open-Drain)", bus: "SDA Pull-Up Node", color: "#2563eb" },
+        { hdr: "CN5-4 (D11)", pin: "PA7", role: "SPI1_MOSI / Sensor Bus", bus: "Breadboard Col 9", color: "#059669" },
+        { hdr: "CN6-6", pin: "GND", role: "Common Return (ST-LINK)", bus: "GND Bus Rail", color: "#0f172a" }
+      ];
+      halCode = [
+        "// STM32CubeIDE I2C1 / Bus Bring-Up · " + spec.qId.toUpperCase(),
+        "uint8_t txBuf[2] = {0x00, 0xA5};",
+        `// Rp=${fmtEng(sol.effR1, "Ω")}, Cbus=${fmtEng(spec.c1, "F")}, tr≈${fmtEng(0.8473 * sol.effR1 * spec.c1, "s")}`,
+        "if (HAL_I2C_Master_Transmit(&hi2c1, 0x40<<1, txBuf, 2, 20) == HAL_OK) {",
+        "    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET); // PA5 LD2 OK",
+        "}"
+      ].join("\n");
+    } else if (spec.topo === "rc_step" || spec.topo === "rl_flyback" || spec.topo.includes("rc_") || spec.topo === "rlc_band") {
+      const arrVal = Math.max(99, Math.round(80e6 / Math.max(100, spec.freq)) - 1);
+      peripheral = "TIM2_CH2 PWM + ADC1_IN5 Envelope Capture";
+      iocConfig = "SYSCLK=80MHz | PB3->TIM2_CH2 (AF1 PWM) | PA0->ADC1_IN5 | PC13->EXTI13 Button B1";
+      pins = [
+        { hdr: "CN9-4 (D3)", pin: "PB3", role: "TIM2_CH2 Stimulus/PWM Drive", bus: "Input Node (R1)", color: "#dc2626" },
+        { hdr: "CN8-1 (A0)", pin: "PA0", role: "ADC1_IN5 Response Probe", bus: "Filter/Tank Vout", color: "#2563eb" },
+        { hdr: "CN7-23", pin: "PC13", role: "User B1 (Step Trigger EXTI13)", bus: "Trigger Switch", color: "#d97706" },
+        { hdr: "CN6-4", pin: "+3V3", role: "Logic & Decoupling Ref", bus: "+3.3V Rail (100nF)", color: "#16a34a" },
+        { hdr: "CN6-6", pin: "GND", role: "Return Ground", bus: "GND Rail", color: "#0f172a" }
+      ];
+      halCode = [
+        "// STM32CubeIDE TIM2 Step/AC Drive · " + spec.qId.toUpperCase(),
+        `__HAL_TIM_SET_AUTORELOAD(&htim2, ${arrVal}); // Target f ≈ ${fmtEng(spec.freq, "Hz")}`,
+        `__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, ${Math.round((arrVal + 1) * (spec.duty / 100))}); // Duty ${spec.duty}%`,
+        "HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);",
+        `// Cutoff/Resonant fc ≈ ${fmtEng(sol.fc, "Hz")} | Tau ≈ ${fmtEng(sol.tau, "s")}`
+      ].join("\n");
+    }
+    return { vddStr, adcRaw, peripheral, iocConfig, pins, halCode };
+  }
+
+  /** Draw full multi-rail 3220-inspired breadboard with docked NUCLEO-L476RG pins & multi-components. */
   function drawLiveBreadboard(canvas, spec, sol) {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const W = 540, H = 260;
+    const W = 640, H = 300;
     canvas.width = W * dpr;
     canvas.height = H * dpr;
     const ctx = canvas.getContext("2d");
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, W, H);
 
-    // Board base
+    // Outer Lab Bench Surface
+    ctx.fillStyle = "#eef2f7";
+    ctx.fillRect(0, 0, W, H);
+
+    // Left Docked STM32 NUCLEO-L476RG (UM1724 / MB1136) Carrier Header
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, 8, 8, 128, H - 16, 10, true, true);
+    ctx.fillStyle = "#1e293b";
+    roundRect(ctx, 16, 16, 112, 34, 6, true, false);
+    ctx.fillStyle = "#38bdf8";
+    ctx.font = "bold 9.5px monospace";
+    ctx.fillText("NUCLEO-L476RG", 24, 30);
+    ctx.fillStyle = "#cbd5e1";
+    ctx.font = "8.5px monospace";
+    ctx.fillText("UM1724 / MB1136", 24, 42);
+
+    const ledOn = spec.powerOn && !spec.faulted && (sol.volts.nOut || 0) > 0.2;
+    ctx.fillStyle = ledOn ? "#22c55e" : "#94a3b8";
+    ctx.beginPath(); ctx.arc(118, 28, 4.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#475569";
+    ctx.font = "bold 8px sans-serif";
+    ctx.fillText("LD2 PA5", 82, 62);
+
+    const nucPins = [
+      { lbl: "+3V3 CN6-4", col: "#dc2626", y: 80 },
+      { lbl: "+5V  CN6-5", col: "#ea580c", y: 108 },
+      { lbl: "PA0  A0/ADC", col: "#2563eb", y: 136 },
+      { lbl: "PB3  D3/PWM", col: "#7c3aed", y: 164 },
+      { lbl: "PB8  D15/SCL", col: "#059669", y: 192 },
+      { lbl: "PC13 B1/BTN", col: "#d97706", y: 220 },
+      { lbl: "GND  CN6-6", col: "#0f172a", y: 248 }
+    ];
+    nucPins.forEach((p) => {
+      ctx.fillStyle = "#0f172a";
+      roundRect(ctx, 96, p.y - 8, 30, 16, 4, true, false);
+      ctx.fillStyle = p.col;
+      ctx.beginPath(); ctx.arc(118, p.y, 4.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#1e293b";
+      ctx.font = "bold 8.5px monospace";
+      ctx.fillText(p.lbl, 16, p.y + 3);
+    });
+
+    // Right Full Multi-Rail Solderless Breadboard (Cols 1..15, +5V/+3.3V/GND split bus strips)
+    const bx = 148, bw = W - bx - 8;
     ctx.fillStyle = "#f5efe2";
     ctx.strokeStyle = "#cbd5e1";
     ctx.lineWidth = 1.5;
-    roundRect(ctx, 8, 8, W - 16, H - 16, 12, true, true);
+    roundRect(ctx, bx, 8, bw, H - 16, 12, true, true);
 
-    // Top red & blue power bus rails
+    // Top Dual Bus (+5V red & GND blue)
     ctx.fillStyle = "#fee2e2";
-    roundRect(ctx, 22, 18, W - 44, 18, 6, true, false);
+    roundRect(ctx, bx + 12, 16, bw - 24, 15, 4, true, false);
+    ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(bx + 20, 23.5); ctx.lineTo(bx + bw - 20, 23.5); ctx.stroke();
+    ctx.fillStyle = "#dbeafe";
+    roundRect(ctx, bx + 12, 34, bw - 24, 15, 4, true, false);
+    ctx.strokeStyle = "#2563eb";
+    ctx.beginPath(); ctx.moveTo(bx + 20, 41.5); ctx.lineTo(bx + bw - 20, 41.5); ctx.stroke();
+
+    ctx.fillStyle = "#b91c1c"; ctx.font = "bold 9px monospace";
+    ctx.fillText("+5V", bx + 16, 26);
+    ctx.fillStyle = "#1d4ed8";
+    ctx.fillText("GND", bx + 16, 44);
+
+    // Bottom Dual Bus (+3.3V red & GND)
+    ctx.fillStyle = "#fee2e2";
+    roundRect(ctx, bx + 12, H - 48, bw - 24, 15, 4, true, false);
     ctx.strokeStyle = "#ef4444";
-    ctx.beginPath(); ctx.moveTo(30, 27); ctx.lineTo(W - 30, 27); ctx.stroke();
-    ctx.fillStyle = "#dc2626";
-    ctx.font = "bold 11px sans-serif";
-    ctx.fillText("+ RAIL (" + (spec.powerOn ? (sol.volts.nIn || 0).toFixed(2) + "V" : "0V OFF") + ")", 32, 31);
-
-    // Bottom GND rail
+    ctx.beginPath(); ctx.moveTo(bx + 20, H - 40.5); ctx.lineTo(bx + bw - 20, H - 40.5); ctx.stroke();
     ctx.fillStyle = "#e2e8f0";
-    roundRect(ctx, 22, H - 36, W - 44, 18, 6, true, false);
+    roundRect(ctx, bx + 12, H - 30, bw - 24, 15, 4, true, false);
     ctx.strokeStyle = spec.faulted && spec.faultInfo.kind === "bad_gnd" ? "#d97706" : "#0f172a";
-    ctx.beginPath(); ctx.moveTo(30, H - 27); ctx.lineTo(W - 30, H - 27); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx + 20, H - 22.5); ctx.lineTo(bx + bw - 20, H - 22.5); ctx.stroke();
+
+    ctx.fillStyle = "#b91c1c";
+    ctx.fillText("+3V3 (" + (spec.powerOn ? (sol.volts.nIn || 0).toFixed(1) + "V" : "0V") + ")", bx + 16, H - 38);
     ctx.fillStyle = "#0f172a";
-    ctx.fillText("GND RETURN (" + (sol.volts.GND || 0).toFixed(2) + "V)", 32, H - 23);
+    ctx.fillText("GND (" + (sol.volts.GND || 0).toFixed(2) + "V)", bx + 16, H - 20);
 
-    // Center DIP ravine
+    // Center DIP IC trench
     ctx.fillStyle = "#e2e8f0";
-    roundRect(ctx, 22, 124, W - 44, 12, 4, true, false);
+    roundRect(ctx, bx + 12, 144, bw - 24, 14, 4, true, false);
 
-    // Active strip columns (12 breadboard columns)
-    const activeTopCol = 2 + (spec.rowBase % 3);
+    // 14 Full Prototyping Strip Columns
+    const colStart = bx + 44, colStep = 30;
+    const activeTopCol = 2 + (spec.rowBase % 2);
     const activeMidCol = activeTopCol + 4;
     const activeLoadCol = activeMidCol + 3;
+    const activeIcCol = activeLoadCol + 1;
 
     for (let c = 0; c < 14; c++) {
-      const x = 44 + c * 34;
-      const isHi = c === activeTopCol || c === activeMidCol || c === activeLoadCol;
-      ctx.fillStyle = c === activeTopCol ? "#fee2e2" : c === activeMidCol ? "#dbeafe" : c === activeLoadCol ? "#dcfce7" : "#ebe5d8";
-      roundRect(ctx, x - 9, 44, 18, 74, 5, true, false);
-      roundRect(ctx, x - 9, 142, 18, 74, 5, true, false);
-      ctx.fillStyle = isHi ? "#0f172a" : "#64748b";
-      ctx.font = isHi ? "bold 10px monospace" : "10px monospace";
-      ctx.fillText(String(c + 1), x - 4, 54);
-      for (let r = 0; r < 4; r++) {
+      const x = colStart + c * colStep;
+      const fillTop = c === activeTopCol ? "#fee2e2" : c === activeMidCol ? "#dbeafe" : "#ebe5d8";
+      const fillBot = c === activeMidCol ? "#dbeafe" : c === activeLoadCol ? "#dcfce7" : "#ebe5d8";
+      roundRect(ctx, x - 8, 56, 16, 82, 4, true, false);
+      ctx.fillStyle = fillTop;
+      roundRect(ctx, x - 8, 56, 16, 82, 4, true, false);
+      ctx.fillStyle = fillBot;
+      roundRect(ctx, x - 8, 164, 16, 82, 4, true, false);
+      ctx.fillStyle = "#475569"; ctx.font = "9px monospace";
+      ctx.fillText(String(c + 1), x - 4, 65);
+      for (let r = 0; r < 5; r++) {
         ctx.fillStyle = "#1e293b";
-        ctx.beginPath(); ctx.arc(x, 66 + r * 14, 2.6, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(x, 154 + r * 14, 2.6, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, 75 + r * 14, 2.3, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, 175 + r * 14, 2.3, 0, Math.PI * 2); ctx.fill();
       }
+      // Power rail bus holes
+      ctx.beginPath(); ctx.arc(x, 23.5, 2.1, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x, 41.5, 2.1, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x, H - 40.5, 2.1, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x, H - 22.5, 2.1, 0, Math.PI * 2); ctx.fill();
     }
 
-    const xTop = 44 + activeTopCol * 34;
-    const xMid = 44 + activeMidCol * 34;
-    const xLoad = 44 + activeLoadCol * 34;
+    const xTop = colStart + activeTopCol * colStep;
+    const xMid = colStart + activeMidCol * colStep;
+    const xLoad = colStart + activeLoadCol * colStep;
+    const xIc = colStart + activeIcCol * colStep;
 
-    // Jumper from + Rail -> top node
+    // Decoupling ceramic bypass cap across top rail + GND (column 1 -> full breadboard realism)
+    const xDec = colStart;
+    ctx.fillStyle = "#f59e0b";
+    roundRect(ctx, xDec - 7, 26, 14, 12, 3, true, false);
+    ctx.strokeStyle = "#475569"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(xDec - 3, 38); ctx.lineTo(xDec - 3, 42); ctx.moveTo(xDec + 3, 24); ctx.lineTo(xDec + 3, 26); ctx.stroke();
+
+    // NUCLEO-L476RG jumpers docked directly onto breadboard columns!
+    ctx.lineWidth = 2.6;
     ctx.strokeStyle = "#dc2626";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(xTop, 27);
-    ctx.lineTo(xTop, 66);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(118, 80); ctx.lineTo(xTop, 23.5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(xTop, 23.5); ctx.lineTo(xTop, 75); ctx.stroke();
+
+    ctx.strokeStyle = "#2563eb"; // PA0 ADC sense jumper -> Midpoint node
+    ctx.beginPath(); ctx.moveTo(118, 136); ctx.bezierCurveTo(170, 136, xMid - 25, 136, xMid, 175); ctx.stroke();
+
+    ctx.strokeStyle = "#0f172a"; // GND return from Nucleo CN6-6 -> Bottom GND bus
+    ctx.beginPath(); ctx.moveTo(118, 248); ctx.lineTo(xLoad, H - 22.5); ctx.stroke();
 
     const drawLabelPill = (text, cx, cy, fg) => {
-      ctx.font = "bold 10.5px sans-serif";
-      const w = ctx.measureText(text).width + 12;
-      ctx.fillStyle = "rgba(255,255,255,0.94)";
+      ctx.font = "bold 9.5px sans-serif";
+      const w = ctx.measureText(text).width + 10;
+      ctx.fillStyle = "rgba(255,255,255,0.95)";
       ctx.strokeStyle = "#cbd5e1";
       ctx.lineWidth = 1;
-      roundRect(ctx, cx - w / 2, cy - 11, w, 16, 4, true, true);
+      roundRect(ctx, cx - w / 2, cy - 10, w, 15, 4, true, true);
       ctx.fillStyle = fg || "#0f172a";
-      ctx.fillText(text, cx - w / 2 + 6, cy + 1);
+      ctx.fillText(text, cx - w / 2 + 5, cy + 1);
     };
 
-    // R1 bridging activeTopCol -> activeMidCol on top half
-    drawResistorCanvas(ctx, xTop, 84, xMid, 84, spec.r1, spec.faulted && spec.faultInfo.kind === "open_r1");
-    drawLabelPill("R1 " + fmtEng(sol.effR1, "Ω"), (xTop + xMid) / 2, 62, "#0f172a");
+    // Main Series Component R1 bridging xTop -> xMid
+    drawResistorCanvas(ctx, xTop, 94, xMid, 94, spec.r1, spec.faulted && spec.faultInfo.kind === "open_r1");
+    drawLabelPill("R1 " + fmtEng(sol.effR1, "Ω"), (xTop + xMid) / 2, 72, "#0f172a");
 
-    // Bridge wire across center ravine at activeMidCol (nOut!)
-    ctx.strokeStyle = "#2563eb";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(xMid, 108);
-    ctx.lineTo(xMid, 154);
-    ctx.stroke();
+    // Bridge jumper across center DIP trench at activeMidCol
+    ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.moveTo(xMid, 128); ctx.lineTo(xMid, 175); ctx.stroke();
 
-    // Component 2 from activeMidCol to activeLoadCol (C/L/R2)
-    if (spec.topo.includes("rc") || spec.topo.includes("i2c") || spec.topo === "rlc_band") {
-      ctx.strokeStyle = "#1d4ed8";
-      ctx.lineWidth = 2.5;
-      ctx.beginPath(); ctx.moveTo(xMid, 182); ctx.lineTo(xLoad, 182); ctx.stroke();
-      ctx.fillStyle = "#2563eb";
-      roundRect(ctx, (xMid + xLoad) / 2 - 12, 170, 24, 24, 5, true, false);
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 10px sans-serif";
-      ctx.fillText("C1", (xMid + xLoad) / 2 - 7, 186);
-      drawLabelPill(fmtEng(spec.c1, "F"), (xMid + xLoad) / 2, 207, "#1e3a8a");
-    } else {
-      drawResistorCanvas(ctx, xMid, 182, xLoad, 182, sol.effR2, false);
-      drawLabelPill("R2 " + fmtEng(sol.effR2, "Ω"), (xMid + xLoad) / 2, 162, "#0f172a");
+    // Multi-component Companion DIP-8 IC straddling center trench (cols activeIcCol .. activeIcCol+3)
+    const icTag = spec.topo.includes("i2c") ? "INA219" : spec.topo === "rc_step" ? "NE555" : spec.topo === "rl_flyback" ? "DRV88" : "LM358";
+    ctx.fillStyle = "#1e293b";
+    roundRect(ctx, xIc - 10, 122, colStep * 3 + 20, 56, 5, true, false);
+    ctx.fillStyle = "#ffffff"; ctx.font = "bold 9.5px monospace";
+    ctx.fillText(icTag + " DIP-8", xIc + 10, 153);
+    for (let pin = 0; pin < 4; pin++) {
+      ctx.fillStyle = "#94a3b8";
+      ctx.fillRect(xIc + pin * colStep - 3, 117, 6, 6);
+      ctx.fillRect(xIc + pin * colStep - 3, 177, 6, 6);
     }
 
-    // Ground return jumper
-    ctx.strokeStyle = "#0f172a";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(xLoad, 196);
-    ctx.lineTo(xLoad, H - 27);
-    ctx.stroke();
+    // Component 2 from xMid -> xLoad (Capacitor / Inductor / Diode / Resistor)
+    if (spec.topo.includes("rc") || spec.topo.includes("i2c") || spec.topo === "rlc_band") {
+      ctx.strokeStyle = "#1d4ed8"; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.moveTo(xMid, 198); ctx.lineTo(xLoad, 198); ctx.stroke();
+      ctx.fillStyle = "#2563eb";
+      roundRect(ctx, (xMid + xLoad) / 2 - 12, 186, 24, 24, 5, true, false);
+      ctx.fillStyle = "#ffffff"; ctx.font = "bold 9.5px sans-serif";
+      ctx.fillText("C1", (xMid + xLoad) / 2 - 7, 202);
+      drawLabelPill(fmtEng(spec.c1, "F"), (xMid + xLoad) / 2, 224, "#1e3a8a");
+    } else if (spec.topo === "rl_flyback") {
+      ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.moveTo(xMid, 198); ctx.lineTo(xLoad, 198); ctx.stroke();
+      ctx.fillStyle = "#334155";
+      roundRect(ctx, (xMid + xLoad) / 2 - 14, 186, 28, 24, 7, true, false);
+      ctx.fillStyle = "#fef08a"; ctx.font = "bold 9.5px sans-serif";
+      ctx.fillText("L1", (xMid + xLoad) / 2 - 6, 202);
+      drawLabelPill(fmtEng(spec.l1, "H"), (xMid + xLoad) / 2, 224, "#0f172a");
+    } else {
+      drawResistorCanvas(ctx, xMid, 198, xLoad, 198, sol.effR2, false);
+      drawLabelPill("R2 " + fmtEng(sol.effR2, "Ω"), (xMid + xLoad) / 2, 224, "#0f172a");
+    }
 
-    // Draw Red & Black DMM Probes snapped onto selected nodes
+    // Secondary companion LED indicator wired from xIc+colStep (via 330Ω) down to GND
+    const xLed = colStart + (activeIcCol + 2) * colStep;
+    ctx.fillStyle = ledOn ? "#10b981" : "#94a3b8";
+    ctx.strokeStyle = "#064e3b"; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.arc(xLed, 204, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(xLoad, 212); ctx.lineTo(xLoad, H - 22.5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(xLed, 212); ctx.lineTo(xLed, H - 22.5); ctx.stroke();
+
+    // Red & Black DMM Probes
     const nodePos = {
-      nIn: [xTop, 66],
-      n1: [(xTop + xMid) / 2, 84],
-      nTh: [xMid, 94],
-      nMid: [xMid, 94],
-      n2: [xTop + 34, 66],
-      nOut: [xMid, 154],
-      GND: [xLoad, H - 27]
+      nIn: [xTop, 75],
+      nOut: [xMid, 175],
+      GND: [xLoad, H - 22.5]
     };
     const rPos = nodePos[spec.redNode] || nodePos.nOut;
     const bPos = nodePos[spec.blackNode] || nodePos.GND;
@@ -1351,11 +1504,12 @@
 
     targets.forEach((box) => {
       const baseSpec = buildCircuitSpec(q, t);
-      const state = Object.assign({}, baseSpec, { showOnline: false });
+      const state = Object.assign({}, baseSpec, { showOnline: false, simTab: "bench" });
 
       function renderUI() {
         const sol = solveCircuit(state);
         const falstadUrl = toFalstadUrl(state);
+        const stm = buildStm32Profile(state, sol);
         const bannerCls = !state.powerOn ? "is-poweroff" : state.faulted ? "is-fault" : "is-healthy";
         const bannerMsg = !state.powerOn
           ? "⚡ Power OFF: Safe state for continuity & Ω resistance measurements."
@@ -1370,11 +1524,11 @@
         box.innerHTML =
           '<div class="av-sim-topbar">' +
             '<div class="av-sim-titlewrap">' +
-              '<div class="av-sim-eyebrow">LIVE INTERACTIVE CIRCUIT BENCH &amp; ONLINE SIMULATOR</div>' +
+              '<div class="av-sim-eyebrow">FULL BREADBOARD, NUCLEO-L476RG &amp; ONLINE SIMULATOR</div>' +
               '<h4 class="av-sim-title">' + esc(state.qId.toUpperCase()) + ' · ' + esc(state.instrument) + '</h4>' +
               '<p class="av-sim-sub">' + esc(state.isIndirectHardwareTopic
                 ? "Representative DUT power/interface circuit for this automated test & log scenario."
-                : "Auto-built for " + state.qId + " (" + state.level + "). Edit values, probe nodes, inject faults, or run live in CircuitJS1.") + '</p>' +
+                : "Auto-built multi-component breadboard + STM32 NUCLEO-L476RG (UM1724) for " + state.qId + " (" + state.level + ").") + '</p>' +
             '</div>' +
             '<div class="av-sim-actions">' +
               '<button type="button" class="av-sim-btn ' + (state.powerOn ? "power-on" : "power-off") + '" data-sim-act="power">' +
@@ -1390,65 +1544,88 @@
               '<a class="av-sim-btn" href="' + esc(falstadUrl) + '" target="_blank" rel="noopener noreferrer">↗ Open Full Sim</a>' +
             '</div>' +
           '</div>' +
+          '<div class="av-sim-tabs" role="tablist" aria-label="Simulator bench tabs">' +
+            '<button type="button" class="av-sim-tab ' + (state.simTab === "bench" ? "active" : "") + '" data-sim-tab="bench">⚡ Full Breadboard &amp; MNA Bench</button>' +
+            '<button type="button" class="av-sim-tab ' + (state.simTab === "stm32" ? "active" : "") + '" data-sim-tab="stm32">🧩 STM32 NUCLEO-L476RG (UM1724) + CubeMX / CubeIDE</button>' +
+          '</div>' +
           '<div class="av-sim-banner ' + bannerCls + '">' +
             '<span>' + esc(bannerMsg) + '</span>' +
             '<span><strong>Total Current:</strong> ' + esc(fmtEng(sol.totalI, "A")) + ' · <strong>Power:</strong> ' + esc(fmtEng(sol.totalP, "W")) + '</span>' +
           '</div>' +
-          '<div class="av-sim-grid">' +
-            '<div class="av-sim-card">' +
-              '<h5>Interactive Breadboard &amp; Probe Placement <span class="av-sim-chip">' + esc(state.topo.replace(/_/g, " ").toUpperCase()) + '</span></h5>' +
-              '<div class="av-sim-bb-wrap"><canvas class="av-sim-bb-canvas" width="540" height="260" aria-label="Interactive solderless breadboard"></canvas></div>' +
-              '<div class="av-sim-probe-row">' +
-                '<label class="av-sim-probe-label"><span class="av-sim-dot red"></span>Red Probe (+)' +
-                  '<select data-sim-probe="red">' +
-                    '<option value="nIn"' + (state.redNode === "nIn" ? " selected" : "") + '>Supply Rail (+Vs)</option>' +
-                    '<option value="nOut"' + (state.redNode === "nOut" ? " selected" : "") + '>DUT Output Node</option>' +
-                    '<option value="GND"' + (state.redNode === "GND" ? " selected" : "") + '>GND Reference</option>' +
-                  '</select>' +
-                '</label>' +
-                '<label class="av-sim-probe-label"><span class="av-sim-dot blk"></span>Black Probe (-)' +
-                  '<select data-sim-probe="black">' +
-                    '<option value="GND"' + (state.blackNode === "GND" ? " selected" : "") + '>GND Reference</option>' +
-                    '<option value="nOut"' + (state.blackNode === "nOut" ? " selected" : "") + '>DUT Output Node</option>' +
-                    '<option value="nIn"' + (state.blackNode === "nIn" ? " selected" : "") + '>Supply Rail (+Vs)</option>' +
-                  '</select>' +
-                '</label>' +
-              '</div>' +
-              '<div class="av-sim-scope-wrap"><canvas class="av-sim-scope-canvas" width="520" height="190" aria-label="Live 2-channel oscilloscope"></canvas></div>' +
-            '</div>' +
-            '<div class="av-sim-card">' +
-              '<h5>Digital Multimeter &amp; Component Bench</h5>' +
-              '<div class="av-sim-dmm">' +
-                '<div class="av-sim-dmm-top">' +
-                  '<span class="av-sim-dmm-brand">Bench DMM · MNA Engine</span>' +
-                  '<div class="av-sim-dmm-modes">' +
-                    ["V", "mA", "OHM"].map((md) =>
-                      '<button type="button" class="' + (state.dmmMode === md ? "active" : "") + '" data-sim-dmm="' + md + '">' + (md === "OHM" ? "Ω" : md) + '</button>'
-                    ).join("") +
-                  '</div>' +
+          (state.simTab === "stm32"
+            ? '<div class="av-stm32-panel">' +
+                '<div class="av-stm32-card">' +
+                  '<h5>STM32 NUCLEO-L476RG (MB1136 / UM1724) Pin Map</h5>' +
+                  '<p class="av-stm32-meta"><strong>STM32CubeMX Peripheral:</strong> ' + esc(stm.peripheral) + '<br><code>' + esc(stm.iocConfig) + '</code></p>' +
+                  '<table class="av-stm32-table"><thead><tr><th>Header (Arduino / Morpho)</th><th>STM32 Pin</th><th>CubeMX Role</th><th>Breadboard Net</th></tr></thead><tbody>' +
+                  stm.pins.map((p) =>
+                    '<tr><td>' + esc(p.hdr) + '</td><td><span class="av-stm32-pin-pill">' + esc(p.pin) + '</span></td><td>' + esc(p.role) + '</td><td>' + esc(p.bus) + '</td></tr>'
+                  ).join("") +
+                  '</tbody></table>' +
+                  '<div class="av-stm32-live-adc">Live Breadboard -> STM32 ADC1_IN5 (PA0): Vout = ' + (sol.volts.nOut || 0).toFixed(3) + ' V · 12-bit RAW ≈ ' + stm.adcRaw + ' / 4095 · Supply: ' + esc(stm.vddStr) + '</div>' +
                 '</div>' +
-                '<div class="av-sim-dmm-readout ' + (sol.dmmWarn ? "warn" : "") + '">' + esc(sol.dmmText) + '</div>' +
-                '<div class="av-sim-dmm-meta">Probing <strong>' + esc(state.redNode) + '</strong> wrt <strong>' + esc(state.blackNode) + '</strong> · ' + esc(sol.acMetricLabel) + '</div>' +
-              '</div>' +
-              '<div class="av-sim-controls">' +
-                '<div class="av-sim-slider-row"><label>Source Vs</label><input type="range" min="1" max="24" step="0.1" value="' + state.vs + '" data-sim-param="vs"><span class="av-sim-slider-val">' + state.vs.toFixed(1) + ' V</span></div>' +
-                '<div class="av-sim-slider-row"><label>Series R1</label><input type="range" min="10" max="10000" step="10" value="' + Math.min(10000, Math.round(state.r1)) + '" data-sim-param="r1"><span class="av-sim-slider-val">' + esc(fmtEng(state.r1, "Ω")) + '</span></div>' +
-                '<div class="av-sim-slider-row"><label>Shunt/Load R2</label><input type="range" min="10" max="10000" step="10" value="' + Math.min(10000, Math.round(state.r2)) + '" data-sim-param="r2"><span class="av-sim-slider-val">' + esc(fmtEng(state.r2, "Ω")) + '</span></div>' +
-                (showC ? '<div class="av-sim-slider-row"><label>Cap C1 (µF)</label><input type="range" min="0.1" max="22" step="0.1" value="' + Math.max(0.1, Math.min(22, +(state.c1 * 1e6).toFixed(2))) + '" data-sim-param="c1u"><span class="av-sim-slider-val">' + esc(fmtEng(state.c1, "F")) + '</span></div>' : "") +
-                (showL ? '<div class="av-sim-slider-row"><label>Ind L1 (mH)</label><input type="range" min="0.5" max="20" step="0.5" value="' + Math.max(0.5, Math.min(20, +(state.l1 * 1e3).toFixed(1))) + '" data-sim-param="l1m"><span class="av-sim-slider-val">' + esc(fmtEng(state.l1, "H")) + '</span></div>' : "") +
-                (showF ? '<div class="av-sim-slider-row"><label>Freq (Hz)</label><input type="range" min="50" max="50000" step="50" value="' + Math.min(50000, Math.round(state.freq)) + '" data-sim-param="freq"><span class="av-sim-slider-val">' + esc(fmtEng(state.freq, "Hz")) + '</span></div>' : "") +
-              '</div>' +
-              '<table class="av-sim-nodes-table"><thead><tr><th>Node / Branch</th><th>Live Value</th></tr></thead><tbody>' +
-                '<tr><td>V(Supply Rail)</td><td class="num">' + (sol.volts.nIn || 0).toFixed(3) + ' V</td></tr>' +
-                '<tr><td>V(DUT Output)</td><td class="num">' + (sol.volts.nOut || 0).toFixed(3) + ' V</td></tr>' +
-                '<tr><td>Loop Current I</td><td class="num">' + esc(fmtEng(sol.totalI, "A")) + '</td></tr>' +
-                (state.topo === "rc_lowpass" || state.topo === "rc_highpass" || state.topo === "rlc_band"
-                  ? '<tr><td>Cutoff / Resonant</td><td class="num">' + esc(fmtEng(sol.fc, "Hz")) + '</td></tr>'
-                  : '<tr><td>Power (P = V×I)</td><td class="num">' + esc(fmtEng(sol.totalP, "W")) + '</td></tr>') +
-              '</tbody></table>' +
-              '<div class="av-sim-target-check">' + esc(describeVerification(state, sol)) + '</div>' +
-            '</div>' +
-          '</div>' +
+                '<div class="av-stm32-card">' +
+                  '<h5>STM32CubeIDE HAL Demonstration (main.c)</h5>' +
+                  '<p class="av-stm32-meta">Flash via ST-LINK/V2-1 (CN1 USB, PA13 SWDIO / PA14 SWCLK). Live register values sync to your breadboard sliders.</p>' +
+                  '<pre class="av-stm32-code">' + esc(stm.halCode) + '</pre>' +
+                  '<div class="av-sim-target-check">' + esc(describeVerification(state, sol)) + '</div>' +
+                '</div>' +
+              '</div>'
+            : '<div class="av-sim-grid">' +
+                '<div class="av-sim-card">' +
+                  '<h5>Full Multi-Rail Breadboard + NUCLEO-L476RG <span class="av-sim-chip">' + esc(state.topo.replace(/_/g, " ").toUpperCase()) + '</span></h5>' +
+                  '<div class="av-sim-bb-wrap"><canvas class="av-sim-bb-canvas" width="640" height="300" aria-label="Full multi-component solderless breadboard"></canvas></div>' +
+                  '<div class="av-sim-probe-row">' +
+                    '<label class="av-sim-probe-label"><span class="av-sim-dot red"></span>Red Probe (+)' +
+                      '<select data-sim-probe="red">' +
+                        '<option value="nIn"' + (state.redNode === "nIn" ? " selected" : "") + '>Supply Rail (+Vs)</option>' +
+                        '<option value="nOut"' + (state.redNode === "nOut" ? " selected" : "") + '>DUT Output Node</option>' +
+                        '<option value="GND"' + (state.redNode === "GND" ? " selected" : "") + '>GND Reference</option>' +
+                      '</select>' +
+                    '</label>' +
+                    '<label class="av-sim-probe-label"><span class="av-sim-dot blk"></span>Black Probe (-)' +
+                      '<select data-sim-probe="black">' +
+                        '<option value="GND"' + (state.blackNode === "GND" ? " selected" : "") + '>GND Reference</option>' +
+                        '<option value="nOut"' + (state.blackNode === "nOut" ? " selected" : "") + '>DUT Output Node</option>' +
+                        '<option value="nIn"' + (state.blackNode === "nIn" ? " selected" : "") + '>Supply Rail (+Vs)</option>' +
+                      '</select>' +
+                    '</label>' +
+                  '</div>' +
+                  '<div class="av-sim-scope-wrap"><canvas class="av-sim-scope-canvas" width="520" height="190" aria-label="Live 2-channel oscilloscope"></canvas></div>' +
+                '</div>' +
+                '<div class="av-sim-card">' +
+                  '<h5>Digital Multimeter &amp; Component Bench</h5>' +
+                  '<div class="av-sim-dmm">' +
+                    '<div class="av-sim-dmm-top">' +
+                      '<span class="av-sim-dmm-brand">Bench DMM · MNA Engine</span>' +
+                      '<div class="av-sim-dmm-modes">' +
+                        ["V", "mA", "OHM"].map((md) =>
+                          '<button type="button" class="' + (state.dmmMode === md ? "active" : "") + '" data-sim-dmm="' + md + '">' + (md === "OHM" ? "Ω" : md) + '</button>'
+                        ).join("") +
+                      '</div>' +
+                    '</div>' +
+                    '<div class="av-sim-dmm-readout ' + (sol.dmmWarn ? "warn" : "") + '">' + esc(sol.dmmText) + '</div>' +
+                    '<div class="av-sim-dmm-meta">Probing <strong>' + esc(state.redNode) + '</strong> wrt <strong>' + esc(state.blackNode) + '</strong> · ' + esc(sol.acMetricLabel) + '</div>' +
+                  '</div>' +
+                  '<div class="av-sim-controls">' +
+                    '<div class="av-sim-slider-row"><label>Source Vs</label><input type="range" min="1" max="24" step="0.1" value="' + state.vs + '" data-sim-param="vs"><span class="av-sim-slider-val">' + state.vs.toFixed(1) + ' V</span></div>' +
+                    '<div class="av-sim-slider-row"><label>Series R1</label><input type="range" min="10" max="10000" step="10" value="' + Math.min(10000, Math.round(state.r1)) + '" data-sim-param="r1"><span class="av-sim-slider-val">' + esc(fmtEng(state.r1, "Ω")) + '</span></div>' +
+                    '<div class="av-sim-slider-row"><label>Shunt/Load R2</label><input type="range" min="10" max="10000" step="10" value="' + Math.min(10000, Math.round(state.r2)) + '" data-sim-param="r2"><span class="av-sim-slider-val">' + esc(fmtEng(state.r2, "Ω")) + '</span></div>' +
+                    (showC ? '<div class="av-sim-slider-row"><label>Cap C1 (µF)</label><input type="range" min="0.1" max="22" step="0.1" value="' + Math.max(0.1, Math.min(22, +(state.c1 * 1e6).toFixed(2))) + '" data-sim-param="c1u"><span class="av-sim-slider-val">' + esc(fmtEng(state.c1, "F")) + '</span></div>' : "") +
+                    (showL ? '<div class="av-sim-slider-row"><label>Ind L1 (mH)</label><input type="range" min="0.5" max="20" step="0.5" value="' + Math.max(0.5, Math.min(20, +(state.l1 * 1e3).toFixed(1))) + '" data-sim-param="l1m"><span class="av-sim-slider-val">' + esc(fmtEng(state.l1, "H")) + '</span></div>' : "") +
+                    (showF ? '<div class="av-sim-slider-row"><label>Freq (Hz)</label><input type="range" min="50" max="50000" step="50" value="' + Math.min(50000, Math.round(state.freq)) + '" data-sim-param="freq"><span class="av-sim-slider-val">' + esc(fmtEng(state.freq, "Hz")) + '</span></div>' : "") +
+                  '</div>' +
+                  '<table class="av-sim-nodes-table"><thead><tr><th>Node / Branch</th><th>Live Value</th></tr></thead><tbody>' +
+                    '<tr><td>V(Supply Rail)</td><td class="num">' + (sol.volts.nIn || 0).toFixed(3) + ' V</td></tr>' +
+                    '<tr><td>V(DUT Output)</td><td class="num">' + (sol.volts.nOut || 0).toFixed(3) + ' V</td></tr>' +
+                    '<tr><td>Loop Current I</td><td class="num">' + esc(fmtEng(sol.totalI, "A")) + '</td></tr>' +
+                    (state.topo === "rc_lowpass" || state.topo === "rc_highpass" || state.topo === "rlc_band"
+                      ? '<tr><td>Cutoff / Resonant</td><td class="num">' + esc(fmtEng(sol.fc, "Hz")) + '</td></tr>'
+                      : '<tr><td>Power (P = V×I)</td><td class="num">' + esc(fmtEng(sol.totalP, "W")) + '</td></tr>') +
+                  '</tbody></table>' +
+                  '<div class="av-sim-target-check">' + esc(describeVerification(state, sol)) + '</div>' +
+                '</div>' +
+              '</div>') +
           (state.showOnline
             ? '<div class="av-sim-online-drawer">' +
                 '<div class="av-sim-online-bar">' +
@@ -1464,6 +1641,13 @@
         const scCanvas = box.querySelector(".av-sim-scope-canvas");
         if (bbCanvas) drawLiveBreadboard(bbCanvas, state, sol);
         if (scCanvas) drawScopeCanvas(scCanvas, state, sol);
+
+        box.querySelectorAll("[data-sim-tab]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            state.simTab = btn.getAttribute("data-sim-tab");
+            renderUI();
+          });
+        });
 
         // Wire controls cleanly without re-creating duplicate document listeners
         box.querySelectorAll("[data-sim-act]").forEach((btn) => {

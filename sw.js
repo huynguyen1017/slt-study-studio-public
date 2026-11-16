@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v29-nucleo-progressive-videos';
+const CACHE = 'slt-study-studio-v29-nucleo-progressive-videos-r2';
 const CORE = [
   "./",
   "./index.html",
