@@ -78,7 +78,7 @@
 .av-system-figure b{align-self:center;color:#44829e}
 .av-math{border:1px solid #cbdfea;background:#fff;border-radius:10px;padding:14px 14px;margin:16px 0;overflow-x:auto;text-align:center}
 .av-math .av-math-label{font-size:11px;letter-spacing:1px;color:#1b6481;font-weight:850;text-align:left;padding-bottom:9px}
-.av-math math{font-size:clamp(20px,2.2vw,29px);display:block;overflow-x:auto;max-width:100%}
+.av-math math{font-size:clamp(20px,2.2vw,29px);display:block math;max-width:100%}
 .av-worked-mini{border-left:4px solid #c18b32;background:#fff8e8;border-radius:0 10px 10px 0;padding:15px 18px;margin:18px 0}
 .av-worked-mini strong{color:#784e16}
 .av-worked-mini p{font-size:14px;margin:7px 0;color:#554b40}
