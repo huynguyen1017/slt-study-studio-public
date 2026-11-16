@@ -13,7 +13,7 @@ const math={
  ohm:{prompt:"A hypothetical 5 V bench source drives a 220 Ω protection resistor in series with a 330 Ω load. Find loop current in mA.",formula:"I_mA = 1000 * V / (R1 + R2)",sub:"I_mA = 1000 * 5 / (220 + 330) = 9.090909091 mA",answer:1000*5/550,unit:"mA",explain:"In one path, add 220 + 330 = 550 Ω first. Divide 5 V by 550 Ω to obtain 0.00909 A; multiply by 1000 for mA."},
  power:{prompt:"An educational 12 V subsystem draws 0.8 A continuously. Find its instantaneous electrical input power in W before evaluating its thermal budget.",formula:"P = V * I",sub:"P = 12 * 0.8 = 9.6 W",answer:9.6,unit:"W",explain:"One watt equals one volt times one ampere. Multiply 12 by 0.8; no mA conversion is required."},
  series:{prompt:"A 12 V source drives 100 Ω IN SERIES with (200 Ω IN PARALLEL with 300 Ω) and then 80 Ω IN SERIES. Find source current in mA.",formula:"I_mA = 1000 * V / (R1 + (R2 * R3) / (R2 + R3) + R4)",sub:"I_mA = 1000 * 12 / (100 + (200 * 300) / (200 + 300) + 80) = 40 mA",answer:40,unit:"mA",explain:"Reduce 200 Ω || 300 Ω to 120 Ω. Add the series resistances: 100 + 120 + 80 = 300 Ω. Then 12/300 = 0.04 A = 40 mA."},
- parallel:{prompt:"Two loads 150 Ω and 300 Ω share both the +5 V and GND nodes. Find TOTAL supply current in mA, not just one branch.",formula:"I_total_mA = 1000 * V * (1 / R1 + 1 / R2)",sub:"I_total_mA = 1000 * 5 * (1 / 150 + 1 / 300) = 50 mA",answer:50,unit:"mA",explain:"Each branch gets 5 V: I1=5/150=33.333 mA and I2=5/300=16.667 mA. KCL gives a 50 mA total."},
+ parallel:{prompt:"5.0 V feeds 100 identical 1.0 Ω resistors in parallel (all 0 Ω shorts are already removed, healthy baseline R_eq = 10 mΩ, I = 500 A). Total supply current now measures 470 A at 5.0 V. Calculate how many resistors are OPEN (∞ Ω)",formula:"N_open = N - (I_total / (V_s / R_nom))",sub:"N_open = 100 - (470 / (5 / 1)) = 6 resistors",answer:6,unit:"resistors",explain:"Healthy branch current I_branch = 5 V / 1 Ω = 5 A, giving 100 × 5 A = 500 A baseline. At 470 A, active healthy branches = 470 / 5 = 94, leaving 100 - 94 = 6 open (∞ Ω) branches (R_eq = 1/94 = 10.638 mΩ)."},
  "kcl-kvl":{prompt:"At a hypothetical rail junction, 45 mA and 25 mA enter; 20 mA leaves for logic and 15 mA for a sensor. Find missing OUTGOING current in mA.",formula:"I_missing = I_in1 + I_in2 - I_out1 - I_out2",sub:"I_missing = 45 + 25 - 20 - 15 = 35 mA",answer:35,unit:"mA",explain:"Add incoming 45+25=70 mA. Subtract known outgoing 20+15=35 mA. The remaining 35 mA must leave."},
  thevenin:{prompt:"A 5 V source feeds a top 1 kΩ resistor. The lower 1 kΩ divider resistor is also loaded by a 1 kΩ ADC input to ground. Compute ACTUAL midpoint voltage in V.",formula:"V_out = V_in * (R_bottom || R_ADC) / (R_top + (R_bottom || R_ADC))",sub:"V_out = 5 * ((1000 * 1000) / (1000 + 1000)) / (1000 + ((1000 * 1000) / (1000 + 1000))) = 1.666666667 V",answer:5/3,unit:"V",explain:"The lower 1 kΩ and ADC 1 kΩ are parallel, so the lower effective resistance becomes 500 Ω. Divider result is 5×500/(1000+500) = 1.667 V, not the unloaded 2.5 V."},
  ac:{prompt:"A zero-offset sine wave measures 4 V peak-to-peak on a scope. Find RMS voltage in V (not peak voltage).",formula:"V_rms = V_pp / (2 * sqrt(2))",sub:"V_rms = 4 / (2 * sqrt(2)) = 1.414213562 V",answer:Math.sqrt(2),unit:"V",explain:"Peak amplitude is half the peak-to-peak value: 2 V. RMS for a sine is peak/√2, yielding 1.414 V."},
@@ -180,8 +180,142 @@ for(const t of T){
   // All other Q31–50 graphics are conceptual illustrations, not a
   // hardware netlist to auto-wire onto a live STM32 board.
   if(i===6&&t.id==="series")question.network={kind:"mixed4",values:{v:12,a:100,b:200,c:300,d:80}};
-  if(i===6&&t.id==="parallel")question.network={kind:"parallel",values:{v:5,b:150,c:300}};
   if(i===6&&t.id==="thevenin")question.network={kind:"loadedDivider",values:{v:5,top:1000,bot:1000,load:1000}};
+  // Hardware Debug Interview Specialization: 5 V, 100 x 1 Ohm Parallel Array Open (∞ Ω) + Short (0 Ω) Walkthroughs
+  const hwdSpecs={
+   "parallel-X8":{
+    question:"Advanced 38 / 50 — Interview Hardware Debug Master Case (100 Parallel Resistors): A 5.0 V main rail feeds 100 resistors (nominal 1.0 Ω each) wired in parallel. Some resistors are OPEN and some are SHORTED (broken unit reads 0 Ω instead of 1 Ω). Walk through the complete paper math FIRST (formulas + broken resistance definitions), reading the schematic, isolating shorts before opens, and using an IR infrared camera and DMM (4-wire Kelvin vs 2-wire) to identify every broken resistor.",
+    formula:"1 / R_eq = Sum(1 / R_i) = (N_ok / 1.0) + (N_open / Infinity) + (N_short / 0)",
+    steps:[
+     "Paper Math Step 1 (Healthy Baseline): Compute healthy parallel resistance R_eq = R_nom / N = 1.0 Ω / 100 = 0.01 Ω = 10.00 mΩ, I_branch = 5 V / 1 Ω = 5 A, total I_healthy = 500 A, and total P_healthy = 2500 W before touching hardware.",
+     "Paper Math Step 2 (Broken Resistor Values): Define shorted resistor R_short = 0 Ω (~1–5 mΩ physical solder bridge, G → ∞) and open resistor R_open = ∞ Ω (OL out-of-circuit, G = 0 S, I = 0 A). Even ONE 0 Ω short pulls total R_eq ≈ 0 Ω and masks every open branch!",
+     "Read the Schematic First: Locate +5V_MAIN net, GND return, all 100 designators R1–R100, sub-bank jumpers JP1–JP10, and J1 feed entry so every physical measurement maps directly to exact schematic parts.",
+     "Choose the Correct DMM Technique: Reject 2-wire in-circuit ohming across 10 mΩ (lead resistance ~0.24 Ω dwarfs 10 mΩ and all 100 parallel branches mask single units). Use 4-wire Kelvin milliohms for true R_eq, plus mV bus-gradient probing.",
+     "Phase A — Hunt All 0 Ω Shorts First with PSU Current-Limited CC Mode + IR Camera: Limit bench supply safely (e.g., 1.0 V max, 1.5–2.5 A). Current divides almost 100% through the 0 Ω short(s), lighting only shorted resistors/pads as unmistakable IR hotspots while healthy 1 Ω branches stay cool.",
+     "Isolate & Confirm Shorts Out-of-Circuit: Power OFF, walk mV probe along the +5V copper bus until drop flattens to 0 mV/tap, lift ONE pad of the suspect resistor (or open bank jumper JP_k), and measure directly with DMM: 0.000 Ω confirms SHORT! Repeat until 4-wire R_eq ≥ 10.00 mΩ.",
+     "Phase B — Hunt All ∞ Ω Opens with Paper Math + IR Cold Spots: Once 0 Ω shorts are cleared, solve N_open = 100 − (1.0 / R_eq). Apply a safe bias (e.g., 1.0 V -> 1.0 W in every healthy resistor -> ~60 °C), and sweep the IR camera to pinpoint every unheated ∞ Ω cold spot (~25 °C).",
+     "Verify Out-of-Circuit & Close Out: Power OFF, lift one pad on each IR cold resistor to confirm OL (∞ Ω), rework failed 0 Ω and ∞ Ω parts with verified 1.00 Ω resistors, and confirm final 4-wire R_eq = 10.00 mΩ ± tolerance."
+    ],
+    lesson:{
+     title:"5 V, 100 × 1 Ω Parallel Open + Short Hardware Debug Interview Walkthrough",
+     summary:"Do paper math first (R_eq = 10 mΩ, I_total = 500 A, short = 0 Ω masking open = ∞ Ω), check schematic topology/jumpers, hunt 0 Ω shorts first via current-limited IR hotspots + 4-wire Kelvin/mV gradient + lifted pad, then clear shorts and use N_open = 100 − 1/R_eq + IR cold spots to find every open.",
+     example:"Healthy: R_eq = 1/100 = 10 mΩ (500 A). If 1 short (0 Ω): R_eq ≈ 0 Ω → IR hotspot finds short under 1V/2A limit; lift pad reads 0.000 Ω. After removing shorts, R_eq = 10.309 mΩ → N_open = 100 − (1/0.010309) = 3 IR cold spots (OL out-of-circuit).",
+     why:"Probing a parallel 1 Ω bank in-circuit with a 2-wire DMM fails completely; separating shorts first (hotspot hunt) from opens second (cold-spot + KCL hunt) solves all 100 branches systematically without lifting 100 parts.",
+     vocab:[["Healthy 100 × 1 Ω Array","R_eq = 0.01 Ω (10 mΩ), I_total = 500 A @ 5 V"],["Broken Short","0 Ω ideal (~1 mΩ bridge); IR hotspot + masks opens"],["Broken Open","∞ Ω (OL out-of-circuit, 0 W); IR cold spot once shorts cleared"],["Out-of-Circuit Isolation","Lift 1 pad or open bank jumper so DMM measures R_i alone, not 99 siblings"]]
+    }
+   },
+   "parallel-X9":{
+    question:"Advanced 39 / 50 — Separating Masked Faults (Multiple 0 Ω Shorts + Multiple ∞ Ω Opens): On the 5.0 V, 100 × 1.0 Ω parallel board, removing the first hot-spotted 0 Ω short (R14) leaves 4-wire R_eq = 1.98 mΩ instead of climbing ≥ 10.00 mΩ. Explain both failure modes separately: why a SECOND hidden short still masks open branches, and how to prove all shorts are cleared before trusting IR cold-spot inspection for ∞ Ω opens.",
+    steps:[
+     "Check paper threshold immediately after removing the first 0 Ω short (R14): ALL open-only combinations of 1.0 Ω resistors yield R_eq ≥ 10.00 mΩ (e.g., 10.10 mΩ for 1 open, 10.31 mΩ for 3 opens). Therefore R_eq = 1.98 mΩ PROVES at least one more short remains!",
+     "Define the two independent failure trees cleanly: Tree A (parallel shorts ≤ 5 mΩ pulling R_eq << 10 mΩ and tripping OCP) vs Tree B (parallel opens = ∞ Ω raising R_eq > 10 mΩ once Tree A count reaches zero).",
+     "Keep the bench PSU in current-limited CC mode (V_clamp ≤ 1.0 V, I_limit = 2.0 A) so remaining healthy resistors and downstream traces stay safe while re-scanning with the IR camera.",
+     "Use the IR camera + schematic bank map: with R14 lifted, 100% of injected test current now redirects through the SECOND short (e.g., R62) which immediately lights up thermally.",
+     "Confirm by walking a 4-wire / mV probe down the schematic bus beyond R14 until ΔV_bus flattens at R62, then power OFF and lift one pad on R62 to verify 0.000 Ω out-of-circuit.",
+     "Re-check 4-wire Kelvin across the array after isolating R62: seeing R_eq jump from 1.98 mΩ to 10.309 mΩ (strictly ≥ 10.00 mΩ!) falsifies all remaining short hypotheses and unlocks Phase B.",
+     "Execute paper math on 10.309 mΩ: m = 1.0 / 0.010309 = 97 healthy resistors → target N_open = 100 − 97 = 3 opens; switch to safe 1.0 V IR bias to spot the 3 unheated 25 °C cold resistors.",
+     "Document independent out-of-circuit DMM proof (0.000 Ω for each removed short, OL / ∞ Ω for each lifted open) tied cleanly to schematic reference designators before rework."
+    ],
+    lesson:{
+     title:"Phase A → Phase B Gate: Why R_eq ≥ 10.00 mΩ Proves Zero Shorts Remain",
+     summary:"Because adding any parallel short pulls R_eq far below 10 mΩ while adding opens pushes R_eq above 10 mΩ, checking whether 4-wire R_eq ≥ 10.00 mΩ mathematically separates multi-short masking from remaining ∞ Ω open faults.",
+     example:"1st short removed → R_eq = 1.98 mΩ (< 10 mΩ) ⇒ another 0 Ω short exists (find hot spot R62). 2nd short removed → R_eq = 10.309 mΩ (≥ 10 mΩ) ⇒ 0 shorts remain; N_open = 100 − 1/0.010309 = 3 opens.",
+     why:"Engineers who switch to full voltage after finding only one short risk board damage or missing hidden second shorts; the 10.00 mΩ gate guarantees every short is cleared first.",
+     vocab:[["10.00 mΩ Gate","R_eq < 10 mΩ means ≥1 short remains; R_eq > 10 mΩ (with 0 shorts) counts opens"],["Masked Open","An ∞ Ω open is invisible in R_eq while a 0 Ω short shunts the bus"],["Second-Hotspot Sweep","After lifting 1st short, CC test current immediately heats the next 0 Ω short"]]
+    }
+   },
+   "schematics-X8":{
+    question:"Advanced 38 / 50 — Schematic-Driven Debug (100 Parallel Resistors & Kelvin Mapping): Before touching any probe to the 5.0 V, 100 × 1.0 Ω array board showing open and 0 Ω short faults, explain the controlled schematic inspection and A/B/A pad-lift procedure used to map DMM and IR findings onto exact PCB designators.",
+    steps:[
+     "Read the schematic topology before powering up: confirm R1–R100 all bridge +5V_MAIN to GND, note resistor wattage/package (e.g., 1.0 Ω precision shunts), and mark feed connector J1 plus bank jumpers JP1–JP10.",
+     "Record calculated paper expectations on the schematic margins: 100 branches healthy → R_eq = 10.00 mΩ; short = 0 Ω; open = ∞ Ω; single isolated resistor removed from circuit = 1.000 Ω.",
+     "Overlay IR camera hotspots onto the PCB silkscreen and schematic sub-banks to narrow 100 parallel candidates down to 1–2 adjacent parts before touching a soldering iron.",
+     "Trace the copper feed pour on layout/schematic: identify which side of R_k connects upstream toward J1 so DC mV probe readings distinguish upstream current flow from zero-current downstream stubs.",
+     "Design an A/B/A lifted-pad isolation check (power OFF): (A) record in-circuit 4-wire R_eq, (B) lift one pad of suspect R_k so it is 100% isolated from the 99 siblings, measure R_k directly (0.000 Ω = short, OL = open), and inspect rail R_eq jump.",
+     "Restore (A) with a verified 1.00 Ω replacement resistor when faulted (or re-solder original if healthy), keeping solder fillets clean so no artificial solder bridge is introduced.",
+     "Re-check total 4-wire array resistance between schematic Kelvin sense nodes (+5V_SENSE to GND_SENSE) after every single rework step against paper target R_eq = 1.0 / (100 − k_open).",
+     "Archive annotated schematic showing exact failed designators (e.g., R14/R62 shorted 0 Ω; R27/R53/R88 open ∞ Ω), out-of-circuit DMM photos, and IR thermal captures."
+    ],
+    lesson:{
+     title:"Schematic Mapping & Single-Pad A/B/A Isolation on Parallel Banks",
+     summary:"Reading the schematic first identifies copper bus feed points, sub-bank jumpers, and shared nets so IR hotspots and 4-wire mV drops pinpoint the exact failing designator before a single pad is lifted.",
+     example:"Lift 1 pad of IR hotspot R14 → out-of-circuit DMM = 0.000 Ω (short confirmed), rail 4-wire R_eq jumps from ~1 mΩ toward ≥ 10 mΩ (or next short). Install verified 1.00 Ω → R_eq tracks paper prediction.",
+     why:"Never unsolder all 100 resistors blindly; lifting one pad only on the schematic/IR-localized candidate avoids lifted PCB pads and proves root cause with A/B/A evidence.",
+     vocab:[["Lifted-Pad Isolation","Unsoldering 1 terminal breaks parallel coupling for true 1.00 Ω vs 0 Ω vs OL DMM check"],["Silkscreen Overlay","Aligning IR hotspot coordinates to schematic reference designators R1..R100"],["Sub-Bank Jumper","Schematic jumper (JP1–JP10) enabling O(log₂ N) half-split current isolation"]]
+    }
+   },
+   "instruments-X8":{
+    question:"Advanced 38 / 50 — DMM 2-Wire Error vs 4-Wire Kelvin & FLIR IR Camera Calibration (100 × 1 Ω Array): While debugging the 5.0 V, 100 × 1.0 Ω parallel array, a technician tries 2-wire DMM Ω mode and reads ~0.25 Ω across every resistor, concluding nothing is shorted. Explain the instrument error, set up 4-wire Kelvin + mV gradient + IR camera properly, and verify by A/B/A probe comparison.",
+    steps:[
+     "Quantify why 2-wire DMM misled the technician: typical test leads add ~0.24 Ω in series with a 0.010 Ω healthy bus (2400% error!) and also in series with a ~0.001 Ω dead short, reading ~0.24–0.25 Ω for BOTH!",
+     "Remember the parallel circuit rule too: even with zero lead error, in-circuit probing across any healthy 1.0 Ω resistor measures that resistor IN PARALLEL with the 99 siblings, never 1.000 Ω.",
+     "Switch to 4-wire Kelvin resistance (separate Force HI/LO carrying I_test and Sense HI/LO measuring pure DUT voltage across the copper rail pads) — cancels 0.24 Ω lead drop so healthy = 10.00 mΩ, 1 short ≈ 1 mΩ, and 3 opens = 10.309 mΩ.",
+     "To locate WHERE the 0 Ω short sits without lifting 100 parts, inject constant DC current (1.0 V max / 2.5 A CC limit) into +5V_MAIN and use DMM in DC mV/μV mode to trace copper voltage drop along the bus.",
+     "Pair electrical mV probing with an FLIR IR camera: remember shiny tin/lead solder joints have low emissivity (~0.05–0.1) and reflect ambient heat — use matte high-emissivity tape or thin Kapton over target banks for accurate ΔT contrast.",
+     "Run IR short-hunt pass under CC limit (hotspots = 0 Ω shorts), clear shorts until 4-wire Kelvin reads ≥ 10.00 mΩ, then switch to safe 1.0 V bias pass where healthy resistors warm uniformly and ∞ Ω opens appear as blue cold spots.",
+     "Perform A/B/A probe verification: check meter zero with shorted Kelvin clips, re-measure with an independent second DMM, and confirm lifted-pad readings directly on the removed resistor terminals.",
+     "Document 4-wire setup range, PSU compliance settings (V_max, I_lim), emissivity note, and out-of-circuit resistance before approving rework."
+    ],
+    lesson:{
+     title:"Instrument Mastery: 4-Wire Kelvin Milliohms, mV Gradient & IR Emissivity",
+     summary:"2-wire leads (~0.24 Ω) swamp a 10 mΩ parallel array; 4-wire Kelvin sensing, DC mV copper-bus tracing under CC compliance, and emissivity-checked IR thermography isolate 0 Ω shorts and ∞ Ω opens rapidly.",
+     example:"2-wire DMM on 10 mΩ array reads 0.25 Ω whether healthy or shorted. 4-wire Kelvin reads 1.67 mΩ (short present) vs 10.00 mΩ (healthy) vs 10.53 mΩ (5 opens). IR + mV pinpoints the single bad branch.",
+     why:"Choosing the right probe geometry and instrument mode determines whether a fault is visible above the noise floor or completely buried inside test-lead resistance.",
+     vocab:[["4-Wire Kelvin","Separate Force and Sense leads eliminate test-lead resistance on mΩ rails"],["DC mV Gradient","Probing μV/mV drop along copper bus shows where current stops at a short"],["IR Emissivity Control","Matte tape/coating prevents false cold reflections on shiny metallic solder pads"]]
+    }
+   },
+   "power-X8":{
+    question:"Advanced 38 / 50 — Safe Power-Limited Supply Strategy & Thermal Dissipation (5 V, 100 × 1 Ω Array): Why would energizing an un-inspected 5 V, 100 × 1 Ω parallel array directly with a 5 V high-current supply risk PCB trace delamination or blown shunts, and how does current-limited (1 V / 2 A) excitation safely turn thermal dissipation I²R into your primary IR fault-finding tool?",
+    steps:[
+     "Calculate unconstrained 5 V baseline thermal load on paper: healthy I = 500 A → P_total = 2500 W (25 W per 1 Ω resistor!), while a 0 Ω short across 5 V draws massive destructive fault current!",
+     "Establish safety rule first: NEVER inject full high-power 5 V onto a suspected shorted parallel bank before power-OFF 4-wire Kelvin R_eq verification.",
+     "Design safe CC excitation for Phase A (Short Hunt): set programmable bench supply V_clamp ≤ 0.5–1.0 V and I_limit = 1.5–2.5 A CC mode, keeping power inside a few watts safely.",
+     "Analyze current divider power localization: with a 2 mΩ short in parallel with 99 × 1 Ω branches under 2.5 A CC, V_rail = 4.2 mV; P_healthy ≈ 17 μW each, while localized bridge/trace heating concentrates hundreds of mW right at the 0 Ω defect!",
+     "Watch the thermal contrast on the IR camera: nearly all 2.5 A flows only along the path from injection J1 through the shorted branch back to GND, creating an unmistakable IR trail straight to the broken resistor.",
+     "Verify A/B/A thermal repeatability: after lifting one pad on the suspect hot resistor, confirm thermal hotspot vanishes at that coordinate and verify if 4-wire R_eq recovers ≥ 10.00 mΩ.",
+     "Configure Phase B (Open Hunt) thermal power once shorts = 0: apply safe controlled 1.0 V bias -> healthy 1 Ω resistors dissipate P = V²/R = 1.0 W (~35 °C rise -> ~60 °C), while OPEN (∞ Ω) units dissipate 0 W (~25 °C cold spot).",
+     "Confirm total power telemetry (P_measured vs V × I_expected) and IR uniformity across all 100 resistors after replacing failed 0 Ω shorts and ∞ Ω opens."
+    ],
+    lesson:{
+     title:"Safe Current-Limited I²R Thermal Fault Localization (2500 W Hazard Avoidance)",
+     summary:"Unconstrained 5 V across 100 × 1 Ω means 500 A / 2500 W. Current-limited CC injection (≤1 V, 1.5–2.5 A) turns I²R safely into an IR camera beacon for 0 Ω shorts first, then reveals ∞ Ω opens cleanly via P = V²/R contrast.",
+     example:"Unconstrained 5 V = 2500 W (hazard). Phase A (1 V / 2.5 A CC): I_short = 2.09 A vs I_healthy = 4.2 mA → short glows hot! Phase B (1 V, 0 shorts): healthy = 1.0 W (~60 °C), open = 0 W (25 °C blue).",
+     why:"Thermal power equations P = I²R and P = V²/R invert behavior cleanly between series-limited short tests and voltage-driven open tests.",
+     vocab:[["CC Mode Current Limit","Bench PSU holds current steady (e.g., 2.5 A) and drops voltage safely across short"],["I²R Short Heating","Dominates when current is constant and 1 branch drops to mΩ resistance"],["V²/R Open Contrast","Dominates at fixed bias voltage once shorts are gone: healthy warms, ∞ Ω stays ambient"]]
+    }
+   },
+   "kcl-kvl-X8":{
+    question:"Advanced 38 / 50 — KCL Branch Budgeting Across 100 Parallel Resistors (Opens vs Shorts): Use Kirchhoff's Current Law (I_total = Σ I_k) to explain why measuring total supply current cleanly counts exact missing ∞ Ω open branches ONLY after 0 Ω shorts are eliminated, and how measuring branch node mV drops tracks KCL current paths toward a short.",
+    steps:[
+     "Write KCL across the shared +5V_MAIN rail feeding 100 parallel branches: I_total = Σ_{k=1}^{100} I_k = Σ (V_node / R_k).",
+     "Insert paper healthy parameters (V_s = 5.0 V, R_nom = 1.0 Ω): I_k,healthy = 5.0 A per resistor → I_total,healthy = 100 × 5.0 A = 500.0 A.",
+     "Substitute broken open resistor condition (R_open = ∞ Ω → I_open = 5 V / ∞ = 0 A): each open removes exactly 5.0 A at 5 V (or 1.0 A at 1.0 V safe bias), making KCL directly count opens via k_open = 100 − (I_total / I_single).",
+     "Prove why KCL total current breaks when a 0 Ω short is present: I_short = V_node / R_short dominates KCL (or hits PSU CC/OCP), while V_node collapses toward 0 V so all remaining healthy branches drop to near-zero current too.",
+     "Apply KCL along the physical PCB copper pour segments connecting R1 through R100: at tap j, current downstream I_bus(j+1) = I_bus(j) − I_j.",
+     "Because nearly 100% of current exits through the shorted tap R_k (I_k ≈ I_test), KCL forces downstream bus current I_bus(k+1..100) ≈ 0 A!",
+     "Measure ΔV_bus = I_bus(j) × R_seg with a DC mV DMM along +5V_MAIN: ΔV climbs steadily up to R_k and drops cleanly to 0 mV/segment beyond R_k — pinpointing the exact short via KCL + Ohm's law.",
+     "Verify total KCL conservation (I_in = I_healthy_sum) once all 0 Ω shorts and ∞ Ω opens are replaced, confirming measured current matches theoretical N × (V_test / 1.0 Ω) within instrument tolerance."
+    ],
+    lesson:{
+     title:"KCL Branch Counting & Copper-Bus Current Termination at a 0 Ω Short",
+     summary:"By KCL, total bus current equals the sum of active 1 Ω branch currents (N_open = 100 − I_total/I_branch) whenever 0 shorts exist, while bus-segment current termination (ΔV_bus = 0 downstream) isolates 0 Ω shorts cleanly.",
+     example:"Shorts cleared @ 1.0 V: I_total = 96.0 A / 1.0 A = 96 healthy → 4 opens. Short present @ 2.0 A: mV bus drop stops rising at tap k=14 → KCL says current exited via R14 short.",
+     why:"KCL works both globally (counting missing parallel branches) and locally (finding where current dives to ground along a PCB copper bus).",
+     vocab:[["Global KCL Open Count","k_open = N − I_total / I_branch (valid only after all 0 Ω shorts are removed)"],["Local Bus KCL Drop","I_bus(downstream) = I_bus(upstream) − I_tap → reaches ~0 A right after a 0 Ω short"],["Short vs Open KCL Sign","Opens decrease total rail current; shorts spike rail current toward PSU limit and collapse bus voltage"]]
+    }
+   }
+  };
+  if(hwdSpecs[id]){
+   const hs=hwdSpecs[id];
+   question.question=hs.question;
+   question.steps=hs.steps;
+   question.lesson=hs.lesson;
+   question.expected=undefined;
+   delete question.unit;
+   if(hs.formula)question.formula=hs.formula;
+   else delete question.formula;
+   delete question.sub;
+  }
   if(field.expected!==undefined){question.expected=field.expected;question.unit=field.unit;}
   if(!question.steps.length||question.steps.length<8||!question.lesson)throw Error("Missing detailed worked guidance: "+id);
   seen.add(id);newQuestions.push(question);

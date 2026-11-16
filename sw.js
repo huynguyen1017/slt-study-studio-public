@@ -36,6 +36,8 @@ const CORE = [
   "./book_library.css",
   "./avionics_si.css",
   "./avionics_tutor.js",
+  "./avionics_hw_debug_interview.js",
+  "./avionics_hw_debug_interview.css",
   "./avionics_assessor.js",
   "./avionics_feedback.css",
   "./avionics_tutor.css",

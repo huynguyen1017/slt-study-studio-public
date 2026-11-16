@@ -16,6 +16,7 @@ const CIRCUITSIM=window.avionicsCircuitSimulator||null;
 const VIDEO=window.avionicsVideoLessons||null;
 const NUCLEO=window.avionicsNucleoWorkbench||null;
 const MIXED=window.avionicsMixedCircuitCurriculum||null;
+const HWD=window.avionicsHardwareDebugLab||null;
 const ASSESS=window.avionicsAnswerCheck;
 const STORE="slt-avionics-ee-practice-v1";
 const TOPIC_TOTAL=window.AVIONICS_EXPECTED_PER_TOPIC||30;
@@ -381,6 +382,7 @@ function muonInterviewGuidePanel(){
   '</div>'+
   '<div class="av-worked-mini"><strong>Reported Glassdoor Technical Question #1: Satellite passes in ambient thermal chamber, then FAILS in TVAC chamber — why?</strong><p>1) Zero convection in vacuum (h = 0 at &lt;10⁻⁵ Torr): heat transfers only via conduction through bolted baseplates/TIM and thermal radiation (ε·σ·A·(T₁⁴ − T₂⁴)), so poor TIM/torque causes localized thermal runaway. 2) Paschen’s law corona/arcing (~0.001–100 Torr during pump-down) and multipaction. 3) Outgassing volatiles condensing on cold payloads.</p></div>'+
   '<div class="av-worked-mini"><strong>Reported Glassdoor Technical Question #2: Verification vs. Validation (V&amp;V)</strong><p>Verification (“Did we build the system right?”) proves through objective measurements that hardware/firmware meets its specified requirements and ICD limits. Validation (“Did we build the right system?”) proves that the integrated spacecraft survives and accomplishes its actual operational mission in a flight-like environment (e.g., FlatSat/HIL mission simulation in TVAC).</p></div>'+
+  '<div class="av-worked-mini"><strong>Reported Hardware Debug Question #3: 5 V Rail Feeding 100 Parallel 1 Ω Resistors (Mixed Opens + 0 Ω Shorts)</strong><p>1) <b>Paper Math First:</b> Healthy R<sub>eq</sub> = 1 Ω / 100 = 0.01 Ω (10 mΩ), I = 500 A (2500 W); broken Short = 0 Ω (~1 mΩ bridge) masks Open = ∞ Ω. 2) <b>Read Schematic:</b> Trace +5V_MAIN, R1–R100, and bank jumpers JP1–JP10. 3) <b>Clear Shorts First:</b> 2-wire DMM leads (0.24 Ω) swamp 10 mΩ — inject safe CC limit (≤1 V / 2.5 A), find hotspots via <b>IR camera + DC mV gradient</b>, and lift 1 pad (0.000 Ω confirms short) until 4-wire Kelvin R<sub>eq</sub> ≥ 10.00 mΩ. 4) <b>Find Opens Second:</b> Calculate N<sub>open</sub> = 100 − 1/R<sub>eq</sub>, apply safe 1 V bias, spot ∞ Ω units as cool ambient spots on IR camera, and confirm OL out-of-circuit.</p></div>'+
   '</details>';
 }
 
@@ -406,6 +408,7 @@ function lessonPage(q,t,f){
  courseworkBridge(t)+
  digitalLogicPanel(t)+
  muonInterviewGuidePanel()+
+ (HWD?HWD.render(t,q):"")+
  (NOTEBOOK?NOTEBOOK.render(t.id):"")+
  (VIDEO?VIDEO.render(q,t):"")+
  '<h4 class="av-figure-heading">Interactive circuit, graph &amp; '+(VIS&&VIS.describe(q,t).board?'breadboard':'test fixture')+' wiring for '+esc(q.id.toUpperCase())+'</h4>'+
@@ -480,6 +483,7 @@ function solvePage(q,t,f){
  '<details class="av-all-steps" open><summary>Complete '+steps.length+'-Step Guided Walkthrough (All steps &amp; MathML equations)</summary><div class="av-all-list">'+
  steps.map((s,i)=>'<div class="'+(i===stepIndex?"av-step-highlight":"")+'"><b>Step '+(i+1)+': '+esc(s.title)+'</b><p>'+rich(s.body)+'</p>'+(s.formula?equation(s.formula,"EQUATION (MATHML)"):"")+(s.answer?'<div class="av-final-value">Final Answer: '+esc(s.answer)+(s.engHtml?' · Engineering Notation: '+s.engHtml:"")+'</div>':"")+'</div>').join("")+
  '</div></details>'+
+ (HWD?HWD.render(t,q):"")+
  '<div class="av-takeaway"><strong>How to say this in your Muon Space interview:</strong> First state the physical law, describe how you set up the DMM/scope/breadboard, then explain the safety check and Go/No-Go limit.</div>'+
  '</section>';
 }
@@ -540,6 +544,7 @@ function show(){
  '<button class="av-light av-export" id="avExportLearning">Export my saved progress</button></aside>'+
  '<div class="av-workbook"><div class="av-workbook-heading"><div><span class="av-eyebrow">'+esc(t.group.toUpperCase())+' · TOPIC '+(TOPICS.indexOf(t)+1)+' OF '+TOPICS.length+'</span>'+
  '<h2>'+esc(t.title)+'</h2><p>'+rich(LESSONS[t.id]?.lead||t.goal)+'</p></div></div>'+
+ (HWD?'<div class="av-hwd-launchbar"><span><strong>🛠️ Featured Hardware Debug Interview:</strong> 5 V rail feeding 100 parallel 1 Ω resistors (open + 0 Ω short faults · paper math → schematic → IR camera → 4-wire DMM)</span><button type="button" id="avOpenHwdInterview" class="av-light">Open 100-Resistor Lab &amp; 12 Practice Problems →</button></div>':'')+
  '<div class="av-question-controls"><strong>QUESTION '+(all.length?currentIndex+1:0)+' / '+all.length+'</strong>'+
  '<div><button id="avQuestionPrevious" class="av-light" '+(currentIndex<=0?"disabled":"")+'>← Previous</button><button id="avQuestionNext" class="av-light" '+(currentIndex>=all.length-1?"disabled":"")+'>Next →</button></div></div>'+
  '<div class="av-quick-strip" aria-label="Quick question switcher 1 to 50">'+
@@ -582,6 +587,14 @@ function wire(){
  if(CIRCUITSIM)CIRCUITSIM.bind(host,requestedTopic=>requestedTopic?topicOf():activeQuestion());
  if(NUCLEO)NUCLEO.bind(host,()=>activeQuestion());
  if(NOTEBOOK)NOTEBOOK.bind(host);
+ if(HWD)HWD.bind(host,topicOf(),activeQuestion());
+ const openHwd=find("#avOpenHwdInterview",host);
+ if(openHwd)openHwd.onclick=()=>{
+  topic="parallel";filter="All";query="";page="learn";stepIndex=0;
+  const idx=allTopicQuestions().findIndex(x=>x.id==="parallel-X8");
+  currentIndex=idx>=0?idx:37;state.lastTopic=topic;state.lastIndex=currentIndex;save();show();
+  const det=find("#avHwdDetails",host);if(det){det.open=true;det.scrollIntoView({block:"start",behavior:"smooth"});}
+ };
  const el=find("#avTopicList",host);
  if(el)el.onchange=e=>{topic=e.target.value;currentIndex=0;page="learn";stepIndex=0;filter="All";query="";state.lastTopic=topic;state.lastIndex=0;save();show()};
  const lev=find("#avLevelList",host);
