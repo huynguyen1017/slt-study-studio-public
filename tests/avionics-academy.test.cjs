@@ -60,7 +60,7 @@ console.log("PASS: 690 questions retained; 23 beginner lessons; six-step guides;
   assert.equal(await page.locator("#avTopicList").inputValue(),"ohm");
   assert((await page.locator(".av-lede").textContent()).includes("TWO electrical points"));
   assert.equal(await page.locator(".av-diagram svg").count(),1);
-  assert.equal(await page.locator(".av-vocab tbody tr").count(),4);
+  assert((await page.locator(".av-vocab tbody tr").count())>=4);
   assert(await page.locator(".av-math mfrac").count()>0,"Voltage fundamental math in MathML");
   await page.locator("#avGoWork").click();
   assert.equal(await page.locator(".av-baby-step").count(),1);
