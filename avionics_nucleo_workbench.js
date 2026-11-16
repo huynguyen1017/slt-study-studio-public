@@ -253,7 +253,7 @@ function render(q,t){
  return '<section class="av-nucleo-lesson" data-nucleo-q="'+esc(q.id)+'"><h4>Full STM32 Nucleo-64 + solderless breadboard circuit</h4>'+
  '<p>All 63 terminal rows and power rails shown, not the former 9–17 row crop. This illustrates one 830-point breadboard module, NOT a verified 3220-point Makeronics internal layout. Wires follow the selected question and its practice setup.</p>'+
  '<div class="av-nucleo-stage" tabindex="0">'+buildSvg(q,t)+'</div>'+
- '<details class="av-3220-details"><summary>Show full Makeronics-style 3220-point assembly (4 terminal strips + 7 power strips)</summary><div class="av-nucleo-stage" tabindex="0">'+full3220(q)+'</div><p>The highlighted first strip corresponds to the detailed practice module above. The other strips and distribution lanes are intentionally unconnected until you explicitly wire them. Verify internal rail breaks using continuity mode.</p></details>'+
+ '<details class="av-3220-details" data-nucleo-overview="'+esc(q.id)+'"><summary>Show full Makeronics-style 3220-point assembly (4 terminal strips + 7 power strips)</summary><div class="av-nucleo-stage" data-nucleo-assembly="'+esc(q.id)+'" tabindex="0"><p>Open this section to draw the complete 3220-terminal assembly.</p></div><p>The highlighted first strip corresponds to the detailed practice module above. The other strips and distribution lanes are intentionally unconnected until you explicitly wire them. Verify internal rail breaks using continuity mode.</p></details>'+
  '<p><strong>Selected probe node(s):</strong> '+esc((c.bench.length?c.bench.map(x=>x[1]):c.links.map(x=>x[1])).filter(x=>/^[a-j]\d+$/.test(x)).slice(0,3).join(" · ")||"Use approved ground/reference measurements")+'</p>'+
  '<p class="av-nucleo-warning">Read the official ST UM1724 board connector table before any physical wiring. Board power, GPIO level limits, jumper configuration, module pinouts and current limits must be independently checked. Never connect powered circuits based only on this illustration.</p>'+
  '<p class="av-nucleo-resources"><a href="https://www.st.com/resource/en/user_manual/dm00105823.pdf" target="_blank" rel="noopener noreferrer">ST UM1724 official connector manual</a> · '+
@@ -265,5 +265,16 @@ function render(q,t){
  c.parts.map(([name,kind,a,b,v])=>'<li>'+esc(name)+' ('+esc(kind)+', '+esc(v)+'): '+esc(a)+' ↔ '+esc(b)+'</li>').join("")+
  '</ol></details></section>';
 }
-window.avionicsNucleoWorkbench={render,buildSvg,full3220,setup,choose,includesNucleo:t=>!!t&&["units","ohm","power","series","parallel","kcl-kvl","capacitors","rc","filters","components","power-rails","schematics","instruments","timing","buses"].includes(t.id),pin};
+function bind(host,active){
+ host.querySelectorAll("[data-nucleo-overview]").forEach(elem=>{
+  elem.addEventListener("toggle",()=>{
+   if(!elem.open)return;
+   const q=active&&active();
+   if(!q||q.id!==elem.dataset.nucleoOverview)return;
+   const slot=elem.querySelector("[data-nucleo-assembly]");
+   if(slot&&slot.dataset.loaded!=="1"){slot.innerHTML=full3220(q);slot.dataset.loaded="1";}
+  });
+ });
+}
+window.avionicsNucleoWorkbench={render,bind,buildSvg,full3220,setup,choose,includesNucleo:t=>!!t&&["units","ohm","power","series","parallel","kcl-kvl","capacitors","rc","filters","components","power-rails","schematics","instruments","timing","buses"].includes(t.id),pin};
 })();
