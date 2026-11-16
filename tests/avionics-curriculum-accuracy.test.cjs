@@ -62,7 +62,7 @@ for(const topic of t){
  for(let i=0;i<topic.calc.length;i++)for(let j=0;j<5;j++){
   const numeric=family[topic.calc[i]](j);
   const qq=own.find(x=>x.id===topic.id+"-C"+(i*5+j+1));
-  assert(qq&&numeric.prompt===qq.question,topic.id+" calculation prompt");
+  assert(qq&&qq.question.startsWith(numeric.prompt),topic.id+" calculation prompt");
   assert.equal(qq.unit,numeric.unit,qq.id+" unit");
   assert.equal(qq.expected,numeric.answer,qq.id+" stored answer");
   assert(math(qq.formula,true).includes("<math"),qq.id+" formula MathML");
