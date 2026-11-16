@@ -26,6 +26,14 @@ const derived=[
  ["Magnetic flux","weber","Wb"],
  ["Magnetic flux density","tesla","T"]
 ];
+const magnetic=[
+ ["Magnetic field intensity","ampere per meter (turn treated as dimensionless)","A/m"],
+ ["Magnetic flux","weber","Wb"],
+ ["Magnetic flux density","tesla","T"],
+ ["Magnetomotive force","ampere-turn","At"],
+ ["Permeability","henry per meter","H/m"],
+ ["Reluctance","ampere-turn per weber","At/Wb"]
+];
 const lesson={
  heading:"What makes a unit an SI base unit?",
  plain:"A base unit is one of seven fundamental measurement units in the International System of Units (SI). The ampere (A) is the base unit for electric current. The volt (V) is NOT a base unit: it is a derived unit made from combinations of SI base units.",
@@ -41,11 +49,13 @@ const lesson={
  ["volt (V)","Derived unit for electric potential difference."],
  ["prefix","A factor such as milli (10⁻³) or micro (10⁻⁶) that scales a unit."]
  ],
- base,derived,
+ base,derived,magnetic,
  historical:[
  ["Plane angle","radian","rad"],
  ["Solid angle","steradian","sr"]
  ],
+ gaussNote:"The supplied textbook excerpt calls gauss a magnetic flux unit. In standard electromagnetic terminology, gauss (G) measures magnetic flux density: 1 G = 10⁻⁴ T. Maxwell (Mx) measures magnetic flux: 1 Mx = 10⁻⁸ Wb. This clarification comes from NIST/NBS tables, not a silent rewrite of the excerpt.",
+ mksNote:"The textbook contrasts mks (meter–kilogram–second) engineering units with the older cgs (centimeter–gram–second) system. SI still has seven base units; mks names only three historically important base quantities.",
  note:"The quoted textbook uses the historical class 'supplementary units' for radian and steradian. The SI eliminated this separate category in 1995; today they are dimensionless derived units. Both descriptions refer to the same angle units, but to different SI classification periods.",
  styleNote:"In engineering typesetting, use italic quantity symbols such as I, V, P, and t. Use upright (roman) unit symbols such as A, V, W, and s. The same letter V can refer to a voltage quantity when italic and to the volt unit when upright.",
  sourceScope:"Aligned to the Base and Derived Units excerpt supplied from Chapter 1 of Principles of Electric Circuits (Floyd and Buchla). Historical SI status and modern unit symbols cross-checked against BIPM and NIST. Other chapters are original curriculum summaries, not verbatim textbook excerpts.",
@@ -55,7 +65,8 @@ const lesson={
  ["BIPM SI Brochure, 9th edition","https://www.bipm.org/en/publications/si-brochure"],
  ["NIST SI base unit definitions","https://www.nist.gov/si-redefinition/definitions-si-base-units"],
  ["BIPM historical supplementary-unit decision","https://www.bipm.org/en/publications/si-brochure/annex-1/derived-units"],
- ["NIST SI symbol style","https://physics.nist.gov/cuu/Units/checklist.html"]
+ ["NIST SI symbol style","https://physics.nist.gov/cuu/Units/checklist.html"],
+ ["NIST/NBS Magnetic Unit Conversions","https://www.govinfo.gov/content/pkg/GOVPUB-C13-aaf879474ebe03fd4c45a247d099163e/pdf/GOVPUB-C13-aaf879474ebe03fd4c45a247d099163e.pdf"]
  ]
 };
 window.AVIONICS_SI_LESSON=lesson;
