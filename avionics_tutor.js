@@ -326,7 +326,7 @@ function lessonPage(q,t,f){
  courseworkBridge(t)+
  digitalLogicPanel(t)+
  (NOTEBOOK?NOTEBOOK.render(t.id):"")+
- '<h4 class="av-figure-heading">Interactive circuit, graph &amp; 3-panel breadboard connection for '+esc(q.id.toUpperCase())+'</h4>'+
+ '<h4 class="av-figure-heading">Interactive circuit, graph &amp; '+(VIS&&VIS.describe(q,t).board?'breadboard':'test fixture')+' wiring for '+esc(q.id.toUpperCase())+'</h4>'+
  visualSwitcherBar(inlineVisualMode)+illustration+
  '<div class="av-actions-bottom"><button id="avGoVisual" class="av-light">See all 3 large visuals stacked →</button><button id="avGoWork" class="av-primary">See all 6 baby steps + worked MathML →</button></div>'+
  (formulaSrc?equation(formulaSrc,"1. ENGINEERING EQUATION (MATHML)"):"")+
@@ -352,7 +352,7 @@ function visualPage(q,t,f){
  pics.map(x=>'<section class="av-visual-panel" id="avVisual-'+x[0]+'"><div class="av-visual-panel-head"><div><h4>'+esc(x[1])+'</h4><p>'+esc(x[2])+'</p></div><button class="av-light" data-zoom="'+x[0]+'" aria-label="Enlarge '+esc(x[1])+'">↗ Enlarge</button></div>'+
  (VIS?VIS.render(q,t,x[0]):'<p>Visuals are unavailable.</p>')+
  (x[0]==="wiring"&&CIRCUITSIM?CIRCUITSIM.render(q,t):"")+'</section>').join("")+
- '<div class="av-takeaway"><strong>Before continuing:</strong> Trace the drive and return connections through the shown components, identify which holes share a breadboard row (`a–e`), and verify where the DMM/scope probes belong for this question.</div>'+
+ '<div class="av-takeaway"><strong>Before continuing:</strong> '+((info&&info.board)?'Trace the source and return path, which breadboard row holes share a net, and exactly where the selected probe belongs.':'Trace the test signal, reference and return paths. Fixture grid labels are logical signal references, NOT electrically connected breadboard holes or verified device pins.')+'</div>'+
  '<div class="av-actions-bottom"><button id="avVisualBack" class="av-light">← Review the idea</button><button id="avVisualForward" class="av-primary">Now solve it in 6 baby steps →</button></div></section>';
 }
 
