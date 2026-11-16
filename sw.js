@@ -19,6 +19,8 @@ const CORE = [
   "./nvidia_slt_math.js",
   "./nvidia_slt_questions.js",
   "./nvidia_slt_ui.js",
+  "./nvidia_slt_visual_lab_v2.js",
+  "./nvidia_slt_visual_lab_v2.css",
   "./nvidia_slt.css",
   "./avionics_mixed_visuals_v11.js",
   "./avionics_practice.js",
