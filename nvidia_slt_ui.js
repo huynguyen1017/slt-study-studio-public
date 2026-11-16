@@ -20,6 +20,8 @@ const ref=()=>window.NVIDIA_SLT_SOURCE_REFERENCES||[];
 function makeDice(){
  const base=getBase();if(!base||base.questionType!=="number")return;
  const next=(rolls[base.id]||0)+1;rolls[base.id]=next;
+ // Every roll is an independently graded attempt: never reuse a prior dice PASS.
+ delete state.checked[base.id+"::dice"];delete state.responses[base.id+"::dice"];delete state.mastered[base.id+"::dice"];save();
  const m=M.generate(base.topic,(base.difficulty-21)%10,next);
  if(m.method!==base.operation)throw Error("Numerical method changed during reroll");
  const steps=[
@@ -155,7 +157,7 @@ function wire(){
   save();render();
  };
  const reveal=root.querySelector("#nvsReveal");if(reveal)reveal.onclick=()=>{const d=root.querySelector("#nvsReference");if(d){d.open=true;d.scrollIntoView({block:"nearest"})}};
- const review=root.querySelector("#nvsReview");if(review)review.onclick=()=>{delete state.mastered[q.id];feedback="Marked for another review.";save();render()};
+ const review=root.querySelector("#nvsReview");if(review)review.onclick=()=>{delete state.mastered[q.variant?q.id+"::dice":q.id];feedback="Marked for another review.";save();render()};
  const master=root.querySelector("#nvsMaster");if(master)master.onclick=()=>{if(!state.checked[key])return;state.mastered[q.variant?q.id+"::dice":q.id]=true;save();if(state.index<49)goto(state.index+1);else render()};
 }
 window.mountNvidiaSltAcademy=el=>{
