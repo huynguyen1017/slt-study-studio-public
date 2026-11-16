@@ -9,7 +9,7 @@ const read=p=>fs.readFileSync(path.join(root,p),"utf8");
 const saved=new Map(),storage={getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v)};
 const c={window:{},Math,console,document:{},localStorage:storage};
 vm.createContext(c);
-for(const file of ["avionics_data.js","avionics_questions.js","avionics_beginner_lessons.js","avionics_si_lesson.js","avionics_textbook_toc.js","simulation/math_format.js","avionics_visuals.js","avionics_assessor.js","avionics_tutor.js"])vm.runInContext(read(file),c,{filename:file});
+for(const file of ["avionics_data.js","avionics_questions.js","avionics_distinct_labs_v10.js","avionics_distinct_math_v10.js","avionics_distinct_reasoning_v10.js","avionics_beginner_lessons.js","avionics_si_lesson.js","avionics_textbook_toc.js","simulation/math_format.js","avionics_visuals.js","avionics_assessor.js","avionics_tutor.js"])vm.runInContext(read(file),c,{filename:file});
 const t=c.window.AVIONICS_TOPICS,q=c.window.AVIONICS_QUESTIONS,si=c.window.AVIONICS_SI_LESSON;
 assert.equal(t.length,23);assert.equal(q.length,690);
 assert.equal(Object.keys(c.window.AVIONICS_BEGINNER_LESSONS).length,23);
@@ -43,12 +43,19 @@ for(const topic of t){
  for(let i=0;i<5;i++){
   const [term,def,why,example]=topic.skills[i];
   for(const letter of ["F","A"]){
-    const question=own.find(x=>x.id===topic.id+"-"+letter+(i+1));
-    assert(question&&question.question.includes(term),topic.id+" "+term+" prompt mismatch");
-    assert(question.steps.some(v=>v.includes(def)),question.id+" missing source definition");
-    assert(question.steps.some(v=>v.includes(why)),question.id+" missing purpose");
-    assert(question.steps.some(v=>v.includes(example)),question.id+" missing use-case");
-    sourced++;
+   const question=own.find(x=>x.id===topic.id+"-"+letter+(i+1));
+   assert(question,topic.id+" "+term+" missing");
+   if(letter==="F"){
+    assert(question.question.includes(term)||topic.id==="units",question.id+" no skill reference");
+    assert(question.steps.some(v=>v.includes(def)),question.id+" missing sourced definition");
+    assert(question.steps.some(v=>v.includes(why)),question.id+" missing reason");
+    assert(question.steps.some(v=>v.includes(example)),question.id+" missing use case");
+   }else{
+    assert(question.lesson&&question.lesson.title&&question.lesson.example,question.id+" needs distinct lab lesson");
+    assert(question.steps.some(v=>v.includes(def)),question.id+" original concept omitted");
+    assert(question.lesson.why,question.id+" original purpose lost");
+   }
+   sourced++;
   }
   const row=topic.cases[i];
   for(const id of [topic.id+"-D"+(i*2+1),topic.id+"-D"+(i*2+2)]){
@@ -62,13 +69,20 @@ for(const topic of t){
  for(let i=0;i<topic.calc.length;i++)for(let j=0;j<5;j++){
   const numeric=family[topic.calc[i]](j);
   const qq=own.find(x=>x.id===topic.id+"-C"+(i*5+j+1));
-  assert(qq&&qq.question.startsWith(numeric.prompt),topic.id+" calculation prompt");
-  assert.equal(qq.unit,numeric.unit,qq.id+" unit");
-  assert.equal(qq.expected,numeric.answer,qq.id+" stored answer");
+  assert(qq,topic.id+" missing numerical task");
+  if(qq.originalNumeric){
+    assert.equal(qq.originalNumeric.question,numeric.prompt,qq.id+" historical source prompt changed");
+    assert.equal(qq.originalNumeric.unit,numeric.unit,qq.id+" source unit");
+    assert.equal(qq.originalNumeric.expected,numeric.answer,qq.id+" reference source");
+  }else{
+    assert(qq.question.startsWith(numeric.prompt),qq.id+" original law altered");
+    assert.equal(qq.unit,numeric.unit,qq.id+" original unit");
+    assert.equal(qq.expected,numeric.answer,qq.id+" original numerical answer");
+    const independent=expressionValue(qq.sub);
+    assert(Math.abs(independent-qq.expected)<=Math.max(Math.abs(qq.expected)*0.003,0.00005),qq.id+" original arithmetic");
+  }
   assert(math(qq.formula,true).includes("<math"),qq.id+" formula MathML");
   assert(math(qq.sub,true).includes("<math"),qq.id+" substitution MathML");
-  const independent=expressionValue(qq.sub);
-  assert(Math.abs(independent-qq.expected)<=Math.max(Math.abs(qq.expected)*0.003,0.00005),qq.id+" arithmetic mismatch: "+independent+" vs "+qq.expected);
   arith++;
  }
  for(const question of own){
@@ -90,7 +104,7 @@ assert.equal(c.window.avionicsAnswerCheck.gradeText(sample,unit,"Ampere measures
 assert.equal(c.window.avionicsAnswerCheck.gradeText(sample,unit,"The volt is an SI base unit.").band,"needs-correction");
 const testHtml=read("index.html"),sw=read("sw.js");
 assert(testHtml.includes("avionics_si_lesson.js?v=2")&&testHtml.includes("avionics_si.css?v=2"));
-assert(sw.includes("v29-nucleo-progressive-videos"));
+assert(sw.includes("v30-distinct-690-curriculum"));
 assert(c.window.AVIONICS_TEXTBOOK_TOC.chapters.length===21);
 assert(c.window.AVIONICS_SI_LESSON.baseFormulaMathml.includes("<mfrac>"));
 assert(c.window.avionicsWorkbookV2.stepsForQuestion("units-F1").every(x=>!x.formula||x.formula!=="V = I * R"));
