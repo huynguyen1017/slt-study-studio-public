@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v21-si-curriculum-audit-r2';
+const CACHE = 'slt-study-studio-v22-mathml-layout-chapter-map';
 const CORE = [
   "./",
   "./index.html",
@@ -12,6 +12,7 @@ const CORE = [
   "./avionics_practice.css",
   "./avionics_beginner_lessons.js",
   "./avionics_si_lesson.js",
+  "./avionics_textbook_toc.js",
   "./avionics_si.css",
   "./avionics_tutor.js",
   "./avionics_assessor.js",

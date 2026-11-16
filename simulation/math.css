@@ -1,9 +1,9 @@
 /* Native MathML + ENGR 852 HW1/HW2 Stacked Equation Cards */
-math.math-inline{display:inline-math;display:inline;margin:0 .12em;vertical-align:middle;font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:1.12em;color:#1b3b75}
-math.math-display{display:block;overflow-x:auto;max-width:100%;padding:.28em 0;font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:clamp(1.12rem,2.1vw,1.52rem);color:#142d5e}
-math mfrac{padding:.14em .08em}
-math mfrac > *:first-child{padding-bottom:.08em}
-math mfrac > *:last-child{padding-top:.08em}
+math.math-inline{display:inline math;margin:0 .12em;vertical-align:middle;font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:1.12em;color:#1b3b75}
+math.math-display{display:block math;overflow-x:auto;max-width:100%;padding:.28em 0;font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:clamp(1.12rem,2.1vw,1.52rem);color:#142d5e}
+math mfrac{padding:0}
+math mfrac > *:first-child{padding:0}
+math mfrac > *:last-child{padding:0}
 math mi{font-style:italic}
 .math-panel{display:flex;flex-wrap:wrap;justify-content:space-evenly;gap:15px;align-items:center;padding:13px 14px!important}
 .math-panel math{min-width:170px;flex:1}

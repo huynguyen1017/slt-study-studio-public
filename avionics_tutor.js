@@ -8,6 +8,7 @@ const QUESTIONS=window.AVIONICS_QUESTIONS||[];
 const LESSONS=window.AVIONICS_BEGINNER_LESSONS||{};
 const DEEP=window.AVIONICS_CONCEPT_DEEP_DIVE||{};
 const SI=window.AVIONICS_SI_LESSON||null;
+const BOOK=window.AVIONICS_TEXTBOOK_TOC||null;
 const VIS=window.avionicsVisuals;
 const ASSESS=window.avionicsAnswerCheck;
 const STORE="slt-avionics-ee-practice-v1";
@@ -93,8 +94,8 @@ function stepsFor(q,t,f){
  const st=q.steps||[];
  const beginner=f.deep;
  const out=[];
- const formulaStr=q.formula||(beginner?beginner.formula:"V = I * R");
- const subStr=q.sub||(beginner?beginner.sub:"V = 5.0");
+ const formulaStr=q.formula||(beginner&&beginner.formula)||null;
+ const subStr=q.sub||(beginner&&beginner.sub)||null;
  if(q.level==="Foundations"||q.level==="Application"){
   out.push({
    title:"Understand the question in everyday words",
@@ -107,15 +108,15 @@ function stepsFor(q,t,f){
    kind:"text"
   });
   out.push({
-   title:"Engineering equation in MathML notation",
-   body:`Here is the mathematical relationship that governs "${f.label}". Notice how each symbol maps directly to a measurable physical quantity.`,
-   kind:"formula",
+   title:formulaStr?"The governing equation and its symbols":"Distinguish a principle from a numerical equation",
+   body:formulaStr?"We will define every symbol in this equation before using it.":"This is a concept question. Not every definition needs a calculation, and using an unrelated equation would be misleading. Describe the physical meaning first: "+f.definition,
+   kind:formulaStr?"formula":"text",
    formula:formulaStr
   });
   out.push({
-   title:"Worked numerical example (with engineering units)",
-   body:`${beginner?beginner.example:LESSONS[t.id].example} Substituting real bench values gives:`,
-   kind:"formula",
+   title:subStr?"Work through the given numbers":"Use a concrete example without assuming numbers",
+   body:subStr?((beginner?beginner.example:LESSONS[t.id].example)+" Substitute the stated values in the equation."):((beginner?beginner.example:LESSONS[t.id].example)+" This is a qualitative example, not a measured dataset or a calculation."),
+   kind:subStr?"formula":"text",
    formula:subStr
   });
   out.push({
@@ -184,15 +185,15 @@ function stepsFor(q,t,f){
    kind:"text"
   });
   out.push({
-   title:"Engineering check & governing equation",
-   body:`Safest first action: ${st[1]||st[0]}. Use the governing physical relationship below to predict what a healthy reading must look like:`,
-   kind:"formula",
+   title:formulaStr?"Engineering check and governing equation":"Engineering check without an assumed formula",
+   body:formulaStr?"Safest first action: "+(st[1]||st[0])+". Use the actual governing relationship to predict a healthy reading.":"Safest first action: "+(st[1]||st[0])+". Compare the expected healthy observations with the reported fault.",
+   kind:formulaStr?"formula":"text",
    formula:formulaStr
   });
   out.push({
-   title:"Expected healthy vs. fault signature",
-   body:`Why this isolates the root cause: ${st[2]||f.why} Compare measured telemetry against nominal behavior:`,
-   kind:"formula",
+   title:"Expected healthy behavior versus observed fault",
+   body:"Why this isolates the root cause: "+(st[2]||f.why)+". "+(subStr?"Evaluate the given numeric example.":"No numerical values were provided, so do not invent a substitution."),
+   kind:subStr?"formula":"text",
    formula:subStr
   });
   out.push({
@@ -246,16 +247,29 @@ function siChapterPanel(){
  unitTable("Common derived units — electric and magnetic",SI.derived)+
  unitTable("Magnetic quantities and their SI-related unit expressions",SI.magnetic)+
  '<p class="av-si-note">'+esc(SI.gaussNote)+'</p>'+
- '<div class="av-math"><div class="av-math-label">EXAMPLE · VOLT EXPRESSED WITH BASE UNITS (NATIVE MATHML)</div>'+SI.formulaMathml+'</div>'+
+ '<div class="av-math"><div class="av-math-label">EXAMPLE · VOLT EXPRESSED IN SI UNITS</div><div class="av-math-scroll">'+SI.formulaMathml+'</div><div class="av-math-scroll">'+SI.baseFormulaMathml+'</div><p class="av-meaning">Two equivalent equations are separated to avoid an overly wide mathematical expression.</p></div>'+
  '<h4>How this textbook labels supplementary units</h4>'+
  unitTable("Historical SI supplementary class",SI.historical)+
  '<p class="av-si-note">'+esc(SI.note)+'</p>'+
  '<p class="av-si-note">'+esc(SI.mksNote)+'</p>'+
  '<h4>Quantity symbols versus unit symbols</h4>'+
  '<p>'+esc(SI.styleNote)+'</p>'+
- '<div class="av-math"><div class="av-math-label">ITALIC QUANTITY VS UPRIGHT UNIT SYMBOL</div>'+SI.symbolMathml+'</div>'+
+ '<div class="av-math"><div class="av-math-label">ITALIC QUANTITY VS UPRIGHT UNIT SYMBOL</div><div class="av-math-scroll">'+SI.symbolMathml+'</div><p class="av-symbol-example">'+esc(SI.symbolNote)+'</p></div>'+
  '<div class="av-si-sources"><strong>Reference scope</strong><p>'+esc(SI.sourceScope)+'</p>'+
  '<p>'+SI.links.map(a=>'<a target="_blank" rel="noopener noreferrer" href="'+esc(a[1])+'">'+esc(a[0])+'</a>').join(" · ")+'</p></div></section>';
+}
+
+function textbookPanel(t){
+ if(!BOOK)return "";
+ const matched=BOOK.chapters.filter(c=>c.topics.includes(t.id));
+ return '<details class="av-chapter-map"><summary>Floyd &amp; Buchla chapter cross-reference ('+matched.length+' matching headings)</summary>'+
+ '<p><strong>'+esc(BOOK.title)+'</strong> — '+esc(BOOK.authors)+'</p>'+
+ '<p>'+esc(BOOK.evidence)+'</p>'+
+ (matched.length?'<p><strong>Related sections by chapter title:</strong> '+matched.map(c=>'Ch. '+c.number+' '+esc(c.title)).join(' · ')+'</p>':
+ '<p>Applied avionics skills not explicitly titled as a chapter of this foundational circuit textbook.</p>')+
+ '<details><summary>View all 21 chapter names and starting pages</summary><ol>'+
+ BOOK.chapters.map(c=>'<li>Ch. '+c.number+': '+esc(c.title)+' (p. '+c.startPage+')</li>').join('')+
+ '</ol></details></details>';
 }
 
 function lessonPage(q,t,f){
@@ -263,7 +277,7 @@ function lessonPage(q,t,f){
  const glossary=item?item.words:guide.terms;
  const summary=item?item.plain:f.definition;
  const illustration=VIS?VIS.render(q,t,inlineVisualMode):"";
- const formulaSrc=q.formula||(item&&item.formula)||"V = I * R";
+ const formulaSrc=q.formula||(item&&item.formula)||null;
  const subSrc=q.sub||(item&&item.sub)||"";
  return '<section class="av-page" aria-label="Understand the concept">'+
  '<div class="av-eyebrow">PAGE 1 / 4 · UNDERSTAND THE QUESTION &amp; CIRCUIT</div>'+
@@ -274,10 +288,11 @@ function lessonPage(q,t,f){
  glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+rich(p[1])+'</td></tr>').join("")+
  '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(item?item.analogy:guide.analogy)+'</p><h4>Why Muon Space engineers care</h4><p>'+rich(item?item.why:f.why)+'</p></section></div>'+
  (f.label==="SI base unit"?siChapterPanel():"")+
+ textbookPanel(t)+
  '<h4 class="av-figure-heading">Interactive circuit, graph &amp; 3-panel breadboard connection for '+esc(q.id.toUpperCase())+'</h4>'+
  visualSwitcherBar(inlineVisualMode)+illustration+
  '<div class="av-actions-bottom"><button id="avGoVisual" class="av-light">See all 3 large visuals stacked →</button><button id="avGoWork" class="av-primary">See all 6 baby steps + worked MathML →</button></div>'+
- equation(formulaSrc,"1. ENGINEERING EQUATION (MATHML)")+
+ (formulaSrc?equation(formulaSrc,"1. ENGINEERING EQUATION (MATHML)"):"")+
  (subSrc?equation(subSrc,"2. WORKED EXAMPLE / SUBSTITUTION (ENGINEERING NOTATION)"):"")+
  '<div class="av-worked-mini"><strong>One real-life bench example</strong><p>'+rich(item?item.example:guide.example)+'</p></div>'+
  '<div class="av-takeaway"><strong>Remember this:</strong> '+rich(item?item.recap:guide.lead)+'</div>'+

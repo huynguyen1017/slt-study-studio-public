@@ -8,6 +8,7 @@ on:
       - feature/avionics-question-specific-visuals-v3
       - fix/avionics-browser-feedback-guided-circuits-v4
       - fix/si-and-curriculum-accuracy-audit-v5
+      - fix/mathml-layout-and-textbook-map-v6
   pull_request:
     paths:
       - 'index.html'
@@ -39,6 +40,7 @@ jobs:
           node --check avionics_visuals.js
           node --check avionics_assessor.js
           node --check avionics_si_lesson.js
+          node --check avionics_textbook_toc.js
           node tests/avionics-academy.test.cjs
           node tests/avionics-assessor.test.cjs
           node tests/avionics-curriculum-accuracy.test.cjs
