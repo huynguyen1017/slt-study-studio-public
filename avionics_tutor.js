@@ -82,7 +82,7 @@ function stepsFor(q,t,f){
  const out=[];
  if(q.level==="Foundations"||q.level==="Application"){
    out.push({title:"Translate the question into everyday language",body:"We are learning what "+f.label+" means, not asking you to memorize complicated vocabulary yet. "+(beginner?beginner.plain:f.definition),kind:"text"});
-   out.push({title:"Learn the key words",body:(beginner?beginner.why:t.terms).toString?((beginner?beginner.why:LESSONS[t.id].lead)):"",kind:"text"});
+   out.push({title:"Learn the key words",body:beginner?beginner.why:LESSONS[t.id].lead,kind:"text"});
    out.push({title:"Use a picture or everyday comparison",body:beginner?beginner.analogy:LESSONS[t.id].analogy,kind:"text"});
    out.push({title:"Connect the idea to one concrete example",body:beginner?beginner.example:LESSONS[t.id].example,kind:"text"});
    out.push({title:"Explain the engineering reason",body:f.why+" "+f.test,kind:"text"});
