@@ -17,7 +17,7 @@ const txt=(x,y,label,size=16,color="#1a4169",weight=600,anchor="start")=>'<text 
 const wire=(x1,y1,x2,y2,c="#50779c")=>'<path d="M'+x1+' '+y1+' L'+x2+' '+y2+'" stroke="'+c+'" stroke-width="3" fill="none" stroke-linecap="round"/>';
 const dot=(x,y)=>'<circle cx="'+x+'" cy="'+y+'" r="5" fill="#168ba0"/>';
 const card=(x,y,w,head,small,color)=>box(x,y,w,82,color)+txt(x+12,y+27,trunc(head,27),15)+txt(x+12,y+49,trunc(small,32),12,"#526a7c",450);
-const caption=(q,content,legend)=>'<svg class="nvs-scenario-svg" viewBox="0 0 920 306" role="img" aria-label="'+esc(legend)+'" xmlns="http://www.w3.org/2000/svg">'+box(1,1,918,304,"#fcfeff")+content+txt(18,286,"Teaching model · '+esc(q.id)+' · no real DUT telemetry, approved limits or physical pinout",12,"#57738b",400)+'</svg>';
+const caption=(q,content,legend)=>'<svg class="nvs-scenario-svg" viewBox="0 0 920 306" role="img" aria-label="'+esc(legend)+'" xmlns="http://www.w3.org/2000/svg">'+box(1,1,918,304,"#fcfeff")+content+txt(18,286,"Teaching model · "+q.id+" · no real DUT telemetry, approved limits or physical pinout",12,"#57738b",400)+'</svg>';
 function stagesSvg(q,t,m){
  const focus=trunc(m.primary.name,31),s2=trunc(m.secondary.name,31),s3=trunc(m.third.name,31);
  let g=txt(18,30,"BOOT, CLOCK, RESET & FIRST FAILING CHECKPOINT",17,"#245579",750);
