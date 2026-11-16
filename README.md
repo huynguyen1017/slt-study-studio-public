@@ -1,4 +1,19 @@
 # Open SLT Study Studio
+
+## Avionics EE Practice Academy (23 topics × 30 original questions)
+
+Open [Avionics EE Practice](https://huynguyen1017.github.io/slt-study-studio-public/#avionics) in the navigation bar.
+
+- 690 original practice exercises: five foundations, five applications, ten numerical calculations, and ten troubleshooting scenarios per topic.
+- Coverage: SI units, Ohm's law, power, series/parallel, KCL/KVL, Thevenin/Norton, AC, capacitors, RC, RL, RLC/filters, magnetics/transformers, diodes/MOSFETs, power rails, schematic reading and PCBA bring-up, oscilloscope/DMM measurements, digital timing, UART/SPI/I2C/CAN, Python SCPI/VISA, Linux logs, RF, and spacecraft qualification.
+- Worked numerical solutions have symbolic equations and actual numeric substitution displayed as **native MathML** using the existing offline math renderer.
+- Numeric answers accept scientific notation with 1.2% rounding tolerance; every question has step-by-step explanations, optional hints, and self-assessment.
+- Progress is separate from original cards and stored locally under `slt-avionics-ee-practice-v1`; users can export it.
+- Exercises are originally authored using the broad chapter topics of Floyd and Buchla's *Principles of Electric Circuits* as curriculum guidance. No protected textbook problem text is copied.
+- Avionics examples are educational and not proprietary Muon Space procedures.
+- Tests: `node tests/avionics-academy.test.cjs` plus Chromium desktop/mobile regression in `.github/workflows/avionics-academy.yml`.
+
+Files: `avionics_data.js`, `avionics_questions.js`, `avionics_practice.js`, and `avionics_practice.css`.
 Free, publicly accessible learning practice for system-level testing and post-silicon hardware validation.
 No account required. Progress stays in browser localStorage on the visitor's own device.
 
