@@ -76,6 +76,15 @@ console.log("PASS: 12 topics ×50 =600; 120 distinct topic methods; 840 method-c
   await page.locator("#nvidiaView #nvsDice").click();
   const rolled2=await page.locator("#nvidiaView .nvs-question").textContent();
   assert.notEqual(rolled2,rolled,"Two dice clicks must change inputs");
+  await page.locator("#nvidiaView [data-screen='practice']").first().click();
+  await page.locator("#nvidiaView #nvsValue").fill(String(M.generate("electrical",0,2).expected));
+  await page.locator("#nvidiaView #nvsCheck").click();
+  await page.locator("#nvidiaView #nvsMaster").click();
+  assert((await page.locator("#nvidiaView .nvs-stats").textContent()).includes("0 / 600"),"A dice score must not change canonical mastery");
+  await page.locator("#nvidiaView [data-goto='20']").last().click();
+  await page.locator("#nvidiaView #nvsDice").click();
+  await page.locator("#nvidiaView [data-screen='practice']").first().click();
+  assert(await page.locator("#nvidiaView #nvsMaster").isDisabled(),"Every fresh dice roll needs a new answer check");
   await page.locator("#nvidiaView #nvsRestore").click();
   assert.equal(await page.locator("#nvidiaView .nvs-question").textContent(),canonical,"Canonical restore");
   await page.locator("#nvidiaView [data-screen='steps']").first().click();
