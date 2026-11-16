@@ -41,5 +41,5 @@ const rendered=lab.render("components");assert(rendered.includes("XOR 1")&&rende
 const code=read("avionics_tutor.js"),idx=read("index.html"),cache=read("sw.js");
 assert(code.includes("NOTEBOOK.render(t.id)")&&code.includes("NOTEBOOK.bind(host)"));
 assert(idx.includes("avionics_notebook_labs.js?v=1")&&idx.includes("avionics_notebook_cases.js?v=1"));
-assert(cache.includes("v29-nucleo-progressive-videos")&&cache.includes("avionics_notebook_labs.css"));
+assert(cache.includes("v30-distinct-690-curriculum")&&cache.includes("avionics_notebook_labs.css"));
 console.log("PASS: 23 original topic-specific labs, 23 recomputed answers, 23 diagrams and graded forms, privacy and Lab 7 evidence corrections");
