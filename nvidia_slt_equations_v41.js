@@ -92,5 +92,22 @@ function render(q,t,stage){
  }
  return '<section class="ne41-sheet ne41-'+kind+'" aria-label="NVIDIA source-specific engineering equations · '+esc(head)+'"><header><small>'+esc(head)+' · ENGINEERING NOTEBOOK</small><h4>Real values · Stacked MathML · Railroad-track fractions</h4><p>'+esc(t?.title||"SLT learning")+' · Source-derived, read-only</p></header><div class="ne41-body">'+content+'</div></section>';
 }
-window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41={version:"41.0",render,stepLine,numeratorRails,sceneSvg,formula,substitution,givens};
+function renderInterview(q,t){
+ if(!q)return "";
+ const f=formula(q),sub=substitution(q),s=stepsFor(q),numeric=q.expected!==undefined&&Number.isFinite(Number(q.expected));
+ const model=String(q.interviewAnswer||q.modelAnswer||s[s.length-1]||"");
+ const context=String(q.question||"");
+ return '<section class="ne41-sheet ne41-interview" aria-label="Question-specific NVIDIA engineering interview defense">'+
+ '<header><small>🎤 INTERVIEW · QUESTION-SPECIFIC EVIDENCE</small><h4>Engineer answer → math → bench proof → disposition</h4><p>Proposed educational answer, not a claim of personal hardware experience.</p></header>'+
+ '<div class="ne41-body"><p><b>Actual question:</b> '+esc(context)+'</p>'+
+ '<p><b>1 · State the mechanism:</b> '+esc(s[0]||q.lesson?.summary||q.lesson||"Explain the physical or test mechanism first.")+'</p>'+
+ (hasEq(f)?label("2 · Governing law (stacked MathML)",math(f)):'<p class="ne41-neutral">2 · Conceptual problem: establish a falsifiable measurement without inventing an unrelated numeric model.</p>')+
+ (sub?label("3 · Current-question substitution (not a different question)",math(hasEq(sub)?sub:"Substitution = "+sub)):"")+
+ (numeric?label("Calculated target from source data",'<strong>'+esc(q.expected+" "+(q.unit||""))+'</strong><p>Numerical teaching result, NOT actual validated DUT data.</p>'):"")+
+ '<p><b>4 · Cross-check and isolate:</b> '+esc(s[2]||q.hints?.[1]||"Verify against an independent measurement or a known-good test configuration.")+'</p>'+
+ '<p><b>5 · Engineer disposition:</b> '+esc(model||"Report PASS, FAIL or INVALID based only on documented limits and independent evidence.")+'</p>'+
+ '</div></section>';
+}
+
+window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41={version:"41.0",render,renderInterview,stepLine,numeratorRails,sceneSvg,formula,substitution,givens};
 })();
