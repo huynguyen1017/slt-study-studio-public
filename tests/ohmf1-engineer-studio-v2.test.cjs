@@ -57,7 +57,7 @@ console.log("PASS: OHM-F1 8 worked steps; six technical follow-ups; verified KVL
   assert.equal(await speech.locator('[data-ohm-path="meter"]').getAttribute("aria-pressed"),"true");
   await speech.locator('[data-ohm-input="vl"]').fill("2.20");
   assert((await speech.locator(".ohm-live-output").textContent()).includes("2.80 V"));
-  assert((await speech.locator(".ohm-live-output").textContent()).includes("146.7 Ω"));
+  assert((await speech.locator(".ohm-live-output").textContent()).includes("146.67 Ω"));
   await page.locator('[data-page="visual"]').click();
   assert.equal(await page.locator(".ohm-sheet .nb-spread-svg").count(),1);
   assert((await page.locator(".ohm-sheet").textContent()).includes("Voltage between nodes"));
