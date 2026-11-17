@@ -405,9 +405,11 @@ function svgNotebookEquation(raw, x, y) {
   }
   if(lhs.length<=22&&rhs.length<=76&&slashes.length===1){
     let a=rhs.slice(0,slashes[0]).trim(),b=rhs.slice(slashes[0]+1).trim();
-    if(a.startsWith("(")&&a.endsWith(")"))a=a.slice(1,-1);
-    if(b.startsWith("(")&&b.endsWith(")"))b=b.slice(1,-1);
-    if(a.length<30&&b.length<30&&!/[=]/.test(a+b)&&!/\s[+\-]\s/.test(a)&&!/\s[+\-]\s/.test(b)){
+    const aGrouped = a.startsWith("(")&&a.endsWith(")");
+    const bGrouped = b.startsWith("(")&&b.endsWith(")");
+    if(aGrouped)a=a.slice(1,-1);
+    if(bGrouped)b=b.slice(1,-1);
+    if(a.length<30&&b.length<30&&!/[=]/.test(a+b)&&(aGrouped||!/\s[+\-]\s/.test(a))&&(bGrouped||!/\s[+\-]\s/.test(b))){
       return '<g class="nb-svg-math-fraction" aria-label="'+esc(value)+'">'+
         '<text x="'+(x-60)+'" y="'+(y+32)+'" text-anchor="end" font-size="15" font-family="Arial,sans-serif" font-weight="800" fill="#163550">'+esc(lhs)+'</text>'+
         '<text x="'+x+'" y="'+(y+20)+'" text-anchor="middle" font-size="15" font-family="Arial,sans-serif" font-weight="800" fill="#163550">'+esc(a)+'</text>'+
