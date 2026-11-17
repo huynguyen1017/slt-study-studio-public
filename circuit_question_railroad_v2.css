@@ -20,3 +20,21 @@
 .rrq-answer{background:#f5fcf8;border:1px solid #a7d4c1;border-radius:9px;padding:12px 14px;margin-top:10px}
 .rrq-answer strong{display:block;font-size:19px;color:#176a51;margin-top:5px}
 @media(max-width:590px){.rrq-body{padding:9px}.rrq-workpad>header{padding:13px}.rrq-rail{font-size:15px;gap:6px}.rrq-item{padding:7px}}
+
+/* One consistent mathematical workpad in Understand, Visuals, Baby Steps and Try It. */
+.rrq-stage{margin:14px 0 20px;border:1px solid #b2cbdf;border-radius:14px;background:#fff;overflow:hidden;color:#173b56}
+.rrq-stage>header{padding:12px 17px;background:#eaf4fb;border-bottom:1px solid #b9d6e9}
+.rrq-stage>header small{font-size:11px;color:#226d88;font-weight:800;letter-spacing:.04em}
+.rrq-stage>header h4{font-size:18px;margin:5px 0;color:#1b4c70}
+.rrq-stage>header p{font-size:12px;margin:5px 0;color:#486579}
+.rrq-stage-content{padding:13px 17px;font-size:14px;line-height:1.75}
+.rrq-stage-content>p{margin:8px 0 13px}
+.rrq-stage-content .rrq-label{margin:12px 0 6px}
+.rrq-stage-content .rrq-rail{padding:8px 0;max-width:100%;overflow-x:auto}
+.rrq-stage-content .rrq-math{overflow-x:auto;max-width:100%}
+.rrq-stage-content math[display="block"]{max-width:none;min-width:max-content;font-size:clamp(16px,2vw,23px)}
+.rrq-stage-baby .rrq-workpad{box-shadow:none;margin:10px 0}
+.rrq-stage-try{border-color:#aac8d2;background:#fbfefd}
+.rrq-stage-try>header{background:#edf7f3}
+.rrq-stage-try .rrq-label{font-weight:800}
+@media(max-width:590px){.rrq-stage>header{padding:11px}.rrq-stage-content{padding:10px}.rrq-stage-content math[display="block"]{font-size:17px}}
