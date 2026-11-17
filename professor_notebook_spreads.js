@@ -508,12 +508,12 @@ function renderNotebookSpreadSVG(spec) {
     ${renderPanel3BenchHookup(s)}
 
     <!-- ROW 2: 4 COMPLETE ENGINEER SOLUTION CARDS (y=674..1310) — ZERO GENERALIST FLUFF! -->
-    ${card(40, 674, 610, 636, "4. Governing Equations & 10^(3n) Prefix Table", "#1e3a8a")}
+    ${card(40, 674, 610, 636, "4. Equations & Railroad-Track Unit Cancellation", "#1e3a8a")}
     ${eqChips.map((eqStr, idx) => `
       <rect x="64" y="${736 + idx * 72}" width="562" height="58" rx="9" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.8"/>
       ${idx===2 ? svgNotebookFactorLabel(s, 345, 736 + idx * 72) : svgNotebookEquation(eqStr, 345, 736 + idx * 72)}
     `).join("")}
-    <text x="64" y="974" font-family="${fontMain}" font-size="15" font-weight="800" fill="#1e3a8a">Given Quantities -> Base SI 10^(3n) Conversion Table:</text>
+    <text x="64" y="974" font-family="${fontMain}" font-size="15" font-weight="800" fill="#1e3a8a">Givens Reference (fraction method shown above):</text>
     <rect x="64" y="988" width="562" height="36" fill="#1e3a8a"/>
     ${(tbl.headers || []).slice(0, colCount).map((h, i) => `<text x="${colStarts[i] + 8}" y="1011" font-family="${fontMain}" font-size="12" font-weight="800" fill="#ffffff">${esc(String(h).slice(0, 22))}</text>`).join("")}
     ${(tbl.rows || []).slice(0, 4).map((row, rIdx) => {
