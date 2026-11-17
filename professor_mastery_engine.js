@@ -2088,7 +2088,7 @@ function renderNvidiaMasterStudyBank() {
     ["hld", "15-Step HLD + 8 Socket + 10 Linux QA"]
   ];
   return `<details class="nvs-prof-bank" id="nvsProfMasterBank" ${masterBankOpen ? "open" : ""}>
-    <summary>📗 NVIDIA SLT Master 253-Box Study Bank (8 Equations · CPU2 Scope · DRAM Bug · Intel/Cisco · 25 Python Labs · 15-Step HLD)</summary>
+    <summary>📗 NVIDIA SLT Master Reference Bank (10 Curated Modules · Equations · Oscilloscope · DDR · Test Automation)</summary>
     <div class="nvs-prof-bank-body">
       <p style="margin-top:0;font-size:0.9rem;color:#334155;">Structured walkthroughs unifying the complete NVIDIA SLT Master Study Guide: 10<sup>3n</sup> PDN/DRAM/STA physics, 4-Channel Keysight Scope methodology, fail-closed Python grading, and Linux hardware triage.</p>
       <div class="nvs-prof-filters" role="group" aria-label="Filter NVIDIA Master Study modules">
