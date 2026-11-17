@@ -34,6 +34,9 @@ on:
       - 'tests/nvidia-slt-visual-lab-v2.test.cjs'
       - 'nvidia_slt_*.js'
       - 'nvidia_slt.css'
+      - 'engineering_solved_cases_v1.js'
+      - 'engineering_solved_cases_v1.css'
+      - 'tests/engineering-solved-cases-v1.test.cjs'
 permissions:
   contents: read
 jobs:
@@ -61,6 +64,7 @@ jobs:
           node --check nvidia_slt_math.js
           node --check nvidia_slt_questions.js
           node --check nvidia_slt_ui.js
+          node --check engineering_solved_cases_v1.js
           node --check nvidia_slt_visual_lab_v2.js
           node --check avionics_mixed_visuals_v11.js
           node --check avionics_practice.js
@@ -87,6 +91,7 @@ jobs:
           node tests/avionics-advanced-50-v12.test.cjs
           node tests/nvidia-slt-academy-v1.test.cjs
           node tests/nvidia-slt-visual-lab-v2.test.cjs
+          node tests/engineering-solved-cases-v1.test.cjs
       - name: Install headless browser for desktop and mobile smoke tests
         run: |
           npm install --no-save playwright@1.56.1
