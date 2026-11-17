@@ -33,7 +33,7 @@ const PREFIX_MAP = {
 };
 
 function parseGivenQuantities(text) {
-  const regex = /(\d+(?:\.\d+)?(?:e[+-]?\d+)?)\s*(pF|nF|µF|uF|mF|F|pH|nH|µH|uH|mH|H|ps|ns|µs|us|ms|s|mV|kV|V|µA|uA|mA|A|mW|kW|MW|W|mΩ|kΩ|MΩ|Ω|Hz|kHz|MHz|GHz|mJ|µJ|J|C|dB|MiB|GiB|GB\/s|MT\/s|GT\/s|%)/g;
+  const regex = /(?<![A-Za-z0-9_.-])(\d+(?:\.\d+)?(?:e[+-]?\d+)?)\s*(pF|nF|µF|uF|mF|F|pH|nH|µH|uH|mH|H|ps|ns|µs|us|ms|s|mV|kV|V|µA|uA|mA|A|mW|kW|MW|W|mΩ|kΩ|MΩ|Ω|Hz|kHz|MHz|GHz|mJ|µJ|J|C|dB|MiB|GiB|GB\/s|MT\/s|GT\/s|%)(?![A-Za-z])/g;
   const seen = new Set();
   const list = [];
   let m;
@@ -458,79 +458,727 @@ const AVIONICS_WORKED_BANK = [
 /* ============================================================================
    4. UNIVERSAL 10^(3n) PHYSICS INFERENCE & HIRING-MANAGER INTERVIEW SCRIPT
    ============================================================================ */
+function cleanExponentSign(expStr) {
+  return String(expStr ?? "").replace(/^\+/, "").replace(/-/g, "−");
+}
+
+function prettyMathText(str) {
+  let out = esc(str);
+  // Powers of 10 and general exponents before subscript pass
+  out = out.replace(/10\^\(([^)]+)\)/g, (_, e) => `10<sup>${cleanExponentSign(e)}</sup>`);
+  out = out.replace(/([A-Za-z0-9\)\]])\^\(([^)]+)\)/g, (_, b, e) => `${b}<sup>${cleanExponentSign(e)}</sup>`);
+  out = out.replace(/([A-Za-z0-9\)\]])\^(-?\d+)/g, (_, b, e) => `${b}<sup>${cleanExponentSign(e)}</sup>`);
+  // Scientific notation like 2.50e-3 or 1.43e9 (avoid touching words/ids)
+  out = out.replace(/(^|[\s(=\[,;×·])(\d+(?:\.\d+)?)[eE]([+-]?\d+)\b/g,
+    (_, pre, coef, exp) => `${pre}${coef} × 10<sup>${cleanExponentSign(exp)}</sup>`);
+  // Delta and Greek symbols
+  out = out.replace(/Delta_?([A-Za-z]+)/g, (_, s) => `Δ${s}`);
+  out = out.replace(/\btheta_([A-Za-z0-9]+)/g, (_, s) => `θ<sub>${s}</sub>`);
+  out = out.replace(/\btheta\b/g, "θ").replace(/\btau\b/g, "τ").replace(/\bGamma\b/g, "Γ")
+    .replace(/\bsigma\b/g, "σ").replace(/\balpha\b/g, "α").replace(/\bdPhi\b/g, "dΦ")
+    .replace(/\bpi\b/g, "π").replace(/\bSum\b/g, "Σ");
+  // Electrical variable subscripts (skip lowercase path/code tokens like test_file)
+  out = out.replace(/(^|[^/A-Za-z0-9_-])(TP_GND|GND|BW|HoldSlack|Hold|Margin|DutyCycle|theta|Δ[A-Za-z]+|[VIQRZCfTtLBPSN])_([A-Za-z0-9]{1,8})(?![A-Za-z0-9_])/g,
+    (_, pre, stem, sub) => `${pre}${stem}<sub>${sub}</sub>`);
+  // Clean operators & units
+  out = out.replace(/-&gt;/g, "→").replace(/&gt;=/g, "≥").replace(/&lt;=/g, "≤").replace(/!=/g, "≠");
+  out = out.replace(/\s\*\s/g, " × ");
+  out = out.replace(/\bmOhm\b/g, "mΩ").replace(/\bkOhm\b/g, "kΩ").replace(/\bMOhm\b/g, "MΩ").replace(/\bOhm\b/g, "Ω");
+  out = out.replace(/\buF\b/g, "µF").replace(/\buA\b/g, "µA").replace(/\buH\b/g, "µH")
+    .replace(/\bus\b/g, "µs").replace(/\buW\b/g, "µW").replace(/\buV\b/g, "µV");
+  return out;
+}
+
+function cleanStepSentence(raw) {
+  return String(raw ?? "")
+    .replace(/^(?:Define clearly|Explain why it governs real hardware|Concrete anchor example|Read the words slowly|The plain-language meaning is|Step \d+(?:\s*\([^)]*\))?)\s*[:—-]\s*/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const TOPIC_BENCH_PLAYBOOK = {
+  ohm: {
+    schematicShort: "regulator output V_OUT, series load/shunt path, and local GND_RET",
+    schematicNodes: "Regulator output node (V_OUT / +5V rail / +3.3V rail), series load resistor R_load or current-sense shunt, and the nearest low-impedance local ground return (GND_RET / TP_GND) — never a floating chassis lug.",
+    probeShort: "probe DC Volts in PARALLEL across V_OUT and local GND_RET (~10 MΩ DMM input), keeping any resistance Ω check strictly power-off",
+    probeSteps: [
+      "Select DC Volts (V⎓) on the calibrated DMM (COM -> black lead, VΩ -> red lead) with a range above expected V_rail.",
+      "Measure potential difference strictly in PARALLEL across the two exposed target nodes (V_OUT to local GND_RET) so the ~10 MΩ meter draws negligible current.",
+      "Never switch to Ω/Continuity on a powered board; power OFF and bleed bulk capacitors first (lifting one leg if parallel paths exist)."
+    ],
+    isolationShort: "compare V_source vs. V_load and GND_RET drop, then lift one downstream jumper to isolate source vs. load",
+    productIsolation: [
+      "Split Voltage Drops: Measure V_source (regulator pin), V_load (IC VDD pin), and V_gnd (load TP_GND to PSU COM). High V_source − V_load or elevated V_gnd exposes trace/connector resistance.",
+      "Single-Variable Load Isolation: Open the downstream feed jumper or 0 Ω series bridge. If V_OUT recovers to spec unloaded, compute I_fault = ΔV / R_shunt to hunt the downstream short/overload.",
+      "Verify Corrective Action: Rework marginal joints/components, restore jumper, and confirm V_load, I_load, and resistor I²R temperature rise stay inside flight guardbands under full load."
+    ]
+  },
+  units: {
+    schematicShort: "supply test points, series shunt resistors, and component package markings",
+    schematicNodes: "Power rail test points (V_S, V_OUT), series current-sense resistor R_shunt, and schematic BOM tolerance / unit callouts (mΩ, kΩ, µF, ms, ns).",
+    probeShort: "verify instrument display prefixes (mV vs. V, mA vs. A, µs vs. ms) against hand-scaled 10^(3n) numbers before logging",
+    probeSteps: [
+      "Lock manual or explicit SI range on the DMM/scope and verify whether readout is displayed in mV (10⁻³ V), µA (10⁻⁶ A), or base units.",
+      "Check both component markings (e.g., SMD '472' = 4.7 × 10³ Ω) and schematic units before applying stimulus.",
+      "Cross-check charge/current/voltage magnitude sanity (e.g., I = Q/t in 10³ⁿ A) prior to recording pass/fail."
+    ],
+    isolationShort: "audit raw unscaled instrument telemetry vs. 10^(3n) script conversion and swap known reference resistors/sources",
+    productIsolation: [
+      "Audit Unit Scaling First: Compare raw SCPI/DMM binary or ASCII string against automated test script multiplier before suspecting hardware.",
+      "Known-Standard Check: Probe a precision 1.000 kΩ calibration standard or 5.000 V reference to prove meter range calibration.",
+      "Hardware Verification: Re-run the measurement with explicit base-SI logging and confirm value stability across repeatability cycles."
+    ]
+  },
+  power: {
+    schematicShort: "power dissipation path, series current limiters, and resistor wattage packages",
+    schematicNodes: "High-current rail feeder (+12V/+28V/+5V), power-dissipating resistors/LDO pass FETs, and copper thermal pour / heatsink pads.",
+    probeShort: "measure both V_across (parallel DMM) and I_branch (shunt ΔV/R or series ammeter) to confirm P = V·I stays below 50% derated rating",
+    probeSteps: [
+      "Set bench PSU current limit I_lim ≈ 1.2 × expected nominal current before applying power to prevent resistor/trace burn-up.",
+      "Measure V across the component in parallel and branch current I via series shunt/ammeter to verify P = V·I and P = I²·R.",
+      "Capture IR thermal image or thermocouple reading after thermal stabilization against the package rating (1/8 W, 1/4 W, 1 W) with ≥ 2× derating."
+    ],
+    isolationShort: "isolate individual parallel loads one by one and inspect thermal hotspots under current-limited bias",
+    productIsolation: [
+      "Separate Voltage vs. Current Contribution: Check whether excess P comes from over-voltage (faulty VR feedback) or excess current (downstream partial short).",
+      "Isolate Load Branches: Disconnect loads sequentially or lift series 0 Ω links while monitoring PSU current draw.",
+      "Permanent Fix & Retest: Upgrade under-rated resistors for ≥ 2× flight power derating or remove short, then verify peak ΔT at max ambient temperature."
+    ]
+  },
+  series: {
+    schematicShort: "the single series string R_1, R_2, ... and any loaded divider tap node",
+    schematicNodes: "Series resistor chain nodes (V_in -> R_1 -> V_tap -> R_2 -> GND), downstream ADC/op-amp/DMM tap connection, and total loop return.",
+    probeShort: "measure every intermediate node voltage V_1, V_2 with high-Z DMM (accounting for 10 MΩ tap loading) and confirm sum of drops equals V_in",
+    probeSteps: [
+      "Verify unbroken continuity through every series element power-off before energizing.",
+      "Probe each node wrt GND with a high-Z DMM; verify KVL sum V_R1 + V_R2 + ... = V_in within resistor tolerance.",
+      "Calculate parallel loading effect R_2 || R_load (or || 10 MΩ DMM) whenever V_tap reads lower than unloaded divider ratio."
+    ],
+    isolationShort: "disconnect downstream load at V_tap to prove unloaded divider ratio vs. external loading or open series joint",
+    productIsolation: [
+      "Localize Open vs. Loaded Node: On an open series chain, upstream nodes read full V_in while everything downstream reads 0 V — the open component carries the entire V_in drop.",
+      "Detach Downstream Tap Load: Lift feed into ADC/load to distinguish a wrong resistor BOM value from heavy downstream sink current or 10 MΩ meter loading.",
+      "Rework & Verify: Replace out-of-tolerance/cracked SMT resistor or buffer high-Z tap with unity-gain op-amp, then verify loaded V_tap across corners."
+    ]
+  },
+  parallel: {
+    schematicShort: "shared +rail bus copper pour, bank jumpers JP1–JP10, and individual parallel branches",
+    schematicNodes: "Common high-side rail pour (+5V_MAIN), shared ground return pour, bank disconnect jumpers/test pads, and N parallel R_nom branches.",
+    probeShort: "switch DMM to 4-wire Kelvin (eliminating ~0.24 Ω 2W lead error), clear 0 Ω shorts FIRST via 1 V CC bias + IR camera, then solve N_open = 100 − 1/R_eq",
+    probeSteps: [
+      "Check aggregate R_eq power-off using 4-wire Kelvin sensing (mandatory when healthy R_eq < 1 Ω so ~0.24 Ω 2-wire leads don't ruin accuracy).",
+      "Clear Shorts FIRST: Inject safe current-limited bias (e.g., 1 V / 2.5 A CC) and sweep with IR camera + microvolt Kelvin gradient to lift one pad on dead-shorted branches.",
+      "Count & Locate Opens SECOND: Once R_eq ≥ healthy target (all shorts cleared), compute exact open count from 1/R_eq = N_healthy/R_nom and inspect cold (ambient ~25 °C) vs. warm (~60 °C) resistor bodies on IR."
+    ],
+    isolationShort: "clear dead shorts via CC thermal/mV gradient + single-pad lift before measuring remaining open branches with 4W Kelvin & IR",
+    productIsolation: [
+      "Phase A — Isolate Shorts First: Because one 0 Ω short collapses parallel R_eq and masks opens, follow the IR hotspot and falling mV pour gradient, lift 1 pad per suspect (0.000 Ω out-of-circuit confirms short) until 4W R_eq rises to ≥ R_nom/N.",
+      "Phase B — Isolate Opens Second: With shorts gone, calculate remaining open count ΔN = N_total − R_nom/R_eq, energize lightly, and flag every resistor staying at ambient temperature on IR or carrying 0 V drop.",
+      "Verify Restored Bank: Reflow tombstoned/cracked pads, clean flux residue, and confirm final 4W Kelvin R_eq equals R_nom/N within tolerance."
+    ]
+  },
+  "kcl-kvl": {
+    schematicShort: "branch junctions (KCL nodes) and every closed mesh loop (KVL)",
+    schematicNodes: "Multi-branch junctions, series sense resistors for branch currents I_1/I_2/I_3, and independent source loops returning to reference GND.",
+    probeShort: "measure node voltages and differential shunt ΔV across each branch to verify ΣI_in = ΣI_out and ΣV_loop = 0",
+    probeSteps: [
+      "Assign consistent node labels (V_A, V_B, GND) and branch reference directions directly on the schematic printout.",
+      "Measure every branch resistor voltage ΔV across each component to compute I_branch = ΔV / R without breaking traces.",
+      "Verify KCL residual (ΣI_in − ΣI_out) at the suspect junction and KVL residual ΣV_drops around each closed loop."
+    ],
+    isolationShort: "zero independent supplies on paper (Superposition/Thevenin) and lift suspect parallel branches to catch hidden leakage paths",
+    productIsolation: [
+      "Detect Unaccounted Current: If KCL ΣI_in != ΣI_out at a node, an unintended PCB leakage path, ESD diode forward conduction, or bridged pad is stealing current.",
+      "Split Network With Known Load: Verify open-circuit V_TH and loaded ΔV to catch unexpected source impedance or corroded connector pins.",
+      "Verify Multi-Loop Balance: Rework leakage/corroded path and confirm measured branch currents match Cramer/mesh calculations within component tolerances."
+    ]
+  },
+  thevenin: {
+    schematicShort: "the two-terminal output port A–B feeding variable load R_L",
+    schematicNodes: "Upstream bridge/divider network, output terminals A and B, and removable load resistor R_L.",
+    probeShort: "measure open-circuit V_oc = V_TH unloaded first, then attach known R_test to extract R_TH = R_test·(V_TH/V_L − 1)",
+    probeSteps: [
+      "Disconnect load R_L and measure open-circuit voltage V_TH across terminals A–B with a high-Z DMM.",
+      "Attach a known calibration load R_test (near expected R_TH) and measure loaded voltage V_L safely.",
+      "Compute effective R_TH = R_test · (V_TH/V_L − 1) rather than probing Ω while independent sources remain active."
+    ],
+    isolationShort: "compare measured (V_TH, R_TH) against schematic prediction to pinpoint high series contact resistance or shorted upstream leg",
+    productIsolation: [
+      "Diagnose Sag Source: Low V_TH points to upstream divider/supply droop; normal V_TH with high extracted R_TH points to oxidized contacts, narrow traces, or drifted series resistors.",
+      "A-B-A Load Swap: Swap known calibration load against suspect product load to isolate source network vs. load fault.",
+      "Re-verify Max Power / Regulation Point: Confirm loaded voltage regulation across specified min/max R_L."
+    ]
+  },
+  ac: {
+    schematicShort: "oscillator/transformer/AC output node, coupling path, and scope ground reference",
+    schematicNodes: "AC signal source, transformer secondary/rectifier node, coupling network, and clean analog ground reference.",
+    probeShort: "use oscilloscope DC/AC coupling with <5 mm ground spring to check V_p, V_pp, T = 1/f, and phase Δφ against DMM True-RMS",
+    probeSteps: [
+      "Configure oscilloscope (10× probe matched to channel attenuation, bandwidth limit set cleanly, trigger level ~50% of V_pp).",
+      "Inspect V_pp, period T = 1/f, DC offset (via DC coupling), and True-RMS value simultaneously.",
+      "When probing differential AC secondaries or non-ground nodes, use differential probe (or Ch1 − Ch2 Math) — never clip grounded BNC shields across floating nodes."
+    ],
+    isolationShort: "compare time-domain scope waveform vs. True-RMS DMM to expose distortion, clipping, DC offset, or 2:1 half-wave drop",
+    productIsolation: [
+      "Distortion & Diode Check: If V_rms/V_p != 0.7071 or ripple rate drops from 2f to f (120 Hz -> 60 Hz), look for asymmetrically clipping stage or open bridge diode.",
+      "Frequency & Loading Check: Measure unloaded source amplitude vs. loaded stage amplitude to distinguish source droop from downstream capacitive loading.",
+      "Verify Clean Sinusoid / Rail: Rework failed rectifier/driver and verify THD, ripple V_r(pp), and RMS margin over full line range."
+    ]
+  },
+  capacitors: {
+    schematicShort: "decoupling/bulk capacitor pads, ESR path, and nearby VDD–GND power planes",
+    schematicNodes: "MLCC / polymer / electrolytic capacitor positive and GND pads, via inductance loop to IC power pins, and discharge bleed path.",
+    probeShort: "discharge capacitor safely first, measure C & ESR out-of-circuit/LCR power-off, and scope switching ripple ΔV across pad vs. IC pin",
+    probeSteps: [
+      "Safety First: Power OFF and bleed stored energy (Q = C·V) through an insulated bleed resistor before probing or touching bulk caps.",
+      "Measure capacitance and ESR with an LCR meter at target test frequency (e.g., 100 Hz / 100 kHz); reverse-check DC leakage if shorted.",
+      "Under power, probe AC ripple directly across the MLCC pads with a <5 mm tip-and-barrel spring ground."
+    ],
+    isolationShort: "check for cracked MLCC flex-shorts on power-off 4W Ω, and measure ripple right at IC vs. bulk output to spot anti-resonance",
+    productIsolation: [
+      "Flex-Crack & Short Screening: Thermal/IR camera under 1 V CC bias flags leaky/shorted MLCCs; lifting one pad confirms whether C died or silicon shorted.",
+      "High-Frequency Effectiveness: If ripple spikes cleanly at f_sw or load step despite good bulk capacitance, inspect high-frequency MLCC solder joints or missing via stitching.",
+      "Verify Repaired PDN: Replace damaged capacitor with same X7R/voltage-derated part and re-verify transient droop and ripple."
+    ]
+  },
+  rc: {
+    schematicShort: "timing resistor R, capacitor C, switch/step source, and voltmeter measurement node",
+    schematicNodes: "Charge/discharge resistor R, timing capacitor C, step input node V_in, and V_C(t) sense node connected to the DMM/scope.",
+    probeShort: "record V_C(t) with buffered/high-Z probe or compute R_eq = R || R_DMM (~10 MΩ) before comparing measured τ against theory",
+    probeSteps: [
+      "Measure actual component R and C power-off with DMM/LCR so component tolerance (±5–20%) doesn't confuse τ analysis.",
+      "Note instrument input impedance explicitly (standard DMM ≈ 10 MΩ, 10× scope probe ≈ 10 MΩ || 12 pF) across node V_C.",
+      "Capture step response from t = 0 through 5τ and extract τ at the 63.2% charge / 36.8% discharge crossing or semi-log ln(V) slope."
+    ],
+    isolationShort: "compute unloaded τ = R·C vs. meter-loaded τ = (R || R_DMM)·C to prove whether fast decay is meter loading or leaky C",
+    productIsolation: [
+      "Separate Meter Loading From Faulty Capacitor: If observed τ matches (R || 10 MΩ)·C cleanly, the hardware C is healthy and instrument loading caused the shift.",
+      "Isolate Leakage Path: Remove external probe or buffer through FET op-amp; if τ still decays early, check dirty flux/moisture/leaky dielectric across C pads.",
+      "Verify Margin Across Temp: Confirm reset/soft-start RC delay stays within min/max timing spec across cold and hot soak."
+    ]
+  },
+  inductors: {
+    schematicShort: "switching/filter inductor L, catch diode/freewheel path, and high-di/dt current loop",
+    schematicNodes: "Buck/filter inductor L (SW node to V_OUT), freewheeling diode / low-side FET, and current-sense shunt resistor.",
+    probeShort: "measure inductor DCR power-off with 4-wire Kelvin, and monitor switching node SW + current waveform with differential/current probe under load",
+    probeSteps: [
+      "Verify inductor DCR (milliohms) and zero winding-to-core short power-off.",
+      "Scope switch-node ringing and inductive kick v_L = L·(di/dt) with high-voltage/differential probe rated above spike peak.",
+      "Check triangular inductor current waveform for flat-top peak clipping (core saturation L drops -> runaway current)."
+    ],
+    isolationShort: "inspect current waveform linearity to catch core saturation vs. missing freewheel clamp or wrong package inductance",
+    productIsolation: [
+      "Catch Saturation vs. Flyback Failure: Upward concave current ramping signals core saturation (excess I_peak or wrong L part); large negative/positive SW spikes signal open catch diode/snubber.",
+      "Check Trace Loop Inductance: Compare V_droop across package cap vs. board trace to separate package bondwire/via L_pkg from buck inductor L.",
+      "Confirm Thermal & Current Margin: After replacing L or diode, sweep full step load and confirm ΔI_L ripple and peak temp remain well below I_sat."
+    ]
+  },
+  filters: {
+    schematicShort: "series/shunt reactive elements (R, C, L) and input/output buffer boundaries",
+    schematicNodes: "Filter input drive impedance, reactive divider junction (LPF/HPF/BPF), and downstream load input impedance R_load.",
+    probeShort: "sweep sine frequency across 0.1·f_c to 10·f_c measuring V_in and V_out simultaneously to verify −3.01 dB (0.7071) at f_c and −20 dB/dec slope",
+    probeSteps: [
+      "Measure unloaded source drive vs. filter output across decade steps (0.1f_c, f_c, 10f_c) using matched 10× probes.",
+      "Confirm exactly −3 dB attenuation (V_out / V_in = 0.7071) and 45° phase shift at theoretical f_c = 1/(2πRC).",
+      "Check above 10f_c for capacitor ESL/trace crosstalk floor limiting stopband rejection."
+    ],
+    isolationShort: "disconnect downstream load at V_out to isolate filter R/C shift vs. downstream impedance loading",
+    productIsolation: [
+      "Load Separation Test: If passband gain or f_c shifts, detach downstream ADC/amplifier load to verify unloaded filter corner vs. stage loading.",
+      "Verify Part Values: Measure R and C values if corner deviates >10% (common BOM mix-up: 10 nF vs. 100 nF = 10× shift in f_c).",
+      "Confirm Sweep Margin: Re-sweep Bode plot after rework/buffering and sign off passband flatness + stopband rejection."
+    ]
+  },
+  magnetics: {
+    schematicShort: "primary winding, magnetic isolation barrier, secondary taps, and core/snubber return",
+    schematicNodes: "Primary drive terminals (pulsed/AC only), transformer turns marking N_1:N_2, dot polarity convention, and secondary rectifier/load.",
+    probeShort: "verify winding DCR and hipots/isolation power-off, then probe primary vs. secondary phase and turns ratio under AC/switched excitation",
+    probeSteps: [
+      "Confirm winding continuity (low Ω) and primary-to-secondary insulation resistance power-off.",
+      "Verify AC/switched excitation waveform (never apply pure DC across a low-Ω primary: dΦ/dt = 0 shorts the source!).",
+      "Scope secondary amplitude and dot polarity simultaneously against primary using isolated/differential probes."
+    ],
+    isolationShort: "disconnect secondary rectifier/load to verify unloaded V_2/V_1 = N_2/N_1 turns ratio before checking core/secondary fault",
+    productIsolation: [
+      "Unload Secondary Test: Open secondary diode/load; if V_2 matches (N_2/N_1)·V_1 cleanly, fault lies in secondary rectifier/load, not transformer.",
+      "Reflected Impedance Check: Verify primary current doesn't spike due to shorted secondary turns (shorted turn collapses reflected Z).",
+      "Sign Off With Thermal & Isolation Margin: Run loaded heat soak and verify winding ΔT and secondary regulation."
+    ]
+  },
+  components: {
+    schematicShort: "PN junction anode/cathode, Zener/BJT bias resistors, or combinational/DFF gate pins",
+    schematicNodes: "Diode bridge/Zener terminals, BJT Base/Collector/Emitter nodes with current-limiting R_B/R_C, or digital logic gate I/O pins.",
+    probeShort: "run DMM Diode Check (power-off ~0.6–0.7 V forward, OL reverse), then verify active bias points (V_Z, V_BE ≈ 0.7 V, V_CE(sat) ≈ 0.2 V) or logic levels",
+    probeSteps: [
+      "Power OFF: DMM Diode mode verifies PN junctions (~0.6–0.7 V forward, OL reverse for discrete diodes/BJT BE & BC junctions).",
+      "Power ON (CC-limited): Probe DC operating point (Q-pt): diode ~0.7 V, Zener at regulated V_Z (with I_Z > I_ZK), BJT V_CE < 0.3 V for saturation.",
+      "For logic/rectifiers, verify waveform edges and full-wave (2f) vs. half-wave (f) ripple / logic threshold VIH/VIL."
+    ],
+    isolationShort: "verify input drive vs. output node (e.g., BJT V_B vs. V_C or diode V_A vs. V_K) to distinguish semiconductor failure from bias/pull-up defect",
+    productIsolation: [
+      "Bias vs. Device Check: If BJT stays stuck OFF or won't saturate, check V_BE and I_B = (V_BB − 0.7)/R_B first; normal base drive with dead collector current confirms open device.",
+      "Bridge/Logic Faults: Scope ripple frequency (60 Hz = 1 open diode in full-wave bridge) or check pull-up resistor on floating logic outputs.",
+      "Replace & Confirm Operating Point: Swap suspect diode/transistor/IC (or correct BOM resistor) and confirm operating Q-point across temp."
+    ]
+  },
+  "power-rails": {
+    schematicShort: "upstream +28V/+12V bus, VR enable/PG/feedback divider, inductor/LDO pass element, and load Kelvin sense",
+    schematicNodes: "VR input bulk stage, EN/PWRGOOD/FB pin divider, switch node + inductor + output cap bank, and IC load point.",
+    probeShort: "use Keysight N7020A power-rail probe (or coax pigtail) directly across IC VDD–GND for clean mV ripple + transient droop, alongside sequencing triggers",
+    probeSteps: [
+      "Check rail resistance power-off before energizing via current-limited supply; confirm EN logic level rises cleanly above threshold.",
+      "Measure V_out right at the load BGA/IC decoupling pad (not just VRM output!) using differential / N7020A rail probe to include trace I·R drop.",
+      "Trigger scope on step load or PWRGOOD rising edge to inspect monotonic ramp, overshoot, switching ripple V_r(pp), and sequence timing."
+    ],
+    isolationShort: "open load jumper/shunt to test VR unloaded regulation vs. excess load draw, and check feedback resistor ratio + trace IR drop",
+    productIsolation: [
+      "Separate VR vs. PDN Path vs. Load: If VR output is 3.30 V but IC pin is 3.12 V, measure ΔV across trace/shunt/connector; if VR drops everywhere, open load jumper to isolate overloaded silicon vs. failing regulator.",
+      "Check Sequencing & Ripple: Verify LDO thermal dissipation (V_in − V_out)·I_load and switcher loop stability under dynamic load steps.",
+      "Confirm Guardbanded Pass: Retest ripple, transient droop, and power-up sequence across min/max line voltage and temperature."
+    ]
+  },
+  schematics: {
+    schematicShort: "named nets (PWR, GND, TX/RX, _n), solid dot junctions, and test-point / jumper reference designators",
+    schematicNodes: "Net aliases, power flags, solid vs. non-dot wire crossings, active-low pins (# / _n / bar), and shunt/connector pinouts.",
+    probeShort: "continuity-beep mapped schematic nets power-off before energizing and probe active-low polarities / I_shunt = ΔV/R at exact schematic test points",
+    probeSteps: [
+      "Trace every suspect net across all schematic pages using exact net names (confirm dot vs. non-dot crossings so unconnected crossovers aren't misread).",
+      "Confirm active-low control polarity (RESET_n, CS#, EN) and directional naming (MCU_TX -> Peer_RX) on connector pinouts.",
+      "Ring out mapped test points power-off for continuity and absence of rail-to-GND shorts prior to apply-power bring-up."
+    ],
+    isolationShort: "compare physical PCB continuity and pin voltages against schematic netlist to expose swapped TX/RX, missing DNI jumper, or wrong pinout",
+    productIsolation: [
+      "Schematic vs. Assembly Delta: Check BOM DNI/DNP population options (e.g., 0 Ω option resistors, I²C pull-ups) on the physical PCBA.",
+      "Cross-Check Connector Pinouts: Verify cable harness pin-1 orientation and TX/RX crossover continuity end-to-end.",
+      "Document Redline & Verify: Record any schematic/ECO discrepancy cleanly, install rework jumper/part, and verify expected pin voltages."
+    ]
+  },
+  instruments: {
+    schematicShort: "exported clock SMA, core rail decoupling pads, current-sense shunt, and local ground return",
+    schematicNodes: "Ch1 Exported CLK (SMA/coax), Ch2 Logic Rail (+0.85V/+3.3V at load MLCC), Ch3 Kelvin Current-Sense Shunt, Ch4 M-Rail / Auxiliary Rail.",
+    probeShort: "verify probe cal/attenuation (10× / N7020A / 1169B), use <5 mm ground spring (cutting ~150 nH clip ringing), deskew V vs. I, and sample ≥5× BW",
+    probeSteps: [
+      "Match probe type to signal: SMA-BNC coax for clock (Ch1), Keysight N7020A power-rail probe for millivolt rail ripple/droop (Ch2/Ch4), and 1169B differential/shunt probe for current (Ch3) — NEVER clip grounded passive probe onto high-side shunts!",
+      "Replace 6-inch alligator ground clips (~150 nH antenna!) with <5 mm tip-and-barrel spring grounds, verify 10× probe compensation at 1 kHz, and verify BW ≥ 0.5/t_r.",
+      "Deskew Ch3 current vs. Ch2 voltage on a known step edge and inspect triggering, holdoff, and sample rate (≥5× highest harmonic) to prevent aliasing."
+    ],
+    isolationShort: "re-probe suspect ringing/droop with <5 mm spring ground or N7020A differential probe to separate probe-loop artifact from real circuit noise",
+    productIsolation: [
+      "Artifact vs. Real Fault Check: Touch probe tip and <5 mm ground spring both directly to the SAME GND pad — any 'noise' still visible is common-mode probe ground-loop pickup, not rail noise!",
+      "Check Bandwidth & Attenuation Errors: Verify 10×/1× switch, termination (50 Ω vs. 1 MΩ), and DC vs. AC coupling before filing a hardware defect.",
+      "Log Calibrated Capture: Save CSV/PNG waveform with verified cursor Δt/ΔV, channel scale, and calibration ID."
+    ]
+  },
+  timing: {
+    schematicShort: "launching DFF clock/Q pin, combinational logic/MUX path, capturing DFF D/CLK pin, and clock distribution tree",
+    schematicNodes: "Launch register Q -> fast/slow combinational path -> capture register D, plus shared clock tree branch lengths (t_skew).",
+    probeShort: "verify Setup vs. Hold mathematically FIRST (T_clk drops from Hold!), then trigger scope on clock-to-data edge with <5 mm ground spring & Shmoo f_clk",
+    probeSteps: [
+      "Solve Setup inequality (T_min = t_CQ(max) + t_logic(max) + t_su + t_skew) and Hold inequality ((t_CQ(min) + t_logic(min)) − (t_h + t_skew)) in ps (10⁻¹² s) BEFORE lab debug.",
+      "Scope Launch CLK, Capture CLK (checking physical t_skew), and Capture D right at package pins with matched high-BW probes.",
+      "Execute Frequency Shmoo: Lower f_clk by 2× — Setup fails pass cleanly at slower clock, while Same-Edge Hold fails persist identically across ALL frequencies!"
+    ],
+    isolationShort: "use frequency Shmoo (f_clk sweep) and temperature/V_DD corner check to separate Setup violation from Same-Edge Hold race",
+    productIsolation: [
+      "Root Cause Discrimination: Failing only at high f_clk / slow/hot silicon = Setup bottleneck (longest path); failing even at 1 MHz or cold/fast silicon = Same-Edge Hold violation on shortest path.",
+      "Physical / RTL Fix: For Setup, pipeline logic or raise margin / lower f_clk; for Hold, slowing f_clk NEVER works — insert physical delay buffers ≥ |HoldSlack| on short path or reduce t_skew!",
+      "Sign Off Across PVT: Re-verify positive Setup & Hold slack in STA and hardware Shmoo across slow/hot and fast/cold corners."
+    ]
+  },
+  buses: {
+    schematicShort: "bus driver/receiver pins, external pull-ups (I²C R_p), series damping (SPI), and 120 Ω end terminators (CAN/RS-485)",
+    schematicNodes: "UART TX/RX cross-connections, SPI SCLK/MOSI/MISO/CS#, I²C open-drain SDA/SCL pull-ups R_p to V_CC, and CANH/CANL 120 Ω end resistors.",
+    probeShort: "check physical bus pull-ups, idle levels, and rise time t_r = 0.8473·R_p·C_bus on the scope BEFORE debugging software drivers",
+    probeSteps: [
+      "Verify power-off termination/pull-up values (e.g., CAN 60 Ω equivalent across H–L = two 120 Ω ends; I²C R_p sized for C_bus rise time).",
+      "Scope physical layers FIRST: confirm idle HIGH voltage, sharp monotonic edges (no slow RC shark-fin or mid-rail contention stairstep), and valid setup/hold relative to clock.",
+      "Decode actual bit timing (baud error < 2%, SPI CPOL/CPHA mode, I²C 9th-clock ACK pulse) with protocol trigger synced to analog trace."
+    ],
+    isolationShort: "disconnect peer devices or lift series resistors to separate electrical contention/missing pull-up vs. firmware configuration mismatch",
+    productIsolation: [
+      "Diagnose Mid-Rail Contention vs. Missing Pull-Up: V_bus sitting stuck near 0 V = missing I²C pull-up or shorted line; stairstep around V_CC/2 = push-pull TX-to-TX or mode contention.",
+      "Single-Node Disconnect: Unplug endpoints one at a time while checking idle voltage and clean edge shape on scope.",
+      "Verify Clean Protocol Margins: Install proper pull-up/termination or align baud/SPI mode, then stress-test 10,000+ frames zero-CRC error."
+    ]
+  },
+  rf: {
+    schematicShort: "50 Ω single-ended / 100 Ω differential trace/coax, AC coupling caps, stubs, and end termination",
+    schematicNodes: "TX driver, AC-coupling caps, controlled-Z₀ transmission line / SMA connector, via transitions, and receiver R_term.",
+    probeShort: "check termination resistance power-off, inspect time-domain edge reflection spacing (Γ = (Z_L − Z_0)/(Z_L + Z_0)), and inspect eye height/width",
+    probeSteps: [
+      "Verify end termination R_L (50 Ω SE / 100 Ω diff) and continuity across coax/connector center pin & shield.",
+      "Measure incident vs. reflected step voltage and round-trip time Δt = 2·ℓ/v_p to localize impedance discontinuity distance along trace/cable.",
+      "Capture statistical eye diagram at RX (checking UI = 1/R_lane, jitter, and insertion loss attenuation at Nyquist frequency)."
+    ],
+    isolationShort: "swap coax/riser/cable with known-good 50 Ω / 100 Ω termination to localize reflection at connector launch vs. PCB trace stub",
+    productIsolation: [
+      "Localize Discontinuity by Round-Trip Time: Positive Γ step = inductive/open impedance peak; negative Γ dip = capacitive pad/connector/stub discontinuity.",
+      "Cable/Connector A-B-A Swap: Swap SMA cable or fixture first; if reflection vanishes, fault is connector torque/cable crush rather than PCB trace.",
+      "Verify Return Loss & BER: Confirm eye opening and error-free BERT/AER run across UI budget."
+    ]
+  },
+  qualification: {
+    schematicShort: "flight unit thermal straps, baseplate coldplate mounting, chamber feedthroughs, and telemetry sensors",
+    schematicNodes: "Unit power/telemetry harness through chamber bulkhead, bolted thermal conduction interface, high-voltage nodes (Paschen risk), and guardbanded rails.",
+    probeShort: "apply Guardband = Limit − Uncertainty (U), verify thermal soak ΔT/Δt equilibrium, and monitor Paschen arc pressure (0.001–100 Torr) during pump-down",
+    probeSteps: [
+      "Compute test-station guardbands explicitly (effective pass band = [Spec_min + U, Spec_max − U]) before running automated pass/fail.",
+      "In TVAC (<10⁻⁵ Torr), verify thermocouple attachment and wait for ΔT/Δt soak stability (remember convection h = 0 W/m²·K; cooling relies on conduction & εσT⁴ radiation!).",
+      "Keep high-voltage supplies inhibited while chamber pressure crosses ~10⁻³ to 100 Torr (Paschen minimum corona breakdown zone)."
+    ],
+    isolationShort: "separate chamber feedthrough harness drop / sensor offset from DUT performance across hot/cold TVAC plateaus",
+    productIsolation: [
+      "Thermal Runaway Triage: If die temperature spikes in vacuum despite coldplate holding temp, inspect mounting fastener torque and TIM pad compression (missing conduction path!).",
+      "Feedthrough Harness Check: Measure 4-wire Kelvin sense right at DUT connector inside chamber to remove long feedthrough cable IR drop.",
+      "Qualification Sign-Off: Log full dwell time, ramp rate, pressure, and guardbanded telemetry across all survival & operational cycles."
+    ]
+  },
+  "python-scpi": {
+    schematicShort: "instrument GPIB/USB/LAN physical port, 4-wire Kelvin sense wiring, and PSU output relay state",
+    schematicNodes: "Host USB-to-Serial (`/dev/serial/by-id/...`), SCPI VISA resource, PSU +/-/S+/S- sense leads, and DUT hardware interlock.",
+    probeShort: "query *IDN? & SYST:ERR?, enforce math.isfinite() against NaN false-clean PASS, wrap PSU in try/finally: OUTP OFF, and preserve attempt #1 FPY logs",
+    probeSteps: [
+      "Query `*IDN?` and clear/check `SYST:ERR?` after every SCPI setup block so silent syntax/range errors never invalidate data.",
+      "Validate every parsed float with `try/except (ValueError, TypeError)` and `if not math.isfinite(val): return 'INVALID'` before checking spec bounds (NaN breaks `if val > max:` checks!).",
+      "Wrap test sequences in `try ... finally: psu.write('OUTP OFF')` and persist raw first-attempt logs separately (Three-State: PASS / FAIL / INVALID)."
+    ],
+    isolationShort: "audit raw SCPI response strings & `$?`/timestamps alongside hardware DMM readout to separate parser/automation bug from DUT failure",
+    productIsolation: [
+      "Script vs. DUT Isolation: Run script against known-good calibration load/voltage reference and diff raw SCPI string against summary PASS/FAIL verdict.",
+      "Ban Blind Retry-Until-Pass: Flag any unit passing only on retry so intermittent solder joints/pogo pins don't escape into yield metrics.",
+      "Verify Deterministic Suite: Sign off automated station with zero `INVALID` escapes, injected NaN/timeout unit tests, and verified hardware safe-off on exception."
+    ]
+  },
+  linux: {
+    schematicShort: "host root port, PCIe riser/slot, UART/USB serial path (`/dev/serial/by-id/`), and BMC/CPLD telemetry bus",
+    schematicNodes: "PCIe bus BDF topology, persistent USB-UART `/dev/serial/by-id/` symlink, PSU/IPMI power status, and Linux kernel driver boundary.",
+    probeShort: "freeze DUT (do NOT reboot!) and capture `uname -a`, `lspci -nnvv`, `dmesg -T`, and `journalctl -b` checking actual `$?` exit status before touching hardware",
+    probeSteps: [
+      "Freeze state FIRST — never reboot or clear logs before snapping volatile ring buffers: `dmesg -T`, `lspci -nnvv`, `journalctl -b`, `ls -l /dev/serial/by-id/`.",
+      "Verify command exit status `$?` explicitly: `grep` returns `1` for 'no match' and `>=2` for file/permission errors; `0` alone NEVER proves the hardware passed validation!",
+      "Cross-check enumerated LnkCap vs. LnkSta, AER/EDAC error counters, and timestamps against automated script output."
+    ],
+    isolationShort: "compare kernel logs + slot A-B-A swap + persistent `/dev/serial/by-id/` binding to separate OS/driver/cabling vs. target hardware defect",
+    productIsolation: [
+      "Kernel vs. Hardware Triage: Inspect AER/EDAC/Xid timestamps relative to workload start and check whether device vanishes off bus or drops link speed (`Gen5 -> Gen1`).",
+      "Slot & Riser A-B-A Swap: Move endpoint card to a known-good PCIe slot / cable holding OS image & kernel version identical.",
+      "Confirm Clean Enumeration: Sign off zero AER/EDAC errors, expected speed/width, and intact telemetry after targeted fix."
+    ]
+  },
+  // NVIDIA-specific playbooks (mapped to both academy & prep IDs)
+  electrical: {
+    schematicShort: "VRM phase inductors, bulk/MLCC decoupling banks, package PDN plane, and Kelvin shunt pads",
+    schematicNodes: "Logic rail (VDD_CORE/M-Rail), VRM remote differential sense (+/-S), series sense shunt R_shunt, and package decoupling array.",
+    probeShort: "capture 4-channel Keysight scope (Ch1 SMA CLK, Ch2 Logic N7020A, Ch3 1169B Current Shunt, Ch4 M-Rail N7020A) with Ch3–Ch2 deskewed",
+    probeSteps: [
+      "Connect Keysight 4-ch bench setup: Ch1 = Exported Clock (SMA-to-BNC), Ch2 = Logic Rail via N7020A power-rail probe (±24 V offset, low noise), Ch3 = 1169B Differential/Current Shunt, Ch4 = Memory M-Rail (N7020A).",
+      "Deskew Ch3 current probe delay vs. Ch2 voltage probe so dynamic ΔV_droop aligns exactly to ΔI/Δt turbo step.",
+      "Measure local ΔV at BGA/MLCC decoupling pads (not VRM output!) and verify Z_pdn = ΔV_max / ΔI_max stays flat across load transient spectrum."
+    ],
+    isolationShort: "correlate dynamic step-load Ch2/Ch4 droop synchronously against Ch3 ΔI and swap DUT vs. VR/socket/riser via A-B-A",
+    productIsolation: [
+      "Separate VR Loop vs. Package/PCB PDN: Compare VRM output cap ΔV against BGA pin ΔV; clean VRM with deep BGA droop points to PCB via resistance, missing MLCCs, or poor socket pin contact.",
+      "Cross-Check Current-Triggered Droop: Trigger on Ch3 ΔI threshold and verify transient droop doesn't hit silicon V_min during simultaneous shader/tensor wake-up.",
+      "Verify Margin Across Shmoo Corners: Confirm voltage floor + Z_target margin across min/max PVT corners."
+    ]
+  },
+  socboot: {
+    schematicShort: "PMIC/VRM enable tree, PWRGOOD comparator, REFCLK generator, PERST#/RESET# gates, and Boot SPI flash",
+    schematicNodes: "Rail sequencing tree (VDD_CORE/IO -> PWRGOOD -> REFCLK -> CPLD t_POR -> PERST#), UART console pins, and boot strap resistors.",
+    probeShort: "single-shot capture Ch1..Ch4 on PWRGOOD rising edge while logging early UART + CPLD/PMIC reset pins",
+    probeSteps: [
+      "Confirm PSU standby current and power-off rail impedance before enabling main bus.",
+      "Arm 4-channel scope single-shot trigger on PWRGOOD rising edge to measure exact t_rel between stable rails, locked REFCLK, and PERST#/RESET# release.",
+      "Attach UART console at verified baud/voltage (`/dev/serial/by-id/...`) and sample boot-strap resistor strapping voltages before flashing."
+    ],
+    isolationShort: "separate hung reset/missing clock/bad SPI flash from unresponsive SoC by probing sequence rails -> CLK -> PERST# -> Boot ROM",
+    productIsolation: [
+      "Walk Boot Gate Chain Strictly In Order: Never blame SoC die before proving (1) all rails > V_min without droop, (2) crystal/PLL REFCLK oscillating at spec frequency, (3) PERST# deasserts cleanly after t_POR.",
+      "Check Straps & SPI Image: Verify bootstrap pull-ups/downs and SHA256 flash image against known-good image before hardware rework.",
+      "A-B-A Swap Verification: Confirm failing silicon reproduces identical boot hang in a Known-Good Reference Board (KGB)."
+    ]
+  },
+  dram: {
+    schematicShort: "VDDQ/VDD2/VPP rails, ZQ calibration resistor (240 Ω), V_ref_CA/DQ, and BGA/DIMM command-address & DQ lanes",
+    schematicNodes: "Memory M-Rail (VDD/VDDQ/VPP), 240 Ω ±1% ZQ precision resistor, clock/DQS differential pair, and per-byte lane routing.",
+    probeShort: "audit raw kernel/EDAC CE/UE error logs alongside Ch4 N7020A M-Rail ripple and Per-Lane Shmoo V_ref / timing eyes (never trust summary flags alone!)",
+    probeSteps: [
+      "Inspect raw EDAC / BMC / training calibration telemetry per channel/rank/bank/row FIRST — never rely on a high-level summary PASS line!",
+      "Probe M-Rail right at memory package caps with N7020A power-rail probe during stress traffic to catch VPP/VDDQ droop or noise.",
+      "Sweep temperature (checking Hot >85 °C 2× refresh t_REFI halving 3.9 µs -> 1.95 µs) and per-lane eye Shmoo margins (t_RAS, t_RP, t_RCD, V_ref)."
+    ],
+    isolationShort: "distinguish parser/report false-clean bug, V_ref/M-rail noise, temperature retention leak, vs. single bit/row cell defect via slot/DIMM A-B-A swap",
+    productIsolation: [
+      "Separate Test Software vs. Memory Array: Diff raw bit-error log against summary report (catches summary-PASS parser bugs instantly).",
+      "Isolate Single-Cell Retention vs. Channel/PDN: Fail clustered at one row/bank after long idle hot dwell points to 1T1C capacitor leakage / t_REFI limit; burst fails across all banks track M-Rail droop or ZQ mis-calibration.",
+      "DIMM / Socket A-B-A Swap: Swap module across channels/boards and confirm defect follows hardware before RMA."
+    ]
+  },
+  pcie: {
+    schematicShort: "REFCLK 100 MHz pair, TX/RX AC-coupling capacitors (typically 220 nF), riser/connector pins, and PERST# sideband",
+    schematicNodes: "PCIe differential TX/RX lanes (100 Ω Z₀), AC-coupling caps near TX, 100 MHz HCSL REFCLK, and riser gold-finger / socket contacts.",
+    probeShort: "check `lspci -vvv` (LnkCap vs LnkSta), watch `dmesg` AER replay/CRC storms under load (not idle!), and inspect differential eye / AC-cap pads",
+    probeSteps: [
+      "Compare `LnkCap` vs `LnkSta` speed (Gen1–Gen5) and width (`x16` downgraded to `x8`/`x4`) in `lspci -vvv` BEFORE and DURING heavy DMA stress.",
+      "Monitor Linux `dmesg` / AER Correctable (BadTLP, BadDLLP, Replay Rollover) and Uncorrectable counters under active bidirectional traffic.",
+      "Inspect AC-coupling caps on suspect downgraded lanes visually/X-ray and check 100 MHz REFCLK jitter + PERST# timing."
+    ],
+    isolationShort: "swap endpoint card, PCIe riser/cable, and host slot via strict A-B-A to separate add-in card vs. riser/connector SI degradation",
+    productIsolation: [
+      "Idle vs. Stress Separation: A link that trains x16 Gen5 at idle but drops or spikes AER replays under GPU load indicates power-coupled crosstalk, poor connector contact, or missing EQ preset.",
+      "3-Way A-B-A Isolation: Swap card into KGB slot/riser; inspect gold fingers / missing AC-coupling cap on lane 0–15 if width consistently drops at x8/x4 boundary.",
+      "Sign Off Clean Gen Speed & Zero AER: Confirm sustained max BW (`BW_eff`) with zero Correctable/Uncorrectable AER events."
+    ]
+  },
+  gpu: {
+    schematicShort: "NVVDD/FBVDDQ VR phases, PCIe auxiliary 12V/16-pin sense, thermal coldplate interface, and SMBus/BMC out-of-band link",
+    schematicNodes: "Core GPU rails, HBM/GDDR memory rail, PCIe edge connector, thermal diode / NVML telemetry path, and board BMC interface.",
+    probeShort: "capture `nvidia-smi -q` + `dmesg` Xid timeline BEFORE reboot, verify passive `dcgmi health -c`, and correlate Xid/throttling against thermal & Ch2/Ch3 rail scopes",
+    probeSteps: [
+      "Freeze state immediately on fail: dump `nvidia-smi -q` (ECC volatile/aggregate, clocks, power, temp, throttle reasons) and full `dmesg -T` BEFORE power cycle!",
+      "Treat Xid codes (e.g., Xid 79 Fallen Off Bus, Xid 48 DBE, Xid 31 MMU) as starting symptoms — run passive `dcgmi health -c` first, then targeted idle `dcgmi diag -r 1/2/3`.",
+      "Correlate crash millisecond timestamp with 4-ch scope NVVDD droop, thermal sensor readout, and PCIe AER logs."
+    ],
+    isolationShort: "separate PSU droop / riser failure / thermal throttling / CUDA SW bug from bad GPU die via pre-reboot telemetry + KGB A-B-A slot swap",
+    productIsolation: [
+      "Multi-Cause Xid 79 Triage: Rule out PSU OCP/brownout, riser/PCIe drop, and thermal shutdown BEFORE blaming GPU silicon.",
+      "Check Volatile vs. Aggregate ECC: Single row-remapped SBE vs. spiking uncorrectable DBEs across isolated HBM/GDDR channels distinguishes bad memory stack from driver crash.",
+      "A-B-A Slot Confirmation: Move failing GPU into KGB chassis with known-good PSU/riser; reproduce identical failure signature before RMA."
+    ]
+  },
+  ate: {
+    schematicShort: "scan/MBIST ATPG structural domains vs. full-system PCB clocks, VR PDNs, and I/O interfaces",
+    schematicNodes: "Package ATE socket pins vs. full SLT system board (VRM PDN, real DRAM, real PCIe traces, thermal ambient).",
+    probeShort: "lock wafer/lot/stepping (A0 vs B0) & test-program hash first, then correlate ATE scan/MBIST signature with SLT functional crash conditions",
+    probeSteps: [
+      "Verify exact DUT stepping (A0 vs B0), fuse trim ID, and ATE/SLT test-program checksum BEFORE debugging fallout spikes.",
+      "Map failing functional SLT block (memory controller, PCIe PHY, SM cluster) back to ATE scan chain / MBIST bitmap data.",
+      "Re-create SLT transient condition (voltage droop, asynchronous clock domain crossing, simultaneous I/O traffic) on bench scope."
+    ],
+    isolationShort: "distinguish ATE test-hole escape (cross-clock / PDN droop / high-speed I/O) from fixture contact or mismatched stepping program",
+    productIsolation: [
+      "Why 100% ATE Fails SLT: ATE tests structural vectors at clean socket power and slow/fixed clocks; SLT stresses full-speed simultaneous PDN droop + asynchronous I/O interaction.",
+      "Cross-Team Handoff Package: Hand DFT/Design a minimal reproducer with silicon ECID/lot/wafer, exact failing Shmoo (V, f, T) boundary, and pre-crash telemetry.",
+      "Verify Screening Hole Closure: Add targeted SLT screen or updated ATE stress vector and confirm DPPM reduction."
+    ]
+  },
+  pvt: {
+    schematicShort: "core VDD supply sense, crystal/PLL clock mux, and DUT thermal sensor / chamber air-stream thermocouple",
+    schematicNodes: "DUT core rail remote-sense point, clock reference generator, die thermal diode/sensor, and thermal chamber soak controller.",
+    probeShort: "wait for chamber ΔT/Δt soak stability, respect Absolute Max Rating clamp, and sweep 2D Shmoo (Voltage × Frequency) to separate Setup vs. Hold",
+    probeSteps: [
+      "Enforce chamber thermal soak equilibrium (wait until die/case ΔT/Δt stabilizes) and clamp programmable VDD below Absolute Maximum Rating.",
+      "Map 2D V_DD vs. f_clk Shmoo matrix across nominal, slow/hot, and fast/cold corners to locate pass/fail cliffs precisely.",
+      "Check slope of failure boundary: failing at low VDD / high f_clk that recovers at slower f_clk = Setup; failing even at 1 MHz especially cold/high VDD = Hold/ZQCal."
+    ],
+    isolationShort: "separate fixture/cable thermal expansion from silicon corner marginality via Shmoo curve shape & KGB reference correlation",
+    productIsolation: [
+      "Thermal Fixture Check: Correlate failure against known-good golden unit (KGB) in the exact same thermal socket to eliminate pogo-pin shrinkage at cold temp.",
+      "Quantify Spec Margin: Compare V_min curve against fused VF table + guardband to measure exact mV margin.",
+      "Close Loop With Characterization: Document PVT corner cliff and verify margin recovery after voltage/timing trim update."
+    ]
+  },
+  "socket-assembly": {
+    schematicShort: "BGA package lands, elastomer/spring pogo pins, torque bolster plate, lid/TIM stackup, and Kelvin sense pins",
+    schematicNodes: "High-current power pogo cluster, ground return pins, high-speed differential PCIe/DDR pins, and fixture alignment dowels.",
+    probeShort: "measure 4-wire Kelvin pin contact resistance, inspect pins under stereoscope for FOD/bent tips/recessed springs, and test thermal-soak contact stability",
+    probeSteps: [
+      "Unseat DUT and inspect socket field under angled stereoscope lighting for bent pogo pins, FOD, flux film, or solder-ball debris.",
+      "Use 4-wire Kelvin milliohm meter or continuity/diode-drop scan across power/IO pins (detecting >50 mΩ outlier pins before stressing 100 A).",
+      "Check cross-pattern torque wrench tightening sequence and fixture warpage/pin compression across thermal chamber cold-hot swings."
+    ],
+    isolationShort: "rotate/re-seat DUT, check A-B-A against KGB DUT in suspect socket vs. suspect DUT in KGB socket (Cisco socket style!)",
+    productIsolation: [
+      "Prove Socket vs. Silicon (Cisco A-B-A Standard): Place suspect DUT into KGB Socket B; if fail vanishes, and KGB DUT fails in Socket A, fault is 100% proven in Socket A!",
+      "Thermal Intermittency Check: Socket warpage or elastomer stiffeners can open marginal pins ONLY at −10 °C or +85 °C — test contact resistance hot & cold.",
+      "Clean, Re-Pin & Re-Verify: Clean pins per spec, replace damaged pins, re-torque bolster evenly, and confirm 100% continuity + repeat FPY."
+    ]
+  },
+  quality: {
+    schematicShort: "station boundary gates (ATE -> SLT -> Burn-In -> Final), retest loops, and Gage R&R / calibration standards",
+    schematicNodes: "Test flow checkpoints tracking serial ECID, Attempt #1 status, Retest attempts, and station instrument calibration offsets.",
+    probeShort: "compute FPY = N_pass_1 / N_valid, RTY = Π y_i, and DPPM strictly from Attempt #1 data with guardbanded [Min+U, Max−U] limits",
+    probeSteps: [
+      "Query raw attempt-level logs to separate true Attempt #1 First-Pass Yield (FPY) from masked Retest Yield.",
+      "Build a defect Pareto keyed by unique failure mechanism (not noisy symptom strings) and verify instrument Gage R&R / calibration uncertainty U.",
+      "Shrink raw spec boundaries by measurement uncertainty (Guardband = Spec − U) before clearing marginal lots."
+    ],
+    isolationShort: "compare failure rate by station/tester slot/fixture ID + run single-factor DOE + KGB correlation to crush phantom yield loss",
+    productIsolation: [
+      "Tester/Slot Pareto Split: If 80% of fallout clusters on Station #3 / Socket #2, quarantine station hardware before shipping/scrapping lots.",
+      "Fix Retest Masking: Stop automated 'retry-until-pass' scripts — escalate repeatable Attempt #1 failures into structured CAPA.",
+      "Verify CAPA Closure: Track DPPM & FPY trend post-fix across statistically significant sample runs."
+    ]
+  },
+  "high-level-debug": {
+    schematicShort: "entire DUT-to-Host hierarchy (AC/PSU -> VR/PDN -> Clock/Reset -> SoC/GPU/DRAM/PCIe -> Socket/Harness -> Linux/Script)",
+    schematicNodes: "Every subsystem interface boundary where electrical, timing, firmware, or OS telemetry crosses cleanly between host and DUT.",
+    probeShort: "execute strict Freeze -> Capture Raw Telemetry -> Power/Clock/Socket Sanity -> Binary Half-Split -> A-B-A Proof order without changing two variables",
+    probeSteps: [
+      "Step A (Freeze & Evidence): Capture ALL volatile telemetry (`dmesg`, `nvidia-smi -q`, raw parser logs, scope trigger) BEFORE touching or rebooting the system.",
+      "Step B (Sanity & Baseline): Confirm physical power rails, clocks, thermal soak, stepping/FW hash, and clean `math.isfinite()` automation scoring against 10³ⁿ math limits.",
+      "Step C (Half-Split & Single-Variable A-B-A): Cut problem space in half (Host/Script vs. Riser/Socket vs. DUT) moving ONE component at a time."
+    ],
+    isolationShort: "prove causality via strict single-variable A -> B -> A reversal so the true defect never survives to field escape",
+    productIsolation: [
+      "Ban Shotgun Debugging: Changing riser + firmware + silicon simultaneously destroys diagnostic evidence even if the box happens to boot.",
+      "Confirm Repeatability: Show defect follows suspect subsystem into KGB (A -> B) and disappears when original KGB returns (B -> A).",
+      "Deliver Root-Cause & Prevention: Document physics cause, short-term containment, permanent fix, and automated screen to catch recurrence."
+    ]
+  },
+  interview: {
+    schematicShort: "documented bench architectures (CPU2 4-ch Keysight scope, DRAM raw log path, Intel VR/bring-up, Cisco BGA socket)",
+    schematicNodes: "CPU2 Ch1 SMA CLK / Ch2 Logic N7020A / Ch3 1169B Shunt / Ch4 M-Rail N7020A, DIMM raw telemetry path, VR I²C/PMBus, and pogo socket.",
+    probeShort: "explain physical law + 10^(3n) calculation FIRST, state exact probe/channel setup, then prove DUT vs. fixture via A-B-A without exaggerating role boundaries",
+    probeSteps: [
+      "Lead with Principle & Paper Math: State governing equation and 10³ⁿ calculation cleanly before jumping to debug tools.",
+      "Detail Your Actual Measurement Discipline: Cite Ch1 SMA CLK, Ch2/Ch4 N7020A power-rail probes, Ch3 1169B current shunt (deskewed, <5 mm return, 4W Kelvin for mΩ).",
+      "Demonstrate Strict Integrity & IP Boundaries: Separate symptom vs. guess, say what you personally executed vs. team work, and never invent register/product numbers."
+    ],
+    isolationShort: "demonstrate A-B-A fault proof (CPU2 rail vs. clock, DRAM raw log vs. summary PASS parser bug, Intel VR bring-up, Cisco socket swap)",
+    productIsolation: [
+      "Close With Actionable Root Cause: Show how A-B-A isolated hardware vs. harness/socket vs. parser software cleanly.",
+      "Highlight Cross-Team Handoff: Explain exact artifacts handed to ATE/DFT/Design (ECID/lot/stepping, failing Shmoo corner, scope trace, raw dmesg).",
+      "Verify Zero Escape: Describe final multi-corner verification and CAPA lock."
+    ]
+  }
+};
+// Exact aliases covering all 23 Avionics topics + 12 NVIDIA tracks + 12 NVIDIA Prep topics
+TOPIC_BENCH_PLAYBOOK.safety = TOPIC_BENCH_PLAYBOOK.power;
+TOPIC_BENCH_PLAYBOOK.automation = TOPIC_BENCH_PLAYBOOK["python-scpi"];
+TOPIC_BENCH_PLAYBOOK.thermal = TOPIC_BENCH_PLAYBOOK.qualification;
+TOPIC_BENCH_PLAYBOOK.rca = TOPIC_BENCH_PLAYBOOK["high-level-debug"];
+TOPIC_BENCH_PLAYBOOK["si-pi"] = TOPIC_BENCH_PLAYBOOK.electrical;
+TOPIC_BENCH_PLAYBOOK["timing-sta"] = TOPIC_BENCH_PLAYBOOK.timing;
+TOPIC_BENCH_PLAYBOOK["soc-boot"] = TOPIC_BENCH_PLAYBOOK.socboot;
+TOPIC_BENCH_PLAYBOOK["ddr-lpddr"] = TOPIC_BENCH_PLAYBOOK.dram;
+TOPIC_BENCH_PLAYBOOK["pcie-hsio"] = TOPIC_BENCH_PLAYBOOK.pcie;
+TOPIC_BENCH_PLAYBOOK["bench-instruments"] = TOPIC_BENCH_PLAYBOOK.instruments;
+TOPIC_BENCH_PLAYBOOK["linux-slt"] = TOPIC_BENCH_PLAYBOOK.linux;
+TOPIC_BENCH_PLAYBOOK["python-automation"] = TOPIC_BENCH_PLAYBOOK["python-scpi"];
+TOPIC_BENCH_PLAYBOOK["ate-dft-slt"] = TOPIC_BENCH_PLAYBOOK.ate;
+TOPIC_BENCH_PLAYBOOK["panel-career"] = TOPIC_BENCH_PLAYBOOK.interview;
+
+function formatUnitSubIfMissing(subStr, fallbackUnit) {
+  const s = String(subStr || "").trim();
+  if (!s || !fallbackUnit) return s;
+  const lastToken = s.split("=").pop().trim();
+  if (/^-?\d+(?:\.\d+)?$/.test(lastToken) && fallbackUnit) {
+    return `${s} ${fallbackUnit}`;
+  }
+  return s;
+}
+
 function inferTopicPhysicsModel(q, t, isNvidia) {
   const tid = (t && t.id) || "";
-  const txt = ((q && q.id) || "") + " " + ((q && q.question) || "") + " " + tid;
   const rawFormula = String((q && q.formula) || "").trim();
   const hasRealFormula = rawFormula && !rawFormula.includes("->");
   const topicDefaults = {
-    units: { f: "I = Q / t ;   V = W / Q", s: "(45e-6) / (15e-3) = 3.00e-3 A", unitConv: "1 p=10^(-12), 1 n=10^(-9), 1 u=10^(-6), 1 m=10^(-3), 1 k=10^3, 1 M=10^6" },
-    ohm: { f: "I = V / R ;   R = V / I", s: "5.00 / (2.00 * 10^3) = 2.50 * 10^(-3) A", unitConv: "I = 5 / (2*10^3) = 2.50e-3 A (2.50 mA)" },
-    power: { f: "P = V * I = V^2 / R", s: "(12.0^2) / (4.70 * 10^3) = 30.64 * 10^(-3) W", unitConv: "2x derating min = 61.3e-3 W <= 125e-3 W (1/8 W)" },
-    series: { f: "V_out = V_in * (R_2 / (R_1 + R_2))", s: "5.00 * ((1.0*10^3) / (1.0*10^3 + 1.0*10^3)) = 2.50 V", unitConv: "R_T = R_1 + R_2 in 10^3n Ohms" },
-    parallel: { f: "R_eq = R_nom / N_healthy ;   1 / R_eq = 1 / R_1 + 1 / R_2", s: "1.0 / 100 = 10.0 * 10^(-3) Ohm", unitConv: "I_5V = 5.0 / (10.0*10^(-3)) = 500 A -> Debug at 1.0 V CC" },
-    "kcl-kvl": { f: "Sum(I_in) = Sum(I_out) ;   Sum(V_loop) = 0", s: "69.0e-3 - 10.0e-3 = 59.0e-3 A", unitConv: "Keep signed branch currents in mA (10^(-3) A)" },
-    thevenin: { f: "V_TH = V_open ;   R_TH = (R_1 * R_2) / (R_1 + R_2)", s: "(10e3 * 10e3) / (20e3) = 5.00e3 Ohm", unitConv: "Short V_S on paper to find R_TH in 10^3n Ohms" },
-    ac: { f: "V_rms = 0.7071 * (V_pp / 2) ;   T = 1 / f", s: "0.7071 * (14.14 / 2) = 5.00 V", unitConv: "f = 2.0e3 Hz -> T = 500e-6 s (500 us)" },
-    capacitors: { f: "Q = C * V ;   X_C = 1 / (2 * pi * f * C)", s: "1 / (2 * pi * 10e3 * 0.1e-6) = 159.15 Ohm", unitConv: "C in uF = 10^(-6) F; pF = 10^(-12) F" },
-    rc: { f: "tau = R_eq * C ;   R_eq = (R * R_DMM) / (R + R_DMM)", s: "(3.197e6) * (2.2e-6) = 7.034 s", unitConv: "10^6 Ohm * 10^(-6) F = 1.0 s (10^3n cancels!)" },
-    inductors: { f: "V_L = L * (dI / dt) ;   tau = L / R", s: "(250e-12) * (40 / 20e-9) = 500e-3 V", unitConv: "pH (10^(-12)) * A / ns (10^(-9)) = mV (10^(-3) V)" },
-    filters: { f: "f_c = 1 / (2 * pi * R * C)", s: "1 / (2 * pi * 1.59e3 * 0.1e-6) = 1.00e3 Hz", unitConv: "At f_c: gain = 0.7071 (-3.01 dB), slope = -20 dB/dec" },
-    magnetics: { f: "V_2 / V_1 = N_2 / N_1 ;   v = N * (dPhi / dt)", s: "120 * (1 / 10) = 12.0 V", unitConv: "Transformers require dPhi/dt != 0 (AC/switched only)" },
-    components: { f: "I_Z = (V_in - V_Z)/R_S - V_Z/R_L ;   I_C_sat = (V_CC - 0.2)/R_C", s: "(12 - 5.1)/100 - 5.1/510 = 59.0e-3 A", unitConv: "Si V_F = 0.70 V; V_CE(sat) = 0.20 V" },
-    "power-rails": { f: "P_loss = (V_in - V_out) * I_load ;   V_r_pp = V_p / (f_r * R_L * C)", s: "15.57 / (120 * 1.0e3 * 1.0e-3) = 129.8e-3 V", unitConv: "Ripple rate f_r = 2 * 60 = 120 Hz for full bridge" },
-    schematics: { f: "I_shunt = V_sense / R_shunt", s: "(25.0e-3) / (5.00e-3) = 5.00 A", unitConv: "Measure V_sense differentially at Kelvin pads (10^(-3) cancels)" },
-    instruments: { f: "BW_scope >= 0.5 / t_rise ;   R_eq = (R * 10e6) / (R + 10e6)", s: "0.5 / (0.35e-9) = 1.43e9 Hz", unitConv: "Use <5 mm spring ground to cut ~150e-9 H clip ringing" },
-    timing: { f: "T_min = t_CQ + t_logic + t_su + t_skew ;   HoldSlack = (t_CQ_min + t_min) - (t_h + t_skew)", s: "(300e-12 + 30e-12) - (400e-12 + 750e-12) = -820e-12 s", unitConv: "ps = 10^(-12) s -> 1 / (2.59e-9) = 386.10e6 Hz" },
-    buses: { f: "R_p_max = t_r_max / (0.8473 * C_bus)", s: "(300e-9) / (0.8473 * 100e-12) = 3.54e3 Ohm", unitConv: "t_r in ns (10^(-9)), C_bus in pF (10^(-12)) -> R in kOhm (10^3)" },
-    "python-scpi": { f: "FPY = (N_pass_1 / N_valid) * 100", s: "(92 / 100) * 100 = 92.0%", unitConv: "Enforce math.isfinite() -> PASS / FAIL / INVALID" },
-    linux: { f: "DPPM = (Defects / Total) * 10^6", s: "(2 / 50e3) * 10^6 = 40.0 DPPM", unitConv: "Capture dmesg/lspci BEFORE reboot ($?=0 != DUT PASS)" },
-    rf: { f: "Gamma = (Z_L - Z_0) / (Z_L + Z_0)", s: "(100 - 85) / (100 + 85) = 81.1e-3", unitConv: "Gen5 32e9 T/s -> 1 UI = 31.25e-12 s (31.25 ps)" },
-    qualification: { f: "Guardband = Limit - Uncertainty ;   Q_rad = e * sigma * A * (T_1^4 - T_2^4)", s: "3.30 - 0.020 = 3.280 V", unitConv: "TVAC <10^(-5) Torr: convection h = 0 W/m^2*K" },
-    safety: { f: "P_fault = V_rail^2 / R_short ;   I_lim = 1.2 * I_idle", s: "(5.0^2) / (10e-3) = 2.50e3 W", unitConv: "Always set PSU CC current limit before energizing board" },
-    automation: { f: "FPY = (N_pass_1 / N_valid) * 100", s: "(95 / 100) * 100 = 95.0%", unitConv: "Never coerce NaN to 0.0; log first attempt separately" },
-    thermal: { f: "T_J = T_A + P_d * theta_JA", s: "25 + (5.0 * 12) = 85 C", unitConv: "Wait for dT/dt soak equilibrium before logging" },
-    rca: { f: "A -> B -> A Swap ;   R_eq = R_nom / N_healthy", s: "1.0 / (100 - 5) = 10.53e-3 Ohm", unitConv: "Move ONE suspect variable at a time (KGB comparison)" },
-    electrical: { f: "DeltaV = I * R_PDN + L_pkg * (dI / dt)", s: "(40 * 2e-3) + (250e-12 * (40 / 20e-9)) = 580e-3 V", unitConv: "pH (10^(-12)) * A / ns (10^(-9)) = mV (10^(-3) V)" },
-    dram: { f: "ΔV_BL = (V_cell - V_PRE) * (C_cell / (C_cell + C_BL))", s: "(1.10 - 0.55) * (25e-15 / (25e-15 + 225e-15)) = 55.0e-3 V", unitConv: "C_cell in fF (10^(-15) F); Hot >85C t_REFI drops 3.9us -> 1.95us" },
-    "memory-ddr": { f: "ΔV_BL = (V_cell - V_PRE) * (C_cell / (C_cell + C_BL))", s: "(1.10 - 0.55) * (25e-15 / 250e-15) = 55.0e-3 V", unitConv: "BW = (3200e6 * 64)/8 = 25.6e9 B/s; t_RC = t_RAS + t_RP" },
-    socboot: { f: "t_rel >= max(t_VDD, t_CLK) + t_POR", s: "25e-3 + 5e-3 = 30.0e-3 s", unitConv: "ms = 10^(-3) s; check PWRGOOD -> REFCLK -> PERST#" },
-    pcie: { f: "BW_eff = R_lane * N_lanes * (128/130) / 8", s: "16e9 * 16 * (128/130) / 8 = 31.51e9 B/s", unitConv: "16 GT/s = 16e9 T/s; check LnkCap vs LnkSta & AER" },
-    gpu: { f: "P_total = alpha * C * V^2 * f + V * I_leak", s: "1.0 * 100e-6 * 0.85^2 * 2e9 = 144.5 W", unitConv: "Capture nvidia-smi -q & dmesg BEFORE rebooting Xid 79" },
-    ate: { f: "T_min = t_CQ + t_logic + t_su + t_skew", s: "(950e-12 + 590e-12 + 300e-12 + 750e-12) = 2.59e-9 s", unitConv: "f_max = 1 / (2.59e-9) = 386.10e6 Hz; pass lot/wafer/step" },
-    pvt: { f: "Margin_pct = ((V_fused - V_min) / V_fused) * 100", s: "((0.850 - 0.748) / 0.850) * 100 = 12.0%", unitConv: "Slow/Hot degrades Setup; Fast/Cold provokes Hold/ZQCal" },
-    linux: { f: "DPPM = (Defects / Total) * 10^6", s: "(2 / 50e3) * 10^6 = 40.0 DPPM", unitConv: "grep exit 0=match, 1=no match, 2+=error" },
-    python: { f: "FPY = (N_pass_1 / N_valid) * 100", s: "(92 / 100) * 100 = 92.0%", unitConv: "math.isfinite(val) catches float('nan') & inf" },
-    quality: { f: "RTY = y_1 * y_2 ;   DPPM = (Defects / Units) * 10^6", s: "(0.92 * 0.95) * 100 = 87.4%", unitConv: "Track Attempt #1 FPY separately from Retest Yield" },
-    interview: { f: "DeltaV = I * R_PDN + L_pkg * (dI / dt)", s: "(40 * 2e-3) + (250e-12 * 2e9) = 580e-3 V", unitConv: "CH1 CLK (SMA) | CH2/4 N7020A Rails | CH3 1169B Shunt" },
-    "si-pi": { f: "DeltaV = I * R_PDN + L_pkg * (dI / dt)", s: "(40 * 2e-3) + (250e-12 * (40 / 20e-9)) = 580e-3 V", unitConv: "pH (10^(-12)) * A / ns (10^(-9)) = mV (10^(-3) V)" },
-    "timing-sta": { f: "T_min = t_CQ + t_logic + t_su + t_skew ;   HoldSlack = (t_CQ_min + t_min) - (t_h + t_skew)", s: "(300e-12 + 30e-12) - (400e-12 + 750e-12) = -820e-12 s", unitConv: "ps = 10^(-12) s -> 1 / (2.59e-9) = 386.10e6 Hz" },
-    "soc-boot": { f: "t_rel >= max(t_VDD, t_CLK) + t_POR", s: "25e-3 + 5e-3 = 30.0e-3 s", unitConv: "Verify PWRGOOD -> REFCLK -> PERST# before BIOS console" },
-    "ddr-lpddr": { f: "ΔV_BL = (V_cell - V_PRE) * (C_cell / (C_cell + C_BL))", s: "(1.10 - 0.55) * (25e-15 / (25e-15 + 225e-15)) = 55.0e-3 V", unitConv: "25 fF = 25 * 10^(-15) F; Hot >85C t_REFI drops 3.9us -> 1.95us" },
-    "pcie-hsio": { f: "Gamma = (Z_L - Z_0) / (Z_L + Z_0) ;   UI = 1 / R_lane", s: "(100 - 85) / (100 + 85) = 81.1e-3", unitConv: "32 GT/s = 32e9 T/s -> 1 UI = 31.25e-12 s (31.25 ps)" },
-    "bench-instruments": { f: "I_load = V_sense / R_shunt ;   BW_sys >= 0.5 / t_rise", s: "(25e-3) / (5e-3) = 5.00 A", unitConv: "Ch1 SMA CLK | Ch2/4 N7020A Rails | Ch3 1169B Shunt" },
-    "linux-slt": { f: "DPPM = (Defects / Total) * 10^6", s: "(2 / 50e3) * 10^6 = 40.0 DPPM", unitConv: "Save dmesg/lspci/nvidia-smi BEFORE reboot ($?=0 != PASS)" },
-    "python-automation": { f: "FPY = (N_pass_1 / N_valid) * 100", s: "(92 / 100) * 100 = 92.0%", unitConv: "Check math.isfinite(val) to block NaN/Inf False-Clean PASS" },
-    "ate-dft-slt": { f: "T_min = t_CQ + t_logic + t_su + t_skew", s: "(950e-12 + 590e-12 + 300e-12 + 750e-12) = 2.59e-9 s", unitConv: "ATE structural scan != full-system SLT transient droops" },
-    "socket-assembly": { f: "R_contact = R_meas - R_2W_leads", s: "45.0e-3 - 240.0e-3 -> Use 4W Kelvin", unitConv: "Inspect bent pins, FOD, torque & thermal warpage + A-B-A" },
-    "high-level-debug": { f: "A -> B -> A Swap ;   Margin = Limit - (Meas + U)", s: "3.30 - (3.18 + 20e-3) = 100e-3 V", unitConv: "Freeze DUT -> Pull raw logs -> Check power/socket -> A-B-A" },
-    "panel-career": { f: "DeltaV = I * R_PDN + L_pkg * (dI / dt)", s: "(40 * 2e-3) + (250e-12 * 2e9) = 580e-3 V", unitConv: "CPU2 4-Ch Scope + DRAM raw vs parser + Intel/Cisco A-B-A" }
+    units: { f: "V = W / Q ;   I = Q / t", s: "V = (10.0 * 10^(-3) J) / (2.00 * 10^(-3) C) = 5.00 V ;   I = (3.00 * 10^(-3) C) / (1.00 * 10^(-3) s) = 3.00 A", target: "1 V = 1 J/C (derived), 1 A = 1 C/s (SI base)", unitConv: "1 p = 10^(-12), 1 n = 10^(-9), 1 u = 10^(-6), 1 m = 10^(-3), 1 k = 10^3, 1 M = 10^6" },
+    ohm: { f: "I = V / R ;   R = V / I", s: "I = 5.00 V / (2.00 * 10^3 Ohm) = 2.50 * 10^(-3) A", target: "2.50 × 10⁻³ A (2.50 mA at 5.00 V across 2.00 kΩ)", unitConv: "I = 5.00 V / (2.00 × 10^3 Ω) = 2.50 × 10^(-3) A (2.50 mA)" },
+    power: { f: "P = V * I = V^2 / R", s: "P = 12.0 V * (2.55 * 10^(-3) A) = 30.6 * 10^(-3) W", target: "30.6 × 10⁻³ W (size resistor ≥ 2× = 61.2 mW -> 1/8 W safe)", unitConv: "Always size power rating >= 2x worst-case P = V*I" },
+    series: { f: "R_T = R_1 + R_2 ;   V_out = V_in * (R_2 / R_T)", s: "V_out = 5.00 V * ((1.00 * 10^3 Ohm) / (2.00 * 10^3 Ohm)) = 2.50 V", target: "2.50 V midpoint (same current I = 2.50 mA in series loop)", unitConv: "R_T = R_1 + R_2 in 10^(3n) Ω; watch 10 MΩ DMM loading" },
+    parallel: { f: "R_eq = R_nom / N_healthy ;   1 / R_eq = 1 / R_1 + 1 / R_2", s: "R_eq = 1.00 Ohm / 100 = 10.0 * 10^(-3) Ohm", target: "10.0 × 10⁻³ Ω (10.0 mΩ -> 4-wire Kelvin mandatory!)", unitConv: "5.00 V / 10.0 mΩ = 500 A fault risk -> Test at 1.0 V CC" },
+    "kcl-kvl": { f: "Sum(I_in) = Sum(I_out) ;   Sum(V_loop) = 0", s: "I_Z = (69.0 * 10^(-3) A) - (10.0 * 10^(-3) A) = 59.0 * 10^(-3) A", target: "59.0 × 10⁻³ A (59.0 mA conserving charge at junction)", unitConv: "Keep signed branch currents in mA (10^(-3) A)" },
+    thevenin: { f: "V_TH = V_open ;   R_TH = (R_1 * R_2) / (R_1 + R_2)", s: "R_TH = ((10.0 * 10^3) * (10.0 * 10^3)) / (20.0 * 10^3) = 5.00 * 10^3 Ohm", target: "R_TH = 5.00 × 10³ Ω (max power to load when R_L = R_TH)", unitConv: "Short independent V_S on paper to solve R_TH in 10^(3n) Ω" },
+    ac: { f: "V_rms = 0.7071 * (V_pp / 2) ;   T = 1 / f", s: "V_rms = 0.7071 * (14.14 V / 2) = 5.00 V ;   T = 1 / (2.00 * 10^3 Hz) = 500 * 10^(-6) s", target: "V_rms = 5.00 V at f = 2.00 kHz (T = 500 × 10⁻⁶ s)", unitConv: "Peak V_p != V_rms; wall 120 V_rms = +/-170 V peak" },
+    capacitors: { f: "Q = C * V ;   X_C = 1 / (2 * pi * f * C)", s: "X_C = 1 / (2 * pi * 10.0 * 10^3 Hz * 0.10 * 10^(-6) F) = 159.2 Ohm", target: "X_C = 159.2 Ω at 10.0 kHz (shunts HF noise to GND)", unitConv: "uF = 10^(-6) F; nF = 10^(-9) F; pF = 10^(-12) F" },
+    rc: { f: "tau = R_eq * C ;   R_eq = (R * R_DMM) / (R + R_DMM)", s: "tau = (3.197 * 10^6 Ohm) * (2.20 * 10^(-6) F) = 7.034 s", target: "τ = 7.034 s (32% faster than 10.34 s due to 10 MΩ DMM)", unitConv: "10^6 Ω × 10^(-6) F = 10^0 s (prefixes cancel cleanly!)" },
+    inductors: { f: "V_L = L * (dI / dt) ;   tau = L / R", s: "V_L = (250 * 10^(-12) H) * (40.0 A / (20.0 * 10^(-9) s)) = 500 * 10^(-3) V", target: "500 × 10⁻³ V (500 mV inductive overshoot spike)", unitConv: "pH (10^(-12)) × A / ns (10^(-9)) = mV (10^(-3) V)" },
+    filters: { f: "f_c = 1 / (2 * pi * R * C)", s: "f_c = 1 / (2 * pi * 1.59 * 10^3 Ohm * 100 * 10^(-9) F) = 1.00 * 10^3 Hz", target: "f_c = 1.00 × 10³ Hz (−3.01 dB, gain = 0.7071, −45° phase)", unitConv: "kΩ (10^3) × nF (10^(-9)) -> 1 / 10^(-6) -> MHz scale" },
+    magnetics: { f: "V_2 / V_1 = N_2 / N_1 ;   v = N * (dPhi / dt)", s: "V_2 = 120 V * (1 / 10) = 12.0 V", target: "12.0 V AC secondary at 10:1 step-down turns ratio", unitConv: "Requires dΦ/dt != 0 (AC/switched only; DC shorts winding!)" },
+    components: { f: "I_Z = (V_in - V_Z)/R_S - V_Z/R_L ;   I_C_sat = (V_CC - 0.20 V)/R_C", s: "I_Z = ((12.0 - 5.10) / 100) - (5.10 / 510) = 59.0 * 10^(-3) A", target: "59.0 × 10⁻³ A Zener shunt current (V_F = 0.70 V, V_CE(sat) = 0.20 V)", unitConv: "Verify V_in > V_Z and 2× resistor/Zener wattage margin" },
+    "power-rails": { f: "P_loss = (V_in - V_out) * I_load ;   V_r_pp = V_p / (f_r * R_L * C)", s: "V_r_pp = 15.57 V / (120 Hz * 1.00 * 10^3 Ohm * 1.00 * 10^(-3) F) = 129.8 * 10^(-3) V", target: "129.8 × 10⁻³ Vpp ripple (full-bridge f_r = 2 × 60 = 120 Hz)", unitConv: "Measure rail droop & ripple right at IC pins via Kelvin/N7020A" },
+    schematics: { f: "I_shunt = V_sense / R_shunt", s: "I_shunt = (25.0 * 10^(-3) V) / (5.00 * 10^(-3) Ohm) = 5.00 A", target: "5.00 A branch current across 5.00 mΩ Kelvin shunt", unitConv: "mV (10^(-3) V) / mΩ (10^(-3) Ω) = A (10^(-3) cancels!)" },
+    instruments: { f: "BW_scope >= 0.5 / t_rise ;   R_eq = (R * 10e6) / (R + 10e6)", s: "BW_scope >= 0.5 / (0.35 * 10^(-9) s) = 1.43 * 10^9 Hz", target: "1.43 × 10⁹ Hz (1.43 GHz min BW for 350 ps digital edge)", unitConv: "ns = 10^(-9) s -> GHz = 10^9 Hz; use <5 mm spring ground" },
+    timing: { f: "T_min = t_CQ + t_logic + t_su + t_skew ;   HoldSlack = (t_CQ_min + t_min) - (t_h + t_skew)", s: "HoldSlack = (300 + 30) * 10^(-12) s - (400 + 750) * 10^(-12) s = -820 * 10^(-12) s", target: "−820 × 10⁻¹² s (−820 ps HOLD VIOLATION: slowing f_clk cannot fix!)", unitConv: "ps = 10^(-12) s; T_min = 2.59 ns -> f_max = 386.10 MHz" },
+    buses: { f: "R_p_max = t_r_max / (0.8473 * C_bus)", s: "R_p_max = (300 * 10^(-9) s) / (0.8473 * 100 * 10^(-12) F) = 3.54 * 10^3 Ohm", target: "R_p(max) = 3.54 × 10³ Ω (3.54 kΩ max I²C pull-up at 100 pF bus)", unitConv: "t_r in ns (10^(-9)), C_bus in pF (10^(-12)) -> R in kΩ (10^3)" },
+    "python-scpi": { f: "FPY = (N_pass_1 / N_valid) * 100", s: "FPY = (92 / 100) * 100 = 92.0%", target: "92.0% Attempt #1 FPY (with NaN/Timeout tagged INVALID)", unitConv: "Enforce math.isfinite() -> strict PASS / FAIL / INVALID" },
+    linux: { f: "DPPM = (Defects / Total) * 10^6", s: "DPPM = (2 / (50.0 * 10^3)) * 10^6 = 40.0 DPPM", target: "40.0 DPPM (40 defects per million units)", unitConv: "Save dmesg/lspci BEFORE reboot; grep $?=1 != hardware PASS" },
+    rf: { f: "Gamma = (Z_L - Z_0) / (Z_L + Z_0)", s: "Gamma = (100 Ohm - 85.0 Ohm) / (100 Ohm + 85.0 Ohm) = 81.1 * 10^(-3)", target: "Γ = 81.1 × 10⁻³ reflection (−21.8 dB return loss)", unitConv: "Gen5 32 × 10^9 T/s -> 1 UI = 31.25 × 10^(-12) s (31.25 ps)" },
+    qualification: { f: "Guardband = Limit - U ;   Q_rad = e * sigma * A * (T_1^4 - T_2^4)", s: "Limit_GB = 3.300 V - (20.0 * 10^(-3) V) = 3.280 V", target: "3.280 V guardbanded max limit (with 20 mV station uncertainty U)", unitConv: "TVAC <10^(-5) Torr: convection h = 0 W/m²·K; watch Paschen arc" },
+    safety: { f: "P_fault = V_rail^2 / R_short ;   I_lim = 1.2 * I_idle", s: "P_fault = (5.00 V)^2 / (10.0 * 10^(-3) Ohm) = 2.50 * 10^3 W", target: "2.50 × 10³ W (2.5 kW un-limited fault power -> set CC I_lim first!)", unitConv: "Always program CC current limit BEFORE closing power switch" },
+    automation: { f: "FPY = (N_pass_1 / N_valid) * 100", s: "FPY = (95 / 100) * 100 = 95.0%", target: "95.0% Attempt #1 FPY (zero blind retry masking)", unitConv: "Check math.isfinite() so NaN never masquerades as PASS" },
+    thermal: { f: "T_J = T_A + P_d * theta_JA", s: "T_J = 25.0 C + (5.00 W * 12.0 C/W) = 85.0 C", target: "85.0 °C junction temp at 5.00 W (wait for ΔT/Δt soak equilibrium)", unitConv: "In vacuum TVAC, verify TIM pad torque (θ_CS spikes if loose)" },
+    rca: { f: "A -> B -> A Swap ;   R_eq = R_nom / N_healthy", s: "R_eq = 1.00 Ohm / (100 - 5) = 10.53 * 10^(-3) Ohm", target: "10.53 × 10⁻³ Ω (5 open branches isolated after shorts cleared)", unitConv: "Move ONE suspect variable at a time against KGB" },
+    electrical: { f: "DeltaV = I * R_PDN + L_pkg * (dI / dt)", s: "DeltaV = (40.0 A * 2.00 * 10^(-3) Ohm) + (250 * 10^(-12) H * (40.0 A / (20.0 * 10^(-9) s))) = 580 * 10^(-3) V", target: "580 × 10⁻³ V total droop (80 mV IR + 500 mV L·di/dt)", unitConv: "pH (10^(-12)) × A / ns (10^(-9)) = mV (10^(-3) V)" },
+    dram: { f: "DeltaV_BL = (V_cell - V_PRE) * (C_cell / (C_cell + C_BL))", s: "DeltaV_BL = (1.10 - 0.55) * ((25 * 10^(-15)) / (250 * 10^(-15))) = 55.0 * 10^(-3) V", target: "55.0 × 10⁻³ V (55.0 mV differential sense-amp margin)", unitConv: "C_cell in fF (10^(-15) F); Hot >85°C halves t_REFI (3.9 -> 1.95 µs)" },
+    socboot: { f: "t_rel >= max(t_VDD, t_CLK) + t_POR", s: "t_rel = (25.0 * 10^(-3) s) + (5.00 * 10^(-3) s) = 30.0 * 10^(-3) s", target: "30.0 × 10⁻³ s (30.0 ms hold after PWRGOOD + stable REFCLK)", unitConv: "Verify PWRGOOD -> REFCLK -> PERST# order on scope" },
+    pcie: { f: "BW_eff = R_lane * N_lanes * (128 / 130) / 8", s: "BW_eff = (16.0 * 10^9 T/s) * 16 * (128 / 130) / 8 = 31.51 * 10^9 B/s", target: "31.51 × 10⁹ B/s (31.51 GB/s net Gen4 x16 throughput)", unitConv: "16 GT/s = 16 × 10^9 T/s; check LnkCap vs. LnkSta & AER under load" },
+    gpu: { f: "P_total = alpha * C * V^2 * f + V * I_leak", s: "P_dyn = 1.0 * (100 * 10^(-6) F) * (0.85 V)^2 * (2.00 * 10^9 Hz) = 144.5 W", target: "144.5 W dynamic GPU power (quadratically sensitive to V²)", unitConv: "Snapshot nvidia-smi -q & dmesg BEFORE rebooting on Xid 79" },
+    ate: { f: "T_min = t_CQ + t_logic + t_su + t_skew", s: "T_min = (950 + 590 + 300 + 750) * 10^(-12) s = 2.59 * 10^(-9) s", target: "f_max = 1 / (2.59 ns) = 386.10 × 10⁶ Hz (log wafer/lot/step)", unitConv: "ATE structural scan != full-system SLT transient droop" },
+    pvt: { f: "Margin_pct = ((V_fused - V_min) / V_fused) * 100", s: "Margin = ((0.850 V - 0.748 V) / 0.850 V) * 100 = 12.0%", target: "+12.0% voltage guardband margin (V_min = 748 mV)", unitConv: "Slow/Hot provokes Setup fails; Fast/Cold provokes Hold/ZQCal" },
+    python: { f: "FPY = (N_pass_1 / N_valid) * 100", s: "FPY = (92 / 100) * 100 = 92.0%", target: "92.0% Attempt #1 FPY (NaN -> INVALID, never false PASS)", unitConv: "math.isfinite(val) catches float('nan') & inf safely" },
+    quality: { f: "RTY = y_1 * y_2 ;   DPPM = (Defects / Units) * 10^6", s: "RTY = (0.92 * 0.95) * 100 = 87.4%", target: "87.4% Rolled Throughput Yield across two stations", unitConv: "Track Attempt #1 FPY separately from Retest Yield" },
+    interview: { f: "DeltaV = I * R_PDN + L_pkg * (dI / dt)", s: "DeltaV = (40.0 A * 2.00 * 10^(-3) Ohm) + (250 * 10^(-12) H * 2.00 * 10^9 A/s) = 580 * 10^(-3) V", target: "580 × 10⁻³ V PDN transient (CPU2 4-ch scope + A-B-A verification)", unitConv: "Ch1 CLK (SMA) | Ch2/4 N7020A Rails | Ch3 1169B Shunt" },
+    "si-pi": { f: "DeltaV = I * R_PDN + L_pkg * (dI / dt)", s: "DeltaV = (40.0 A * 2.00 * 10^(-3) Ohm) + (250 * 10^(-12) H * (40.0 A / (20.0 * 10^(-9) s))) = 580 * 10^(-3) V", target: "580 × 10⁻³ V transient droop vs. Z_target = ΔV_max / ΔI_max", unitConv: "pH (10^(-12)) × A / ns (10^(-9)) = mV (10^(-3) V)" },
+    "timing-sta": { f: "T_min = t_CQ + t_logic + t_su + t_skew ;   HoldSlack = (t_CQ_min + t_min) - (t_h + t_skew)", s: "HoldSlack = (300 + 30) * 10^(-12) s - (400 + 750) * 10^(-12) s = -820 * 10^(-12) s", target: "−820 × 10⁻¹² s (−820 ps same-edge Hold race)", unitConv: "ps = 10^(-12) s -> Setup sets f_max = 386.10 MHz" },
+    "soc-boot": { f: "t_rel >= max(t_VDD, t_CLK) + t_POR", s: "t_rel = (25.0 * 10^(-3) s) + (5.00 * 10^(-3) s) = 30.0 * 10^(-3) s", target: "30.0 × 10⁻³ s boot reset release margin", unitConv: "Verify PWRGOOD -> REFCLK -> PERST# before blaming SoC" },
+    "ddr-lpddr": { f: "DeltaV_BL = (V_cell - V_PRE) * (C_cell / (C_cell + C_BL))", s: "DeltaV_BL = (1.10 - 0.55) * ((25 * 10^(-15)) / (250 * 10^(-15))) = 55.0 * 10^(-3) V", target: "55.0 × 10⁻³ V bitline sense differential", unitConv: "25 fF = 25 × 10^(-15) F; Hot >85°C halves t_REFI (3.9 -> 1.95 µs)" },
+    "pcie-hsio": { f: "Gamma = (Z_L - Z_0) / (Z_L + Z_0) ;   UI = 1 / R_lane", s: "Gamma = (100 Ohm - 85.0 Ohm) / (100 Ohm + 85.0 Ohm) = 81.1 * 10^(-3)", target: "Γ = 81.1 × 10⁻³ reflection at Gen5 31.25 ps UI", unitConv: "32 GT/s = 32 × 10^9 T/s -> 1 UI = 31.25 × 10^(-12) s" },
+    "bench-instruments": { f: "I_load = V_sense / R_shunt ;   BW_sys >= 0.5 / t_rise", s: "I_load = (25.0 * 10^(-3) V) / (5.00 * 10^(-3) Ohm) = 5.00 A", target: "5.00 A Kelvin shunt current; BW >= 1.43 GHz for 350 ps edges", unitConv: "Ch1 SMA CLK | Ch2/4 N7020A Rails | Ch3 1169B Shunt" },
+    "linux-slt": { f: "DPPM = (Defects / Total) * 10^6", s: "DPPM = (2 / (50.0 * 10^3)) * 10^6 = 40.0 DPPM", target: "40.0 DPPM field failure rate", unitConv: "Save dmesg/lspci/nvidia-smi BEFORE reboot ($?=0 != PASS)" },
+    "python-automation": { f: "FPY = (N_pass_1 / N_valid) * 100", s: "FPY = (92 / 100) * 100 = 92.0%", target: "92.0% true Attempt #1 FPY", unitConv: "Check math.isfinite(val) to block NaN/Inf False-Clean PASS" },
+    "ate-dft-slt": { f: "T_min = t_CQ + t_logic + t_su + t_skew", s: "T_min = (950 + 590 + 300 + 750) * 10^(-12) s = 2.59 * 10^(-9) s", target: "386.10 × 10⁶ Hz peak system frequency vs. ATE vectors", unitConv: "ATE structural scan != full-system SLT transient droops" },
+    "socket-assembly": { f: "R_contact = R_meas - R_2W_leads", s: "R_contact(4W) = 15.0 * 10^(-3) Ohm (vs. 255 * 10^(-3) Ohm 2-wire)", target: "15.0 × 10⁻³ Ω true pin contact via 4-wire Kelvin", unitConv: "Inspect bent pins, FOD, torque & thermal warpage + A-B-A" },
+    "high-level-debug": { f: "A -> B -> A Swap ;   Margin = Limit - (Meas + U)", s: "Margin = 3.300 V - (3.180 V + 20.0 * 10^(-3) V) = 100 * 10^(-3) V", target: "+100 × 10⁻³ V guardbanded rail margin", unitConv: "Freeze DUT -> Pull raw logs -> Check power/socket -> A-B-A" },
+    "panel-career": { f: "DeltaV = I * R_PDN + L_pkg * (dI / dt)", s: "DeltaV = (40.0 A * 2.00 * 10^(-3) Ohm) + (250 * 10^(-12) H * 2.00 * 10^9 A/s) = 580 * 10^(-3) V", target: "580 × 10⁻³ V transient PDN budget", unitConv: "CPU2 4-Ch Scope + DRAM raw vs. parser + Intel/Cisco A-B-A" }
   };
+
   const def = topicDefaults[tid] || topicDefaults.ohm;
-  const formula = hasRealFormula ? rawFormula : def.f;
-  const sub = (q && q.sub) ? q.sub : (q && q.expected !== undefined ? `Result = ${q.expected} ${q.unit || ""}` : def.s);
+  const rawSub = String((q && q.sub) || "").trim();
+  let formula = hasRealFormula ? rawFormula : def.f;
+  let sub = rawSub;
+  let customTarget = "";
+
+  // Fix legacy conceptual formula/sub mismatches & missing 10^(3n) units
+  if (rawFormula === "Delta_V = Delta_U / q") {
+    formula = "Delta_V = Delta_U / q ;   I_load = V_rail / R_load";
+    sub = "Delta_V = (15.0 * 10^(-3) J) / (3.00 * 10^(-3) C) = 5.00 V ;   I_load = 5.00 V / (2.00 * 10^3 Ohm) = 2.50 * 10^(-3) A";
+    customTarget = "5.00 V potential difference (15.0 mJ/3.00 mC) driving 2.50 × 10⁻³ A into 2.00 kΩ load";
+  } else if (rawFormula === "1 V = 1 J / 1 C") {
+    formula = def.f;
+    sub = def.s;
+    customTarget = def.target;
+  } else if (rawFormula === "V_AB = V_A - V_B" && (!rawSub || !/[AVΩ]/.test(rawSub))) {
+    sub = "V_AB = 5.00 V - 0.00 V = +5.00 V ;   V_BA = 0.00 V - 5.00 V = -5.00 V";
+    customTarget = "+5.00 V (V_A − V_B polarity wrt reference return)";
+  } else if (rawFormula === "P = V * I" && q && q.expected === undefined && (!rawSub || !/W/.test(rawSub))) {
+    sub = "P = 3.30 V * (800 * 10^(-3) A) = 2.64 W";
+    customTarget = "2.64 W continuous dissipation (use >= 5 W or lower I_load)";
+  } else if (q && q.expected !== undefined) {
+    sub = rawSub ? formatUnitSubIfMissing(rawSub, q.unit) : `Result = ${fmt(q.expected)} ${q.unit || ""}`;
+  } else if (!rawSub) {
+    sub = def.s;
+    customTarget = def.target;
+  } else if (!hasRealFormula) {
+    sub = def.s;
+    customTarget = def.target;
+  } else if (!/(?:10\^|e[+-]?\d+|\b[VAWΩFsHz]\b|mV|mA|kΩ|MΩ|µF|ns|ps)/i.test(rawSub)) {
+    // Conceptual q.sub lacked both units and 10^(3n) exponents: pair with topic baseline
+    formula = `${rawFormula} ;   ${def.f}`;
+    sub = def.s;
+    customTarget = def.target;
+  }
+
   const givensList = parseGivenQuantities((q && q.question) || "");
   const rawUC = String((q && q.unitConv) || "").trim();
   const isPureMathUC = rawUC && /[=<>]/.test(rawUC) && !/[a-z]{5,}\s+[a-z]{5,}/i.test(rawUC);
   const prefixEq = isPureMathUC ? rawUC
     : givensList.length
-      ? givensList.slice(0, 3).map(g => g.prefixChar ? `${g.num}*${g.unitStr} = ${g.num} * 10^(${g.exp}) ${g.baseUnit}` : `${g.num} ${g.baseUnit} = ${g.num} * 10^0 ${g.baseUnit}`).join(" ; ")
-      : "1 p = 10^(-12) ; 1 n = 10^(-9) ; 1 u = 10^(-6) ; 1 m = 10^(-3) ; 1 k = 10^3 ; 1 M = 10^6";
+      ? givensList.slice(0, 3).map(g => g.prefixChar ? `${g.num} ${g.unitStr} = ${g.num} * 10^(${g.exp}) ${g.baseUnit}` : `${g.num} ${g.baseUnit} = ${g.num} * 10^0 ${g.baseUnit}`).join(" ; ")
+      : "1 n = 10^(-9) ; 1 m = 10^(-3) ; 1 k = 10^3";
   const convExplain = buildConversionExplanation((q && q.question) || "");
+  const prefixRule = givensList.length
+    ? convExplain
+    : def.unitConv;
+
   return {
     formula,
     sub,
     prefixEq,
+    prefixRule,
+    targetSummary: customTarget || def.target || sub.split("=").pop().trim(),
     unitConv: `${def.unitConv}${convExplain ? " · " + convExplain : ""}`
   };
 }
@@ -541,30 +1189,85 @@ function renderHiringManagerInterviewScript(q, t, isNvidia) {
   const tid = (t && t.id) || "";
   const txt = ((q && q.id) || "") + " " + ((q && q.question) || "") + " " + tid;
   const note = isNvidia ? (NVIDIA_TRACK_LECTURES[tid] || NVIDIA_TRACK_LECTURES.electrical) : (TOPIC_PROFESSOR_NOTES[tid] || TOPIC_PROFESSOR_NOTES.ohm);
+  const play = TOPIC_BENCH_PLAYBOOK[tid] || (isNvidia ? TOPIC_BENCH_PLAYBOOK.electrical : TOPIC_BENCH_PLAYBOOK.ohm);
   const phys = inferTopicPhysicsModel(q, t, isNvidia);
   const qidLabel = String((q && q.id) || "ACTIVE").toUpperCase();
+  const skillLabel = (q && (q.skillName || q.learningObjective)) || (t && t.title) || "Circuit Verification";
   const isNum = isNvidia ? (q && (q.questionType === "number" || q.kind === "calc")) : (q && q.expected !== undefined);
-  const targetStr = isNum ? `${fmt(q.expected)} ${q.unit || ""}` : (q && (q.skillName || q.learningObjective || t.title));
-  const convStr = buildConversionExplanation((q && q.question) || "");
+  const targetStr = isNum ? `${fmt(q.expected)} ${q.unit || ""}` : phys.targetSummary;
+  const targetHtml = isNum ? `${esc(fmt(q.expected))} ${esc(q.unit || "")} (${engVal(q.expected, q.unit || "")})` : prettyMathText(targetStr);
 
-  // Custom high-value spoken script for the 100-resistor interview question or active question
+  // Extract question-specific learning anchors without leaking redundant "Step 1:" prefixes
+  const rawSteps = Array.isArray(q && q.steps) ? q.steps : [];
+  const step0Clean = cleanStepSentence(rawSteps[0] || (q && q.modelAnswer) || (q && q.lesson && (q.lesson.summary || q.lesson)) || note.intuition);
+  const step1Clean = cleanStepSentence(rawSteps[1] || note.lawWhy || (isNvidia ? note.instrument : ""));
+  const step2Clean = cleanStepSentence(rawSteps[2] || (q && q.lesson && q.lesson.example) || play.probeSteps[0]);
+  const extraSteps = rawSteps.slice(3).map(cleanStepSentence).filter(Boolean);
+  const trapFirst = String(note.trap || "").split(/(?<=[.!])\s+/)[0] || note.trap;
+
   const is100R = /100.*resistor|100\s*x|1\s*ω.*parallel|parallel-x[789]/i.test(txt);
   const roleLabel = isNvidia ? "NVIDIA SLT Engineering Panel" : "Muon Space Avionics Hiring Manager";
+  const formulaPretty = prettyMathText(phys.formula);
+  const subPretty = prettyMathText(phys.sub);
+  const skillPretty = prettyMathText(skillLabel);
+  const hwLabel = isNvidia ? "post-silicon / SLT hardware" : "flight / avionics hardware";
+  const step0StartsWithSkill = step0Clean.toLowerCase().startsWith(String(skillLabel).toLowerCase());
+  const conceptLead = step0StartsWithSkill ? prettyMathText(step0Clean) : `For ${skillPretty}, ${prettyMathText(step0Clean)}`;
+  const isoClause = String(play.productIsolation[1] || "swap against a known-good harness and KGB board")
+    .replace(/^[A-Za-z0-9\s/-]+:\s*/, "")
+    .replace(/\.+$/, "");
 
-  const spokenAnswer = (q && q.interviewAnswer) ? q.interviewAnswer : is100R
-    ? "As a hardware test engineer, I solve the paper math in 10^(3n) engineering notation BEFORE touching probes: 100 parallel 1 Ω resistors have healthy R_eq = 1/100 = 10×10⁻³ Ω (drawing 500 A / 2.5 kW at 5 V!). Because standard 2-wire DMM leads (~0.24 Ω) create +2400% error here, I open the schematic to map +5V_MAIN and bank jumpers JP1–JP10, switch to 4-wire Kelvin mode, and clear 0 Ω shorts FIRST (because any short masks opens). I apply a safe current-limited 1 V / 2.5 A supply, pinpoint hot-spot shorts with an IR thermal camera and mV gradient, lift one pad per suspect (0.000 Ω confirms short) until 4-wire R_eq ≥ 10.00 mΩ, then solve N_open = 100 − 1/R_eq and identify the ∞ Ω opens as 25 °C cold spots against 60 °C healthy resistors on IR."
-    : isNum
-      ? `When solving ${qidLabel} (${t?.title || ""}) on real flight/post-silicon hardware, first I convert all given prefixes into base 10^(3n) SI units (${convStr}) and apply the governing law ${phys.formula} to predict an exact paper target of ${targetStr}. Next I open the schematic to trace the source node, sense test points, and ground return, verify power-off resistance before enabling a current-limited PSU, and compare the oscilloscope/DMM measurement against my ${targetStr} bound—confirming any anomaly with a single-variable A-B-A swap before replacing parts.`
-      : `First I separate the reported symptom from any unproven hypothesis and solve the governing healthy baseline (${phys.formula} -> ${targetStr}) in 10^(3n) SI units before probing. Second, on the schematic I locate the exact supply rail, series shunt, pull-up, or clock test points and configure safe current-limited measurements (4-wire Kelvin for milliohms, or Keysight N7020A + <5 mm spring ground on Ch1–Ch4). Third, I isolate fault vs. fixture via single-variable A-B-A swap, apply the targeted hardware/firmware fix, and verify full pass margin on the product.`;
+  // Part 1: Question-anchored, engineer-level 60-second spoken answer (no raw ASCII Delta_V / ->)
+  let spokenHtml;
+  if (is100R) {
+    spokenHtml = `“As a test engineer, I solve the paper math in 10<sup>3n</sup> engineering notation BEFORE touching probes: 100 parallel 1 Ω resistors have healthy R<sub>eq</sub> = 1/100 = 10 × 10<sup>−3</sup> Ω (drawing 500 A / 2.5 kW at 5 V!). Because 2-wire DMM leads (~0.24 Ω) create +2400% error here, I map +5V<sub>MAIN</sub> and bank jumpers JP1–JP10 on the schematic, switch to 4-wire Kelvin, and clear 0 Ω shorts FIRST using a current-limited 1 V / 2.5 A supply + IR camera + mV gradient + single-pad lift until R<sub>eq</sub> ≥ 10.0 mΩ; then I solve N<sub>open</sub> = 100 − 1/R<sub>eq</sub> and find the ∞ Ω opens as 25 °C cold spots vs. 60 °C healthy resistors.”`;
+  } else if (q && q.interviewAnswer) {
+    spokenHtml = `“${prettyMathText(q.interviewAnswer)} In engineering terms, I first verify ${formulaPretty} in 10<sup>3n</sup> SI units (${subPretty} → ${targetHtml}), inspect ${prettyMathText(play.schematicShort)} on the schematic to ${prettyMathText(play.probeShort)}, and prove root cause via single-variable A-B-A swap (${prettyMathText(play.isolationShort)}).”`;
+  } else if (isNum) {
+    spokenHtml = `“For ${skillPretty} on ${hwLabel}, first I convert all given quantities into base 10<sup>3n</sup> SI powers (${prettyMathText(phys.prefixRule)}) and solve ${formulaPretty} (${subPretty}) to anchor a healthy target of ${targetHtml}. Second, I open the schematic to locate ${prettyMathText(play.schematicShort)}, ${prettyMathText(play.probeShort)}; key guard rule: ${prettyMathText(trapFirst)} Third, if out of margin, I ${prettyMathText(play.isolationShort)} before approving rework.”`;
+  } else {
+    spokenHtml = `“On ${hwLabel}, ${conceptLead}${step0Clean.endsWith(".") ? "" : "."} Before probing, I verify ${formulaPretty} in 10<sup>3n</sup> SI units (${subPretty} → target ${targetHtml}) so I know safe limits and expected margin on paper. On the schematic I locate ${prettyMathText(play.schematicShort)}, execute the bench check (${prettyMathText(step2Clean)}); key guard rule: ${prettyMathText(trapFirst)} Finally, if a board misses baseline, I ${prettyMathText(play.isolationShort)} via controlled A → B → A swap and re-verify inside spec guardbands.”`;
+  }
 
-  const step1Pic = `Locate the active nodes, return path (GND), series/parallel junctions, test points, or decoupling caps on the ${isNvidia ? "SoC/GPU board schematic" : "flight PCBA schematic"} for "${t?.title || "circuit"}". Physics: ${isNvidia ? note.physics : note.intuition}`;
-  const step2Math = `Convert every prefix cleanly (p=10⁻¹², n=10⁻⁹, µ=10⁻⁶, m=10⁻³, k=10³, M=10⁶, G=10⁹) FIRST -> Apply ${phys.formula} -> Compute ${phys.sub} (Target: ${targetStr}). Never plug raw mA or kΩ without 10^(3n) scaling!`;
-  const step3Order = isNvidia
-    ? `1) Freeze DUT—do NOT reboot! Pull raw dmesg/lspci/nvidia-smi -q/EDAC logs BEFORE clearing counters. 2) Set up 4-channel Keysight scope (CH1 CLK SMA-BNC, CH2 Core N7020A, CH3 1169B Shunt, CH4 M-Rail N7020A) and deskew CH3 vs CH2. 3) Verify PSU rails & BGA socket pogo pins.`
-    : `1) Check resistance & shorts POWER-OFF (using 4-wire Kelvin below 1 Ω so lead resistance ~0.24 Ω doesn't swamp reading). 2) Energize via CC-limited supply. 3) Measure voltage in PARALLEL, current via differential shunt or series break, and scope clocks with <5 mm ground springs.`;
-  const step4Product = is100R
-    ? `Phase A (Shorts First): With 1 V / 2.5 A CC bias, shoot IR thermal image + step mV probe along copper pour toward lowest V -> lift 1 pad per suspect (0.000 Ω confirms dead short) until 4W R_eq ≥ 10 mΩ. Phase B (Opens Second): Compute N_open = 100 − 1/R_eq, image warmed 1 Ω resistors (~60 °C) vs cold 25 °C open resistors on IR, rework tombstoned/cracked pads, and verify full-board 4W R_eq = 10.00 mΩ.`
-    : `Execute controlled single-variable A -> B -> A swap using a Known-Good Fixture/Cable/Board (KGB). Fault moves with DUT = silicon/PCBA failure; fault stays in slot = harness/pogo-pin/bench setup failure. Apply corrective rework or FW fix, then retest across temperature/load corners inside guardbanded spec limits.`;
+  // Step 1, 2, 3, 4 structured content tailored to this question + topic
+  const step1Body = `
+    <ul class="prof-card-list">
+      <li><strong>Core Principle (${skillPretty}):</strong> ${prettyMathText(step0Clean)}</li>
+      <li><strong>Why It Governs Hardware:</strong> ${prettyMathText(step1Clean)}</li>
+      <li><strong>Schematic Nets to Trace:</strong> ${prettyMathText(play.schematicNodes)}</li>
+    </ul>`;
+
+  const stackEqLines = expr => String(expr || "").split(/\s*;\s*/).filter(Boolean).map(p => `<div class="prof-math-line">${eq(p)}</div>`).join("");
+  const step2Body = `
+    <div class="prof-math-pair">
+      <div class="prof-math-lbl">Governing Equation</div>
+      ${stackEqLines(phys.formula)}
+      <div class="prof-math-lbl" style="margin-top:6px;">10<sup style="text-transform:none;">3n</sup> Worked Substitution</div>
+      ${stackEqLines(phys.sub)}
+    </div>
+    <ul class="prof-card-list" style="margin-top:6px;">
+      <li><strong>10<sup>3n</sup> Prefix Scaling:</strong> ${prettyMathText(phys.prefixRule)}</li>
+      <li><strong>Expected Healthy Target:</strong> ${targetHtml}</li>
+    </ul>`;
+
+  const step3Items = [
+    `${prettyMathText(step2Clean)} <span class="prof-tag-inline">Question Check</span>`,
+    ...play.probeSteps.map(s => prettyMathText(s))
+  ];
+  const step3Body = `
+    <ol class="prof-step-list">${step3Items.map(li => `<li>${li}</li>`).join("")}</ol>
+    <div class="prof-card-trap"><strong>Measurement Trap to Block:</strong> ${prettyMathText(note.trap)}</div>`;
+
+  const step4Items = [
+    ...extraSteps.slice(0, 2).map(s => prettyMathText(s)),
+    ...play.productIsolation.map(s => prettyMathText(s))
+  ];
+  const step4Body = `<ol class="prof-step-list">${step4Items.map(li => `<li>${li}</li>`).join("")}</ol>`;
+
+  // Part 3: Deep Hiring-Manager Defense Q&A (explicitly anchored to question & topic)
+  const qa1Answer = `Probing blindly makes you a guess-and-check technician. Solving ${formulaPretty} in 10<sup>3n</sup> SI units (${subPretty} → ${targetHtml}) BEFORE energizing lets you set safe PSU current limits, catch 1,000× prefix mistakes (mA vs. A, kΩ vs. Ω), and verify hardware behavior (${prettyMathText(step1Clean)}) against a hard numerical guardband.`;
+  const qa2Answer = `${prettyMathText(note.trap)} To prove the reading in “${prettyMathText(step2Clean)}” is real: (1) null/4-wire Kelvin milliohm paths so ~0.24 Ω leads cancel out, (2) verify whether meter 10 MΩ input loads high-impedance nodes, (3) measure voltage directly against local return TP_GND (separating return drop I·R<sub>gnd</sub>), and (4) cross-check raw SCPI/kernel telemetry so NaN or script parsing bugs cannot fake a pass.`;
+  const qa3Answer = `Run a single-variable A → B → A swap while holding supply voltage, temperature, and firmware constant: first compare upstream vs. downstream node voltages along ${prettyMathText(play.schematicShort)}; then ${prettyMathText(isoClause.charAt(0).toLowerCase() + isoClause.slice(1))}. Only condemn or rework flight/production silicon when the exact signature tracks the DUT into a known-good fixture and returns upon reinstall.`;
 
   const badgeCls = isNvidia ? "nvs-prof-badge" : "av-prof-badge";
   const boxCls = isNvidia ? "nvs-prof-box prof-interview-box" : "av-prof-box prof-interview-box";
@@ -572,43 +1275,48 @@ function renderHiringManagerInterviewScript(q, t, isNvidia) {
   return `<section class="${boxCls}" aria-label="Hiring Manager Interview Answer and Real-Product Execution">
     <h4><span class="${badgeCls}">🎤 ${esc(roleLabel)} Readiness</span> Complete Engineer Answer, Post-Math Product Steps &amp; Follow-Up Defense (${esc(qidLabel)})</h4>
     <div class="prof-interview-say">
-      <strong>⏱️ Part 1 · 60-Second Spoken Answer to Deliver to the Hiring Manager:</strong>
-      <p>"${esc(spokenAnswer)}"</p>
+      <strong>⏱️ Part 1 · 60-Second Spoken Answer to Deliver to the Hiring Manager</strong>
+      <p>${spokenHtml}</p>
+      <div class="prof-interview-beats" aria-label="Spoken answer structure">
+        <span><b>1.</b> Define ${skillPretty}</span>
+        <span><b>2.</b> 10<sup>3n</sup> Paper Target</span>
+        <span><b>3.</b> Schematic &amp; Safe Probe</span>
+        <span><b>4.</b> A-B-A Product Fix</span>
+      </div>
     </div>
+    <div class="prof-interview-part2-head">🧭 Part 2 · 4-Step Engineer Execution Blueprint (Paper Math → Schematic → Bench Probe → Product Fix)</div>
     <div class="prof-interview-grid">
       <div class="prof-interview-card">
-        <h5>🔬 Step 1 · Start With the Schematic &amp; Physical Model</h5>
-        <p>${esc(step1Pic)}</p>
+        <h5>🔬 Step 1 · Schematic Trace &amp; Physical Model</h5>
+        ${step1Body}
       </div>
       <div class="prof-interview-card">
-        <h5>🧮 Step 2 · Solve the Paper Math in 10<sup>3n</sup> First</h5>
-        <div style="margin:6px 0;">${eq(phys.formula)}</div>
-        <div style="margin:6px 0;">${eq(phys.sub)}</div>
-        <p style="font-size:0.84rem;color:#334155;">${esc(step2Math)}</p>
+        <h5>🧮 Step 2 · Solve the Paper Math in 10<sup>3n</sup> SI Units First</h5>
+        ${step2Body}
       </div>
       <div class="prof-interview-card">
-        <h5>🎛️ Step 3 · Instrument, Probe &amp; Measurement Order</h5>
-        <p>${esc(step3Order)}</p>
+        <h5>🎛️ Step 3 · Instrument Setup &amp; Measurement Order</h5>
+        ${step3Body}
       </div>
       <div class="prof-interview-card">
         <h5>🛠️ Step 4 · Real-Product Isolation &amp; Fix (Engineer Level)</h5>
-        <p>${esc(step4Product)}</p>
+        ${step4Body}
       </div>
     </div>
     <details class="prof-interview-defense" open>
-      <summary>🛡️ Part 3 · "If the Hiring Manager Asks..." Deeper Follow-Up Defense Q&amp;A</summary>
+      <summary>🛡️ Part 3 · "If the Hiring Manager Asks..." Deeper Follow-Up Defense Q&amp;A (${esc(qidLabel)})</summary>
       <div class="prof-qa-list">
         <div class="prof-qa-item">
-          <strong>Q1: Why solve the ${esc(phys.formula)} math in 10<sup>3n</sup> on paper BEFORE probing the product?</strong>
-          <p>Because probing blindly turns you into a trial-and-error technician. Knowing the exact theoretical target (${esc(targetStr)}) lets you set safe PSU current limits before smoke occurs, detect instrument loading errors (e.g., 10 MΩ DMM or 0.24 Ω 2-wire leads), and immediately tell a healthy board from a shifted margin or hidden short.</p>
+          <div class="prof-qa-top"><span class="prof-qa-badge">Defense 1 · Physics &amp; 10<sup>3n</sup> Math</span><strong>Q1: For ${skillPretty}, why solve ${formulaPretty} in 10<sup>3n</sup> SI units on paper BEFORE probing?</strong></div>
+          <p>${qa1Answer}</p>
         </div>
         <div class="prof-qa-item">
-          <strong>Q2: How do you prove your scope / DMM / script isn't lying to you?</strong>
-          <p>${esc(note.trap)} Always null/4-wire Kelvin low-ohm paths, verify 10× attenuation &amp; divider ratios, keep scope grounds &lt; 5 mm (or use N7020A + 1169B differential), and audit raw telemetry instead of trusting summary PASS flags.</p>
+          <div class="prof-qa-top"><span class="prof-qa-badge">Defense 2 · Probe Validity &amp; Loading</span><strong>Q2: During "${skillPretty}", how do you prove your DMM, scope, or script isn't lying to you?</strong></div>
+          <p>${qa2Answer}</p>
         </div>
         <div class="prof-qa-item">
-          <strong>Q3: How do you prove whether the failure belongs to the product hardware vs. your test fixture or cable?</strong>
-          <p>Run a single-variable A → B → A cross-swap holding temperature, rail voltage, and firmware constant. Only replace or condemn flight/production silicon when the exact signature follows the DUT into a known-good fixture and returns when put back.</p>
+          <div class="prof-qa-top"><span class="prof-qa-badge">Defense 3 · DUT vs. Fixture Proof</span><strong>Q3: How do you prove a fault belongs to product hardware vs. harness, return path, or test fixture?</strong></div>
+          <p>${qa3Answer}</p>
         </div>
       </div>
     </details>
@@ -1066,6 +1774,31 @@ const NVIDIA_TRACK_LECTURES = {
     instrument: "Frame hands-on stories cleanly using STAR: Google CPU2 (4-channel Keysight scope, N7020A rail probes, 1169B current sense on Ch1 CLK / Ch2 Logic / Ch3 I_sense / Ch4 M-Rail), DRAM summary-PASS vs. raw-fail parser mismatch, Intel board bring-up & VR programming, and Cisco socket A-B-A isolation.",
     trap: "Never invent proprietary register addresses/product specs, never claim sole ownership of team board designs or RF/VNA skills you haven't run, and always state PASS / FAIL / INVALID / BLOCKED clearly."
   }
+};
+// Extend with all 12 NVIDIA SLT Prep topic IDs so every #nvidia-sltView topic gets domain-exact notes
+NVIDIA_TRACK_LECTURES["si-pi"] = NVIDIA_TRACK_LECTURES.electrical;
+NVIDIA_TRACK_LECTURES["soc-boot"] = NVIDIA_TRACK_LECTURES.socboot;
+NVIDIA_TRACK_LECTURES["ddr-lpddr"] = NVIDIA_TRACK_LECTURES.dram;
+NVIDIA_TRACK_LECTURES["pcie-hsio"] = NVIDIA_TRACK_LECTURES.pcie;
+NVIDIA_TRACK_LECTURES["bench-instruments"] = NVIDIA_TRACK_LECTURES.instruments;
+NVIDIA_TRACK_LECTURES["linux-slt"] = NVIDIA_TRACK_LECTURES.linux;
+NVIDIA_TRACK_LECTURES["python-automation"] = NVIDIA_TRACK_LECTURES.python;
+NVIDIA_TRACK_LECTURES["ate-dft-slt"] = NVIDIA_TRACK_LECTURES.ate;
+NVIDIA_TRACK_LECTURES["panel-career"] = NVIDIA_TRACK_LECTURES.interview;
+NVIDIA_TRACK_LECTURES["timing-sta"] = {
+  physics: "Setup requires combinational paths to finish before the NEXT clock edge (T_clk(min) = t_CQ(max) + t_logic(max) + t_su + t_skew), while Hold requires fast data not to overwrite the SAME clock edge (t_CQ(min) + t_logic(min) >= t_h(max) + t_skew).",
+  instrument: "Correlate Static Timing reports (setup vs. hold paths) with hardware 2D Shmoo plots sweeping V_DD vs. f_clk: Setup fails recover when slowing f_clk; Same-Edge Hold fails persist across all frequencies down to 1 MHz.",
+  trap: "Slowing the clock frequency NEVER fixes a Hold violation because T_clk cancels completely out of the same-edge Hold inequality!"
+};
+NVIDIA_TRACK_LECTURES["socket-assembly"] = {
+  physics: "High-pin-count BGA SLT sockets pass 100 A+ DC through parallel spring/elastomer pogo pins while carrying 32 GT/s differential lanes. Marginal pin force, FOD, solder flux, or thermal warpage spikes contact resistance R_contact and drops pin voltage ΔV = I·R_contact.",
+  instrument: "Inspect socket field under angled microscope, measure 4-wire Kelvin pin contact resistance power-off, verify cross-pattern torque wrench seating, and execute DUT <-> Known-Good-Socket A-B-A cross-swap.",
+  trap: "2-wire DMM leads (~0.24 Ω) completely swamp 15–45 mΩ pogo contact faults, and ambient bench tests often miss elastomer/fixture intermittent opens at −10 °C or +85 °C thermal soak."
+};
+NVIDIA_TRACK_LECTURES["high-level-debug"] = {
+  physics: "High-level SoC/GPU failure triage follows causal hierarchy: Host Script / Parser -> OS / Kernel Driver -> Power Delivery & Clocking -> Physical Socket / Riser / Harness -> Silicon Die / DRAM / PCIe Block.",
+  instrument: "Freeze the failing box BEFORE rebooting, archive volatile raw logs (dmesg, lspci, nvidia-smi -q, SCPI string), confirm rails/clocks on 4-ch Keysight scope, and prove causality with strict single-variable A-B-A reversal.",
+  trap: "Changing two variables at once (resoldering/swapping riser AND updating BIOS/firmware) destroys root-cause proof and lets escaping bugs recur in fleet/production."
 };
 
 const NVIDIA_MASTER_STUDY_BANK = [

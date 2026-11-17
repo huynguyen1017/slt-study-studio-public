@@ -84,6 +84,10 @@ for (const q of avQuestions) {
   const cHtml = PME.avionics.renderChalkboard(q, t);
   assert(uHtml.includes("av-prof-box") && cHtml.includes("av-prof-chalkboard"), q.id + " missing professor HTML");
   assert(uHtml.includes("prof-interview-box") && cHtml.includes("prof-interview-box"), q.id + " missing Hiring-Manager Interview Script");
+  assert(uHtml.includes("Part 1") && uHtml.includes("Part 2") && uHtml.includes("Part 3"), q.id + " missing Part 1/2/3 structure");
+  const uInterviewOnly = (uHtml.split('<section class="av-prof-box prof-interview-box"')[1] || "").split("<details class=\"av-prof-bank\"")[0];
+  const visInterview = uInterviewOnly.replace(/<math[\s\S]*?<\/math>/g, " ").replace(/<[^>]+>/g, " ");
+  assert(!/Delta_V|Delta_U|DeltaV_max|DeltaI_max|theta_JA|->|10\^\(3n\)/.test(visInterview), q.id + " leaked raw math token in visible interview text");
   assert(!uHtml.includes("ENGR 852") && !cHtml.includes("ENGR 852"), q.id + " must not mix ENGR 852 labels into Avionics EE");
 }
 assert(ctx.window.avionicsWorkbookV2.stepsForQuestion("units-F1").every(x => !x.formula || x.formula !== "V = I * R"));
@@ -106,6 +110,10 @@ for (const q of nvQuestions) {
   const pHtml = PME.nvidia.renderPracticeCoach(q, t);
   assert(uHtml.includes("nvs-prof-box") && dHtml.includes("nvs-prof-chalkboard") && pHtml.includes("nvs-prof-hints"), q.id);
   assert(uHtml.includes("prof-interview-box") && dHtml.includes("prof-interview-box"), q.id + " missing NVIDIA Interview Script");
+  assert(uHtml.includes("Part 1") && uHtml.includes("Part 2") && uHtml.includes("Part 3"), q.id + " missing NVIDIA Part 1/2/3 structure");
+  const nvInterviewOnly = uHtml.split('<section class="nvs-prof-box prof-interview-box"')[1] || "";
+  const visNvInterview = nvInterviewOnly.replace(/<math[\s\S]*?<\/math>/g, " ").replace(/<[^>]+>/g, " ");
+  assert(!/Delta_V|Delta_U|DeltaV_max|DeltaI_max|theta_JA|->|10\^\(3n\)/.test(visNvInterview), q.id + " leaked raw math token in NVIDIA interview text");
   assert(!uHtml.includes("ENGR 852") && !dHtml.includes("ENGR 852"), q.id + " must not mix ENGR 852 into NVIDIA");
   assert(!/:\s*undefined\b|^\s*undefined\b|=\s*NaN\b/.test(uHtml) && !/:\s*undefined\b|^\s*undefined\b|=\s*NaN\b/.test(dHtml));
 }
@@ -165,7 +173,7 @@ function startStaticServer(dir) {
       await page.goto(`${base}/#avionics`, { waitUntil: "load" });
       await page.locator("#avionicsView:visible .av-prof-box").first().waitFor({ timeout: 25000 });
       assert(!(await page.locator("#avionicsView").textContent()).includes("ENGR 852"), "#avionicsView must NOT contain ENGR 852 clutter");
-      assert.equal(await page.locator("#avionicsView .prof-interview-box").count(), 1, "Avionics Understand view must render Hiring-Manager Interview Script");
+      assert.equal(await page.locator("#avionicsView .ohm-studio, #avionicsView .prof-interview-box").count(), 1, "Avionics Understand view must render Hiring-Manager Interview Script");
       assert((await page.locator("#avionicsView .av-vis-side").count()) >= 1, "Avionics visual panel must render Key Equations & How to Read side cards");
       await page.locator("#avProfCourseworkBank > summary").click();
       await page.locator('[data-av-cw-filter="digital_timing"]').click();
@@ -174,7 +182,19 @@ function startStaticServer(dir) {
       assert((await page.locator('[data-av-cw-status="CW-DIG-01"]').textContent()).includes("Correct"));
 
       await page.locator("#avTopicList").selectOption("ohm");
+      await page.locator('#avionicsView [data-qid="ohm-F2"]').click();
+      await page.locator("#avionicsView .prof-interview-box").waitFor();
+      const ohmF2Text = await page.locator("#avionicsView .prof-interview-box").textContent();
+      assert(ohmF2Text.includes("Part 1") && ohmF2Text.includes("Part 2") && ohmF2Text.includes("Part 3"), "ohm-F2 interview box must include Parts 1-3");
+      assert(!/Delta_V|Delta_U|->|10\^\(3n\)/.test(ohmF2Text), "ohm-F2 rendered interview text must not leak raw math tokens");
+      if (vp.width === 1280) {
+        await page.locator("#avionicsView .prof-interview-box").screenshot({ path: "/Users/huynguyen/.gemini/antigravity/brain/9abd734c-7786-4e8f-a3e8-35f2bdc2137b/ohm_f2_interview_redesign.png" });
+      }
       await page.locator('#avionicsView [data-qid="ohm-F1"]').click();
+      await page.locator("#avionicsView .ohm-studio").waitFor();
+      if (vp.width === 1280) {
+        await page.locator("#avionicsView .ohm-studio").screenshot({ path: "/Users/huynguyen/.gemini/antigravity/brain/9abd734c-7786-4e8f-a3e8-35f2bdc2137b/ohm_f1_interview_redesign.png" });
+      }
       await page.locator('[data-page="visual"]').click();
       await page.locator("#avionicsView #avVisual-concept").waitFor();
       const avVisText = await page.locator("#avionicsView #avVisual-concept").textContent();
