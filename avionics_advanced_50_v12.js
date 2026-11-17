@@ -184,24 +184,25 @@ for(const t of T){
   // Hardware Debug Interview Specialization: 5 V, 100 x 1 Ohm Parallel Array Open (∞ Ω) + Short (0 Ω) Walkthroughs
   const hwdSpecs={
    "parallel-X8":{
-    question:"Advanced 38 / 50 — Interview Hardware Debug Master Case (100 Parallel Resistors): A 5.0 V main rail feeds 100 resistors (nominal 1.0 Ω each) wired in parallel. Some resistors are OPEN and some are SHORTED (broken unit reads 0 Ω instead of 1 Ω). Walk through the complete paper math FIRST (formulas + broken resistance definitions), reading the schematic, isolating shorts before opens, and using an IR infrared camera and DMM (4-wire Kelvin vs 2-wire) to identify every broken resistor.",
-    formula:"1 / R_eq = Sum(1 / R_i) = (N_ok / 1.0) + (N_open / Infinity) + (N_short / 0)",
+    question:"Advanced 38 / 50 — Hardware Debug Interview Master Case (100 Parallel Resistors): An ideal 5.0 V source is specified across 100 connected nominal 1.0 Ω resistor branches, some open and some shorted. First predict the healthy resistance/current/power and determine why the full-bias condition is unsafe. Explain short vs open without dividing by zero, use KCL, 4-wire Kelvin resistance, low-energy sectional isolation, and count opens from the resistance AFTER isolating shorted paths. State which IR-camera observations require an independently rated thermal procedure.",
+    formula:"R_eq = R_nom / N_healthy",
+    sub:"R_eq = (1 Ω) / 100 = 0.010 Ω",
     steps:[
-     "Paper Math Step 1 (Healthy Baseline): Compute healthy parallel resistance R_eq = R_nom / N = 1.0 Ω / 100 = 0.01 Ω = 10.00 mΩ, I_branch = 5 V / 1 Ω = 5 A, total I_healthy = 500 A, and total P_healthy = 2500 W before touching hardware.",
-     "Paper Math Step 2 (Broken Resistor Values): Define shorted resistor R_short = 0 Ω (~1–5 mΩ physical solder bridge, G → ∞) and open resistor R_open = ∞ Ω (OL out-of-circuit, G = 0 S, I = 0 A). Even ONE 0 Ω short pulls total R_eq ≈ 0 Ω and masks every open branch!",
-     "Read the Schematic First: Locate +5V_MAIN net, GND return, all 100 designators R1–R100, sub-bank jumpers JP1–JP10, and J1 feed entry so every physical measurement maps directly to exact schematic parts.",
-     "Choose the Correct DMM Technique: Reject 2-wire in-circuit ohming across 10 mΩ (lead resistance ~0.24 Ω dwarfs 10 mΩ and all 100 parallel branches mask single units). Use 4-wire Kelvin milliohms for true R_eq, plus mV bus-gradient probing.",
-     "Phase A — Hunt All 0 Ω Shorts First with PSU Current-Limited CC Mode + IR Camera: Limit bench supply safely (e.g., 1.0 V max, 1.5–2.5 A). Current divides almost 100% through the 0 Ω short(s), lighting only shorted resistors/pads as unmistakable IR hotspots while healthy 1 Ω branches stay cool.",
-     "Isolate & Confirm Shorts Out-of-Circuit: Power OFF, walk mV probe along the +5V copper bus until drop flattens to 0 mV/tap, lift ONE pad of the suspect resistor (or open bank jumper JP_k), and measure directly with DMM: 0.000 Ω confirms SHORT! Repeat until 4-wire R_eq ≥ 10.00 mΩ.",
-     "Phase B — Hunt All ∞ Ω Opens with Paper Math + IR Cold Spots: Once 0 Ω shorts are cleared, solve N_open = 100 − (1.0 / R_eq). Apply a safe bias (e.g., 1.0 V -> 1.0 W in every healthy resistor -> ~60 °C), and sweep the IR camera to pinpoint every unheated ∞ Ω cold spot (~25 °C).",
-     "Verify Out-of-Circuit & Close Out: Power OFF, lift one pad on each IR cold resistor to confirm OL (∞ Ω), rework failed 0 Ω and ∞ Ω parts with verified 1.00 Ω resistors, and confirm final 4-wire R_eq = 10.00 mΩ ± tolerance."
+     "Trace shared physical nodes: +5V_MAIN and GND connect all 100 nominal 1 Ω branches; bank jumpers can disconnect an entire group. Label source, return and each current direction before writing a law.",
+     "Healthy parallel proof: 1/R_eq = N/R_nom = 100/(1 Ω), so R_eq = (1 Ω)/100 = 0.010 Ω = 10 mΩ. At 5 V each branch would draw 5 A and 25 W; the full bank would require 500 A and 2500 W. These numbers are theoretical predictions, NEVER a bench test setting.",
+     "Define opens and shorts separately: an open branch has G_open = 0 S and I_open = 0 A. Any IDEAL 0 Ω short collapses R_eq to 0 Ω, but 1/(0 Ω) is undefined as a finite arithmetic term. A REAL solder bridge has finite milliohm resistance; model it separately with the actual supply compliance.",
+     "Instrument choice: 0.24 Ω of 2-wire lead/contact resistance adds to the 10 mΩ healthy bank, so R_2wire ≈ 0.250 Ω with 2400% relative lead error. Use a properly zeroed/calibrated four-wire Kelvin milliohmmeter after removing power.",
+     "Power-off inspection and sectional isolation come FIRST. For the illustrative 2 mΩ short with 99 healthy 1 Ω branches, R_fault = 1/(99/1 Ω + 1/0.002 Ω) = 1.66945 mΩ. At a 2.5 A compliant supply V≈4.174 mV, I_short≈2.087 A, P_short≈8.7 mW; an IR hotspot is NOT guaranteed. Use only board-approved voltage/current limits.",
+     "Confirm by bank isolation, Kelvin and DC microvolt/millivolt gradients referenced to local return, then power OFF and lift a suspect pad only under approved rework procedures. Verify an isolated short out-of-circuit; R_eq ≥ 10 mΩ is a screening clue, NOT independent proof of no remaining shorts.",
+     "After shorts are eliminated, use N_healthy = R_nom/R_eq with matching Ω units. For R_eq≈0.010309278 Ω, N_healthy≈97 and N_open=100−97=3. An intact 97-branch array biased at 1 V would draw ~97 A and dissipate ~97 W, not 2.5 A. At 2.5 A its rail is ~25.77 mV and each healthy branch dissipates ~0.66 mW; IR contrast may be negligible.",
+     "With power OFF, verify each suspected open on an isolated component, inspect joints, carry out approved rework and restore jumpers. Confirm four-wire R_eq≈10 mΩ only within verified component tolerance, independent branch tests and documented PASS/FAIL/INVALID evidence."
     ],
     lesson:{
-     title:"5 V, 100 × 1 Ω Parallel Open + Short Hardware Debug Interview Walkthrough",
-     summary:"Do paper math first (R_eq = 10 mΩ, I_total = 500 A, short = 0 Ω masking open = ∞ Ω), check schematic topology/jumpers, hunt 0 Ω shorts first via current-limited IR hotspots + 4-wire Kelvin/mV gradient + lifted pad, then clear shorts and use N_open = 100 − 1/R_eq + IR cold spots to find every open.",
-     example:"Healthy: R_eq = 1/100 = 10 mΩ (500 A). If 1 short (0 Ω): R_eq ≈ 0 Ω → IR hotspot finds short under 1V/2A limit; lift pad reads 0.000 Ω. After removing shorts, R_eq = 10.309 mΩ → N_open = 100 − (1/0.010309) = 3 IR cold spots (OL out-of-circuit).",
-     why:"Probing a parallel 1 Ω bank in-circuit with a 2-wire DMM fails completely; separating shorts first (hotspot hunt) from opens second (cold-spot + KCL hunt) solves all 100 branches systematically without lifting 100 parts.",
-     vocab:[["Healthy 100 × 1 Ω Array","R_eq = 0.01 Ω (10 mΩ), I_total = 500 A @ 5 V"],["Broken Short","0 Ω ideal (~1 mΩ bridge); IR hotspot + masks opens"],["Broken Open","∞ Ω (OL out-of-circuit, 0 W); IR cold spot once shorts cleared"],["Out-of-Circuit Isolation","Lift 1 pad or open bank jumper so DMM measures R_i alone, not 99 siblings"]]
+     title:"Two-Node Parallel Bank · 8-Step Kelvin and Kirchhoff Fault Investigation",
+     summary:"The ideal healthy 100 × 1 Ω array is 10 mΩ and would draw 500 A at 5 V (2500 W)—a theoretical WARNING, not a safe bench load. Write KCL, separate open conductance from short path resistance without dividing by zero, perform power-off and low-energy branch isolation, then count opens using the dimensionless ratio R_nom/R_eq only after shorts are independently excluded.",
+     example:"Use the governing law R_eq = R_nom / N_healthy. At 100 healthy branches R_eq = 1 Ω / 100 = 0.010 Ω (10.0 mΩ). With all shorts excluded, 10.309278 mΩ implies 97 intact branches and 3 open branches. Correctly limited millivolt injection may not produce a visible hotspot; inspect banks and test isolated components.",
+     why:"Two-wire resistance includes lead resistance; four-wire Kelvin and bank isolation reveal milliohm faults. Low-energy thermal probing cannot promise a bright hotspot, and 1 V on an intact 10 mΩ bank is a ~100 A requirement. Never assume 25/60 °C temperatures without an explicit thermal and power model.",
+     vocab:[["Parallel nodes","Two terminals are electrically shared by every connected branch"],["Ideal short vs real short","0 Ω ideal needs case logic; a physical bridge has finite milliohm resistance"],["Open branch","Out-of-circuit OL; effectively zero branch conductance"],["4-wire Kelvin","Separate current-force and voltage-sense leads reduce lead-drop errors"]]
     }
    },
    "parallel-X9":{
@@ -314,7 +315,8 @@ for(const t of T){
    delete question.unit;
    if(hs.formula)question.formula=hs.formula;
    else delete question.formula;
-   delete question.sub;
+   if(hs.sub)question.sub=hs.sub;
+   else delete question.sub;
   }
   if(field.expected!==undefined){question.expected=field.expected;question.unit=field.unit;}
   if(!question.steps.length||question.steps.length<8||!question.lesson)throw Error("Missing detailed worked guidance: "+id);
