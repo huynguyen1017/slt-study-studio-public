@@ -19,9 +19,9 @@ assert.equal(6+1/(1/12+1/4),9,"As-drawn network is series + parallel, not pure p
 assert.equal(12/9,4/3);
 assert.equal(4/12+4/4,4/3);
 // Fifth case: bridge cross-link means simple series/parallel reduction is invalid.
-const va=48/7,vc=36/7,br=[(12-va),va/2,(12-vc)/2,vc,va-vc];
-assert(Math.abs(5*va-2*vc-24)<1e-10);
-assert(Math.abs(-2*va+5*vc-12)<1e-10);
+const bridgeVa=48/7,bridgeVc=36/7,br=[(12-bridgeVa),bridgeVa/2,(12-bridgeVc)/2,bridgeVc,bridgeVa-bridgeVc];
+assert(Math.abs(5*bridgeVa-2*bridgeVc-24)<1e-10);
+assert(Math.abs(-2*bridgeVa+5*bridgeVc-12)<1e-10);
 assert(Math.abs(br[0]-br[1]-br[4])<1e-10);
 assert(Math.abs(br[2]+br[4]-br[3])<1e-10);
 assert(Math.abs(br[0]+br[2]-60/7)<1e-10);
