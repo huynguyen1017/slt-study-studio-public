@@ -385,9 +385,9 @@ function muonInterviewGuidePanel(){
    '<section><h4>3. Avionics Bus Physical + Protocol Debugging</h4><p>Separating electrical signal-integrity faults (missing termination, wrong pull-ups, ground bounce, TX/RX swap) from protocol/firmware errors across UART, SPI, I²C, CAN, RS-422/485, LVDS, and Ethernet.</p></section>'+
    '<section><h4>4. Python + SCPI/PyVISA &amp; TVAC Qualification</h4><p>Writing fail-closed Python (pytest, pyvisa, pyserial, socketcan) scripts with try/finally safe power-down, *IDN?/SYST:ERR? checks, guard-banded limits, Linux sysfs/hwmon/dmesg auditing, and TVAC/vibe qualification.</p></section>'+
   '</div>'+
-  '<div class="av-worked-mini"><strong>Reported Glassdoor Technical Question #1: Satellite passes in ambient thermal chamber, then FAILS in TVAC chamber — why?</strong><p>1) Zero convection in vacuum (h = 0 at &lt;10⁻⁵ Torr): heat transfers only via conduction through bolted baseplates/TIM and thermal radiation (ε·σ·A·(T₁⁴ − T₂⁴)), so poor TIM/torque causes localized thermal runaway. 2) Paschen’s law corona/arcing (~0.001–100 Torr during pump-down) and multipaction. 3) Outgassing volatiles condensing on cold payloads.</p></div>'+
-  '<div class="av-worked-mini"><strong>Reported Glassdoor Technical Question #2: Verification vs. Validation (V&amp;V)</strong><p>Verification (“Did we build the system right?”) proves through objective measurements that hardware/firmware meets its specified requirements and ICD limits. Validation (“Did we build the right system?”) proves that the integrated spacecraft survives and accomplishes its actual operational mission in a flight-like environment (e.g., FlatSat/HIL mission simulation in TVAC).</p></div>'+
-  '<div class="av-worked-mini"><strong>Reported Hardware Debug Question #3: 5 V Rail Feeding 100 Parallel 1 Ω Resistors (Mixed Opens + 0 Ω Shorts)</strong><p>1) <b>Paper Math First:</b> Healthy R<sub>eq</sub> = 1 Ω / 100 = 0.01 Ω (10 mΩ), I = 500 A (2500 W); broken Short = 0 Ω (~1 mΩ bridge) masks Open = ∞ Ω. 2) <b>Read Schematic:</b> Trace +5V_MAIN, R1–R100, and bank jumpers JP1–JP10. 3) <b>Clear Shorts First:</b> 2-wire DMM leads (0.24 Ω) swamp 10 mΩ — inject safe CC limit (≤1 V / 2.5 A), find hotspots via <b>IR camera + DC mV gradient</b>, and lift 1 pad (0.000 Ω confirms short) until 4-wire Kelvin R<sub>eq</sub> ≥ 10.00 mΩ. 4) <b>Find Opens Second:</b> Calculate N<sub>open</sub> = 100 − 1/R<sub>eq</sub>, apply safe 1 V bias, spot ∞ Ω units as cool ambient spots on IR camera, and confirm OL out-of-circuit.</p></div>'+
+  '<div class="av-worked-mini"><strong>Technical Interview Practice Scenario #1: Satellite passes in ambient thermal chamber, then FAILS in TVAC chamber — why?</strong><p>1) Zero convection in vacuum (h = 0 at &lt;10⁻⁵ Torr): heat transfers only via conduction through bolted baseplates/TIM and thermal radiation (ε·σ·A·(T₁⁴ − T₂⁴)), so poor TIM/torque causes localized thermal runaway. 2) Paschen’s law corona/arcing (~0.001–100 Torr during pump-down) and multipaction. 3) Outgassing volatiles condensing on cold payloads.</p></div>'+
+  '<div class="av-worked-mini"><strong>Technical Interview Practice Scenario #2: Verification vs. Validation (V&amp;V)</strong><p>Verification (“Did we build the system right?”) proves through objective measurements that hardware/firmware meets its specified requirements and ICD limits. Validation (“Did we build the right system?”) proves that the integrated spacecraft survives and accomplishes its actual operational mission in a flight-like environment (e.g., FlatSat/HIL mission simulation in TVAC).</p></div>'+
+  (window.AVIONICS_ARRAY_MATH_V40?.render('muon')||'')+
   '</details>';
 }
 
@@ -404,11 +404,12 @@ function lessonPage(q,t,f){
  '<h3>Start here: '+esc(f.label)+'</h3>'+
  activeBanner(q,t)+
  (window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,t,"understand")||"")+
+ (window.AVIONICS_ARRAY_MATH_V40?.isCase(q)?window.AVIONICS_ARRAY_MATH_V40.render("understand",q):"")+
  '<div class="av-learning-stage">Learning step '+esc(String(q.difficulty||1))+' / '+TOPIC_TOTAL+' · '+esc(q.learningObjective||q.level)+' <small>Foundations → Lab applications → Calculations → Fault diagnosis</small></div>'+ 
  '<div class="av-lede"><strong>In very simple words (Zero prior EE assumed)</strong><p>'+rich(summary)+'</p></div>'+
  '<div class="av-two-up"><section><h4>Words you need first</h4><table class="av-vocab"><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody>'+
  glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+rich(p[1])+'</td></tr>').join("")+
- '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(lesson?(guide.analogy||(PME?.TOPIC_PROFESSOR_NOTES?.[t.id]?.intuition)||lesson.why):item?item.analogy:guide.analogy)+'</p><h4>Post-Math Engineer Resolution on Hardware</h4><p>'+rich(lesson?(f.test?f.test+" · ":"")+lesson.why:item?item.why:f.why)+'</p></section></div>'+
+ '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(lesson?(guide.analogy||(PME?.TOPIC_PROFESSOR_NOTES?.[t.id]?.intuition)||lesson.why):item?item.analogy:guide.analogy)+'</p><h4>Post-Math Engineer Resolution on Hardware</h4>'+(window.AVIONICS_ARRAY_MATH_V40?.isCase(q)?window.AVIONICS_ARRAY_MATH_V40.render('bench',q):'<p>'+rich(lesson?(f.test?f.test+" · ":"")+lesson.why:item?item.why:f.why)+'</p>')+'</section></div>'+
  ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderUnderstandLecture(q,t,f)||"")+
  (f.label==="SI base unit"?siChapterPanel():"")+
  textbookPanel(t)+
@@ -426,8 +427,8 @@ function lessonPage(q,t,f){
  '<div class="av-actions-bottom"><button id="avGoVisual" class="av-light">See all 3 large visuals stacked →</button><button id="avGoWork" class="av-primary">See all 6 baby steps + worked MathML →</button></div>'+
  (formulaSrc?equation(formulaSrc,"1. ENGINEERING EQUATION (MATHML)"):"")+
  (subSrc?equation(subSrc,"2. WORKED EXAMPLE / SUBSTITUTION (ENGINEERING NOTATION)"):"")+
- '<div class="av-worked-mini"><strong>Worked evidence / expected result</strong><p>'+rich(lesson?lesson.example:item?item.example:guide.example)+'</p></div>'+
- '<div class="av-takeaway"><strong>Remember this:</strong> '+rich(lesson?(q.steps[q.steps.length-1]||lesson.why):item?item.recap:guide.lead)+'</div>'+
+ (window.AVIONICS_ARRAY_MATH_V40?.isCase(q)?window.AVIONICS_ARRAY_MATH_V40.render("evidence",q):'<div class="av-worked-mini"><strong>Worked evidence / expected result</strong><p>'+rich(lesson?lesson.example:item?item.example:guide.example)+'</p></div>')+
+ '<div class="av-takeaway"><strong>Remember this:</strong> '+(window.AVIONICS_ARRAY_MATH_V40?.isCase(q)?'Power OFF; validate true two-node topology, use calibrated Kelvin measurement, and confirm each short/open before approved rework. Theoretical 500 A is NOT a bench setting.':rich(lesson?(q.steps[q.steps.length-1]||lesson.why):item?item.recap:guide.lead))+'</div>'+
  '</section>';
 }
 
@@ -443,6 +444,7 @@ function visualPage(q,t,f){
  '<h3>Draw it first. Then connect it safely.</h3>'+
  activeBanner(q,t)+
  (window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,t,"visual")||"")+
+ (window.AVIONICS_ARRAY_MATH_V40?.isCase(q)?window.AVIONICS_ARRAY_MATH_V40.render("visual",q):"")+
  ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderVisualGuide(q,t)||"")+
  '<p class="av-explain">Every diagram below is tailored specifically to <strong>'+esc(q.id.toUpperCase())+'</strong>. The selected board pins, component mix, breadboard holes, and schematic topology follow this question’s circuit setup.</p>'+
  '<div class="av-visual-nav">'+pics.map(x=>'<a href="#avVisual-'+x[0]+'">'+esc(x[1])+'</a>').join("")+'</div>'+
@@ -479,11 +481,12 @@ function solvePage(q,t,f){
  '<p class="av-explain">Step through one card at a time above, or read the complete 6-step walkthrough already expanded directly below.</p>'+
  activeBanner(q,t)+
  (window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,t,"baby")||"")+
+ (window.AVIONICS_ARRAY_MATH_V40?.isCase(q)?window.AVIONICS_ARRAY_MATH_V40.render("worked",q):"")+
  inlineStepVisual(q,t,stepIndex)+
  '<div class="av-step-counter"><strong>Step '+(stepIndex+1)+' of '+steps.length+'</strong><span>'+esc(step.title)+'</span></div>'+
  '<div class="av-steps-rail">'+steps.map((s,i)=>'<span class="'+(i===stepIndex?"here":i<stepIndex?"passed":"")+'" title="'+esc(s.title)+'"></span>').join("")+'</div>'+
  '<article class="av-baby-step"><span class="av-step-icon">'+(stepIndex+1)+'</span>'+
- '<div><h4>'+esc(step.title)+'</h4><p>'+rich(step.body)+'</p>'+
+ '<div><h4>'+esc(step.title)+'</h4><p>'+rich(step.body)+'</p>'+ (window.AVIONICS_ARRAY_MATH_V40?.renderStep(q,stepIndex)||'')+
  (step.kind==="given"?'<div class="av-given"><strong>Problem statement:</strong> '+esc(q.question)+'</div>':"")+
  (step.formula?equation(step.formula,step.kind==="given"?"UNIT PREFIX CONVERSION":stepIndex===2?"ENGINEERING EQUATION (MATHML)":"NUMBER SUBSTITUTION (MATHML)"):"")+
  (step.answer?'<div class="av-final-value">Final Answer: '+esc(step.answer)+(step.engHtml?' <span class="av-eng-badge">Engineering Notation: '+step.engHtml+'</span>':"")+'</div>':"")+
@@ -491,7 +494,7 @@ function solvePage(q,t,f){
  '<div class="av-control-row"><button id="avStepBack" class="av-light" '+(stepIndex===0?"disabled":"")+'>← Previous step</button>'+
  (stepIndex<steps.length-1?'<button id="avStepNext" class="av-primary">Next baby step →</button>':'<button id="avGoTry" class="av-primary">I have read the steps — try it yourself →</button>')+'</div>'+
  '<details class="av-all-steps" open><summary>Complete '+steps.length+'-Step Guided Walkthrough (All steps &amp; MathML equations)</summary><div class="av-all-list">'+
- steps.map((s,i)=>'<div class="'+(i===stepIndex?"av-step-highlight":"")+'"><b>Step '+(i+1)+': '+esc(s.title)+'</b><p>'+rich(s.body)+'</p>'+(s.formula?equation(s.formula,"EQUATION (MATHML)"):"")+(s.answer?'<div class="av-final-value">Final Answer: '+esc(s.answer)+(s.engHtml?' · Engineering Notation: '+s.engHtml:"")+'</div>':"")+'</div>').join("")+
+ steps.map((s,i)=>'<div class="'+(i===stepIndex?"av-step-highlight":"")+'"><b>Step '+(i+1)+': '+esc(s.title)+'</b><p>'+rich(s.body)+'</p>'+(s.formula?equation(s.formula,"EQUATION (MATHML)"):"")+(window.AVIONICS_ARRAY_MATH_V40?.renderStep(q,i)||"")+(s.answer?'<div class="av-final-value">Final Answer: '+esc(s.answer)+(s.engHtml?' · Engineering Notation: '+s.engHtml:"")+'</div>':"")+'</div>').join("")+
  '</div></details>'+
  ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderChalkboard(q,t)||"")+
  (HWD?HWD.render(t,q):"")+
@@ -521,6 +524,7 @@ function practicePage(q,t,f){
  '<p class="av-explain">Type a calculated number (scientific notation like 2.5e-3 or unit conversion like 0.01 A is accepted!) or explain the concept in your own words.</p>'+
  activeBanner(q,t)+
  (window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,t,"try")||"")+
+ (window.AVIONICS_ARRAY_MATH_V40?.isCase(q)?window.AVIONICS_ARRAY_MATH_V40.render("try",q):"")+
  ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderTryCoach(q,t)||"")+
  (q.expected!==undefined?'<form id="avTryNumber" class="av-try-form"><label for="avValue">Enter your calculated answer</label><div class="av-input-row"><input id="avValue" type="text" inputmode="decimal" autocomplete="off" placeholder="Example: 10 or 0.01 A or 2.5e-3" value="'+esc(currentAnswer)+'" aria-describedby="avRequestedUnit"><span id="avRequestedUnit">'+esc(q.unit)+'</span><button class="av-primary" type="submit">Check answer</button></div></form>':
  '<label class="av-try-label" for="avExplain">Write your explanation in your own words</label><textarea id="avExplain" rows="4" placeholder="I think this means... because... On a Muon Space test bench I would verify it by...">'+esc(draftText)+'</textarea>'+
