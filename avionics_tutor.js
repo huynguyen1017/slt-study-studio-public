@@ -492,6 +492,7 @@ function solvePage(q,t,f){
  '</div></details>'+
  ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderChalkboard(q,t)||"")+
  (HWD?HWD.render(t,q):"")+
+ ((window.ENGINEERING_SOLVED_CASES)?window.ENGINEERING_SOLVED_CASES.render(q,"avionics"):"")+
  '<div class="av-takeaway"><strong>How to say this in your Muon Space interview:</strong> First state the physical law, describe how you set up the DMM/scope/breadboard, then explain the safety check and Go/No-Go limit.</div>'+
  '</section>';
 }
