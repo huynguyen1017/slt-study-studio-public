@@ -34,6 +34,7 @@ on:
       - 'tests/nvidia-slt-academy-v1.test.cjs'
       - 'tests/nvidia-slt-visual-lab-v2.test.cjs'
       - 'nvidia_slt_*.js'
+      - 'tests/nvidia-dual-math-v41.test.cjs'
       - 'nvidia_slt.css'
       - 'ohmf1_engineer_studio_v2.js'
       - 'circuit_question_railroad_v2.js'
@@ -77,6 +78,7 @@ jobs:
           node --check nvidia_slt_math.js
           node --check nvidia_slt_questions.js
           node --check nvidia_slt_ui.js
+          node --check nvidia_slt_equations_v41.js
           node --check engineering_solved_cases_v1.js
           node --check nvidia_slt_visual_lab_v2.js
           node --check ohmf1_engineer_studio_v2.js
@@ -112,6 +114,7 @@ jobs:
           node tests/circuit-railroad-whiteboard-v1.test.cjs
           node tests/circuit-question-railroad-v2.test.cjs
           node tests/four-tab-svg-math-v39.test.cjs
+          node tests/nvidia-dual-math-v41.test.cjs
           node tests/avionics-array-math-v40.test.cjs
       - name: Install headless browser for desktop and mobile smoke tests
         run: |
@@ -127,5 +130,6 @@ jobs:
           RUN_BROWSER=1 node tests/circuit-railroad-whiteboard-v1.test.cjs
           RUN_BROWSER=1 node tests/circuit-question-railroad-v2.test.cjs
           RUN_BROWSER=1 node tests/four-tab-svg-math-v39.test.cjs
+          RUN_BROWSER=1 node tests/nvidia-dual-math-v41.test.cjs
           RUN_BROWSER=1 node tests/avionics-array-math-v40.test.cjs
           node tests/avionics-hw-debug-interview.test.cjs
