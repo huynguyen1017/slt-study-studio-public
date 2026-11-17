@@ -7,7 +7,7 @@ const context={window:{},document:undefined};vm.createContext(context);
 vm.runInContext(read("simulation/math_format.js"),context);
 vm.runInContext(read("circuit_question_railroad_v2.js"),context);
 const pad=context.window.CIRCUIT_CURRENT_QUESTION_RAILROAD;
-assert(pad && pad.version==="2.0");
+assert(pad && pad.version==="3.0");
 const given=pad.extractQuantities("Supply 12 V; R1 2.4 kΩ; shunt 5 mΩ; current 25 mA; cap 0.47 µF; t 20 ns; C 100 pF.");
 const get=u=>given.find(g=>g.unit===u);
 assert.equal(get("V").scaled,12);
@@ -47,7 +47,9 @@ for(const file of ["circuit_question_railroad_v2.js","circuit_question_railroad_
  assert(cache.includes(file),file+" cached for offline use");
 }
 assert(shell.indexOf("circuit_question_railroad_v2.js")<shell.indexOf("professor_notebook_spreads.js"));
-assert(spread.includes("CIRCUIT_CURRENT_QUESTION_RAILROAD?.render(q, t)"),"Avionics and NVIDIA notebook views receive current question rails");
+assert(spread.includes("svgNotebookFactorLabel") && spread.includes("svgNotebookEquation"),"Native SVG pictures should draw fraction bars and canceled units");
+assert(read("avionics_tutor.js").includes("renderStage(q,t,\"visual\")"));
+assert(read("nvidia_slt_tutor.js").includes('renderStage(q,topicObj,"try")'));
 assert(cache.includes("v38-current-question-railroad"));
 assert(shell.includes("circuit_railroad_whiteboard_v1.js"),"retain four reference whiteboards");
 console.log("PASS v38: prefix cancellation, current-question and dice-variant isolation, MathML, escaping, existing course and offline integration.");

@@ -119,5 +119,63 @@
         '</strong><p>This target is from the existing question data, not recomputed from text. Verify it against KCL/KVL, dimensions and actual topology before trusting the result.</p></div>' : "") +
       '</div></section>';
   }
-  window.CIRCUIT_CURRENT_QUESTION_RAILROAD = {version: "2.0", extractQuantities, rail, render};
+
+  // Every tab uses the SAME selected q object, including its live numerical dice variant.
+  // "Try" deliberately does not display the stored expected answer before checking.
+  function renderStage(q, topic, stage) {
+    if (!q || typeof q !== "object") return "";
+    const mode = ["understand", "visual", "baby", "try"].includes(stage) ? stage : "understand";
+    const known = extractQuantities(q.question || q.prompt || "");
+    const converted = known.filter(g => g.power !== 0);
+    const formula = String(q.formula || (q.math && q.math.formula) || "").trim();
+    const substitution = String(q.sub || (q.math && q.math.sub) || "").trim();
+    const hasEquation = formula.includes("=") && !formula.includes("->");
+    const original = mode === "baby" ? render(q, topic) : "";
+    const label = mode === "understand" ? "1 · Understand" :
+      mode === "visual" ? "2 · Visuals" : mode === "baby" ? "3 · Baby Steps" : "4 · Try It";
+    const n = q.expected == null ? NaN : Number(q.expected);
+    const numeric = Number.isFinite(n);
+    const example = converted.length ? converted[0] : null;
+    let content = "";
+    if (mode === "understand") {
+      content =
+        '<p><b>Annotate the actual question.</b> Identify the source, component values, unknown and reference node. Do not treat two resistors as parallel unless BOTH terminals share the same pair of nodes.</p>' +
+        (known.length ? '<div class="rrq-givens">' + known.slice(0, 10).map(g =>
+          '<span><strong>' + esc(g.raw) + '</strong><small>' + esc(g.name) + '</small></span>').join("") + '</div>' :
+          '<p>Concept-only question: identify the physical principle; do not invent a calculation.</p>') +
+        (hasEquation ? '<div class="rrq-label">QUESTION-SPECIFIC GOVERNING LAW</div>' + maths(formula) : '') +
+        (example ? '<div class="rrq-label">ONE ACTUAL GIVEN · FACTOR-LABEL CONVERSION</div>' + rail(example) : '') +
+        '<p>Quantity symbols such as <i>V</i>, <i>I</i> and <i>R</i> are italic; unit labels V, A and Ω are upright. Powers of ten are written as 10³, 10⁻³ and so on.</p>';
+    } else if (mode === "visual") {
+      content =
+        '<p><b>Read the picture:</b> mark both ends of every component, draw each reference current arrow, and check connected nodes before reading a voltage or waveform. A drawn connection controls the equation, not a caption.</p>' +
+        (hasEquation ? '<div class="rrq-label">THE SAME LAW USED TO ANNOTATE THIS VISUAL</div>' + maths(formula) : '') +
+        (substitution ? '<div class="rrq-label">QUESTION-SPECIFIC WORKED SUBSTITUTION</div>' + maths(substitution) : '') +
+        (example ? '<div class="rrq-label">PREFIX FRACTION SHOWN IN THE DIAGRAM STUDY SHEET</div>' + rail(example) : '') +
+        '<p>On a real board, check probe polarity, ground reference and current limits; theoretical diagrams are not verified physical pinouts or live instrument captures.</p>';
+    } else if (mode === "baby") {
+      content =
+        '<p><b>Follow the pencil order:</b> list givens → cancel prefixes → select a law from the actual topology → substitute → clear fractions → solve → convert units → check KCL/KVL/power.</p>' + original +
+        '<div class="rrq-label">FRACTION-ARITHMETIC CHECK (MATHEMATICAL RULE, NOT A NEW CIRCUIT VALUE)</div>' +
+        maths("a/b + c/d = (a*d + b*c)/(b*d)") +
+        '<p>For multi-node circuits, first solve simultaneous KCL equations. You cannot cancel one term from a sum. For ohms-law current, V/Ω has units A; a separate factor converts A→mA.</p>';
+    } else {
+      content =
+        '<p><b>Try it without seeing the stored answer:</b> copy the givens onto paper, draw the node labels, and put the unwanted prefix on the denominator of the next fraction. Your answer box and existing scoring remain unchanged.</p>' +
+        (converted.length ? '<div class="rrq-label">YOU CAN USE THESE CONVERSION IDENTITIES</div>' +
+          converted.slice(0, 4).map(g => '<div class="rrq-label">' +
+            esc(g.name + " = 10^(" + g.power + ")") + "</div>").join("") : '') +
+        (hasEquation ? '<div class="rrq-label">FORMULA ONLY — NO NUMERIC RESULT</div>' + maths(formula) : '') +
+        '<p>Once you submit, compare your result with the original answer checker. Your practice attempt is not modified by this teaching overlay.</p>';
+    }
+    return '<section class="rrq-stage rrq-stage-' + mode +
+      '" aria-label="' + esc(label + ' · question-specific factor-label engineering whiteboard') + '">' +
+      '<header><small>' + esc(label) + ' · ENGINEERING NOTEBOOK</small><h4>' +
+      (mode === "try" ? "Build the answer yourself" : "Railroad fractions × engineering circuit laws") +
+      '</h4><p>Current question: ' + esc(q.id || "selected") +
+      ' · No generic numbers substituted for its data</p></header>' +
+      '<div class="rrq-stage-content"><p class="rrq-original"><b>Given question:</b> ' + esc(q.question || q.prompt || "") + '</p>' + content + '</div></section>';
+  }
+
+  window.CIRCUIT_CURRENT_QUESTION_RAILROAD = {version: "3.0", extractQuantities, rail, render, renderStage};
 })();

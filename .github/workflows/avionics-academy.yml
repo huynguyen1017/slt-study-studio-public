@@ -38,6 +38,8 @@ on:
       - 'circuit_question_railroad_v2.js'
       - 'circuit_question_railroad_v2.css'
       - 'tests/circuit-question-railroad-v2.test.cjs'
+      - 'tests/four-tab-svg-math-v39.test.cjs'
+      - 'professor_notebook_spreads.js'
       - 'circuit_railroad_whiteboard_v1.js'
       - 'circuit_railroad_whiteboard_v1.css'
       - 'tests/circuit-railroad-whiteboard-v1.test.cjs'
@@ -107,6 +109,7 @@ jobs:
           node tests/ohmf1-engineer-studio-v2.test.cjs
           node tests/circuit-railroad-whiteboard-v1.test.cjs
           node tests/circuit-question-railroad-v2.test.cjs
+          node tests/four-tab-svg-math-v39.test.cjs
       - name: Install headless browser for desktop and mobile smoke tests
         run: |
           npm install --no-save playwright@1.56.1
@@ -120,3 +123,4 @@ jobs:
           RUN_BROWSER=1 node tests/ohmf1-engineer-studio-v2.test.cjs
           RUN_BROWSER=1 node tests/circuit-railroad-whiteboard-v1.test.cjs
           RUN_BROWSER=1 node tests/circuit-question-railroad-v2.test.cjs
+          RUN_BROWSER=1 node tests/four-tab-svg-math-v39.test.cjs

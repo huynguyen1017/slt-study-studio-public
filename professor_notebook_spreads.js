@@ -386,6 +386,63 @@ function renderPanel3BenchHookup(s) {
 }
 
 /* ==================== MAIN 2600x1400 FULL LECTURE & SOLUTION SHEET RENDERER ==================== */
+
+/* Draw typeset fractions with native SVG primitives: survives PNG export.
+   An ambiguous expression remains source text rather than a guessed algebraic fraction. */
+function svgNotebookEquation(raw, x, y) {
+  const value = String(raw || "").split(/\s+;\s+|\s+\|\s+/)[0].trim();
+  const normalized = value.replace(/\*/g,"×").replace(/\^2\b/g,"²")
+    .replace(/\^3\b/g,"³").replace(/10\^\(-3\)/g,"10⁻³")
+    .replace(/10\^\(3\)/g,"10³");
+  const eq = normalized.indexOf("=");
+  const lhs = eq >= 1 ? normalized.slice(0, eq+1).trim() : "";
+  const rhs = eq >= 1 ? normalized.slice(eq+1).trim() : "";
+  let depth=0,slashes=[];
+  for(let i=0;i<rhs.length;i++){
+    if(rhs[i]==="(")depth++;
+    else if(rhs[i]===")")depth--;
+    else if(rhs[i]==="/"&&depth===0)slashes.push(i);
+  }
+  if(lhs.length<=22&&rhs.length<=76&&slashes.length===1){
+    let a=rhs.slice(0,slashes[0]).trim(),b=rhs.slice(slashes[0]+1).trim();
+    const aGrouped = a.startsWith("(")&&a.endsWith(")");
+    const bGrouped = b.startsWith("(")&&b.endsWith(")");
+    if(aGrouped)a=a.slice(1,-1);
+    if(bGrouped)b=b.slice(1,-1);
+    if(a.length<30&&b.length<30&&!/[=]/.test(a+b)&&(aGrouped||!/\s[+\-]\s/.test(a))&&(bGrouped||!/\s[+\-]\s/.test(b))){
+      return '<g class="nb-svg-math-fraction" aria-label="'+esc(value)+'">'+
+        '<text x="'+(x-60)+'" y="'+(y+32)+'" text-anchor="end" font-size="15" font-family="Arial,sans-serif" font-weight="800" fill="#163550">'+esc(lhs)+'</text>'+
+        '<text x="'+x+'" y="'+(y+20)+'" text-anchor="middle" font-size="15" font-family="Arial,sans-serif" font-weight="800" fill="#163550">'+esc(a)+'</text>'+
+        '<line class="nb-eq-fraction-rule" x1="'+(x-110)+'" y1="'+(y+27)+'" x2="'+(x+110)+'" y2="'+(y+27)+'" stroke="#b94a58" stroke-width="2.2"/>'+
+        '<text x="'+x+'" y="'+(y+45)+'" text-anchor="middle" font-size="15" font-family="Arial,sans-serif" font-weight="800" fill="#163550">'+esc(b)+'</text></g>';
+    }
+  }
+  const shortened=normalized.length>69?normalized.slice(0,66)+"…":normalized;
+  return '<text class="nb-svg-source-equation" x="'+x+'" y="'+(y+34)+'" font-size="'+(shortened.length>46?12:15)+'" font-family="Arial,sans-serif" text-anchor="middle" font-weight="750" fill="#163550" aria-label="'+esc(value)+'">'+esc(shortened)+'</text>';
+}
+function svgNotebookFactorLabel(spec, x, y) {
+  const g=spec.factorGiven;
+  if(!g || !Number.isFinite(g.value) || !Number.isFinite(g.power)){
+    return '<text x="'+x+'" y="'+(y+34)+'" text-anchor="middle" font-size="14" font-family="Arial,sans-serif" font-weight="700" fill="#375d78">No prefixed given: skip unit conversion (do not invent one).</text>';
+  }
+  const sup=number=>String(Math.abs(number)).replace(/[0-9]/g,z=>("⁰¹²³⁴⁵⁶⁷⁸⁹"[Number(z)]));
+  const p = "10" + (g.power<0?"⁻":"") + sup(g.power);
+  const label=String(g.unit),base=String(g.base);
+  const result=String(Number(g.scaled.toPrecision(7)))+" "+base;
+  const start=x-245;
+  const f=(a,top,bottom,w)=>'<text x="'+a+'" y="'+(y+18)+'" text-anchor="middle" font-size="14" font-weight="800" fill="#163550">'+esc(top)+'</text>'+
+    '<line class="nb-eq-fraction-rule" x1="'+(a-w/2)+'" x2="'+(a+w/2)+'" y1="'+(y+27)+'" y2="'+(y+27)+'" stroke="#b94a58" stroke-width="2.2"/>'+
+    '<text x="'+a+'" y="'+(y+45)+'" text-anchor="middle" font-size="14" font-weight="800" fill="#163550">'+esc(bottom)+'</text>';
+  return '<g class="nb-svg-factor-label" aria-label="'+esc(g.raw+" times 10 to the "+g.power+" "+base+" per "+label+" equals "+result)+'">'+
+    f(start+58,String(g.value)+" "+label,"1",108)+
+    '<line class="nb-eq-cancel-stroke" x1="'+(start+67)+'" x2="'+(start+103)+'" y1="'+(y+8)+'" y2="'+(y+23)+'" stroke="#d54457" stroke-width="2.4"/>'+
+    '<text x="'+(start+136)+'" y="'+(y+32)+'" text-anchor="middle" font-size="17" font-weight="800" fill="#12516b">×</text>'+
+    f(start+220,p+" "+base,"1 "+label,140)+
+    '<line class="nb-eq-cancel-stroke" x1="'+(start+241)+'" x2="'+(start+277)+'" y1="'+(y+36)+'" y2="'+(y+48)+'" stroke="#d54457" stroke-width="2.4"/>'+
+    '<text x="'+(start+322)+'" y="'+(y+32)+'" font-size="17" font-weight="800" fill="#12516b">=</text>'+
+    '<text x="'+(start+343)+'" y="'+(y+32)+'" font-size="16" font-weight="850" fill="#0d7953">'+esc(result)+'</text></g>';
+}
+
 function renderNotebookSpreadSVG(spec) {
   const s = spec || {};
   const header = esc(s.header || "ENGINEERING STUDY & COMPLETE SOLUTION SHEET");
@@ -451,12 +508,12 @@ function renderNotebookSpreadSVG(spec) {
     ${renderPanel3BenchHookup(s)}
 
     <!-- ROW 2: 4 COMPLETE ENGINEER SOLUTION CARDS (y=674..1310) — ZERO GENERALIST FLUFF! -->
-    ${card(40, 674, 610, 636, "4. Governing Equations & 10^(3n) Prefix Table", "#1e3a8a")}
+    ${card(40, 674, 610, 636, "4. Equations & Railroad-Track Unit Cancellation", "#1e3a8a")}
     ${eqChips.map((eqStr, idx) => `
       <rect x="64" y="${736 + idx * 72}" width="562" height="58" rx="9" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.8"/>
-      <text x="345" y="${771 + idx * 72}" text-anchor="middle" font-family="${fontMono}" font-size="${String(eqStr).length > 48 ? 13 : 15.5}" font-weight="800" fill="#0f294a">${esc(String(eqStr))}</text>
+      ${idx===2 ? svgNotebookFactorLabel(s, 345, 736 + idx * 72) : svgNotebookEquation(eqStr, 345, 736 + idx * 72)}
     `).join("")}
-    <text x="64" y="974" font-family="${fontMain}" font-size="15" font-weight="800" fill="#1e3a8a">Given Quantities -> Base SI 10^(3n) Conversion Table:</text>
+    <text x="64" y="974" font-family="${fontMain}" font-size="15" font-weight="800" fill="#1e3a8a">Givens Reference (fraction method shown above):</text>
     <rect x="64" y="988" width="562" height="36" fill="#1e3a8a"/>
     ${(tbl.headers || []).slice(0, colCount).map((h, i) => `<text x="${colStarts[i] + 8}" y="1011" font-family="${fontMain}" font-size="12" font-weight="800" fill="#ffffff">${esc(String(h).slice(0, 22))}</text>`).join("")}
     ${(tbl.rows || []).slice(0, 4).map((row, rIdx) => {
@@ -1086,6 +1143,7 @@ function buildDynamicSpreadSpec(q, t, isNvidia) {
   const givens = pme?.parseGivenQuantities?.(q.question || "") || [];
   const convLine = pme?.buildConversionExplanation?.(q.question || "") || "Convert p(10⁻¹²), n(10⁻⁹), µ(10⁻⁶), m(10⁻³), k(10³), M(10⁶) to base SI first";
   const note = isNvidia ? pme?.NVIDIA_TRACK_LECTURES?.[t?.id] : pme?.TOPIC_PROFESSOR_NOTES?.[t?.id];
+  const factorGiven = (window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.extractQuantities(q.question || "") || []).find(g=>g.power!==0) || null;
 
   const eqUse = (q.formula && !String(q.formula).includes("->")) ? q.formula
     : /1t1c|c_cell|bitline/.test(txt) ? "ΔV_BL = (V_cell − V_PRE) · [C_cell / (C_cell + C_BL)]"
@@ -1148,6 +1206,7 @@ function buildDynamicSpreadSpec(q, t, isNvidia) {
 
   return {
     header: `${idLabel} · ${titlePrefix}`,
+    factorGiven,
     question: q.question || "",
     answer: ans,
     schKind,
@@ -1181,11 +1240,11 @@ function buildDynamicSpreadSpec(q, t, isNvidia) {
 
 function renderQuestionNotebookSpread(q, t, isNvidia) {
   // Match the OHM-F1 readiness math, operating-point graph and documented probe method exactly.
-  if (window.OHM_F1_ENGINEER_STUDIO?.isF1(q, isNvidia)) return window.OHM_F1_ENGINEER_STUDIO.renderSpread(q) + (window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.render(q, t) || "");
+  if (window.OHM_F1_ENGINEER_STUDIO?.isF1(q, isNvidia)) return window.OHM_F1_ENGINEER_STUDIO.renderSpread(q);
   const spec = buildDynamicSpreadSpec(q, t, isNvidia);
   const svgMarkup = renderNotebookSpreadSVG(spec);
   const railroad = window.CIRCUIT_RAILROAD_WHITEBOARD?.render(q, t, isNvidia) || "";
-  const questionRailroad = window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.render(q, t) || "";
+  // Tab-specific equation scratchpads now render directly in all four learning modes.
   const fname = `${String(q.id || "study_sheet").replace(/[^a-zA-Z0-9_-]/g, "_")}_full_lecture_sheet.png`;
   return `<section class="nb-spread-wrap" aria-label="Full Lecture Engineering Study and Solution Sheet">
     <div class="nb-spread-toolbar">
@@ -1199,7 +1258,7 @@ function renderQuestionNotebookSpread(q, t, isNvidia) {
       </div>
     </div>
     <div class="nb-spread-canvas">${svgMarkup}</div>
-  </section>${questionRailroad}${railroad}`;
+  </section>${railroad}`;
 }
 
 let galleryOpen = false;
@@ -1224,11 +1283,11 @@ function renderFlagshipGallerySection(modeFilter, topicId) {
       <div class="nb-spread-toolbar" style="margin-top:10px;">
         <strong>${esc(cur.header)}</strong>
         <div class="nb-spread-actions">
-          <a class="nb-spread-btn" href="figures/notebook_spreads/${esc(cur.file)}" download="${esc(cur.file)}">⬇️ Download Pre-Rendered PNG</a>
+          <button type="button" class="nb-spread-btn" data-prof-dl-png="${esc(cur.file.replace(/\.png$/i,"_UPDATED.png"))}">⬇️ Download Updated Live PNG</button>
           <button type="button" class="nb-spread-btn secondary" data-prof-zoom-nb="1">🔍 Enlarge Fullscreen</button>
         </div>
       </div>
-      <div class="nb-spread-canvas">${renderNotebookSpreadSVG(cur)}</div>
+      <p class="nb-spread-note">This SVG is dynamically typeset with corrected fraction layout. Older archived raster PNGs are historical references; download the updated live PNG above instead.</p><div class="nb-spread-canvas">${renderNotebookSpreadSVG(cur)}</div>
     </div>
   </details>`;
 }

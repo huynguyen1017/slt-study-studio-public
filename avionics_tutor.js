@@ -403,6 +403,7 @@ function lessonPage(q,t,f){
  '<div class="av-eyebrow">PAGE 1 / 4 · UNDERSTAND THE QUESTION &amp; CIRCUIT</div>'+
  '<h3>Start here: '+esc(f.label)+'</h3>'+
  activeBanner(q,t)+
+ (window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,t,"understand")||"")+
  '<div class="av-learning-stage">Learning step '+esc(String(q.difficulty||1))+' / '+TOPIC_TOTAL+' · '+esc(q.learningObjective||q.level)+' <small>Foundations → Lab applications → Calculations → Fault diagnosis</small></div>'+ 
  '<div class="av-lede"><strong>In very simple words (Zero prior EE assumed)</strong><p>'+rich(summary)+'</p></div>'+
  '<div class="av-two-up"><section><h4>Words you need first</h4><table class="av-vocab"><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody>'+
@@ -441,6 +442,7 @@ function visualPage(q,t,f){
  '<div class="av-eyebrow">PAGE 2 / 4 · SEE THE FULL CIRCUIT, GRAPH &amp; BOARD WIRING</div>'+
  '<h3>Draw it first. Then connect it safely.</h3>'+
  activeBanner(q,t)+
+ (window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,t,"visual")||"")+
  ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderVisualGuide(q,t)||"")+
  '<p class="av-explain">Every diagram below is tailored specifically to <strong>'+esc(q.id.toUpperCase())+'</strong>. The selected board pins, component mix, breadboard holes, and schematic topology follow this question’s circuit setup.</p>'+
  '<div class="av-visual-nav">'+pics.map(x=>'<a href="#avVisual-'+x[0]+'">'+esc(x[1])+'</a>').join("")+'</div>'+
@@ -476,6 +478,7 @@ function solvePage(q,t,f){
  '<h3>Every step explained from zero — with equations &amp; visuals</h3>'+
  '<p class="av-explain">Step through one card at a time above, or read the complete 6-step walkthrough already expanded directly below.</p>'+
  activeBanner(q,t)+
+ (window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,t,"baby")||"")+
  inlineStepVisual(q,t,stepIndex)+
  '<div class="av-step-counter"><strong>Step '+(stepIndex+1)+' of '+steps.length+'</strong><span>'+esc(step.title)+'</span></div>'+
  '<div class="av-steps-rail">'+steps.map((s,i)=>'<span class="'+(i===stepIndex?"here":i<stepIndex?"passed":"")+'" title="'+esc(s.title)+'"></span>').join("")+'</div>'+
@@ -517,6 +520,7 @@ function practicePage(q,t,f){
  '<h3>Your turn — test yourself without peeking</h3>'+
  '<p class="av-explain">Type a calculated number (scientific notation like 2.5e-3 or unit conversion like 0.01 A is accepted!) or explain the concept in your own words.</p>'+
  activeBanner(q,t)+
+ (window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,t,"try")||"")+
  ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderTryCoach(q,t)||"")+
  (q.expected!==undefined?'<form id="avTryNumber" class="av-try-form"><label for="avValue">Enter your calculated answer</label><div class="av-input-row"><input id="avValue" type="text" inputmode="decimal" autocomplete="off" placeholder="Example: 10 or 0.01 A or 2.5e-3" value="'+esc(currentAnswer)+'" aria-describedby="avRequestedUnit"><span id="avRequestedUnit">'+esc(q.unit)+'</span><button class="av-primary" type="submit">Check answer</button></div></form>':
  '<label class="av-try-label" for="avExplain">Write your explanation in your own words</label><textarea id="avExplain" rows="4" placeholder="I think this means... because... On a Muon Space test bench I would verify it by...">'+esc(draftText)+'</textarea>'+
