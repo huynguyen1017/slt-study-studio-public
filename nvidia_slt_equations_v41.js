@@ -22,6 +22,7 @@ function givens(q){
 function formula(q){return String(q?.formula||q?.math?.formula||"").trim();}
 function substitution(q){return String(q?.sub||q?.math?.sub||"").trim();}
 function numeratorRails(q){
+ if(window.NVIDIA_SLT_MATH_PROOFS_V42?.valid(q))return window.NVIDIA_SLT_MATH_PROOFS_V42.prefix(q);
  const rr=window.CIRCUIT_CURRENT_QUESTION_RAILROAD;
  const unique=givens(q).filter(v=>v.power!==0);
  if(!unique.length)return '<p class="ne41-neutral">No prefixed SI quantity appears unambiguously in this question. Do not invent a conversion.</p>';
@@ -61,6 +62,7 @@ function sceneSvg(q,stage) {
 }
 function render(q,t,stage){
  if(!q)return "";
+ if(window.NVIDIA_SLT_MATH_PROOFS_V42?.valid(q))return window.NVIDIA_SLT_MATH_PROOFS_V42.render(q,t,stage);
  const kind=["understand","visual","baby","try"].includes(stage)?stage:"understand";
  const f=formula(q),sub=substitution(q),formulaOk=hasEq(f);
  const numeric=q.expected!==undefined&&q.expected!==null&&Number.isFinite(Number(q.expected));
@@ -94,6 +96,7 @@ function render(q,t,stage){
 }
 function renderInterview(q,t){
  if(!q)return "";
+ if(window.NVIDIA_SLT_MATH_PROOFS_V42?.valid(q))return window.NVIDIA_SLT_MATH_PROOFS_V42.interview(q,t);
  const f=formula(q),sub=substitution(q),s=stepsFor(q),numeric=q.expected!==undefined&&Number.isFinite(Number(q.expected));
  const model=String(q.interviewAnswer||q.modelAnswer||s[s.length-1]||"");
  const context=String(q.question||"");
