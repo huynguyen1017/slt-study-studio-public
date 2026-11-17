@@ -423,7 +423,8 @@ function svgNotebookFactorLabel(spec, x, y) {
   if(!g || !Number.isFinite(g.value) || !Number.isFinite(g.power)){
     return '<text x="'+x+'" y="'+(y+34)+'" text-anchor="middle" font-size="14" font-family="Arial,sans-serif" font-weight="700" fill="#375d78">No prefixed given: skip unit conversion (do not invent one).</text>';
   }
-  const p = g.power<0?"10⁻"+Math.abs(g.power):"10"+String(g.power).replace(/[0-9]/g,z=>("⁰¹²³⁴⁵⁶⁷⁸⁹"[Number(z)]));
+  const sup=number=>String(Math.abs(number)).replace(/[0-9]/g,z=>("⁰¹²³⁴⁵⁶⁷⁸⁹"[Number(z)]));
+  const p = "10" + (g.power<0?"⁻":"") + sup(g.power);
   const label=String(g.unit),base=String(g.base);
   const result=String(Number(g.scaled.toPrecision(7)))+" "+base;
   const start=x-245;
