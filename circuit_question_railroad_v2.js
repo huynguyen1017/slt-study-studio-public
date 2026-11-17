@@ -29,7 +29,7 @@
       used.add(key);
       out.push({
         raw: match[0].trim(), value, unit, base, power,
-        name: prefix ? prefixes[prefix].name : "base SI",
+        name: prefix ? prefixes[prefix].name : "unprefixed SI",
         scaled: Number((value * Math.pow(10, power)).toPrecision(12))
       });
     }
@@ -91,12 +91,12 @@
       '</details>' +
       '<details open><summary>2 · Railroad tracks: numerator / denominator / strike identical units</summary>' +
       (converted.length ? converted.slice(0, 12).map(g =>
-        '<div class="rrq-item"><strong>' + esc(g.raw) + ' → base SI</strong>' +
+        '<div class="rrq-item"><strong>' + esc(g.raw) + ' → unprefixed SI</strong>' +
         rail(g) + '<p>Put ' + esc(g.unit) + ' on the bottom of the second fraction. The diagonal ' +
         esc(g.unit) + ' units cancel; multiply ' + esc(g.value) + ' × 10^(' +
         g.power + ') to obtain ' + esc(fmt(g.scaled) + " " + g.base) + '.</p></div>').join("") :
         '<p>All recognized quantities already use unprefixed SI units. No prefix cancellation is needed.</p>') +
-      (bases.length ? '<p class="rrq-original">Already in base units: ' +
+      (bases.length ? '<p class="rrq-original">Already in unprefixed SI units: ' +
         esc(bases.map(g => g.raw).join(" · ")) + '</p>' : "") +
       '</details>' +
       '<details open><summary>3 · Governing equation and the original substituted expression</summary>' +
