@@ -1990,6 +1990,15 @@ let masterBankOpen = false;
 let revealedNvSolutions = new Set(["NV-EQ-01", "NV-QA-01"]);
 
 function renderNvidiaUnderstand(q, t) {
+  if (window.NVIDIA_SLT_MATH_PROOFS_V42?.valid(q)) {
+    const info=window.NVIDIA_SLT_MATH_PROOFS_V42.solved(q);
+    return '<section class="nvs-prof-box ne42-professor" aria-label="NVIDIA professor question-specific lecture">'+
+      '<h4>Professor Lecture · Selected Numerical Problem ('+esc(q.id)+')</h4>'+
+      '<p>State the source and return or data reference first, then convert the ACTUAL input and output units. The full worked proof directly above follows this question; do not substitute an unrelated DRAM or 4-channel scope example.</p>'+
+      '<p><strong>Independent check:</strong> '+esc(info?.limits?.[0]||"Check with a valid independently calibrated test and approved specification.")+'</p></section>'+
+      window.NVIDIA_SLT_MATH_PROOFS_V42.interview(q,t);
+  }
+
   const lec = NVIDIA_TRACK_LECTURES[t.id] || NVIDIA_TRACK_LECTURES.electrical;
   const givens = parseGivenQuantities(q.question);
   const railroad = window.CIRCUIT_CURRENT_QUESTION_RAILROAD;
@@ -2019,6 +2028,13 @@ function renderNvidiaUnderstand(q, t) {
 }
 
 function renderNvidiaWorkedDerivation(q, t) {
+  if (window.NVIDIA_SLT_MATH_PROOFS_V42?.valid(q)) {
+    const info=window.NVIDIA_SLT_MATH_PROOFS_V42.solved(q);
+    return '<section class="nvs-prof-chalkboard ne42-professor" aria-label="NVIDIA professor numeric proof">'+
+      '<h4>Professor Verification · '+esc(q.id)+'</h4><p>The complete source-grounded numerator/denominator calculations appear in the selected-question workbook above.</p>'+
+      '<p><strong>Independent check:</strong> '+esc(info?.limits?.[0]||"Verify actual measurement reference and accuracy before classifying the DUT.")+'</p></section>';
+  }
+
   const lec = NVIDIA_TRACK_LECTURES[t.id] || NVIDIA_TRACK_LECTURES.electrical;
   const phys = {formula:window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.formula(q)||"",sub:window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.substitution(q)||"",unitConv:"Use only authored source units; verify each prefix."};
   const convText = buildConversionExplanation(q.question);
