@@ -174,7 +174,7 @@
       (mode === "try" ? "Build the answer yourself" : "Railroad fractions × engineering circuit laws") +
       '</h4><p>Current question: ' + esc(q.id || "selected") +
       ' · No generic numbers substituted for its data</p></header>' +
-      '<div class="rrq-stage-content">' + content + '</div></section>';
+      '<div class="rrq-stage-content"><p class="rrq-original"><b>Given question:</b> ' + esc(q.question || q.prompt || "") + '</p>' + content + '</div></section>';
   }
 
   window.CIRCUIT_CURRENT_QUESTION_RAILROAD = {version: "3.0", extractQuantities, rail, render, renderStage};
