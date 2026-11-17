@@ -25,7 +25,7 @@ function fracCon(result,from,to,ratio){
  // by (ratio "to") / (1 "from"). The two "from" labels cancel.
  const converted=Number(result)*ratio;
  return '<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">'+row(
- unit(result,from)+op("×")+fraction('<mn>'+e(ratio)+'</mn><mspace width=".2em"/><mi mathvariant="normal">'+e(to)+'</mi>',
+ row("<mn>"+e(fmt(result))+"</mn><mspace width=\".2em\"/>"+strike(from))+op("×")+fraction('<mn>'+e(ratio)+'</mn><mspace width=".2em"/><mi mathvariant="normal">'+e(to)+'</mi>',
  '<mn>1</mn>'+strike(from))+op("=")+unit(converted,to)
  )+'</math>';
 }
@@ -45,9 +45,8 @@ function prefix(q){
   const val=d.target/1000;
   parts.push(box("Required answer unit: V → mV · cancel V",fracCon(val,"V","mV",1000)));
  }else if(d.method==="shunt"){
-  parts.push(box("Both milli (10⁻³) prefixes cancel in voltage / resistance",
-   equals(fraction(unit(d.given.find(g=>g.unit==="mV")?.value??0,"mV"),unit(d.given.find(g=>g.unit==="mΩ")?.value??0,"mΩ")),
-     fraction('<mn>1</mn>'+strike("mV"),'<mn>1</mn>'+strike("mΩ"))))); // visual convention: output proof below is primary
+  parts.push(box("Both milli factors cancel in V/R (but do not confuse mV with mΩ)",
+    m("I = (V_mV * 10^(-3) V) / (R_mΩ * 10^(-3) Ω)")));
  }else if(d.method==="rc"){
   parts.push(box("kΩ × µF → ms from the powers of ten",
     equals(msup("10","3")+op("×")+msup("10","−6")+op("×")+msup("10","3"),'<mn>1</mn>')));
@@ -69,7 +68,7 @@ function solved(q){
    make("3 · Railroad-track output conversion (A cancels)",fracCon(i,"A","mA",1000));
    make("4 · Independent check, multiply back by R",equals(unit(v,"V"),row(unit(i,"A")+op("×")+unit(r,"Ω"))));
    make("5 · Power budget before using actual equipment",equals('<mi>P</mi>',row(unit(v,"V")+op("×")+unit(i,"A")),unit(v*i,"W")));
-   limits.push("A 175 Ω resistor carrying 4 V would dissipate about 0.0914 W. Its power rating, supply current limit and measurement reference must be checked before an actual test.");
+   limits.push("A "+r+" Ω resistor across "+v+" V would dissipate "+fmt(v*i)+" W. Verify its power rating, current limit and measurement reference before actual testing.");
   }
  }else if(method==="parallel"){
   const g=match(p,/([\d.]+)\s*V supply drives\s*([\d.]+)\s*Ω in series with\s*\(([\d.]+)\s*Ω in parallel with\s*([\d.]+)\s*Ω\)/i);
