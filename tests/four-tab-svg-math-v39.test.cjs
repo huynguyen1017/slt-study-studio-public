@@ -76,7 +76,8 @@ console.log("PASS v39 static: all 8 tab surfaces, source-specific SI conversions
   await page.locator('#avionicsView [data-page="visual"]').click();
   const svg=page.locator("#avionicsView .nb-spread-svg").first();
   await svg.waitFor({timeout:20000});
-  assert(await svg.locator(".nb-eq-fraction-rule").count()>0,"Browser-native SVG fractions missing");
+  assert(await svg.locator(".nb-svg-math-fraction, .nb-svg-source-equation").count()>0,"Every generated picture must contain its real equation or a non-guessed fallback");
+  // Source-specific fraction bars and actual cross-out graphics are checked above with a known I = V/R circuit fixture.
   await page.setViewportSize({width:375,height:810});
   assert(await page.locator("#avionicsView .rrq-stage-visual").first().isVisible());
   await page.locator('[data-mode="nvidia-slt"]').first().click();
