@@ -626,6 +626,7 @@
               <div class="nv-q-meta"><span>3-Panel Visual Breakdown</span><span>${esc(q.id)}</span><span>${esc(q.visualKind)}</span></div>
               <div class="nv-q-title">${esc(q.skillName)}</div>
             </div>
+          ${global.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,topicObj,"visual") || ""}
             <div class="nv-vis-grid">
               <div class="nv-vis-card"><header>Panel 1 · Hardware & Wiring</header><div class="nv-svg-wrap">${renderVisual(q, 0)}</div></div>
               <div class="nv-vis-card"><header>Panel 2 · Calibrated Waveform / Margin</header><div class="nv-svg-wrap">${renderVisual(q, 1)}</div></div>
@@ -649,6 +650,7 @@
               <div class="nv-q-meta"><span>All Worked Baby Steps (${steps.length} Steps)</span><span>${esc(q.id)}</span><span>10^(3n) Engineering Notation</span></div>
               <div class="nv-q-title">${esc(q.skillName)}</div>
             </div>
+          ${global.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,topicObj,"baby") || ""}
             ${renderEngMathPanel(q)}
             <div class="nv-steps-list">
               ${steps.map((s, idx) => {
@@ -667,6 +669,7 @@
               <div class="nv-q-title">${esc(q.skillName)}</div>
               <p class="nv-q-prompt">${fmtTextMath(q.question)}</p>
             </div>
+          ${global.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,topicObj,"try") || ""}
             <div class="nv-try-box">
               ${q.kind === "calc"
                 ? `<label for="nvAnsInput"><strong>Enter Numeric Answer (10^(3n) unit optional, default <code>${esc(q.unit)}</code>):</strong></label>
@@ -690,6 +693,7 @@
             <div class="nv-q-title">${esc(q.skillName)}</div>
             <p class="nv-q-prompt">${fmtTextMath(q.question)}</p>
           </div>
+          ${global.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,topicObj,"understand") || ""}
           <div class="nv-lesson-box">
             <strong>Learning Objective:</strong> ${esc(q.learningObjective)}<br/>
             <div style="margin-top:6px"><strong>Plain-English Physics &amp; System Intuition:</strong> ${fmtTextMath(q.lesson)}</div>
