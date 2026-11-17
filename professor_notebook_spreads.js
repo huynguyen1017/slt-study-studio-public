@@ -1185,6 +1185,7 @@ function renderQuestionNotebookSpread(q, t, isNvidia) {
   const spec = buildDynamicSpreadSpec(q, t, isNvidia);
   const svgMarkup = renderNotebookSpreadSVG(spec);
   const railroad = window.CIRCUIT_RAILROAD_WHITEBOARD?.render(q, t, isNvidia) || "";
+  const questionRailroad = window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.render(q, t) || "";
   const fname = `${String(q.id || "study_sheet").replace(/[^a-zA-Z0-9_-]/g, "_")}_full_lecture_sheet.png`;
   return `<section class="nb-spread-wrap" aria-label="Full Lecture Engineering Study and Solution Sheet">
     <div class="nb-spread-toolbar">
@@ -1198,7 +1199,7 @@ function renderQuestionNotebookSpread(q, t, isNvidia) {
       </div>
     </div>
     <div class="nb-spread-canvas">${svgMarkup}</div>
-  </section>${railroad}`;
+  </section>${questionRailroad}${railroad}`;
 }
 
 let galleryOpen = false;
