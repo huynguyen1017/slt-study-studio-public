@@ -66,6 +66,7 @@ console.log("PASS: OHM-F1 8 worked steps; six technical follow-ups; verified KVL
   assert.equal(errors.length,0,"Unexpected page errors: "+errors.join(", "));
   await page.setViewportSize({width:375,height:800});
   await page.locator('[data-qid="ohm-F1"]').click();
+  await page.locator('[data-page="learn"]').click();
   assert(await page.locator(".ohm-studio").isVisible());
   console.log("PASS browser OHM-F1: solved lecture/interview view, alternate fault, live recalc, nonleaking topic scope, 375px mobile");
  }finally{await browser.close();}
