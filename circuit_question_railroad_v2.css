@@ -38,3 +38,5 @@
 .rrq-stage-try>header{background:#edf7f3}
 .rrq-stage-try .rrq-label{font-weight:800}
 @media(max-width:590px){.rrq-stage>header{padding:11px}.rrq-stage-content{padding:10px}.rrq-stage-content math[display="block"]{font-size:17px}}
+
+.rrq-rails-lecture{display:grid;gap:8px}.rrq-lecture-given{padding:10px 12px;background:#f9fcff;border:1px solid #c7dce6;border-radius:10px;overflow-x:auto}.rrq-lecture-given>strong{font-size:13px;color:#215977}.rrq-lecture-given .rrq-rail{margin-top:6px;overflow-x:auto}.rrq-lecture-given .rrq-fraction{white-space:nowrap}
