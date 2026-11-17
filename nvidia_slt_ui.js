@@ -82,14 +82,15 @@ function intro(q){
  const t=track(),lec=pme?.NVIDIA_TRACK_LECTURES?.[t.id]||null;
  const phys={formula:window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.formula(q)||"",sub:window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.substitution(q)||"",prefixEq:""};
  const mathEq=phys.formula;
+ const numericProof=window.NVIDIA_SLT_MATH_PROOFS_V42?.valid(q);
  return '<div class="nvs-lesson"><div class="nvs-kicker">1 · UNDERSTAND · NO BACKGROUND REQUIRED</div>'+
  '<h3>'+esc(q.objective)+'</h3><div class="nvs-question">'+esc(q.question)+'</div>'+courseMath(q,t,"understand")+
  (q.variant?'<p class="nvs-hint">Practice New Numbers uses a separate answer and score; Restore Canonical Question returns to your original example.</p>':"")+
- '<div class="nvs-two"><section><h4>What this means, in simple language</h4><p>'+esc(q.lesson.summary)+'</p><p>'+esc(lec?lec.physics:q.lesson.analogy)+'</p><h4>Key vocabulary</h4><dl>'+q.lesson.vocabulary.map(x=>'<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>').join("")+'</dl></section>'+
- '<section><h4>Post-Math Engineer Action on SLT Hardware</h4><p>'+esc(lec?lec.instrument:q.lesson.why)+'</p><h4>Starter hint</h4><p>'+esc(q.hints[0])+'</p><h4>Common mistake</h4><p>'+esc(q.hints[2])+'</p></section></div>'+
+ '<div class="nvs-two"><section><h4>What this means, in simple language</h4><p>'+esc(q.lesson.summary)+'</p><p>'+esc(numericProof?(q.math?.why||"Focus on this source and target; check units."):lec?lec.physics:q.lesson.analogy)+'</p><h4>Key vocabulary</h4><dl>'+q.lesson.vocabulary.map(x=>'<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>').join("")+'</dl></section>'+
+ '<section><h4>Post-Math Engineer Action on SLT Hardware</h4><p>'+esc(numericProof?(q.math?.check||"Use only approved instruments and actual design limits."):lec?lec.instrument:q.lesson.why)+'</p><h4>Starter hint</h4><p>'+esc(q.hints[0])+'</p><h4>Common mistake</h4><p>'+esc(q.hints[2])+'</p></section></div>'+
  (pme?.nvidia?pme.nvidia.renderUnderstand(q,t):"")+
  '<div class="nvs-visual-host">'+(window.NVIDIA_SLT_VISUAL_LAB?window.NVIDIA_SLT_VISUAL_LAB.render(q,t,svgDiagram(q)):"")+'</div>'+
- '<div class="nvs-math"><strong>Current Question Equation (Stacked MathML)</strong>'+(mathEq?eqHtml(mathEq):'<p>No question-specific numeric equation supplied; do not invent one.</p>')+'<strong>Current Question Substitution</strong>'+(phys.sub?eqHtml(phys.sub):'<p>No numeric substitution supplied for this conceptual question.</p>')+(q.expected!==undefined?'<div style="margin-top:6px;">Result: '+engHtml(q.expected,q.unit)+'</div>':"")+'</div>'+
+  (numericProof?"":'<div class="nvs-math"><strong>Current Question Equation (Stacked MathML)</strong>'+(mathEq?eqHtml(mathEq):'<p>No question-specific numeric equation supplied; do not invent one.</p>')+'<strong>Current Question Substitution</strong>'+(phys.sub?eqHtml(phys.sub):'<p>No numeric substitution supplied for this conceptual question.</p>')+(q.expected!==undefined?'<div style="margin-top:6px;">Result: '+engHtml(q.expected,q.unit)+'</div>':"")+'</div>')+
  (pme?.nvidia?pme.nvidia.renderMasterStudyBank():"")+
  '<div class="nvs-inline-actions"><button type="button" data-screen="steps" class="nvs-primary">Start guided solution →</button><button type="button" data-screen="practice">Try without peeking</button></div></div>';
 }
@@ -97,18 +98,19 @@ function guided(q){
  const pme=PME||window.PROFESSOR_MASTERY_ENGINE||null,t=track();
  const phys={formula:window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.formula(q)||"",sub:window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.substitution(q)||"",prefixEq:""};
  const mathEq=phys.formula;
+ const numericProof=window.NVIDIA_SLT_MATH_PROOFS_V42?.valid(q);
  const total=q.steps.length;step=Math.min(step,total-1);
- const stepEq=(sIdx)=>sIdx===1?(window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.numeratorRails(q)||""):sIdx===2&&mathEq?eqHtml(mathEq):sIdx===3&&phys.sub?eqHtml(phys.sub):sIdx===total-1&&q.expected!==undefined?'<div>'+engHtml(q.expected,q.unit)+'</div>':"";
+ const stepEq=(sIdx)=>numericProof?"":sIdx===1?(window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.numeratorRails(q)||""):sIdx===2&&mathEq?eqHtml(mathEq):sIdx===3&&phys.sub?eqHtml(phys.sub):sIdx===total-1&&q.expected!==undefined?'<div>'+engHtml(q.expected,q.unit)+'</div>':"";
  return '<div class="nvs-lesson"><div class="nvs-kicker">2 · BABY STEPS · '+total+' DISTINCT CHECKS (10^(3n) MATH IN EVERY STEP)</div><h3>Solve the 10<sup>3n</sup> math first, then isolate &amp; resolve on SLT hardware</h3><div class="nvs-question">'+esc(q.question)+'</div>'+courseMath(q,t,"baby")+
  '<div class="nvs-stepbar" role="progressbar" aria-valuenow="'+(step+1)+'" aria-valuemin="1" aria-valuemax="'+total+'"><span style="width:'+Math.round((step+1)*100/total)+'%"></span></div>'+
- '<article class="nvs-step"><strong>STEP '+(step+1)+' / '+total+'</strong><p>'+esc(q.steps[step])+'</p>'+stepEq(step)+'</article>'+
+ '<article class="nvs-step"><strong>STEP '+(step+1)+' / '+total+'</strong><p>'+esc(numericProof&&step===4?"The exact numeric work and the railroad-track conversion appear in the whiteboard above.":q.steps[step])+'</p>'+stepEq(step)+'</article>'+
  '<div class="nvs-inline-actions"><button type="button" id="nvsPrevStep" '+(!step?'disabled':'')+'>← Prior step</button><button type="button" id="nvsNextStep" '+(step>=total-1?'disabled':'')+'>Next step →</button><button type="button" id="nvsAllSteps">'+(showAll?'Hide':'Show')+' all steps</button></div>'+
- (showAll?'<ol class="nvs-steps-all">'+q.steps.map((s,i)=>'<li>'+esc(s)+(stepEq(i)?'<div style="margin-top:4px;">'+stepEq(i)+'</div>':"")+'</li>').join("")+'</ol>':"")+
+ (showAll?'<ol class="nvs-steps-all">'+q.steps.map((s,i)=>'<li>'+esc(numericProof&&i===4?"The actual numeric result and canceled units are typeset in the solved whiteboard above.":s)+(stepEq(i)?'<div style="margin-top:4px;">'+stepEq(i)+'</div>':"")+'</li>').join("")+'</ol>':"")+
  (pme?.nvidia?pme.nvidia.renderWorkedDerivation(q,t):"")+
  (window.ENGINEERING_SOLVED_CASES?window.ENGINEERING_SOLVED_CASES.render(q,"nvidia"):"")+
  (q.code?'<section class="nvs-code"><h4>Runnable teaching example (code is not executed on your device)</h4><pre><code>'+esc(q.code)+'</code></pre><p>Trace each line against the expected result and test negative cases before copying into a real lab system.</p></section>':"")+
- '<div class="nvs-math"><strong>Governing Law (MathML)</strong>'+(mathEq?eqHtml(mathEq):'<p>Concept-only problem: no source equation provided.</p>')+'<strong>Interview-style proposed explanation</strong><p>'+esc(q.interviewAnswer)+'</p>'+
- (q.expected!==undefined?'<strong>Engineering Notation Result</strong><div>'+engHtml(q.expected,q.unit)+'</div><strong>Stacked Substitution</strong>'+eqHtml(phys.sub):"")+'</div>'+
+  (numericProof?"":'<div class="nvs-math"><strong>Governing Law (MathML)</strong>'+(mathEq?eqHtml(mathEq):'<p>Concept-only problem: no source equation provided.</p>')+'<strong>Interview-style proposed explanation</strong><p>'+esc(q.interviewAnswer)+'</p>'+
+(q.expected!==undefined?'<strong>Engineering Notation Result</strong><div>'+engHtml(q.expected,q.unit)+'</div><strong>Stacked Substitution</strong>'+eqHtml(phys.sub):"")+'</div>')+
  '<div class="nvs-inline-actions"><button type="button" data-screen="practice" class="nvs-primary">Now check my understanding →</button></div></div>';
 }
 function practice(q){
