@@ -1982,19 +1982,86 @@ function focusInfo(q,t){
  return t.skills[idx]||t.skills[0];
 }
 
+function topicKeyEquations(q,t){
+ const id=t.id;
+ if(q.formula&&!String(q.formula).includes("->"))return [q.formula,q.sub||(q.expected!==undefined?"Target = "+q.expected+" "+(q.unit||""):"Check units in 10^(3n)")];
+ const map={
+  units:["I = Q / t   ;   V = W / Q","Q = N / (6.25 * 10^18) C"],
+  ohm:["I = V / R   ;   Slope = 1 / R","P = V^2 / R   ;   V = I * R"],
+  power:["P = V * I = I^2 * R = V^2 / R","E = P * t   (1 J = 1 W * 1 s)"],
+  series:["R_T = R_1 + R_2 + R_3","V_x = V_S * (R_x / R_T)"],
+  parallel:["1 / R_eq = 1 / R_1 + 1 / R_2","R_eq = R_nom / N_healthy"],
+  "kcl-kvl":["Sum(I_in) = Sum(I_out)","Sum(V_loop) = 0"],
+  thevenin:["V_TH = V_open_AB","I_N = V_TH / R_TH"],
+  ac:["V_rms = 0.7071 * V_p   ;   V_p = V_pp / 2","T = 1 / f"],
+  capacitors:["Q = C * V   ;   I_C = C * (dV / dt)","X_C = 1 / (2 * pi * f * C)"],
+  rc:["tau = R_eq * C","R_eq = (R * R_DMM) / (R + R_DMM)"],
+  inductors:["V_L = L * (dI / dt)","tau = L / R   ;   X_L = 2 * pi * f * L"],
+  filters:["f_c = 1 / (2 * pi * R * C)","H_dB = 20 * log10(V_out / V_in)"],
+  magnetics:["V_2 / V_1 = N_2 / N_1","Z_ref = (N_1 / N_2)^2 * Z_L"],
+  components:["I_C_sat = (V_CC - 0.2) / R_C","V_out_reg = 1.25 * (1 + R_2 / R_1)"],
+  "power-rails":["P_loss = (V_in - V_out) * I_load","V_r_pp = V_p / (f_r * R_L * C)"],
+  schematics:["I_shunt = V_sense / R_shunt","V_loaded = V_S * (R_2 || R_L) / R_T"],
+  instruments:["BW_scope >= 0.5 / t_rise","f_sample >= 5 * f_max"],
+  timing:["T_min = t_CQ + t_logic + t_su + t_skew","HoldSlack = (t_CQ_min + t_min) - (t_h + t_skew)"],
+  buses:["R_p_max = t_r_max / (0.8473 * C_bus)","BW_eff = R * N_bits / Frame"],
+  "python-scpi":["FPY = (N_pass_1 / N_valid) * 100","math.isfinite(val) == True"],
+  linux:["Exit 0 = ran cleanly (NOT DUT pass)","P_err = (V_s / R_shunt)"],
+  rf:["Gamma = (Z_L - Z_0) / (Z_L + Z_0)","lambda = c / (f * sqrt(e_r))"],
+  qualification:["Guardband = Limit - Uncertainty","Q_rad = e * sigma * A * (T_1^4 - T_2^4)"],
+  safety:["I_limit <= 1.2 * I_idle","P_fault = V_rail^2 / R_short"],
+  thermal:["T_J = T_A + P * theta_JA","P_dissipated = V * I"],
+  rca:["A -> B -> A Single-Var Swap","FPY = Pass_1 / Tested"]
+ };
+ return map[id]||["V = I * R","P = V * I"];
+}
+
+function visualSidePanel(q,t,mode){
+ const eqs=topicKeyEquations(q,t);
+ const mathHtml=eqs.map(e=>'<div class="av-vis-eq-chip">'+(window.studyMath?window.studyMath(e,true):'<code>'+esc(e)+'</code>')+'</div>').join("");
+ const steps=Array.isArray(q.steps)?q.steps:[];
+ const readList=mode==="concept"?[
+  ["Trace & Axes (10³ⁿ)","Blue solid curve traces the primary transfer/operating response; gold dashed curve plots quadratic power/energy P = V²/R or limit boundary."],
+  ["Slope & Marginality","For I–V plots, Slope = ΔI/ΔV = 1/R (steep = low R, flat = high R). For timing/AC plots, watch −3 dB corners and Trigger A -> Cursor B Δt."],
+  ["Operating Point (Q-Pt)","The magenta Operating Point pins the exact circuit solution on the curve—projecting straight down to V/t and left to I/mA."]
+ ]:mode==="schematic"?[
+  ["1. Source & Current Flow","Start at (+) source/rail, follow magenta current arrow through series loads (identical I) to node splits (identical V)."],
+  ["2. Nodes & Reference GND","Solid node dots connect conductors cleanly; trace every parallel return back to 0 V GND before computing KCL/KVL."],
+  ["3. Schematic to Product","Locate the exact test points, jumper headers (e.g. JP1–JP10), and Kelvin shunt pads named in the netlist."]
+ ]:[
+  ["1. Breadboard Strip Connectivity","Vertical 5-hole columns share a single copper clip; center ravine isolates IC pins top-to-bottom."],
+  ["2. Meter & Probe Orientation","Voltmeter across nodes A–B in PARALLEL; Ammeter BREAKS the loop in SERIES; Ohmmeter strictly POWER-OFF."],
+  ["3. Scope Ground & Shunts","Use <5 mm tip-and-barrel spring ground on clocks/switching nodes—never clip grounded probes onto high-side shunts!"]
+ ];
+ const pmeConv=window.PROFESSOR_MASTERY_ENGINE?.buildConversionExplanation?.(q.question||"")||"Convert m(10⁻³), µ(10⁻⁶), n(10⁻⁹), p(10⁻¹²), k(10³), M(10⁶) before substituting.";
+ const postMathAction=q.expected!==undefined
+  ?`1) Compute ${Number(Number(q.expected).toPrecision(5))} ${q.unit||""} in 10^(3n) FIRST -> 2) Locate nodes/jumpers on schematic -> 3) Measure safely under CC limit & isolate any deviation via single-variable A-B-A.`
+  :`1) Solve expected healthy baseline in 10^(3n) FIRST -> 2) Map test points on schematic -> 3) Capture raw probe/scope evidence BEFORE reset & prove root cause via A-B-A.`;
+ return '<aside class="av-vis-side" aria-label="Key Equations and How to Read Graph">'+
+  '<div class="av-vis-card"><div class="av-vis-card-hdr">🧮 Key Equations (10<sup>3n</sup> Engineering Notation)</div><div class="av-vis-card-body">'+mathHtml+
+  '<div class="av-vis-pfx-note"><strong>Prefix Check:</strong> '+esc(pmeConv)+'</div></div></div>'+
+  '<div class="av-vis-card"><div class="av-vis-card-hdr">📖 How to Read This '+(mode==="concept"?"Graph":mode==="schematic"?"Schematic":"Bench Layout")+'</div><div class="av-vis-card-body">'+
+  readList.map((r,idx)=>'<div class="av-vis-read-row"><span class="av-vis-num">'+(idx+1)+'</span><div><strong>'+esc(r[0])+':</strong> '+esc(r[1])+'</div></div>').join("")+
+  '</div></div>'+
+  '<div class="av-vis-card"><div class="av-vis-card-hdr">🛠️ Engineer Action After Solving the Math</div><div class="av-vis-card-body"><p style="margin:0;font-size:0.86rem;line-height:1.48;color:#0f172a;">'+esc(postMathAction)+'</p></div></div>'+
+ '</aside>';
+}
+
 function render(q,t,mode){
  const m=describe(q,t);
  const views={schematic:schematic,concept:curve,wiring:threePanelBoardAndBreadboard};
  if(!views[mode])return "";
  const full=window.avionicsNucleoWorkbench;
  const figure=mode==="wiring"&&full&&full.setup(q,t)?full.render(q,t):views[mode](q,t);
+ const sideHtml=visualSidePanel(q,t,mode);
  const label=mode==="schematic"?"Full circuit schematic / signal path":mode==="concept"?"Operating-point graph / waveform":(window.avionicsNucleoWorkbench&&window.avionicsNucleoWorkbench.setup(q,t)?"Full NUCLEO-L476RG / 63-row breadboard · ST UM1724":m.wiring);
  const focus=focusInfo(q,t),check=q.lesson?(focus[3]||""):q.level==="Troubleshooting"?"Recommended verification: "+(q.steps[q.steps.length-1]||"Verify the issue before changing the hardware."):(focus[3]||"");
  const detail=m.values.length?"Given in question: "+m.values.join(" · "):"Conceptual example; labels represent this exact question's topic.";
- const warning=mode==="wiring"?"Question-specific conceptual bench layout; board header names and wiring colors are illustrative, not a manufacturer-approved flight pinout. Verify the actual board documentation, power-off connections, and component ratings.":mode==="concept"?"Illustrative graph centered on this question's parameters; not measured telemetry.":"Circuit symbols and magenta current loops follow standard textbook conventions.";
+ const stageClass=mode==="wiring"?"av-vis-stage-wide":"av-vis-stage-grid";
  return '<figure class="av-visual-figure" data-visual-question="'+esc(q.id)+'" data-visual-mode="'+esc(mode)+'">'+
  '<div class="av-visual-top"><strong>'+esc(label)+'</strong><span>Question '+esc(q.id)+' · '+esc(q.level)+'</span></div>'+
- figure+'<div class="av-visual-question-line"><strong>Question:</strong> '+esc(q.question)+'</div><div class="av-visual-focus"><strong>Focus: '+esc(focus[0])+'.</strong> '+esc(focus[1]||'')+' <em>'+esc(check)+'</em></div><figcaption>'+esc(detail)+'. '+esc(warning)+'</figcaption></figure>';
+ '<div class="'+stageClass+'"><div class="av-vis-fig-wrap">'+figure+'</div>'+sideHtml+'</div>'+
+ '<div class="av-visual-question-line"><strong>Question:</strong> '+esc(q.question)+'</div><div class="av-visual-focus"><strong>Focus: '+esc(focus[0])+'.</strong> '+esc(focus[1]||'')+' <em>'+esc(check)+'</em></div><figcaption>'+esc(detail)+'. Always verify schematic net names, polarity, and current-limited PSU settings before probing flight PCBAs.</figcaption></figure>';
 }
 window.avionicsVisuals={render,describe,getWiringSetup:boardSetup,getWiringKey:classifyWiring,hasBreadboard:(q,t)=>describe(q,t).board,viewTypes:()=>["schematic","concept","wiring"]};
 })();

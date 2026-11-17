@@ -83,14 +83,16 @@ for (const q of avQuestions) {
   const uHtml = PME.avionics.renderUnderstandLecture(q, t, { label: q.skillName || q.level });
   const cHtml = PME.avionics.renderChalkboard(q, t);
   assert(uHtml.includes("av-prof-box") && cHtml.includes("av-prof-chalkboard"), q.id + " missing professor HTML");
+  assert(uHtml.includes("prof-interview-box") && cHtml.includes("prof-interview-box"), q.id + " missing Hiring-Manager Interview Script");
+  assert(!uHtml.includes("ENGR 852") && !cHtml.includes("ENGR 852"), q.id + " must not mix ENGR 852 labels into Avionics EE");
 }
 assert(ctx.window.avionicsWorkbookV2.stepsForQuestion("units-F1").every(x => !x.formula || x.formula !== "V = I * R"));
 assert(ctx.window.avionicsWorkbookV2.stepsForQuestion("qualification-F1").every(x => !x.formula || x.formula !== "V = I * R"));
 
-// Verify worked bank problems cover Tech 60, Electronic Devices, Tech 63, ENGR 852, Physics 2B
-assert(PME.AVIONICS_WORKED_BANK.length >= 14, "Expected comprehensive worked coursework bank");
-for (const cat of ["tech60", "devices", "tech63", "engr852", "physics2b"]) {
-  assert(PME.AVIONICS_WORKED_BANK.some(x => x.cat === cat), "Missing coursework category " + cat);
+// Verify worked bank problems cover pure Avionics disciplines (zero ENGR 852 mixing)
+assert(PME.AVIONICS_WORKED_BANK.length >= 12, "Expected comprehensive topic-pure Avionics worked bank");
+for (const cat of ["dc_networks", "analog_devices", "digital_timing", "lab_tvac"]) {
+  assert(PME.AVIONICS_WORKED_BANK.some(x => x.cat === cat), "Missing worked bank category " + cat);
 }
 
 // Verify all 12 NVIDIA tracks & 600 questions
@@ -103,6 +105,8 @@ for (const q of nvQuestions) {
   const dHtml = PME.nvidia.renderWorkedDerivation(q, t);
   const pHtml = PME.nvidia.renderPracticeCoach(q, t);
   assert(uHtml.includes("nvs-prof-box") && dHtml.includes("nvs-prof-chalkboard") && pHtml.includes("nvs-prof-hints"), q.id);
+  assert(uHtml.includes("prof-interview-box") && dHtml.includes("prof-interview-box"), q.id + " missing NVIDIA Interview Script");
+  assert(!uHtml.includes("ENGR 852") && !dHtml.includes("ENGR 852"), q.id + " must not mix ENGR 852 into NVIDIA");
   assert(!/:\s*undefined\b|^\s*undefined\b|=\s*NaN\b/.test(uHtml) && !/:\s*undefined\b|^\s*undefined\b|=\s*NaN\b/.test(dHtml));
 }
 for (const cat of ["equations", "post_si", "python", "hld"]) {
@@ -159,12 +163,15 @@ function startStaticServer(dir) {
 
       // Test Avionics View (#avionics)
       await page.goto(`${base}/#avionics`, { waitUntil: "load" });
-      await page.locator("#avionicsView:visible .av-prof-box").waitFor({ timeout: 25000 });
+      await page.locator("#avionicsView:visible .av-prof-box").first().waitFor({ timeout: 25000 });
+      assert(!(await page.locator("#avionicsView").textContent()).includes("ENGR 852"), "#avionicsView must NOT contain ENGR 852 clutter");
+      assert.equal(await page.locator("#avionicsView .prof-interview-box").count(), 1, "Avionics Understand view must render Hiring-Manager Interview Script");
+      assert((await page.locator("#avionicsView .av-vis-side").count()) >= 1, "Avionics visual panel must render Key Equations & How to Read side cards");
       await page.locator("#avProfCourseworkBank > summary").click();
-      await page.locator('[data-av-cw-filter="engr852"]').click();
-      await page.locator('[data-av-cw-input="CW-852-01"]').fill("-820");
-      await page.locator('[data-av-cw-check="CW-852-01"]').click();
-      assert((await page.locator('[data-av-cw-status="CW-852-01"]').textContent()).includes("Correct"));
+      await page.locator('[data-av-cw-filter="digital_timing"]').click();
+      await page.locator('[data-av-cw-input="CW-DIG-01"]').fill("-820");
+      await page.locator('[data-av-cw-check="CW-DIG-01"]').click();
+      assert((await page.locator('[data-av-cw-status="CW-DIG-01"]').textContent()).includes("Correct"));
 
       await page.locator("#avTopicList").selectOption("ohm");
       await page.locator('#avionicsView [data-qid="ohm-F1"]').click();
@@ -172,19 +179,22 @@ function startStaticServer(dir) {
       await page.locator("#avionicsView #avVisual-concept").waitFor();
       const avVisText = await page.locator("#avionicsView #avVisual-concept").textContent();
       assert(avVisText.includes("×10⁻³ A") && avVisText.includes("Parabolic Heat") && !avVisText.includes("I / P"), "ohm-F1 visual must show calibrated lab analyzer instead of bare I / P");
+      assert(avVisText.includes("Key Equations") && avVisText.includes("Engineer Action After Solving"), "ohm-F1 visual must show side equations & post-math action");
       if (vp.width === 1280) {
         await page.locator("#avionicsView #avVisual-concept").screenshot({ path: "/Users/huynguyen/.gemini/antigravity/brain/9abd734c-7786-4e8f-a3e8-35f2bdc2137b/ohm_f1_calibrated_visual.png" });
       }
       await page.locator('[data-page="work"]').click();
       await page.locator("#avionicsView .av-prof-chalkboard").waitFor();
-      assert.equal(await page.locator("#avionicsView .nb-spread-svg").count(), 1, "Avionics Baby Steps must show 3-Page Notebook Spread");
+      assert.equal(await page.locator("#avionicsView .nb-spread-svg").count(), 1, "Avionics Baby Steps must show Full Lecture Study Sheet");
+      assert((await page.locator("#avionicsView math").count()) >= 2, "Avionics Baby Steps must render stacked MathML in steps & interview block");
       await page.locator('[data-page="try"]').click();
       await page.locator('[data-av-hint="2"]').click();
       assert((await page.locator(".av-prof-hint-panel").textContent()).includes("Hint 3"));
 
       // Test NVIDIA SLT View (#nvidia)
       await page.locator('[data-mode="nvidia"]').click();
-      await page.locator("#nvidiaView:visible .nvs-prof-box").waitFor({ timeout: 25000 });
+      await page.locator("#nvidiaView:visible .nvs-prof-box").first().waitFor({ timeout: 25000 });
+      assert(!(await page.locator("#nvidiaView").textContent()).includes("ENGR 852"), "#nvidiaView must NOT contain ENGR 852 clutter");
       await page.locator("#nvsProfMasterBank > summary").click();
       await page.locator('[data-nv-filter="python"]').click();
       await page.locator('[data-nv-sol="NV-PY-02"]').click();
@@ -193,7 +203,8 @@ function startStaticServer(dir) {
       await page.locator('#nvidiaView [data-screen="steps"]').first().click();
       await page.locator("#nvidiaView .nvs-prof-chalkboard").waitFor();
       assert((await page.locator("#nvidiaView math").count()) >= 1, "NVIDIA SLT view must render stacked MathML equations");
-      assert.equal(await page.locator("#nvidiaView .nb-spread-svg").count(), 1, "NVIDIA Baby Steps must show 3-Page Notebook Spread");
+      assert.equal(await page.locator("#nvidiaView .nb-spread-svg").count(), 1, "NVIDIA Baby Steps must show Full Lecture Study Sheet");
+      assert.equal(await page.locator("#nvidiaView .prof-interview-box").count(), 1, "NVIDIA Baby Steps must show Hiring-Manager Interview Script");
       await page.locator('#nvidiaView [data-screen="practice"]').first().click();
       await page.locator('[data-nv-hint="1"]').click();
       assert((await page.locator(".nvs-prof-hint-panel").textContent()).includes("Hint 2"));
@@ -205,6 +216,7 @@ function startStaticServer(dir) {
       await page.locator('#nvidia-sltView:visible [data-topic="ddr-lpddr"]').waitFor({ timeout: 25000 });
       await page.locator('#nvidia-sltView [data-topic="ddr-lpddr"]').click();
       await page.locator('#nvidia-sltView [data-qidx="1"]').click();
+      assert(!(await page.locator("#nvidia-sltView").textContent()).includes("ENGR 852"), "#nvidia-sltView must NOT contain ENGR 852 clutter");
       const nvSltMathHtml = await page.locator("#nvidia-sltView .nv-formula-box").first().innerHTML();
       assert(nvSltMathHtml.includes("<math") && nvSltMathHtml.includes("<mfrac"), "NVIDIA SLT Prep must render stacked MathML <mfrac>");
       const nvSltMathText = await page.locator("#nvidia-sltView .nv-formula-box").first().textContent();
@@ -212,12 +224,14 @@ function startStaticServer(dir) {
 
       await page.locator('#nvidia-sltView [data-ptab="2"]').click();
       assert.equal(await page.locator("#nvidia-sltView .nv-vis-card .nv-svg-wrap svg").count(), 3, "NVIDIA SLT Prep 3-panel visuals must render 3 calibrated SVGs");
-      assert.equal(await page.locator("#nvidia-sltView .nb-spread-svg").count(), 1, "NVIDIA SLT Prep tab 2 must show 3-Page Notebook Spread");
+      assert.equal(await page.locator("#nvidia-sltView .nb-spread-svg").count(), 1, "NVIDIA SLT Prep tab 2 must show Full Lecture Study Sheet");
 
       await page.locator('#nvidia-sltView [data-ptab="3"]').click();
       const stepBodyText = await page.locator("#nvidia-sltView .nv-step-card .nv-step-body").first().textContent();
       assert(!stepBodyText.includes("Step 1 ("), "Baby steps must strip redundant Step 1 prefix from step body");
-      assert.equal(await page.locator("#nvidia-sltView .nb-spread-svg").count(), 1, "NVIDIA SLT Prep Baby Steps tab must show 3-Page Notebook Spread");
+      assert.equal(await page.locator("#nvidia-sltView .nb-spread-svg").count(), 1, "NVIDIA SLT Prep Baby Steps tab must show Full Lecture Study Sheet");
+      assert.equal(await page.locator("#nvidia-sltView .prof-interview-box").count(), 1, "NVIDIA SLT Prep Baby Steps tab must show Hiring-Manager Interview Script");
+      assert((await page.locator("#nvidia-sltView .nv-steps-list math").count()) >= 2, "NVIDIA SLT Prep Baby Steps must render stacked MathML inside steps");
       if (vp.width === 1280) {
         await page.locator("#nvidia-sltView .nv-stage").screenshot({ path: "/Users/huynguyen/.gemini/antigravity/brain/9abd734c-7786-4e8f-a3e8-35f2bdc2137b/nvidia_slt_ddr_f1_upgraded.png" });
       }

@@ -79,32 +79,35 @@ function engHtml(v,u){return window.formatEngineeringMath?window.formatEngineeri
 function intro(q){
  const pme=PME||window.PROFESSOR_MASTERY_ENGINE||null;
  const t=track(),lec=pme?.NVIDIA_TRACK_LECTURES?.[t.id]||null;
- const mathEq=q.formula||((t.id==="pdn-power"||t.id==="thermal-power")?"ΔV = I*R_PDN + L_pkg*(dI/dt)":t.id==="memory-ddr"?"ΔV_BL = (V_cell - V_PRE)*(C_cell/(C_cell + C_BL))":t.id==="high-speed-io"?"Γ = (Z_L - Z_0)/(Z_L + Z_0)":t.id==="dft-jtag"||t.id==="soC-bringup"?"T_min = t_CQ + t_logic + t_su + t_skew":"Yield_FPY = N_pass / N_total");
+ const phys=pme?.inferTopicPhysicsModel?pme.inferTopicPhysicsModel(q,t,true):{formula:q.formula||"DeltaV = I*R_PDN + L_pkg*(dI/dt)",sub:q.sub||"",prefixEq:"1 m=10^(-3); 1 u=10^(-6); 1 n=10^(-9); 1 p=10^(-12)"};
+ const mathEq=phys.formula;
  return '<div class="nvs-lesson"><div class="nvs-kicker">1 · UNDERSTAND · NO BACKGROUND REQUIRED</div>'+
  '<h3>'+esc(q.objective)+'</h3><div class="nvs-question">'+esc(q.question)+'</div>'+
  (q.variant?'<p class="nvs-hint">Practice New Numbers uses a separate answer and score; Restore Canonical Question returns to your original example.</p>':"")+
  '<div class="nvs-two"><section><h4>What this means, in simple language</h4><p>'+esc(q.lesson.summary)+'</p><p>'+esc(lec?lec.physics:q.lesson.analogy)+'</p><h4>Key vocabulary</h4><dl>'+q.lesson.vocabulary.map(x=>'<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>').join("")+'</dl></section>'+
- '<section><h4>Why this matters to SLT</h4><p>'+esc(lec?lec.instrument:q.lesson.why)+'</p><h4>Starter hint</h4><p>'+esc(q.hints[0])+'</p><h4>Common mistake</h4><p>'+esc(q.hints[2])+'</p></section></div>'+
+ '<section><h4>Post-Math Engineer Action on SLT Hardware</h4><p>'+esc(lec?lec.instrument:q.lesson.why)+'</p><h4>Starter hint</h4><p>'+esc(q.hints[0])+'</p><h4>Common mistake</h4><p>'+esc(q.hints[2])+'</p></section></div>'+
  (pme?.nvidia?pme.nvidia.renderUnderstand(q,t):"")+
  '<div class="nvs-visual-host">'+(window.NVIDIA_SLT_VISUAL_LAB?window.NVIDIA_SLT_VISUAL_LAB.render(q,t,svgDiagram(q)):"")+'</div>'+
- '<div class="nvs-math"><strong>Governing Equation (Stacked MathML)</strong>'+eqHtml(mathEq)+(q.formula?'<strong>Worked Substitution &amp; Engineering Notation (10^(3n))</strong>'+eqHtml(q.sub)+(q.expected!==undefined?'<div style="margin-top:6px;">Result: '+engHtml(q.expected,q.unit)+'</div>':""):'')+'</div>'+
+ '<div class="nvs-math"><strong>Governing Equation (Stacked MathML)</strong>'+eqHtml(mathEq)+'<strong>Worked 10^(3n) Substitution &amp; Engineering Notation</strong>'+eqHtml(phys.sub)+(q.expected!==undefined?'<div style="margin-top:6px;">Result: '+engHtml(q.expected,q.unit)+'</div>':"")+'</div>'+
  (pme?.nvidia?pme.nvidia.renderMasterStudyBank():"")+
  '<div class="nvs-inline-actions"><button type="button" data-screen="steps" class="nvs-primary">Start guided solution →</button><button type="button" data-screen="practice">Try without peeking</button></div></div>';
 }
 function guided(q){
  const pme=PME||window.PROFESSOR_MASTERY_ENGINE||null,t=track();
- const mathEq=q.formula||((t.id==="pdn-power"||t.id==="thermal-power")?"ΔV = I*R_PDN + L_pkg*(dI/dt)":t.id==="memory-ddr"?"ΔV_BL = (V_cell - V_PRE)*(C_cell/(C_cell + C_BL))":t.id==="high-speed-io"?"Γ = (Z_L - Z_0)/(Z_L + Z_0)":"Yield_FPY = N_pass / N_total");
+ const phys=pme?.inferTopicPhysicsModel?pme.inferTopicPhysicsModel(q,t,true):{formula:q.formula||"DeltaV = I*R_PDN + L_pkg*(dI/dt)",sub:q.sub||"",prefixEq:"1 m=10^(-3); 1 u=10^(-6); 1 n=10^(-9); 1 p=10^(-12)"};
+ const mathEq=phys.formula;
  const total=q.steps.length;step=Math.min(step,total-1);
- return '<div class="nvs-lesson"><div class="nvs-kicker">2 · BABY STEPS · '+total+' DISTINCT CHECKS</div><h3>Explain the method, not just the answer</h3><div class="nvs-question">'+esc(q.question)+'</div>'+
+ const stepEq=(sIdx)=>sIdx===1?eqHtml(phys.prefixEq):sIdx===2?eqHtml(phys.formula):sIdx===3?eqHtml(phys.sub):sIdx===total-1&&q.expected!==undefined?'<div>'+engHtml(q.expected,q.unit)+'</div>':"";
+ return '<div class="nvs-lesson"><div class="nvs-kicker">2 · BABY STEPS · '+total+' DISTINCT CHECKS (10^(3n) MATH IN EVERY STEP)</div><h3>Solve the 10<sup>3n</sup> math first, then isolate &amp; resolve on SLT hardware</h3><div class="nvs-question">'+esc(q.question)+'</div>'+
  '<div class="nvs-stepbar" role="progressbar" aria-valuenow="'+(step+1)+'" aria-valuemin="1" aria-valuemax="'+total+'"><span style="width:'+Math.round((step+1)*100/total)+'%"></span></div>'+
- '<article class="nvs-step"><strong>STEP '+(step+1)+' / '+total+'</strong><p>'+esc(q.steps[step])+'</p></article>'+
+ '<article class="nvs-step"><strong>STEP '+(step+1)+' / '+total+'</strong><p>'+esc(q.steps[step])+'</p>'+stepEq(step)+'</article>'+
  '<div class="nvs-inline-actions"><button type="button" id="nvsPrevStep" '+(!step?'disabled':'')+'>← Prior step</button><button type="button" id="nvsNextStep" '+(step>=total-1?'disabled':'')+'>Next step →</button><button type="button" id="nvsAllSteps">'+(showAll?'Hide':'Show')+' all steps</button></div>'+
- (showAll?'<ol class="nvs-steps-all">'+q.steps.map(s=>'<li>'+esc(s)+'</li>').join("")+'</ol>':"")+
+ (showAll?'<ol class="nvs-steps-all">'+q.steps.map((s,i)=>'<li>'+esc(s)+(stepEq(i)?'<div style="margin-top:4px;">'+stepEq(i)+'</div>':"")+'</li>').join("")+'</ol>':"")+
  (pme?.nvidia?pme.nvidia.renderWorkedDerivation(q,t):"")+
  (window.ENGINEERING_SOLVED_CASES?window.ENGINEERING_SOLVED_CASES.render(q,"nvidia"):"")+
  (q.code?'<section class="nvs-code"><h4>Runnable teaching example (code is not executed on your device)</h4><pre><code>'+esc(q.code)+'</code></pre><p>Trace each line against the expected result and test negative cases before copying into a real lab system.</p></section>':"")+
  '<div class="nvs-math"><strong>Governing Law (MathML)</strong>'+eqHtml(mathEq)+'<strong>Interview-style proposed explanation</strong><p>'+esc(q.interviewAnswer)+'</p>'+
- (q.expected!==undefined?'<strong>Engineering Notation Result</strong><div>'+engHtml(q.expected,q.unit)+'</div><strong>Stacked Substitution</strong>'+eqHtml(q.sub):"")+'</div>'+
+ (q.expected!==undefined?'<strong>Engineering Notation Result</strong><div>'+engHtml(q.expected,q.unit)+'</div><strong>Stacked Substitution</strong>'+eqHtml(phys.sub):"")+'</div>'+
  '<div class="nvs-inline-actions"><button type="button" data-screen="practice" class="nvs-primary">Now check my understanding →</button></div></div>';
 }
 function practice(q){

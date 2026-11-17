@@ -407,7 +407,7 @@ function lessonPage(q,t,f){
  '<div class="av-lede"><strong>In very simple words (Zero prior EE assumed)</strong><p>'+rich(summary)+'</p></div>'+
  '<div class="av-two-up"><section><h4>Words you need first</h4><table class="av-vocab"><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody>'+
  glossary.map(p=>'<tr><th scope="row">'+esc(p[0])+'</th><td>'+rich(p[1])+'</td></tr>').join("")+
- '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(lesson?(guide.analogy||(PME?.TOPIC_PROFESSOR_NOTES?.[t.id]?.intuition)||lesson.why):item?item.analogy:guide.analogy)+'</p><h4>Why Muon Space engineers care</h4><p>'+rich(lesson?lesson.why:item?item.why:f.why)+'</p></section></div>'+
+ '</tbody></table></section><section class="av-analogy"><h4>Picture it in everyday life</h4><p>'+rich(lesson?(guide.analogy||(PME?.TOPIC_PROFESSOR_NOTES?.[t.id]?.intuition)||lesson.why):item?item.analogy:guide.analogy)+'</p><h4>Post-Math Engineer Resolution on Hardware</h4><p>'+rich(lesson?(f.test?f.test+" · ":"")+lesson.why:item?item.why:f.why)+'</p></section></div>'+
  ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderUnderstandLecture(q,t,f)||"")+
  (f.label==="SI base unit"?siChapterPanel():"")+
  textbookPanel(t)+
@@ -493,7 +493,7 @@ function solvePage(q,t,f){
  ((PME||window.PROFESSOR_MASTERY_ENGINE)?.avionics?.renderChalkboard(q,t)||"")+
  (HWD?HWD.render(t,q):"")+
  ((window.ENGINEERING_SOLVED_CASES)?window.ENGINEERING_SOLVED_CASES.render(q,"avionics"):"")+
- '<div class="av-takeaway"><strong>How to say this in your Muon Space interview:</strong> First state the physical law, describe how you set up the DMM/scope/breadboard, then explain the safety check and Go/No-Go limit.</div>'+
+ '<div class="av-takeaway"><strong>Engineer Execution Order for Muon Space:</strong> (1) Convert prefixes to 10<sup>3n</sup> and solve paper math FIRST, (2) trace nets/jumpers on the schematic, (3) measure safely power-off / CC-limited (4W Kelvin below 1 Ω), (4) isolate via single-variable A-B-A swap and verify on flight hardware.</div>'+
  '</section>';
 }
 

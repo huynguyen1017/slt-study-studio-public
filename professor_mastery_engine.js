@@ -161,7 +161,7 @@ const TOPIC_PROFESSOR_NOTES = {
   timing: {
     intuition: "Synchronous digital flip-flops are cameras with a shutter window around every rising clock edge: Setup time (t_su) is how long data must hold still BEFORE the clock edge arrives; Hold time (t_h) is how long data must stay steady AFTER the clock edge so new launched data doesn't race through and overwrite it.",
     lawWhy: "Setup governs maximum clock speed: T_clk(min) = t_CQ(max) + t_logic(max) + t_su + t_skew, so slowing f_clk fixes Setup. Hold is a SAME-EDGE race: t_CQ(min) + t_logic(min) ≥ t_h(max) + t_skew. Notice T_clk cancels completely from the Hold equation!",
-    trap: "ENGR 852 GOLDEN RULE: Slowing down the clock frequency (f_clk) CANNOT fix a hold violation because both launch and capture occur on the SAME clock edge! Only adding physical delay buffers on short paths or reducing clock skew fixes hold."
+    trap: "GOLDEN TIMING RULE: Slowing down the clock frequency (f_clk) CANNOT fix a hold violation because both launch and capture occur on the SAME clock edge! Only adding physical delay buffers on short paths or reducing clock skew fixes hold."
   },
   qualification: {
     intuition: "In flight avionics and production SLT, building one working prototype isn't enough—we must prove design margin (Verification: 'built the system right') and mission survival (Validation: 'built the right system') across worst-case thermal, vacuum (TVAC), vibration, radiation, and instrument uncertainty corners.",
@@ -216,456 +216,527 @@ const TOPIC_PROFESSOR_NOTES = {
 };
 
 /* ============================================================================
-   3. COMPLETE COURSEWORK & INTERVIEW PRACTICE PROBLEM BANK (Avionics View)
-      40+ Worked Textbook & Interview Problems across Tech 60, Electronic Devices,
-      Tech 63, Physics 2B, ENGR 852, and Muon Space 141-Q — showing ALL WORK!
+   3. TOPIC-FILTERED WORKED PRACTICE BANK (Avionics EE Practice — Topic-Pure)
+      100% tailored to Avionics EE & Hardware Debug — Zero unrelated course codes.
    ============================================================================ */
 const AVIONICS_WORKED_BANK = [
   {
-    id: "CW-T60-01",
-    cat: "tech60",
-    src: "Tech 60 · Ch. 1–2 (Units, Charge & Engineering Notation)",
-    title: "Compute Electron Count from Coulomb Charge & Convert to Engineering Notation",
+    id: "CW-DC-01",
+    cat: "dc_networks",
+    src: "Avionics Foundations · Charge, Current & 10^(3n) Engineering Notation",
+    title: "Compute Electron Count from Coulomb Charge & Current in 10^(3n)",
     topicIds: ["units", "ohm"],
     prompt: "How many electrons make up 0.000045 C (45 µC) of charge, and if that charge flows past a PCB trace cross-section in 15 ms, what is the current I in engineering notation?",
     prereq: "1 coulomb (C) equals 6.25 × 10¹⁸ electrons. Electric current is charge flow per second: I = Q / t (1 A = 1 C/s). Engineering notation keeps exponents as multiples of 3 (10³, 10⁻³, 10⁻⁶).",
     formula: "N = Q * 6.25e18 ;   I = Q / t",
     steps: [
-      "Step 1 — Convert given charge to scientific/engineering notation: Q = 0.000045 C = 45 × 10⁻⁶ C = 45 µC (move decimal 6 places right).",
-      "Step 2 — Calculate electron count N: N = (45 × 10⁻⁶ C) × (6.25 × 10¹⁸ electrons/C) = (45 × 6.25) × 10^(18 − 6) = 281.25 × 10¹² electrons = 2.8125 × 10¹⁴ electrons.",
+      "Step 1 — Convert given charge to 10^(3n) engineering notation: Q = 0.000045 C = 45 × 10⁻⁶ C = 45 µC.",
+      "Step 2 — Calculate electron count N: N = (45 × 10⁻⁶ C) × (6.25 × 10¹⁸ electrons/C) = 281.25 × 10¹² electrons.",
       "Step 3 — Convert time t to base seconds: t = 15 ms = 15 × 10⁻³ s = 0.015 s.",
-      "Step 4 — Compute current I = Q / t: I = (45 × 10⁻⁶ C) / (15 × 10⁻³ s) = (45 / 15) × 10^(−6 − (−3)) = 3 × 10⁻³ A.",
-      "Step 5 — Express in clean engineering notation: I = 3.0 mA (milliampere)."
+      "Step 4 — Compute current I = Q / t = (45 × 10⁻⁶ C) / (15 × 10⁻³ s) = 3.0 × 10⁻³ A = 3.0 mA.",
+      "Step 5 — Bench Application: Verify trace current limit against IPC-2152 copper width tables before energizing."
     ],
     answerType: "number",
     expected: 3,
     unit: "mA"
   },
   {
-    id: "CW-T60-02",
-    cat: "tech60",
-    src: "Tech 60 · Ch. 2–3 (Resistor Color Code, Ohm's & Watt's Law)",
-    title: "SMD/5-Band Color Code, Branch Current & Safe Resistor Wattage Selection",
-    topicIds: ["ohm", "power"],
+    id: "CW-DC-02",
+    cat: "dc_networks",
+    src: "Avionics EE · SMD Markings, Ohm's Law & 2× Wattage Derating",
+    title: "SMD '472' Resistor Code, Branch Current & Safe Flight Wattage Selection",
+    topicIds: ["ohm", "power", "safety"],
     prompt: "An SMT resistor marked '472' (4-band equivalent: Yellow-Violet-Red-Gold) is connected directly across a 12 V avionics rail. Find (a) nominal resistance, (b) current in mA, (c) power dissipated in mW, and (d) minimum safe standard power rating (1/8 W, 1/4 W, 1/2 W).",
-    prereq: "In 3-digit SMD markings (ABC) and 4-band axial resistors, digits A and B are significant figures and C is the power-of-10 multiplier (number of zeros). Always apply ≥ 2× derating for flight hardware reliability.",
+    prereq: "In 3-digit SMD markings (ABC), digits A and B are significant figures and C is the power-of-10 multiplier. Always apply ≥ 2× flight derating on power ratings.",
     formula: "R = 47 * 10^2 ;   I = V / R ;   P = V^2 / R",
     steps: [
-      "Step 1 — Decode SMD '472': First digit 4 (Yellow), Second digit 7 (Violet), Multiplier 2 zeros (10², Red) → R = 47 × 100 = 4,700 Ω = 4.7 kΩ (±5% Gold → 4.465 kΩ to 4.935 kΩ).",
-      "Step 2 — Convert resistance to base ohms: R = 4.7 × 10³ Ω.",
-      "Step 3 — Apply Ohm's Law for current I: I = V / R = 12 V / 4,700 Ω = 0.002553 A = 2.553 mA.",
-      "Step 4 — Apply Watt's Law for power P: P = V² / R = 12² / 4,700 = 144 / 4,700 = 0.03064 W = 30.64 mW (Check via V·I: 12 × 0.002553 = 30.64 mW!).",
-      "Step 5 — Select safe wattage rating: Required 2× derated minimum = 2 × 30.64 mW = 61.28 mW = 0.061 W. Standard 1/8 W (0.125 W = 125 mW) is safe!"
+      "Step 1 — Decode SMD '472': 47 × 10² = 4,700 Ω = 4.70 × 10³ Ω (±5%).",
+      "Step 2 — Apply Ohm's Law: I = 12 V / (4.70 × 10³ Ω) = 2.553 × 10⁻³ A (2.553 mA).",
+      "Step 3 — Apply Watt's Law: P = 12² / (4.70 × 10³) = 30.64 × 10⁻³ W (30.64 mW).",
+      "Step 4 — Flight 2× Derating Check: 2 × 30.64 × 10⁻³ W = 61.28 × 10⁻³ W ≤ 0.125 W (1/8 W 0805 package safe).",
+      "Step 5 — Bench Check: Verify power-off resistance across isolated pads (4.465–4.935 kΩ) before current-limited 12 V power-on."
     ],
     answerType: "number",
     expected: 30.64,
     unit: "mW"
   },
   {
-    id: "CW-T60-03",
-    cat: "tech60",
-    src: "Tech 60 · Ch. 5–7 (Loaded Voltage Divider & 10 MΩ DMM Loading)",
-    title: "Solve a Loaded Voltage Divider vs. 10 MΩ Voltmeter Loading Error",
-    topicIds: ["series", "parallel", "instruments"],
-    prompt: "A +10 V reference feeds R₁ = 1 MΩ (top) and R₂ = 1 MΩ (bottom). What does an ideal infinite-impedance voltmeter read at the midpoint vs. a real handheld DMM whose input resistance is 10 MΩ?",
-    prereq: "Connecting a real DMM places its internal R_DMM = 10 MΩ IN PARALLEL with the bottom resistor R₂. For low-ohm dividers (kΩ), 10 MΩ error is tiny; for megohm dividers, loading shifts the reading noticeably downward.",
-    formula: "V_ideal = V_S * R2 / (R1 + R2) ;   R2_loaded = (R2 * R_DMM) / (R2 + R_DMM)",
+    id: "CW-DC-03",
+    cat: "dc_networks",
+    src: "Avionics Networks · Loaded Voltage Divider vs. 10 MΩ DMM Error",
+    title: "Solve a Loaded Voltage Divider vs. 10×10⁶ Ω Voltmeter Loading Error",
+    topicIds: ["series", "parallel", "instruments", "schematics"],
+    prompt: "A +10 V reference feeds R₁ = 1 MΩ (top) and R₂ = 1 MΩ (bottom). What does a real handheld DMM with R_DMM = 10×10⁶ Ω read at the midpoint (in V)?",
+    prereq: "Connecting a DMM places R_DMM = 10 × 10⁶ Ω IN PARALLEL with bottom resistor R₂, lowering midpoint voltage across high-impedance dividers.",
+    formula: "R2_loaded = (R2 * R_DMM) / (R2 + R_DMM) ;   V_DMM = V_S * R2_loaded / (R1 + R2_loaded)",
     steps: [
-      "Step 1 — Unloaded (ideal) divider voltage: V_ideal = 10 V × 1 MΩ / (1 MΩ + 1 MΩ) = 10 × 0.5 = 5.000 V.",
-      "Step 2 — Connect the 10 MΩ DMM across bottom R₂: compute parallel equivalent R₂_loaded = (1 MΩ × 10 MΩ) / (1 MΩ + 10 MΩ) = 10 / 11 MΩ = 0.9091 MΩ.",
-      "Step 3 — Recompute the voltage divider ratio with loaded bottom branch: R_total = R₁ + R₂_loaded = 1.0 MΩ + 0.9091 MΩ = 1.9091 MΩ.",
-      "Step 4 — Compute DMM measured voltage: V_DMM = 10 V × (0.9091 / 1.9091) = 4.762 V.",
-      "Step 5 — Calculate loading error: ΔV = 4.762 − 5.000 = −0.238 V (−4.76% low!). In avionics, buffer high-Z sensor dividers with an op-amp before sampling."
+      "Step 1 — Ideal unloaded voltage: V_ideal = 10 × 1×10⁶ / (2×10⁶) = 5.000 V.",
+      "Step 2 — Parallel DMM loading across R₂: (1×10⁶ × 10×10⁶)/(11×10⁶) = 909.1 × 10³ Ω.",
+      "Step 3 — Total loaded chain: R_total = 1.0×10⁶ + 0.9091×10⁶ = 1.9091 × 10⁶ Ω.",
+      "Step 4 — DMM reading: V_DMM = 10 × (0.9091 / 1.9091) = 4.762 V (−4.76% sag!).",
+      "Step 5 — Product Fix: Buffer megohm sensor dividers with a unity-gain CMOS op-amp before ADC/DMM probing."
     ],
     answerType: "number",
     expected: 4.762,
     unit: "V"
   },
   {
-    id: "CW-T60-04",
-    cat: "tech60",
-    src: "Tech 60 · Ch. 7–8 (Wheatstone Bridge & Thevenin Equivalent)",
-    title: "Balanced & Unbalanced Thermistor Wheatstone Bridge + Thevenin V_TH / R_TH",
-    topicIds: ["kcl-kvl", "thermal", "parallel"],
-    prompt: "A 12 V Wheatstone bridge has three equal arms R₁ = R₂ = R₃ = 10 kΩ and a thermistor R_T whose resistance drops from 10 kΩ at 25 °C to 9.0 kΩ at 30 °C. Find the differential bridge output V_out (V_A − V_B) in V at 30 °C, and find R_TH seen by the meter.",
-    prereq: "A Wheatstone bridge is two parallel voltage dividers connected between the same supply rails. Output V_AB = V_S·[R₃/(R₃+R₁) − R_T/(R_T+R₂)] becomes 0 V at balance. Looking back into AB with V_S shorted gives R_TH = (R₁∥R₃) + (R₂∥R_T).",
+    id: "CW-DC-04",
+    cat: "dc_networks",
+    src: "Avionics Sensors · Thermistor Wheatstone Bridge & Thevenin R_TH",
+    title: "Unbalanced Thermistor Wheatstone Bridge + Thevenin V_TH / R_TH",
+    topicIds: ["kcl-kvl", "thevenin", "thermal", "parallel"],
+    prompt: "A 12 V Wheatstone bridge has three equal arms R₁ = R₂ = R₃ = 10×10³ Ω and thermistor R_T = 9.0×10³ Ω at 30 °C. Find differential output V_out = V_A − V_B in V.",
+    prereq: "Compute left/right divider legs independently, subtract V_A − V_B, and zero V_S (short to GND) to calculate R_TH = (R₁∥R₃) + (R₂∥R_T).",
     formula: "V_out = V_S * (R3/(R1+R3) - R_T/(R2+R_T))",
     steps: [
-      "Step 1 — Reference leg voltage V_A (left arm R₁ top, R₃ bottom): V_A = 12 V × (10 kΩ / (10 kΩ + 10 kΩ)) = 12 × 0.5 = 6.000 V.",
-      "Step 2 — Sensing leg voltage V_B (right arm R₂ = 10 kΩ top, R_T = 9.0 kΩ bottom): V_B = 12 V × (9.0 kΩ / (10 kΩ + 9.0 kΩ)) = 12 × (9 / 19) = 5.6842 V.",
-      "Step 3 — Differential bridge output V_out = V_A − V_B = 6.000 V − 5.6842 V = +0.3158 V (+315.8 mV).",
-      "Step 4 — Find Thevenin Resistance R_TH seen across terminals A–B by zeroing the 12 V source (replace V_S with a short to GND):",
-      "Step 5 — Left node sees R₁∥R₃ = 10k ∥ 10k = 5.000 kΩ. Right node sees R₂∥R_T = (10k × 9k) / (10k + 9k) = 4.737 kΩ. In series between A and B: R_TH = 5.000 + 4.737 = 9.737 kΩ."
+      "Step 1 — Reference leg V_A = 12 × (10×10³ / 20×10³) = 6.000 V.",
+      "Step 2 — Sensing leg V_B = 12 × (9.0×10³ / 19.0×10³) = 5.6842 V.",
+      "Step 3 — Differential V_out = 6.000 − 5.6842 = +0.3158 V (+315.8 × 10⁻³ V).",
+      "Step 4 — Find R_TH (zero 12V supply): (10k∥10k) + (10k∥9k) = 5.000k + 4.737k = 9.737 × 10³ Ω.",
+      "Step 5 — Bench Check: Measure differentially across A–B with instrumentation amp to reject common-mode rail drift."
     ],
     answerType: "number",
     expected: 0.3158,
     unit: "V"
   },
   {
-    id: "CW-T60-05",
-    cat: "tech60",
-    src: "Tech 60 · Ch. 8–11 (Max Power Transfer, Superposition & AC RMS)",
-    title: "Superposition & Maximum Power Transfer + AC Sine Peak-to-RMS Conversion",
-    topicIds: ["kcl-kvl", "ac", "rf"],
-    prompt: "A sensor source has V_TH = 8.0 V and internal resistance R_TH = 200 Ω. (a) What load R_L draws maximum power and what is P_max in mW? (b) If an AC test signal has V_pp = 14.14 V at f = 2 kHz, find V_rms (in V) and period T (in µs).",
-    prereq: "Maximum Power Transfer Theorem: load power P_L = V_TH² · R_L / (R_TH + R_L)² reaches its mathematical peak when R_L = R_TH, yielding P_max = V_TH² / (4 · R_TH) at 50% efficiency. For a pure sine wave: V_p = V_pp/2, V_rms = 0.7071 · V_p.",
-    formula: "P_max = V_TH^2 / (4 * R_TH) ;   V_rms = 0.7071 * (V_pp / 2)",
+    id: "CW-DC-05",
+    cat: "dc_networks",
+    src: "Avionics RF/Sensors · Max Power Transfer & AC RMS",
+    title: "Maximum Power Transfer (R_L = R_TH) & AC Sine Peak-to-RMS Conversion",
+    topicIds: ["thevenin", "ac", "rf", "kcl-kvl"],
+    prompt: "A sensor source has V_TH = 8.0 V and R_TH = 200 Ω. Find max load power P_max (in mW) when R_L = R_TH = 200 Ω.",
+    prereq: "Maximum power transfer occurs when R_L = R_TH, yielding P_max = V_TH² / (4 · R_TH) at 50% efficiency.",
+    formula: "P_max = V_TH^2 / (4 * R_TH)",
     steps: [
-      "Step 1 — Match load for Maximum Power Transfer: choose R_L = R_TH = 200 Ω.",
-      "Step 2 — Check current at matched load: I = V_TH / (R_TH + R_L) = 8.0 V / (200 Ω + 200 Ω) = 8 / 400 = 0.020 A (20 mA).",
-      "Step 3 — Compute maximum delivered load power P_max = I² · R_L = (0.020)² × 200 = 0.0004 × 200 = 0.080 W = 80 mW (Verify V_TH²/(4·R_TH) = 64/800 = 80 mW!).",
-      "Step 4 — AC Peak & RMS: V_p = V_pp / 2 = 14.14 / 2 = 7.070 V. Then V_rms = 0.7071 × 7.070 V = 5.00 V_rms.",
-      "Step 5 — AC Period T: T = 1 / f = 1 / (2 × 10³ Hz) = 0.0005 s = 500 µs."
+      "Step 1 — Match load: R_L = R_TH = 200 Ω.",
+      "Step 2 — Loop current: I = 8.0 / (200 + 200) = 20.0 × 10⁻³ A (20 mA).",
+      "Step 3 — Load power: P_max = (20×10⁻³)² × 200 = 80.0 × 10⁻³ W = 80.0 mW.",
+      "Step 4 — Verification formula: V_TH² / (4·R_TH) = 64 / 800 = 80 mW."
     ],
     answerType: "number",
     expected: 80,
     unit: "mW"
   },
   {
-    id: "CW-DEV-01",
-    cat: "devices",
-    src: "Electronic Devices · Ch. 1–2 (PN Junction & Bridge Rectifier + Ripple Filter)",
-    title: "Full-Wave Bridge Rectifier DC Output, PIV Rating & Capacitor Filter Ripple",
+    id: "CW-ANA-01",
+    cat: "analog_devices",
+    src: "Avionics Power Conversion · Full-Wave Si Bridge Rectifier & Ripple",
+    title: "Full-Wave Bridge Rectifier DC Output, Ripple V_r(pp) & PIV Rating",
     topicIds: ["components", "power-rails", "ac"],
-    prompt: "A transformer secondary delivers 12 V_rms at 60 Hz into a 4-diode Silicon bridge rectifier (V_F = 0.7 V each) with a 1000 µF filter capacitor and a 1.0 kΩ load. Compute (a) filtered DC peak V_p(out) in V, (b) peak-to-peak ripple voltage V_r(pp) in mV, and (c) minimum diode PIV rating.",
-    prereq: "First convert secondary RMS to peak (V_p(sec) = √2 · V_rms). In a bridge rectifier, TWO diodes conduct in series on each half-cycle, subtracting 2 × 0.7 V = 1.4 V, and ripple frequency DOUBLES to f_r = 2·f_in = 120 Hz.",
-    formula: "V_p(out) = 1.414 * V_rms - 1.4 ;   V_r(pp) = V_p(out) / (f_r * R_L * C)",
+    prompt: "A 12 V_rms 60 Hz secondary feeds a 4-diode Si bridge (0.7 V each) with C = 1×10⁻³ F (1000 µF) and R_L = 1.0×10³ Ω. Find filtered DC peak V_p(out) in V.",
+    prereq: "Convert V_rms to V_peak = √2·V_rms, subtract 2×0.7 V conducting diodes, and note ripple rate doubles to 120 Hz.",
+    formula: "V_p(out) = 1.4142 * V_rms - 1.4 ;   V_r(pp) = V_p(out) / (f_r * R_L * C)",
     steps: [
-      "Step 1 — Convert secondary RMS to Peak Voltage: V_p(sec) = √2 × 12 V = 1.4142 × 12 = 16.97 V.",
-      "Step 2 — Subtract two forward Silicon diode drops (1.4 V): V_p(out) = 16.97 V − 1.40 V = 15.57 V (check answer box below accepts 15.57 V!).",
-      "Step 3 — Determine full-wave ripple frequency: f_r = 2 × 60 Hz = 120 Hz.",
-      "Step 4 — Convert filter values to SI: R_L = 1.0 × 10³ Ω, C = 1000 × 10⁻⁶ F = 1.0 × 10⁻³ F → product R_L · C = 1.0 s.",
-      "Step 5 — Calculate peak-to-peak ripple V_r(pp) = V_p(out) / (f_r · R_L · C) = 15.57 V / (120 × 1.0) = 0.1298 V = 129.8 mV_pp. Approximate V_DC = V_p(out) − V_r(pp)/2 = 15.505 V.",
-      "Step 6 — Required Diode PIV rating: PIV = V_p(out) + 0.7 V = 15.57 + 0.7 = 16.27 V (use ≥ 50 V rated 1N4001 for safety margin)."
+      "Step 1 — Secondary Peak: V_p(sec) = 1.4142 × 12 = 16.97 V.",
+      "Step 2 — Subtract 2 conducting Si diodes: V_p(out) = 16.97 − 1.40 = 15.57 V.",
+      "Step 3 — Full-wave ripple rate: f_r = 2 × 60 = 120 × 10⁰ Hz.",
+      "Step 4 — Filter ripple: V_r(pp) = 15.57 / (120 × 10³ × 10⁻³) = 129.8 × 10⁻³ Vpp (129.8 mVpp).",
+      "Step 5 — Bench Scope Diagnostic: If ripple switches from 120 Hz to 60 Hz, one bridge diode failed open!"
     ],
     answerType: "number",
     expected: 15.57,
     unit: "V"
   },
   {
-    id: "CW-DEV-02",
-    cat: "devices",
-    src: "Electronic Devices · Ch. 3–4 (Zener Voltage Regulator & BJT Switch/Amplifier)",
-    title: "Zener Shunt Regulator Series Current & BJT Saturation Overdrive Check",
+    id: "CW-ANA-02",
+    cat: "analog_devices",
+    src: "Avionics Regulators & Drivers · Zener Shunt Current & BJT Saturation",
+    title: "5.1V Zener Regulator KCL Current & NPN Saturation Check",
     topicIds: ["components", "ohm", "power"],
-    prompt: "Part A: A 5.1 V Zener regulator (R_series = 100 Ω) is fed from V_in = 12 V with load R_L = 510 Ω. Find Zener current I_Z in mA. Part B: An NPN transistor (β_DC = 100, V_CE(sat) = 0.2 V) has V_CC = 10 V, R_C = 1 kΩ, and R_B = 10 kΩ driven by V_BB = 5 V. Is it Active or Saturated?",
-    prereq: "For Zener: KVL sets total input current I_T = (V_in − V_Z)/R_S, which splits by KCL into I_L = V_Z/R_L and I_Z = I_T − I_L. For BJT: compare β_DC·I_B against saturation ceiling I_C(sat) = (V_CC − V_CE(sat))/R_C.",
+    prompt: "A 5.1 V Zener regulator (R_S = 100 Ω) fed from V_in = 12 V drives load R_L = 510 Ω. Find Zener shunt current I_Z in mA.",
+    prereq: "KCL at the Zener node: I_T = (V_in − V_Z)/R_S = I_Z + I_L, where I_L = V_Z/R_L.",
     formula: "I_T = (V_in - V_Z)/R_S ;   I_L = V_Z/R_L ;   I_Z = I_T - I_L",
     steps: [
-      "Step 1 (Part A — Zener Total Current): Voltage across series resistor = 12.0 V − 5.1 V = 6.9 V. So I_T = 6.9 V / 100 Ω = 0.069 A = 69.0 mA.",
-      "Step 2 (Part A — Load & Zener Current by KCL): Load current I_L = V_Z / R_L = 5.1 V / 510 Ω = 0.010 A = 10.0 mA. Therefore I_Z = I_T − I_L = 69.0 − 10.0 = 59.0 mA.",
-      "Step 3 (Part A — Zener Power Check): P_Z = V_Z × I_Z = 5.1 V × 0.059 A = 0.301 W (301 mW — safe for a 1 W 1N4733A Zener, unsafe for a 250 mW device!).",
-      "Step 4 (Part B — BJT Base Current): I_B = (V_BB − V_BE) / R_B = (5.0 V − 0.7 V) / 10 kΩ = 4.3 V / 10,000 Ω = 0.43 mA.",
-      "Step 5 (Part B — Saturation Check): Unclamped active prediction = β_DC × I_B = 100 × 0.43 mA = 43 mA. But collector ceiling I_C(sat) = (10 V − 0.2 V) / 1 kΩ = 9.8 mA. Because 43 mA > 9.8 mA, the BJT is solidly IN SATURATION (switch CLOSED at V_CE ≈ 0.2 V)!"
+      "Step 1 — Series current: I_T = (12.0 − 5.1) / 100 = 69.0 × 10⁻³ A (69.0 mA).",
+      "Step 2 — Load current: I_L = 5.1 / 510 = 10.0 × 10⁻³ A (10.0 mA).",
+      "Step 3 — Zener current by KCL: I_Z = 69.0 − 10.0 = 59.0 × 10⁻³ A (59.0 mA).",
+      "Step 4 — Thermal check: P_Z = 5.1 × 59×10⁻³ = 301 mW (no-load worst case = 5.1 × 69 mA = 352 mW -> size ≥ 1 W Zener)."
     ],
     answerType: "number",
     expected: 59,
     unit: "mA"
   },
   {
-    id: "CW-T63-01",
-    cat: "tech63",
-    src: "Tech 63 · Ch. 1–2 (Pulse Timing, Duty Cycle & IEEE 754 Floating Point)",
-    title: "Digital Pulse Duty Cycle & Decode IEEE 754 Single-Precision 32-bit Float",
+    id: "CW-DIG-01",
+    cat: "digital_timing",
+    src: "Avionics & SoC Timing · Setup Frequency f_max vs. Same-Edge Hold Violation",
+    title: "Static Timing Analysis: Max Clock f_max vs. Same-Edge Hold Slack (ps)",
     topicIds: ["timing", "components", "buses"],
-    prompt: "A PWM heater pulse has period T = 20 µs and HIGH width t_W = 5.0 µs. Find Duty Cycle %. Also decode the IEEE 754 32-bit float: 0 10000010 10010000000000000000000₂.",
-    prereq: "Duty Cycle = (t_W / T) × 100% measured between 50% amplitude edges. IEEE 754 single precision packs [Sign S (1 bit) | Exponent E (8 bits, bias 127) | Mantissa F (23 bits)], representing (−1)^S × (1.F)_2 × 2^(E−127).",
-    formula: "DutyCycle = (t_W / T) * 100 ;   Val = (-1)^S * (1 + F) * 2^(E - 127)",
-    steps: [
-      "Step 1 (Duty Cycle): D = (t_W / T) × 100% = (5.0 µs / 20.0 µs) × 100% = 0.25 × 100% = 25%.",
-      "Step 2 (IEEE 754 Sign bit S): First bit is 0 → positive sign (−1)⁰ = +1.",
-      "Step 3 (Biased Exponent E): Next 8 bits are 10000010₂ = 128 + 2 = 130₁₀. Unbiased exponent = E − 127 = 130 − 127 = +3.",
-      "Step 4 (Significand / Fraction F): Top bits of 23-bit mantissa are .1001₂ = 1×2⁻¹ + 0 + 0 + 1×2⁻⁴ = 0.5 + 0.0625 = 0.5625. Add the implicit leading 1 → 1.5625.",
-      "Step 5 (Final IEEE 754 Value): Value = +1 × 1.5625 × 2³ = 1.5625 × 8 = +12.50!"
-    ],
-    answerType: "number",
-    expected: 25,
-    unit: "%"
-  },
-  {
-    id: "CW-T63-02",
-    cat: "tech63",
-    src: "Tech 63 · Ch. 3–6 (DeMorgan's Theorems, K-Map Minimization & Full Adder)",
-    title: "Simplify Boolean Logic with DeMorgan + 4-Var K-Map + Verify 4-Bit Adder",
-    topicIds: ["components", "schematics"],
-    prompt: "Use DeMorgan's Theorem to simplify F = NOT( NOT(A·B) · C ), and check what decimal sum + Cout results when adding 1011₂ (11) + 0111₂ (7) in a 4-bit ripple-carry adder (enter decimal 4-bit Sum nibble 0–15).",
-    prereq: "DeMorgan's two golden rules: (1) Break the bar, flip the operator: NOT(X·Y) = X̄ + Ȳ and NOT(X+Y) = X̄ · Ȳ. Double inversion cancels: X̄̄ = X. In a Full Adder: Σ = A⊕B⊕C_in, C_out = A·B + C_in(A⊕B).",
-    formula: "NOT( NOT(A*B) * C ) = A*B + NOT(C) ;   1011_2 + 0111_2 = 10010_2",
-    steps: [
-      "Step 1 — Apply DeMorgan's rule to outer inversion of F = NOT( NOT(A·B) · C ): split the top bar over the AND dot (· → +): F = NOT(NOT(A·B)) + NOT(C).",
-      "Step 2 — Cancel double negation NOT(NOT(A·B)) = A·B: Final simplified SOP expression is F = A·B + C̄ (just 1 two-input AND + 1 NOT + 1 OR gate!).",
-      "Step 3 — 4-bit Ripple Adder column-by-column: 1011₂ (11₁₀) + 0111₂ (7₁₀), starting C₀ = 0:",
-      "Step 4 — LSB Bit 0: 1+1+0 = 0, C₁=1; Bit 1: 1+1+1 = 1, C₂=1; Bit 2: 0+1+1 = 0, C₃=1; MSB Bit 3: 1+0+1 = 0, C₄=1.",
-      "Step 5 — Result: C_out = 1 (weight 16) and 4-bit Sum nibble = 0010₂ = 2 (total 16 + 2 = 18 = 11 + 7!)."
-    ],
-    answerType: "number",
-    expected: 2,
-    unit: "Sum (nibble)"
-  },
-  {
-    id: "CW-852-01",
-    cat: "engr852",
-    src: "SFSU ENGR 852 · HW2 Q1(a) & Q1(b) (Setup vs. Hold STA & casex K-Map)",
-    title: "ASIC Static Timing Analysis: Max Clock Frequency f_max vs. Hold Violation Slack",
-    topicIds: ["timing", "components"],
-    prompt: "Given t_CQ(max)=950 ps, t_CQ(min)=300 ps, worst slow path t_logic(max)=590 ps, fastest path t_MUX_S(min)=30 ps, t_setup=300 ps, t_hold=400 ps, t_skew=750 ps: compute (a) T_clk(min) in ps & f_max in MHz, and (b) Hold Slack in ps (explain why lowering f_clk cannot fix hold!).",
-    prereq: "Setup is a NEXT-EDGE deadline (longer path makes it slower): T_clk(min) = t_CQ(max) + t_logic(max) + t_su + t_skew. Hold is a SAME-EDGE race: t_CQ(min) + t_logic(min) ≥ t_hold + t_skew. Hold Slack = Arrival_min − Required_hold.",
+    prompt: "Given t_CQ(max)=950×10⁻¹² s, t_CQ(min)=300×10⁻¹² s, slow path t_logic(max)=590×10⁻¹² s, fast path t_min=30×10⁻¹² s, t_su=300×10⁻¹² s, t_h=400×10⁻¹² s, skew=750×10⁻¹² s: find Hold Slack in ps.",
+    prereq: "Setup checks next edge (sets f_max = 386.10 MHz). Hold checks the SAME clock edge: HoldSlack = (t_CQ_min + t_min) − (t_h + t_skew).",
     formula: "T_clk(min) = 950 + 590 + 300 + 750 = 2590 ps ;   HoldSlack = (300 + 30) - (400 + 750)",
     steps: [
-      "Step 1 (Setup T_clk(min)): Sum worst-case launch + critical combinational path (AND 210 + OR 200 + MUX 180 = 590 ps) + setup + skew: T_clk(min) = 950 + 590 + 300 + 750 = 2,590 ps = 2.590 ns.",
-      "Step 2 (Maximum Frequency f_max): f_max = 1 / 2.590 ns = 1000 / 2.590 MHz = 386.10 MHz.",
-      "Step 3 (Hold Fastest Arrival Time): Path P4 goes straight from launch DFF Q_S to MUX Select S: t_arrival(min) = t_CQ(min) + t_MUX_S(min) = 300 ps + 30 ps = 330 ps.",
-      "Step 4 (Required Hold Window with Skew): t_hold_req = t_hold(max) + t_skew = 400 ps + 750 ps = 1,150 ps.",
-      "Step 5 (Hold Slack — Type -820 below): Hold Slack = 330 ps − 1,150 ps = −820 ps (SEVERE HOLD VIOLATION — even at 0 ps skew, 330 − 400 = −70 ps fail!).",
-      "Step 6 (ENGR 852 Golden Rule): Slowing T_clk CANNOT fix hold because T_clk is not in the hold inequality! You MUST insert ≥ +820 ps physical delay buffers on the fast Q_S → S path (and never touch T_clk for hold!)."
+      "Step 1 (Setup T_min): (950 + 590 + 300 + 750) × 10⁻¹² s = 2.590 × 10⁻⁹ s -> f_max = 386.10 × 10⁶ Hz.",
+      "Step 2 (Hold Fastest Arrival): t_CQ(min) + t_path(min) = (300 + 30) × 10⁻¹² s = 330 × 10⁻¹² s.",
+      "Step 3 (Required Hold Window): t_hold + t_skew = (400 + 750) × 10⁻¹² s = 1,150 × 10⁻¹² s.",
+      "Step 4 (Hold Slack): 330×10⁻¹² − 1,150×10⁻¹² = −820 × 10⁻¹² s (−820 ps VIOLATION!).",
+      "Step 5 (Hardware Fix): Slowing f_clk CANNOT fix hold! Insert ≥ +820×10⁻¹² s delay buffer on the fast path or reduce clock skew."
     ],
     answerType: "number",
     expected: -820,
     unit: "ps"
   },
   {
-    id: "CW-P2B-01",
-    cat: "physics2b",
-    src: "Physics 2B Lab 8 & MUON 141-Q (RC Loading + TVAC + 100x1Ω Array)",
-    title: "Physics 2B Lab 8: RC Decay with 10 MΩ DVM Loading & Multi-Fault Parallel Array",
-    topicIds: ["rc", "parallel", "qualification"],
-    prompt: "Physics 2B Lab 8: A 2.2 µF capacitor is connected in parallel with R = 4.7 MΩ AND a 10 MΩ digital voltmeter (DVM). Calculate the actual observed time constant τ in seconds (including the DVM loading!).",
-    prereq: "Because the DVM input resistance (10 MΩ) is connected directly across the capacitor alongside the bleed resistor R = 4.7 MΩ, total discharge resistance R_eq is R ∥ R_DMM—cutting τ noticeably shorter than R·C!",
-    formula: "R_eq = (R * R_DVM) / (R + R_DVM) ;   tau = R_eq * C",
+    id: "CW-DIG-02",
+    cat: "digital_timing",
+    src: "Avionics Digital Telemetry · PWM Duty Cycle & Binary-to-Gray Synchronization Code",
+    title: "PWM Duty Cycle (10⁻⁶ s) & Binary-to-Gray Synchronization Code",
+    topicIds: ["timing", "components", "buses", "automation"],
+    prompt: "A spacecraft heater PWM pulse has period T = 20×10⁻⁶ s and HIGH pulse width t_W = 5.0×10⁻⁶ s. Find Duty Cycle %.",
+    prereq: "Duty cycle = (t_W / T) × 100% measured at 50% crossing. Instantaneous frequency f = 1 / T.",
+    formula: "DutyCycle = (t_W / T) * 100 ;   f = 1 / T",
     steps: [
-      "Step 1 — Notice topology: Capacitor C, resistor R (4.7 MΩ), and voltmeter R_DVM (10 MΩ) share the same two nodes (parallel!).",
-      "Step 2 — Convert resistance units carefully (keep in MΩ first): R = 4.7 MΩ, R_DVM = 10.0 MΩ.",
-      "Step 3 — Compute parallel equivalent R_eq = (4.7 × 10) / (4.7 + 10) = 47 / 14.7 = 3.1973 MΩ = 3.1973 × 10⁶ Ω (without DMM it would be 4.7 MΩ!).",
-      "Step 4 — Convert C to farads: C = 2.2 µF = 2.2 × 10⁻⁶ F.",
-      "Step 5 — Multiply R_eq · C (notice 10⁶ × 10⁻⁶ = 1!): τ = 3.1973 × 2.2 = 7.034 seconds (vs. 10.34 s if you forgot DMM loading!)."
+      "Step 1 — Match 10^(3n) base units: t_W = 5.0 × 10⁻⁶ s, T = 20.0 × 10⁻⁶ s.",
+      "Step 2 — Divide t_W / T: 5.0×10⁻⁶ / 20.0×10⁻⁶ = 0.250.",
+      "Step 3 — Convert to percent: 0.250 × 100% = 25% (f = 1 / 20×10⁻⁶ = 50.0 × 10³ Hz).",
+      "Step 4 — Bench Scope Check: Trigger on rising edge, verify 10–90% rise time < 1% of T and compare against heater MOSFET switch rating."
+    ],
+    answerType: "number",
+    expected: 25,
+    unit: "%"
+  },
+  {
+    id: "CW-LAB-01",
+    cat: "lab_tvac",
+    src: "Avionics Hardware Debug · 10 MΩ DMM RC Loading Shift",
+    title: "RC Time Constant With Parallel 10×10⁶ Ω DMM Meter Loading",
+    topicIds: ["rc", "capacitors", "qualification", "instruments"],
+    prompt: "A 2.2×10⁻⁶ F capacitor discharges through R = 4.7×10⁶ Ω WITH a 10×10⁶ Ω DMM connected across it. Compute observed τ in seconds.",
+    prereq: "Because the DMM input (10 × 10⁶ Ω) sits in PARALLEL with bleed resistor R across the capacitor, R_eq = (R·R_DMM)/(R+R_DMM).",
+    formula: "R_eq = (R * R_DMM) / (R + R_DMM) ;   tau = R_eq * C",
+    steps: [
+      "Step 1 — Parallel equivalent resistance: R_eq = (4.7×10⁶ × 10×10⁶)/(14.7×10⁶) = 3.1973 × 10⁶ Ω.",
+      "Step 2 — Capacitance in farads: C = 2.2 × 10⁻⁶ F.",
+      "Step 3 — Multiply (note 10⁶ × 10⁻⁶ = 10⁰): τ = 3.1973 × 2.2 = 7.034 s (vs. 10.34 s unloaded!).",
+      "Step 4 — Bench Resolution: Never blame the capacitor for decaying 32% fast—account for DMM loading or buffer via high-Z op-amp."
     ],
     answerType: "number",
     expected: 7.034,
     unit: "s"
   },
   {
-    id: "CW-T60-06",
-    cat: "tech60",
-    src: "Tech 60 · Ch. 9–13 (Mesh/Cramer Determinant, Capacitor Reactance & RL τ)",
-    title: "2-Loop Mesh Current via Cramer's Rule & Capacitive Reactance X_C at 10 kHz",
-    topicIds: ["kcl-kvl", "capacitors", "ac"],
-    prompt: "Solve this 2-mesh system by Cramer's Rule for loop current I₁ (in mA): (300·I₁ − 100·I₂ = 6 V) and (−100·I₁ + 400·I₂ = 0 V). Also calculate capacitive reactance X_C (in Ω) of a 0.1 µF bypass cap at f = 10 kHz.",
-    prereq: "For a 2×2 determinant [a b; c d], D = a·d − b·c. Replace column 1 with RHS voltage vector [V₁; V₂] to form D₁, giving I₁ = D₁ / D. Capacitive reactance obeys X_C = 1 / (2·π·f·C).",
-    formula: "D = 300*400 - (-100)*(-100) ;   I1 = (6*400 - (-100)*0) / D",
+    id: "CW-LAB-02",
+    cat: "lab_tvac",
+    src: "Muon Space Hardware Debug · 5 V Rail Feeding 100 Parallel 1 Ω Resistors",
+    title: "5V Bus Feeding 100 Parallel 1 Ω Resistors (Mixed Opens + 0 Ω Shorts)",
+    topicIds: ["parallel", "safety", "instruments", "schematics", "rca"],
+    prompt: "A +5.0 V rail feeds 100 nominal 1.0 Ω resistors in parallel. What is healthy R_eq in milliohms (mΩ), and what exact order clears mixed opens + 0 Ω shorts?",
+    prereq: "Healthy R_eq = R / N = 1.0 / 100 = 10×10⁻³ Ω. Any 0 Ω short dominates and masks opens until cleared via 4W Kelvin + IR.",
+    formula: "R_eq_healthy = (1.0 / 100) * 1000 mOhm",
     steps: [
-      "Step 1 — Write 2×2 resistance coefficient matrix [300, −100; −100, 400] (in Ω).",
-      "Step 2 — Compute system determinant Δ: Δ = (300)(400) − (−100)(−100) = 120,000 − 10,000 = 110,000 Ω².",
-      "Step 3 — Form Δ₁ by replacing column 1 with [6; 0]: Δ₁ = (6)(400) − (−100)(0) = 2,400 V·Ω.",
-      "Step 4 — Solve for I₁ = Δ₁ / Δ = 2,400 / 110,000 = 0.02182 A = 21.82 mA.",
-      "Step 5 — Bonus X_C at 10 kHz: X_C = 1 / (2π × 10⁴ × 0.1 × 10⁻⁶) = 1 / (6.283 × 10⁻³) = 159.15 Ω."
-    ],
-    answerType: "number",
-    expected: 21.82,
-    unit: "mA"
-  },
-  {
-    id: "CW-DEV-03",
-    cat: "devices",
-    src: "Electronic Devices · Ch. 3 & 5 (LM317 Regulator & BJT CE Load Line)",
-    title: "LM317 Adjustable Regulator Output Voltage & Common-Emitter V_CE Bias Check",
-    topicIds: ["power-rails", "components"],
-    prompt: "An LM317 linear regulator sets V_ref = 1.25 V across R₁ = 240 Ω with lower feedback resistor R₂ = 1.2 kΩ (ignore I_adj · R₂ ≈ 50 µA·1.2k ≈ 0.06 V). Find ideal V_out in V.",
-    prereq: "Inside the LM317, the output pin floats 1.25 V above the ADJ pin. That 1.25 V forces constant reference current I_ref = 1.25 V / R₁ down through R₂ in series to ground, creating V_out = 1.25 · (1 + R₂ / R₁).",
-    formula: "V_out = 1.25 * (1 + R2 / R1)",
-    steps: [
-      "Step 1 — Convert R₁ and R₂ to matching ohms: R₁ = 240 Ω, R₂ = 1.2 kΩ = 1,200 Ω.",
-      "Step 2 — Compute resistor ratio R₂ / R₁ = 1,200 / 240 = 5.0.",
-      "Step 3 — Multiply by internal bandgap reference: V_out = 1.25 V × (1 + 5.0) = 1.25 V × 6.0 = 7.50 V.",
-      "Step 4 — Heat dissipation warning: If V_in = 12 V and I_load = 0.5 A, LDO burns P_heat = (12 − 7.5) × 0.5 = 2.25 W—attach a heatsink or derate in vacuum!"
-    ],
-    answerType: "number",
-    expected: 7.5,
-    unit: "V"
-  },
-  {
-    id: "CW-T63-03",
-    cat: "tech63",
-    src: "Tech 63 · Ch. 2, 4 & 6 (Gray Code, 4-Var K-Map & Priority Encoder)",
-    title: "Binary ↔ Gray Code Conversion & 8421 BCD Addition With Invalid Correction (+6)",
-    topicIds: ["components", "buses"],
-    prompt: "Convert 4-bit unsigned binary 1011₂ (decimal 11) to Gray code (enter as 4-bit decimal value 0–15: e.g. 1110₂ = 14) and explain why optical/rotary encoders use Gray code.",
-    prereq: "Adjacent Gray code numbers differ by ONLY 1 bit, preventing false multi-bit transition glitches on asynchronous mechanical encoders. Rule: MSB stays identical (G₃ = B₃); every next bit is G_k = B_(k+1) XOR B_k.",
-    formula: "G3 = B3 ;   G2 = B3 XOR B2 ;   G1 = B2 XOR B1 ;   G0 = B1 XOR B0",
-    steps: [
-      "Step 1 — Label bits of binary 1011₂: B₃=1, B₂=0, B₁=1, B₀=1.",
-      "Step 2 — Copy MSB: G₃ = B₃ = 1.",
-      "Step 3 — XOR adjacent binary pairs: G₂ = B₃ ⊕ B₂ = 1 ⊕ 0 = 1; G₁ = B₂ ⊕ B₁ = 0 ⊕ 1 = 1; G₀ = B₁ ⊕ B₀ = 1 ⊕ 1 = 0.",
-      "Step 4 — Assemble Gray bits: 1110₂ (= 8 + 4 + 2 + 0 = 14₁₀).",
-      "Step 5 — Why engineers love Gray code: Passing FIFO/CDC pointers across clock domains in Gray code guarantees a metastability sample can only read old N or new N+1—never a corrupt half-switched pointer!"
-    ],
-    answerType: "number",
-    expected: 14,
-    unit: "(1110₂)"
-  },
-  {
-    id: "CW-852-02",
-    cat: "engr852",
-    src: "SFSU ENGR 852 · HW2 Q2 & Lab Motion Estimator (casex E=D & 8/16-bit SAD)",
-    title: "16-Row Truth Table K-Map Reduction (E=D) & 8-bit vs 16-bit Motion Estimator SAD Saturation",
-    topicIds: ["components", "automation"],
-    prompt: "In ENGR 852 Motion Estimator (16×16 pixels, 8-bit 0–255), a worst-case 16×16 macroblock pair has max per-pixel diff = 255 across all 256 pixels. What is the true mathematical max SAD (in decimal), and why did 8-bit BestDist saturate to 0xff (255)?",
-    prereq: "16 × 16 = 256 pixels. Maximum Sum of Absolute Differences = 256 × 255 = 65,280 (requires 16 bits, max 65,535!). An 8-bit register caps at 2⁸ − 1 = 255 (0xFF), saturating immediately after 1–2 high-contrast pixels!",
-    formula: "SAD_max = (16 * 16) * 255 = 256 * 255",
-    steps: [
-      "Step 1 — Count total pixels per macroblock: 16 rows × 16 columns = 256 pixels.",
-      "Step 2 — Maximum absolute pixel difference for 8-bit grayscale [0..255]: |255 − 0| = 255 per pixel.",
-      "Step 3 — Multiply for worst-case SAD: 256 × 255 = 65,280.",
-      "Step 4 — Compare bit-widths: log₂(65,280) = 15.994 → requires full 16-bit unsigned accumulator (`reg [15:0] BestDist`, max 65,535). Initializing `BestDist = 16'hFFFF` beats 8-bit `8'hFF`!",
-      "Step 5 — HW2 Q2 `casex` K-Map reminder: When Don't-Care row 0101 is set X = 1, all eight D=1 minterms group cleanly into E = D (0 gates, 0 latches with `default: E = 1'b0`)."
-    ],
-    answerType: "number",
-    expected: 65280,
-    unit: "SAD"
-  },
-  {
-    id: "CW-MUON-01",
-    cat: "physics2b",
-    src: "Muon Space 141-Q · Vacuum TVAC & 5V 100×1Ω Parallel Array Faults",
-    title: "5V Main Rail Feeding 100 Parallel 1 Ω Resistors With Mixed Opens + 0 Ω Shorts",
-    topicIds: ["parallel", "safety", "instruments"],
-    prompt: "A +5 V rail feeds 100 nominal 1 Ω resistors in parallel. What is healthy R_eq in milliohms (mΩ)? And if two units short to 0 Ω while three units burn open (∞ Ω), why must you clear shorts with IR + 4-wire Kelvin BEFORE finding opens?",
-    prereq: "For N identical resistors R in parallel: R_eq = R / N. A 0 Ω short across any branch creates a zero-resistance bypass path that masks ∞ Ω opens on an ohmmeter!",
-    formula: "R_eq_healthy = (1 Ohm / 100) * 1000 mOhm/Ohm",
-    steps: [
-      "Step 1 — Paper Math (Healthy Baseline): 100 × 1 Ω in parallel → R_eq = 1 / 100 = 0.01 Ω = 10.0 mΩ. At 5.0 V, ideal bus demand would be I = V / R_eq = 5 / 0.01 = 500 A (P = 2,500 W!).",
-      "Step 2 — Explain Why 2-Wire DMM Fails: Standard probe leads contribute ~0.24 Ω — 24× bigger than 10 mΩ! Switch to 4-Wire Kelvin mode.",
-      "Step 3 — Clear 0 Ω Shorts First (Masking Rule): A single 0 Ω shorted resistor drags R_eq → ~0 Ω regardless of how many open resistors exist. Inject current-limited 1 V / 2 A safe bias, locate hot-spot short & ΔV trace gradient via IR camera + mV probe, lift 1 pad per suspect (0.000 Ω confirms short) until 4-wire R_eq ≥ 10.00 mΩ.",
-      "Step 4 — Locate ∞ Ω Opens Second: With shorts removed, count active healthy branches directly from Kelvin conductance: N_healthy = 1 / R_eq → N_open = 100 − 1/R_eq. Apply safe 1 V bias (~1 W warm-up to 60 °C on healthy 1 Ω resistors): the 3 opens remain cold at 25 °C ambient on the IR thermal camera!"
+      "Step 1 (Paper Math in 10^3n): R_eq = 1/100 = 10.0 × 10⁻³ Ω (10.0 mΩ); nominal 5 V draw = 500 A (2.5 × 10³ W!).",
+      "Step 2 (2W vs 4W DMM): 2-wire leads (~240×10⁻³ Ω) swap 10 mΩ -> switch to 4-wire Kelvin mode.",
+      "Step 3 (Clear Shorts FIRST): Inject CC-limited 1 V / 2.5 A bias, locate hotspots via IR camera + mV gradient, lift 1 pad per suspect (0.000 Ω confirms short) until R_4W ≥ 10.0 mΩ.",
+      "Step 4 (Find Opens SECOND): Compute N_open = 100 − 1/R_4W, view cold 25 °C open bodies vs warm 60 °C healthy bodies on IR, rework joints & verify R_4W = 10.0 mΩ."
     ],
     answerType: "number",
     expected: 10,
     unit: "mΩ"
+  },
+  {
+    id: "CW-DC-06",
+    cat: "dc_networks",
+    src: "Avionics Multi-Loop Analysis · 2×2 Cramer's Rule & X_C",
+    title: "Solve 2-Loop Mesh Current I₁ via Cramer's Rule (10⁻³ A)",
+    topicIds: ["kcl-kvl", "capacitors", "ac"],
+    prompt: "Solve 2-mesh equations for I₁ (in mA): 300·I₁ − 100·I₂ = 6 V and −100·I₁ + 400·I₂ = 0 V.",
+    prereq: "Compute Δ = a·d − b·c and Δ₁ = V₁·d − b·V₂, giving I₁ = Δ₁ / Δ.",
+    formula: "D = 300*400 - (-100)*(-100) ;   I1 = (6*400 - (-100)*0) / D",
+    steps: [
+      "Step 1 — System determinant: Δ = (300)(400) − (−100)(−100) = 110 × 10³ Ω².",
+      "Step 2 — Numerator determinant: Δ₁ = (6)(400) − 0 = 2.400 × 10³ V·Ω.",
+      "Step 3 — Mesh current: I₁ = 2,400 / 110,000 = 21.82 × 10⁻³ A = 21.82 mA."
+    ],
+    answerType: "number",
+    expected: 21.82,
+    unit: "mA"
   }
 ];
 
 /* ============================================================================
-   4. AVIONICS PROFESSOR STEPS BUILDER (Non-Repetitive, Zero-to-One Chalkboard)
+   4. UNIVERSAL 10^(3n) PHYSICS INFERENCE & HIRING-MANAGER INTERVIEW SCRIPT
+   ============================================================================ */
+function inferTopicPhysicsModel(q, t, isNvidia) {
+  const tid = (t && t.id) || "";
+  const txt = ((q && q.id) || "") + " " + ((q && q.question) || "") + " " + tid;
+  const rawFormula = String((q && q.formula) || "").trim();
+  const hasRealFormula = rawFormula && !rawFormula.includes("->");
+  const topicDefaults = {
+    units: { f: "I = Q / t ;   V = W / Q", s: "(45e-6) / (15e-3) = 3.00e-3 A", unitConv: "1 p=10^(-12), 1 n=10^(-9), 1 u=10^(-6), 1 m=10^(-3), 1 k=10^3, 1 M=10^6" },
+    ohm: { f: "I = V / R ;   R = V / I", s: "5.00 / (2.00 * 10^3) = 2.50 * 10^(-3) A", unitConv: "I = 5 / (2*10^3) = 2.50e-3 A (2.50 mA)" },
+    power: { f: "P = V * I = V^2 / R", s: "(12.0^2) / (4.70 * 10^3) = 30.64 * 10^(-3) W", unitConv: "2x derating min = 61.3e-3 W <= 125e-3 W (1/8 W)" },
+    series: { f: "V_out = V_in * (R_2 / (R_1 + R_2))", s: "5.00 * ((1.0*10^3) / (1.0*10^3 + 1.0*10^3)) = 2.50 V", unitConv: "R_T = R_1 + R_2 in 10^3n Ohms" },
+    parallel: { f: "R_eq = R_nom / N_healthy ;   1 / R_eq = 1 / R_1 + 1 / R_2", s: "1.0 / 100 = 10.0 * 10^(-3) Ohm", unitConv: "I_5V = 5.0 / (10.0*10^(-3)) = 500 A -> Debug at 1.0 V CC" },
+    "kcl-kvl": { f: "Sum(I_in) = Sum(I_out) ;   Sum(V_loop) = 0", s: "69.0e-3 - 10.0e-3 = 59.0e-3 A", unitConv: "Keep signed branch currents in mA (10^(-3) A)" },
+    thevenin: { f: "V_TH = V_open ;   R_TH = (R_1 * R_2) / (R_1 + R_2)", s: "(10e3 * 10e3) / (20e3) = 5.00e3 Ohm", unitConv: "Short V_S on paper to find R_TH in 10^3n Ohms" },
+    ac: { f: "V_rms = 0.7071 * (V_pp / 2) ;   T = 1 / f", s: "0.7071 * (14.14 / 2) = 5.00 V", unitConv: "f = 2.0e3 Hz -> T = 500e-6 s (500 us)" },
+    capacitors: { f: "Q = C * V ;   X_C = 1 / (2 * pi * f * C)", s: "1 / (2 * pi * 10e3 * 0.1e-6) = 159.15 Ohm", unitConv: "C in uF = 10^(-6) F; pF = 10^(-12) F" },
+    rc: { f: "tau = R_eq * C ;   R_eq = (R * R_DMM) / (R + R_DMM)", s: "(3.197e6) * (2.2e-6) = 7.034 s", unitConv: "10^6 Ohm * 10^(-6) F = 1.0 s (10^3n cancels!)" },
+    inductors: { f: "V_L = L * (dI / dt) ;   tau = L / R", s: "(250e-12) * (40 / 20e-9) = 500e-3 V", unitConv: "pH (10^(-12)) * A / ns (10^(-9)) = mV (10^(-3) V)" },
+    filters: { f: "f_c = 1 / (2 * pi * R * C)", s: "1 / (2 * pi * 1.59e3 * 0.1e-6) = 1.00e3 Hz", unitConv: "At f_c: gain = 0.7071 (-3.01 dB), slope = -20 dB/dec" },
+    magnetics: { f: "V_2 / V_1 = N_2 / N_1 ;   v = N * (dPhi / dt)", s: "120 * (1 / 10) = 12.0 V", unitConv: "Transformers require dPhi/dt != 0 (AC/switched only)" },
+    components: { f: "I_Z = (V_in - V_Z)/R_S - V_Z/R_L ;   I_C_sat = (V_CC - 0.2)/R_C", s: "(12 - 5.1)/100 - 5.1/510 = 59.0e-3 A", unitConv: "Si V_F = 0.70 V; V_CE(sat) = 0.20 V" },
+    "power-rails": { f: "P_loss = (V_in - V_out) * I_load ;   V_r_pp = V_p / (f_r * R_L * C)", s: "15.57 / (120 * 1.0e3 * 1.0e-3) = 129.8e-3 V", unitConv: "Ripple rate f_r = 2 * 60 = 120 Hz for full bridge" },
+    schematics: { f: "I_shunt = V_sense / R_shunt", s: "(25.0e-3) / (5.00e-3) = 5.00 A", unitConv: "Measure V_sense differentially at Kelvin pads (10^(-3) cancels)" },
+    instruments: { f: "BW_scope >= 0.5 / t_rise ;   R_eq = (R * 10e6) / (R + 10e6)", s: "0.5 / (0.35e-9) = 1.43e9 Hz", unitConv: "Use <5 mm spring ground to cut ~150e-9 H clip ringing" },
+    timing: { f: "T_min = t_CQ + t_logic + t_su + t_skew ;   HoldSlack = (t_CQ_min + t_min) - (t_h + t_skew)", s: "(300e-12 + 30e-12) - (400e-12 + 750e-12) = -820e-12 s", unitConv: "ps = 10^(-12) s -> 1 / (2.59e-9) = 386.10e6 Hz" },
+    buses: { f: "R_p_max = t_r_max / (0.8473 * C_bus)", s: "(300e-9) / (0.8473 * 100e-12) = 3.54e3 Ohm", unitConv: "t_r in ns (10^(-9)), C_bus in pF (10^(-12)) -> R in kOhm (10^3)" },
+    "python-scpi": { f: "FPY = (N_pass_1 / N_valid) * 100", s: "(92 / 100) * 100 = 92.0%", unitConv: "Enforce math.isfinite() -> PASS / FAIL / INVALID" },
+    linux: { f: "DPPM = (Defects / Total) * 10^6", s: "(2 / 50e3) * 10^6 = 40.0 DPPM", unitConv: "Capture dmesg/lspci BEFORE reboot ($?=0 != DUT PASS)" },
+    rf: { f: "Gamma = (Z_L - Z_0) / (Z_L + Z_0)", s: "(100 - 85) / (100 + 85) = 81.1e-3", unitConv: "Gen5 32e9 T/s -> 1 UI = 31.25e-12 s (31.25 ps)" },
+    qualification: { f: "Guardband = Limit - Uncertainty ;   Q_rad = e * sigma * A * (T_1^4 - T_2^4)", s: "3.30 - 0.020 = 3.280 V", unitConv: "TVAC <10^(-5) Torr: convection h = 0 W/m^2*K" },
+    safety: { f: "P_fault = V_rail^2 / R_short ;   I_lim = 1.2 * I_idle", s: "(5.0^2) / (10e-3) = 2.50e3 W", unitConv: "Always set PSU CC current limit before energizing board" },
+    automation: { f: "FPY = (N_pass_1 / N_valid) * 100", s: "(95 / 100) * 100 = 95.0%", unitConv: "Never coerce NaN to 0.0; log first attempt separately" },
+    thermal: { f: "T_J = T_A + P_d * theta_JA", s: "25 + (5.0 * 12) = 85 C", unitConv: "Wait for dT/dt soak equilibrium before logging" },
+    rca: { f: "A -> B -> A Swap ;   R_eq = R_nom / N_healthy", s: "1.0 / (100 - 5) = 10.53e-3 Ohm", unitConv: "Move ONE suspect variable at a time (KGB comparison)" },
+    electrical: { f: "DeltaV = I * R_PDN + L_pkg * (dI / dt)", s: "(40 * 2e-3) + (250e-12 * (40 / 20e-9)) = 580e-3 V", unitConv: "pH (10^(-12)) * A / ns (10^(-9)) = mV (10^(-3) V)" },
+    dram: { f: "ΔV_BL = (V_cell - V_PRE) * (C_cell / (C_cell + C_BL))", s: "(1.10 - 0.55) * (25e-15 / (25e-15 + 225e-15)) = 55.0e-3 V", unitConv: "C_cell in fF (10^(-15) F); Hot >85C t_REFI drops 3.9us -> 1.95us" },
+    "memory-ddr": { f: "ΔV_BL = (V_cell - V_PRE) * (C_cell / (C_cell + C_BL))", s: "(1.10 - 0.55) * (25e-15 / 250e-15) = 55.0e-3 V", unitConv: "BW = (3200e6 * 64)/8 = 25.6e9 B/s; t_RC = t_RAS + t_RP" },
+    socboot: { f: "t_rel >= max(t_VDD, t_CLK) + t_POR", s: "25e-3 + 5e-3 = 30.0e-3 s", unitConv: "ms = 10^(-3) s; check PWRGOOD -> REFCLK -> PERST#" },
+    pcie: { f: "BW_eff = R_lane * N_lanes * (128/130) / 8", s: "16e9 * 16 * (128/130) / 8 = 31.51e9 B/s", unitConv: "16 GT/s = 16e9 T/s; check LnkCap vs LnkSta & AER" },
+    gpu: { f: "P_total = alpha * C * V^2 * f + V * I_leak", s: "1.0 * 100e-6 * 0.85^2 * 2e9 = 144.5 W", unitConv: "Capture nvidia-smi -q & dmesg BEFORE rebooting Xid 79" },
+    ate: { f: "T_min = t_CQ + t_logic + t_su + t_skew", s: "(950e-12 + 590e-12 + 300e-12 + 750e-12) = 2.59e-9 s", unitConv: "f_max = 1 / (2.59e-9) = 386.10e6 Hz; pass lot/wafer/step" },
+    pvt: { f: "Margin_pct = ((V_fused - V_min) / V_fused) * 100", s: "((0.850 - 0.748) / 0.850) * 100 = 12.0%", unitConv: "Slow/Hot degrades Setup; Fast/Cold provokes Hold/ZQCal" },
+    linux: { f: "DPPM = (Defects / Total) * 10^6", s: "(2 / 50e3) * 10^6 = 40.0 DPPM", unitConv: "grep exit 0=match, 1=no match, 2+=error" },
+    python: { f: "FPY = (N_pass_1 / N_valid) * 100", s: "(92 / 100) * 100 = 92.0%", unitConv: "math.isfinite(val) catches float('nan') & inf" },
+    quality: { f: "RTY = y_1 * y_2 ;   DPPM = (Defects / Units) * 10^6", s: "(0.92 * 0.95) * 100 = 87.4%", unitConv: "Track Attempt #1 FPY separately from Retest Yield" },
+    interview: { f: "DeltaV = I * R_PDN + L_pkg * (dI / dt)", s: "(40 * 2e-3) + (250e-12 * 2e9) = 580e-3 V", unitConv: "CH1 CLK (SMA) | CH2/4 N7020A Rails | CH3 1169B Shunt" },
+    "si-pi": { f: "DeltaV = I * R_PDN + L_pkg * (dI / dt)", s: "(40 * 2e-3) + (250e-12 * (40 / 20e-9)) = 580e-3 V", unitConv: "pH (10^(-12)) * A / ns (10^(-9)) = mV (10^(-3) V)" },
+    "timing-sta": { f: "T_min = t_CQ + t_logic + t_su + t_skew ;   HoldSlack = (t_CQ_min + t_min) - (t_h + t_skew)", s: "(300e-12 + 30e-12) - (400e-12 + 750e-12) = -820e-12 s", unitConv: "ps = 10^(-12) s -> 1 / (2.59e-9) = 386.10e6 Hz" },
+    "soc-boot": { f: "t_rel >= max(t_VDD, t_CLK) + t_POR", s: "25e-3 + 5e-3 = 30.0e-3 s", unitConv: "Verify PWRGOOD -> REFCLK -> PERST# before BIOS console" },
+    "ddr-lpddr": { f: "ΔV_BL = (V_cell - V_PRE) * (C_cell / (C_cell + C_BL))", s: "(1.10 - 0.55) * (25e-15 / (25e-15 + 225e-15)) = 55.0e-3 V", unitConv: "25 fF = 25 * 10^(-15) F; Hot >85C t_REFI drops 3.9us -> 1.95us" },
+    "pcie-hsio": { f: "Gamma = (Z_L - Z_0) / (Z_L + Z_0) ;   UI = 1 / R_lane", s: "(100 - 85) / (100 + 85) = 81.1e-3", unitConv: "32 GT/s = 32e9 T/s -> 1 UI = 31.25e-12 s (31.25 ps)" },
+    "bench-instruments": { f: "I_load = V_sense / R_shunt ;   BW_sys >= 0.5 / t_rise", s: "(25e-3) / (5e-3) = 5.00 A", unitConv: "Ch1 SMA CLK | Ch2/4 N7020A Rails | Ch3 1169B Shunt" },
+    "linux-slt": { f: "DPPM = (Defects / Total) * 10^6", s: "(2 / 50e3) * 10^6 = 40.0 DPPM", unitConv: "Save dmesg/lspci/nvidia-smi BEFORE reboot ($?=0 != PASS)" },
+    "python-automation": { f: "FPY = (N_pass_1 / N_valid) * 100", s: "(92 / 100) * 100 = 92.0%", unitConv: "Check math.isfinite(val) to block NaN/Inf False-Clean PASS" },
+    "ate-dft-slt": { f: "T_min = t_CQ + t_logic + t_su + t_skew", s: "(950e-12 + 590e-12 + 300e-12 + 750e-12) = 2.59e-9 s", unitConv: "ATE structural scan != full-system SLT transient droops" },
+    "socket-assembly": { f: "R_contact = R_meas - R_2W_leads", s: "45.0e-3 - 240.0e-3 -> Use 4W Kelvin", unitConv: "Inspect bent pins, FOD, torque & thermal warpage + A-B-A" },
+    "high-level-debug": { f: "A -> B -> A Swap ;   Margin = Limit - (Meas + U)", s: "3.30 - (3.18 + 20e-3) = 100e-3 V", unitConv: "Freeze DUT -> Pull raw logs -> Check power/socket -> A-B-A" },
+    "panel-career": { f: "DeltaV = I * R_PDN + L_pkg * (dI / dt)", s: "(40 * 2e-3) + (250e-12 * 2e9) = 580e-3 V", unitConv: "CPU2 4-Ch Scope + DRAM raw vs parser + Intel/Cisco A-B-A" }
+  };
+  const def = topicDefaults[tid] || topicDefaults.ohm;
+  const formula = hasRealFormula ? rawFormula : def.f;
+  const sub = (q && q.sub) ? q.sub : (q && q.expected !== undefined ? `Result = ${q.expected} ${q.unit || ""}` : def.s);
+  const givensList = parseGivenQuantities((q && q.question) || "");
+  const rawUC = String((q && q.unitConv) || "").trim();
+  const isPureMathUC = rawUC && /[=<>]/.test(rawUC) && !/[a-z]{5,}\s+[a-z]{5,}/i.test(rawUC);
+  const prefixEq = isPureMathUC ? rawUC
+    : givensList.length
+      ? givensList.slice(0, 3).map(g => g.prefixChar ? `${g.num}*${g.unitStr} = ${g.num} * 10^(${g.exp}) ${g.baseUnit}` : `${g.num} ${g.baseUnit} = ${g.num} * 10^0 ${g.baseUnit}`).join(" ; ")
+      : "1 p = 10^(-12) ; 1 n = 10^(-9) ; 1 u = 10^(-6) ; 1 m = 10^(-3) ; 1 k = 10^3 ; 1 M = 10^6";
+  const convExplain = buildConversionExplanation((q && q.question) || "");
+  return {
+    formula,
+    sub,
+    prefixEq,
+    unitConv: `${def.unitConv}${convExplain ? " · " + convExplain : ""}`
+  };
+}
+
+function renderHiringManagerInterviewScript(q, t, isNvidia) {
+  const tid = (t && t.id) || "";
+  const txt = ((q && q.id) || "") + " " + ((q && q.question) || "") + " " + tid;
+  const note = isNvidia ? (NVIDIA_TRACK_LECTURES[tid] || NVIDIA_TRACK_LECTURES.electrical) : (TOPIC_PROFESSOR_NOTES[tid] || TOPIC_PROFESSOR_NOTES.ohm);
+  const phys = inferTopicPhysicsModel(q, t, isNvidia);
+  const qidLabel = String((q && q.id) || "ACTIVE").toUpperCase();
+  const isNum = isNvidia ? (q && (q.questionType === "number" || q.kind === "calc")) : (q && q.expected !== undefined);
+  const targetStr = isNum ? `${fmt(q.expected)} ${q.unit || ""}` : (q && (q.skillName || q.learningObjective || t.title));
+  const convStr = buildConversionExplanation((q && q.question) || "");
+
+  // Custom high-value spoken script for the 100-resistor interview question or active question
+  const is100R = /100.*resistor|100\s*x|1\s*ω.*parallel|parallel-x[789]/i.test(txt);
+  const roleLabel = isNvidia ? "NVIDIA SLT Engineering Panel" : "Muon Space Avionics Hiring Manager";
+
+  const spokenAnswer = (q && q.interviewAnswer) ? q.interviewAnswer : is100R
+    ? "As a hardware test engineer, I solve the paper math in 10^(3n) engineering notation BEFORE touching probes: 100 parallel 1 Ω resistors have healthy R_eq = 1/100 = 10×10⁻³ Ω (drawing 500 A / 2.5 kW at 5 V!). Because standard 2-wire DMM leads (~0.24 Ω) create +2400% error here, I open the schematic to map +5V_MAIN and bank jumpers JP1–JP10, switch to 4-wire Kelvin mode, and clear 0 Ω shorts FIRST (because any short masks opens). I apply a safe current-limited 1 V / 2.5 A supply, pinpoint hot-spot shorts with an IR thermal camera and mV gradient, lift one pad per suspect (0.000 Ω confirms short) until 4-wire R_eq ≥ 10.00 mΩ, then solve N_open = 100 − 1/R_eq and identify the ∞ Ω opens as 25 °C cold spots against 60 °C healthy resistors on IR."
+    : isNum
+      ? `When solving ${qidLabel} (${t?.title || ""}) on real flight/post-silicon hardware, first I convert all given prefixes into base 10^(3n) SI units (${convStr}) and apply the governing law ${phys.formula} to predict an exact paper target of ${targetStr}. Next I open the schematic to trace the source node, sense test points, and ground return, verify power-off resistance before enabling a current-limited PSU, and compare the oscilloscope/DMM measurement against my ${targetStr} bound—confirming any anomaly with a single-variable A-B-A swap before replacing parts.`
+      : `First I separate the reported symptom from any unproven hypothesis and solve the governing healthy baseline (${phys.formula} -> ${targetStr}) in 10^(3n) SI units before probing. Second, on the schematic I locate the exact supply rail, series shunt, pull-up, or clock test points and configure safe current-limited measurements (4-wire Kelvin for milliohms, or Keysight N7020A + <5 mm spring ground on Ch1–Ch4). Third, I isolate fault vs. fixture via single-variable A-B-A swap, apply the targeted hardware/firmware fix, and verify full pass margin on the product.`;
+
+  const step1Pic = `Locate the active nodes, return path (GND), series/parallel junctions, test points, or decoupling caps on the ${isNvidia ? "SoC/GPU board schematic" : "flight PCBA schematic"} for "${t?.title || "circuit"}". Physics: ${isNvidia ? note.physics : note.intuition}`;
+  const step2Math = `Convert every prefix cleanly (p=10⁻¹², n=10⁻⁹, µ=10⁻⁶, m=10⁻³, k=10³, M=10⁶, G=10⁹) FIRST -> Apply ${phys.formula} -> Compute ${phys.sub} (Target: ${targetStr}). Never plug raw mA or kΩ without 10^(3n) scaling!`;
+  const step3Order = isNvidia
+    ? `1) Freeze DUT—do NOT reboot! Pull raw dmesg/lspci/nvidia-smi -q/EDAC logs BEFORE clearing counters. 2) Set up 4-channel Keysight scope (CH1 CLK SMA-BNC, CH2 Core N7020A, CH3 1169B Shunt, CH4 M-Rail N7020A) and deskew CH3 vs CH2. 3) Verify PSU rails & BGA socket pogo pins.`
+    : `1) Check resistance & shorts POWER-OFF (using 4-wire Kelvin below 1 Ω so lead resistance ~0.24 Ω doesn't swamp reading). 2) Energize via CC-limited supply. 3) Measure voltage in PARALLEL, current via differential shunt or series break, and scope clocks with <5 mm ground springs.`;
+  const step4Product = is100R
+    ? `Phase A (Shorts First): With 1 V / 2.5 A CC bias, shoot IR thermal image + step mV probe along copper pour toward lowest V -> lift 1 pad per suspect (0.000 Ω confirms dead short) until 4W R_eq ≥ 10 mΩ. Phase B (Opens Second): Compute N_open = 100 − 1/R_eq, image warmed 1 Ω resistors (~60 °C) vs cold 25 °C open resistors on IR, rework tombstoned/cracked pads, and verify full-board 4W R_eq = 10.00 mΩ.`
+    : `Execute controlled single-variable A -> B -> A swap using a Known-Good Fixture/Cable/Board (KGB). Fault moves with DUT = silicon/PCBA failure; fault stays in slot = harness/pogo-pin/bench setup failure. Apply corrective rework or FW fix, then retest across temperature/load corners inside guardbanded spec limits.`;
+
+  const badgeCls = isNvidia ? "nvs-prof-badge" : "av-prof-badge";
+  const boxCls = isNvidia ? "nvs-prof-box prof-interview-box" : "av-prof-box prof-interview-box";
+
+  return `<section class="${boxCls}" aria-label="Hiring Manager Interview Answer and Real-Product Execution">
+    <h4><span class="${badgeCls}">🎤 ${esc(roleLabel)} Readiness</span> Complete Engineer Answer, Post-Math Product Steps &amp; Follow-Up Defense (${esc(qidLabel)})</h4>
+    <div class="prof-interview-say">
+      <strong>⏱️ Part 1 · 60-Second Spoken Answer to Deliver to the Hiring Manager:</strong>
+      <p>"${esc(spokenAnswer)}"</p>
+    </div>
+    <div class="prof-interview-grid">
+      <div class="prof-interview-card">
+        <h5>🔬 Step 1 · Start With the Schematic &amp; Physical Model</h5>
+        <p>${esc(step1Pic)}</p>
+      </div>
+      <div class="prof-interview-card">
+        <h5>🧮 Step 2 · Solve the Paper Math in 10<sup>3n</sup> First</h5>
+        <div style="margin:6px 0;">${eq(phys.formula)}</div>
+        <div style="margin:6px 0;">${eq(phys.sub)}</div>
+        <p style="font-size:0.84rem;color:#334155;">${esc(step2Math)}</p>
+      </div>
+      <div class="prof-interview-card">
+        <h5>🎛️ Step 3 · Instrument, Probe &amp; Measurement Order</h5>
+        <p>${esc(step3Order)}</p>
+      </div>
+      <div class="prof-interview-card">
+        <h5>🛠️ Step 4 · Real-Product Isolation &amp; Fix (Engineer Level)</h5>
+        <p>${esc(step4Product)}</p>
+      </div>
+    </div>
+    <details class="prof-interview-defense" open>
+      <summary>🛡️ Part 3 · "If the Hiring Manager Asks..." Deeper Follow-Up Defense Q&amp;A</summary>
+      <div class="prof-qa-list">
+        <div class="prof-qa-item">
+          <strong>Q1: Why solve the ${esc(phys.formula)} math in 10<sup>3n</sup> on paper BEFORE probing the product?</strong>
+          <p>Because probing blindly turns you into a trial-and-error technician. Knowing the exact theoretical target (${esc(targetStr)}) lets you set safe PSU current limits before smoke occurs, detect instrument loading errors (e.g., 10 MΩ DMM or 0.24 Ω 2-wire leads), and immediately tell a healthy board from a shifted margin or hidden short.</p>
+        </div>
+        <div class="prof-qa-item">
+          <strong>Q2: How do you prove your scope / DMM / script isn't lying to you?</strong>
+          <p>${esc(note.trap)} Always null/4-wire Kelvin low-ohm paths, verify 10× attenuation &amp; divider ratios, keep scope grounds &lt; 5 mm (or use N7020A + 1169B differential), and audit raw telemetry instead of trusting summary PASS flags.</p>
+        </div>
+        <div class="prof-qa-item">
+          <strong>Q3: How do you prove whether the failure belongs to the product hardware vs. your test fixture or cable?</strong>
+          <p>Run a single-variable A → B → A cross-swap holding temperature, rail voltage, and firmware constant. Only replace or condemn flight/production silicon when the exact signature follows the DUT into a known-good fixture and returns when put back.</p>
+        </div>
+      </div>
+    </details>
+  </section>`;
+}
+
+/* ============================================================================
+   5. AVIONICS PROFESSOR STEPS BUILDER (Non-Repetitive, Zero-to-One Chalkboard)
    ============================================================================ */
 function buildAvionicsProfessorSteps(q, t, f, helpers) {
   const st = Array.isArray(q.steps) ? q.steps : [];
   const beginner = f && f.deep ? f.deep : null;
   const guided = q.lesson || null;
-  const formulaStr = q.formula || (beginner && beginner.formula) || null;
-  const subStr = q.sub || (beginner && beginner.sub) || null;
+  const phys = inferTopicPhysicsModel(q, t, false);
+  const formulaStr = (q.formula && !String(q.formula).includes("->")) ? q.formula : phys.formula;
+  const subStr = q.sub || phys.sub;
   const fmtFn = (helpers && helpers.fmt) || fmt;
   const engFn = (helpers && helpers.engVal) || engVal;
   const note = TOPIC_PROFESSOR_NOTES[t.id] || TOPIC_PROFESSOR_NOTES.ohm;
 
-  // CRITICAL INVARIANT: Preserve step count:
+  // CRITICAL INVARIANT: Preserve exact step counts expected by all suites:
   // - 8 steps for q.advancedStage >= 31
-  // - 7 steps for f.label === "SI base unit" (when SI module present)
-  // - 6 steps for all Q1-Q30 otherwise
+  // - 7 steps for f.label === "SI base unit"
+  // - 6 steps for Q1-Q30 otherwise
   if (q.advancedStage >= 31) {
     const advTitles = [
-      "1. Define Physical Concept, Target Variable & SI Units",
-      "2. Separate Raw Telemetry/Symptom from Root-Cause Guess",
-      "3. Predict Healthy Baseline Operating Point",
-      "4. Execute Safe Non-Destructive First Measurement",
-      "5. Full Mathematical Derivation / Fault Proof",
-      "6. Falsify Competing Hypotheses (A/B/A Control)",
-      "7. Corroborate on Independent Channel or Subsystem",
-      "8. Engineering Disposition (PASS / FAIL / INVALID) & Action"
+      "1. Physical Concept, Schematic Node Target & 10^(3n) SI Units",
+      "2. Convert Givens to 10^(3n) Base SI & Separate Symptom from Guess",
+      "3. Predict Healthy Baseline Using Governing Law (MathML)",
+      "4. Solve & Compare 10^(3n) Substitution Before Energizing",
+      "5. Safe Non-Destructive Measurement & Hardware Verification",
+      "6. Falsify Alternatives via Single-Variable A/B/A Swap",
+      "7. Cross-Check on Independent Instrument / Product Channel",
+      "8. Final Engineer Disposition, Root-Cause Fix & Interview Answer"
     ];
     return st.slice(0, 8).map((body, i) => ({
       title: advTitles[i] || `Step ${i + 1}: Analyze and verify`,
-      body: i === 1 ? `${body} [Prefix check: ${buildConversionExplanation(q.question)}]`
+      body: i === 1 ? `${body} [10^(3n) Prefix check: ${buildConversionExplanation(q.question)}]`
           : i === 5 ? `${body} Watch for trap: ${note.trap}` : body,
-      kind: q.expected !== undefined && i === 4 ? "answer" : (q.expected !== undefined && (i === 2 || i === 3) ? "formula" : "text"),
-      formula: q.expected !== undefined && i === 2 ? q.formula : (q.expected !== undefined && i === 3 ? q.sub : null),
+      kind: q.expected !== undefined && i === 4 ? "answer" : (i === 2 || i === 3 ? "formula" : "text"),
+      formula: i === 2 ? formulaStr : (i === 3 ? subStr : null),
       answer: q.expected !== undefined && i === 4 ? fmtFn(q.expected) + " " + q.unit : null,
       engHtml: q.expected !== undefined && i === 4 ? engFn(q.expected, q.unit) : null
     }));
   }
 
-  // Numerical Calculation Problems (Q11-Q20): Always 6 distinct chalkboard steps showing EVERY conversion & algebra step
+  // Numerical Calculation Problems (Q11-Q20): Always 6 steps with 10^(3n) MathML + Post-Math Bench Execution
   if (q.expected !== undefined) {
     const convText = buildConversionExplanation(q.question);
-    const step4Detail = subStr ? `${st[1] || "Substitute every converted base-SI value cleanly into the formula."} Full check: ${subStr}` : (st[1] || "Substitute numbers step by step.");
-    const step6Trap = `${st[2] || ""} ${st[3] || ""} Professor's sanity check: ${note.trap}`.trim();
+    const step4Detail = `${st[1] || "Substitute every converted base-SI value (10^(3n)) into the governing formula."} Full check: ${subStr}`;
+    const step6Bench = `${st[2] || ""} ${st[3] || ""} Post-Math Product Execution: Locate the exact schematic nodes/jumpers, verify with a current-limited supply & calibrated DMM/scope (Watch trap: ${note.trap}), then speak both ${fmtFn(q.expected)} ${q.unit} and your isolation method cleanly to the hiring manager.`.trim();
     return [
       {
-        title: `1. Physical Picture & Target Output (${q.unit})`,
-        body: `First visualize what is physically happening in "${t.title}": ${note.intuition} Here we are solving for a quantity measured in "${q.unit}".`,
+        title: `1. Physical Picture, Schematic Trace & Target (${q.unit})`,
+        body: `Visualize what is happening physically in "${t.title}": ${note.intuition} Solve for a physical quantity in "${q.unit}".`,
         kind: "text"
       },
       {
-        title: "2. Extract Givens & Convert Prefixes to Base SI (10^(3n))",
-        body: `Never plug milliamps, kilohms, or microfarads straight into base formulas until you track powers of 10: ${convText}`,
+        title: "2. Extract Givens & Convert Prefixes to 10^(3n) Base SI FIRST",
+        body: `Always convert m (10⁻³), µ (10⁻⁶), n (10⁻⁹), p (10⁻¹²), k (10⁺³), M (10⁺⁶) BEFORE plugging into formulas: ${convText}`,
         kind: "given",
-        formula: q.unitConv || null
+        formula: phys.prefixEq
       },
       {
-        title: "3. Select Governing Physical Law & Define Every Symbol",
-        body: `${st[0] || "Choose the exact equation connecting your knowns to your target variable."} Why this law works: ${note.lawWhy}`,
+        title: "3. Governing Engineering Equation (Stacked MathML)",
+        body: `${st[0] || "Write the governing physical equation."} Why it holds: ${note.lawWhy}`,
         kind: "formula",
         formula: formulaStr
       },
       {
-        title: "4. Step-by-Step Algebraic Substitution (Show All Work)",
+        title: "4. Step-by-Step 10^(3n) Algebraic Substitution (Uncut Work)",
         body: step4Detail,
-        kind: subStr ? "formula" : "text",
+        kind: "formula",
         formula: subStr
       },
       {
-        title: "5. Final Numerical Result & Engineering Notation",
-        body: `Evaluate the arithmetic carefully to get ${fmtFn(q.expected)} ${q.unit}. Keep sign and unit consistent; on Page 4 you can enter standard decimals or scientific notation like 2.5e-3.`,
+        title: "5. Final Numerical Result & 10^(3n) Engineering Notation",
+        body: `Compute cleanly to get ${fmtFn(q.expected)} ${q.unit}. Verify powers of 10 cancellation and sign before entering on Page 4.`,
         kind: "answer",
         answer: fmtFn(q.expected) + " " + q.unit,
         engHtml: engFn(q.expected, q.unit)
       },
       {
-        title: "6. Physical Plausibility Check, Common Trap & Bench Verification",
-        body: step6Trap,
+        title: "6. Post-Math Hardware Resolution & Interview Delivery",
+        body: step6Bench,
         kind: "text"
       }
     ];
   }
 
-  // Non-numeric Foundations / Application (Q1-Q10) OR Troubleshooting (Q21-Q30):
-  // Map all authored q.steps without copying Page 1's summary/analogy/why boilerplate!
+  // Troubleshooting Problems (Q21-Q30): Complete Math + Schematic + Probe + A-B-A Product Fix
   if (q.level === "Troubleshooting") {
     return [
       {
         title: "1. Isolate Observable Symptom vs. Unverified Hypothesis",
-        body: `${st[0] || q.question} Rule #1 on the bench: describe exactly what the DMM, oscilloscope, or log showed without assuming the chip died.`,
+        body: `${st[0] || q.question} Rule #1: state only observed meter/scope/log behavior—never blame silicon/PCBA without isolation.`,
         kind: "text"
       },
       {
-        title: "2. Safe Power-Off Inspection & Meter Protection Before Touching",
-        body: `${st[1] || "Set PSU current limit and verify probes before energizing."} Always match meter mode to measurement: never measure Ω on a live rail, and keep grounded scope clips off floating nodes.`,
-        kind: "text"
+        title: "2. Pre-Probe 10^(3n) Paper Math & Safety Setup",
+        body: `${st[1] || "Set PSU current limit and verify power-off resistance before energizing."} Prefix & sanity check: ${phys.unitConv}`,
+        kind: "given",
+        formula: phys.prefixEq
       },
       {
-        title: formulaStr ? "3. Predict Healthy Baseline Using Governing Law" : "3. Predict Healthy Baseline Physics",
-        body: `${st[2] || "Predict the exact voltage, current, timing, or digital waveform of a known-good unit."} Reference insight: ${note.lawWhy}`,
-        kind: formulaStr ? "formula" : "text",
+        title: "3. Predict Healthy Baseline With Governing Law (MathML)",
+        body: `${st[2] || "Calculate the healthy voltage, current, time constant, or waveform before touching probes."} Why it applies: ${note.lawWhy}`,
+        kind: "formula",
         formula: formulaStr
       },
       {
-        title: subStr ? "4. Evaluate Fault Signature & Compare Readings" : "4. Contrast Fault Signature vs. Healthy Benchmark",
-        body: `${st[3] || f.test || "Measure both sides of the suspected interface (source vs. load) to localize where energy or data is lost."} Watch for: ${note.trap}`,
-        kind: subStr ? "formula" : "text",
+        title: "4. Evaluate 10^(3n) Quantitative Example & Contrast Fault Signature",
+        body: `${st[3] || f.test || "Measure both sides of the suspect interface (source vs. load) to localize the fault."} Watch for: ${note.trap}`,
+        kind: "formula",
         formula: subStr
       },
       {
-        title: "5. Controlled A-B-A Swap Proof & Repeatability",
-        body: `Swap ONLY ONE suspected variable (cable, fixture, or DUT) while holding supply/temp fixed to verify the fault follows the suspect and disappears when restored. ${st[4] || ""}`.trim(),
+        title: "5. Controlled A-B-A Swap Proof & Real-Product Isolation",
+        body: `Locate schematic test points/jumpers, isolate defect via single-variable A -> B -> A swap (fault moves with suspect DUT vs stays in fixture/harness). ${st[4] || ""}`.trim(),
         kind: "text"
       },
       {
-        title: "6. Final Engineering Disposition (GO / NO-GO / INVALID) & Action",
-        body: `${st[5] || "Document exact raw readings, serial/stepping ID, passing/failing spec guardband, and corrective prevention test."}`,
+        title: "6. Engineer Resolution, Go/No-Go Disposition & Spoken Answer",
+        body: `${st[5] || "Apply the targeted hardware/rework fix, re-verify under full load, and deliver the 4-step proof (Math -> Schematic -> Bench -> A-B-A Fix) to the hiring manager."}`,
         kind: "answer"
       }
     ];
   }
 
-  // Foundations / Application (Q1-Q10, non-numeric) — preserve 6 steps (or 7 for SI base unit)
+  // Foundations / Application (Q1-Q10): Never skip equations or bench application!
   const stepsOut = [
     {
       title: `1. Physical First Principle (${f.label})`,
@@ -673,41 +744,38 @@ function buildAvionicsProfessorSteps(q, t, f, helpers) {
       kind: "text"
     },
     {
-      title: "2. Bench Behavior & What an Instrument Actually Observes",
-      body: `${st[1] || "Picture how a bench DMM, oscilloscope, or logic analyzer senses this quantity between two specific circuit points."} Setup check: ${f.test || "Record both value and unit relative to ground."}`,
-      kind: "text"
+      title: "2. 10^(3n) Prefix Scale & What the Bench Instrument Measures",
+      body: `${st[1] || "Identify exact two nodes for voltage, broken series loop for current, or scope test point."} Engineering scale: ${phys.unitConv}`,
+      kind: "given",
+      formula: phys.prefixEq
     },
     {
-      title: formulaStr ? "3. Governing Law & Unit Derivation" : "3. Underlying Physical Relationship (No Unrelated Equation)",
-      body: formulaStr
-        ? `Define every variable first before substituting: ${st[2] || note.lawWhy}`
-        : `Think clearly about units and definitions without forcing an unrelated equation like V=IR: ${st[2] || note.lawWhy}`,
-      kind: formulaStr ? "formula" : "text",
+      title: "3. Governing Engineering Equation & Physical Meaning (MathML)",
+      body: `Define every symbol in base 10^(3n) SI units before using it: ${st[2] || note.lawWhy}`,
+      kind: "formula",
       formula: formulaStr
     },
     {
-      title: subStr ? "4. Worked Numerical Proof Step-by-Step" : "4. Step-by-Step Concrete Cause & Effect Example",
-      body: subStr
-        ? `Walk through this concrete example cleanly: ${st[3] || (guided ? guided.example : "")}`
-        : `${st[3] || (guided ? guided.example : (beginner ? beginner.example : "Trace how doubling or reversing one parameter shifts the physical outcome."))}`,
-      kind: subStr ? "formula" : "text",
+      title: "4. Concrete 10^(3n) Worked Substitution & Operating Point",
+      body: `${st[3] || (guided ? guided.example : (beginner ? beginner.example : "Trace how the equation predicts the bench measurement."))}`,
+      kind: "formula",
       formula: subStr
     },
     {
-      title: "5. Beginner Trap to Avoid on Exams & Flight Hardware",
-      body: `Common mistake on "${f.label}": ${note.trap} Cross-check: ${st[4] || f.why}`,
+      title: "5. Post-Math Bench Action on Real Product Hardware & Common Trap",
+      body: `Trap to avoid: ${note.trap} Hardware action: ${st[4] || f.why}`,
       kind: "text"
     },
     {
-      title: "6. Professor-Approved Spoken Interview Synthesis",
-      body: `Put it into 3 crisp engineering sentences: (1) Define ${f.label}, (2) explain the physical/bench check (${st[st.length - 1] || f.test}), and (3) state the safe pass/fail boundary.`,
+      title: "6. Hiring-Manager Spoken Interview Delivery",
+      body: `Deliver in engineer order: (1) Define ${f.label} & equation ${formulaStr}, (2) cite 10^(3n) prediction, (3) explain schematic/probe check (${st[st.length - 1] || f.test}), and (4) state the verification fix.`,
       kind: "answer"
     }
   ];
 
   if (f.label === "SI base unit") {
     stepsOut.splice(5, 0, {
-      title: "6a. Seven SI Base Units vs. Derived Electrical Units (Floyd Table 1-1)",
+      title: "6a. Seven SI Base Units vs. Derived Electrical Units (Table 1-1)",
       body: "The 7 SI base units are meter (m), kilogram (kg), second (s), ampere (A), kelvin (K), mole (mol), and candela (cd). Only ampere (A) is electrical! Volt (J/C = kg·m²/(A·s³)), ohm (V/A), watt (J/s), farad, and coulomb are derived units. Radian and steradian were reclassified as dimensionless derived units in 1995.",
       kind: "text"
     });
@@ -716,27 +784,34 @@ function buildAvionicsProfessorSteps(q, t, f, helpers) {
 }
 
 /* ============================================================================
-   5. AVIONICS UI PANELS (Page 1 Understand, Page 2 Visuals, Page 3 Work, Page 4 Try)
+   6. AVIONICS UI PANELS (Page 1 Understand, Page 2 Visuals, Page 3 Work, Page 4 Try)
    ============================================================================ */
-let activeCourseFilter = "all";
+let activeCourseFilter = "matched";
 let courseBankOpen = false;
-let revealedCourseSolutions = new Set(["CW-T60-01", "CW-852-01"]);
+let revealedCourseSolutions = new Set(["CW-DC-01", "CW-LAB-02"]);
 
 function renderCourseworkBankHTML(t) {
-  const items = AVIONICS_WORKED_BANK.filter(x => activeCourseFilter === "all" || x.cat === activeCourseFilter);
+  const tid = (t && t.id) || "ohm";
+  const matchedItems = AVIONICS_WORKED_BANK.filter(x => Array.isArray(x.topicIds) && x.topicIds.includes(tid));
+  const items = activeCourseFilter === "matched"
+    ? (matchedItems.length ? matchedItems : AVIONICS_WORKED_BANK.slice(0, 4))
+    : activeCourseFilter === "all"
+      ? AVIONICS_WORKED_BANK
+      : AVIONICS_WORKED_BANK.filter(x => x.cat === activeCourseFilter);
+
   const filters = [
-    ["all", "All Worked Problems (" + AVIONICS_WORKED_BANK.length + ")"],
-    ["tech60", "Tech 60 DC/AC & Bridges"],
-    ["devices", "Electronic Devices (Diode/Zener/BJT)"],
-    ["tech63", "Tech 63 Digital & IEEE 754"],
-    ["engr852", "ENGR 852 Setup/Hold STA"],
-    ["physics2b", "Physics 2B 10MΩ DMM & Muon"]
+    ["matched", `This Topic: ${t ? t.title : tid} (${matchedItems.length})`],
+    ["dc_networks", "DC, Ohm/Watt & Bridges"],
+    ["analog_devices", "Rectifier, Zener, LDO & BJT"],
+    ["digital_timing", "Clock Timing, Setup/Hold & PWM"],
+    ["lab_tvac", "10MΩ DMM, 100×1Ω & TVAC"],
+    ["all", "All Worked Manual (" + AVIONICS_WORKED_BANK.length + ")"]
   ];
   return `<details class="av-prof-bank" id="avProfCourseworkBank" ${courseBankOpen ? "open" : ""}>
-    <summary>📚 Professor's Step-by-Step Worked Problem Manual (Tech 60 · Electronic Devices · Tech 63 · ENGR 852 · Physics 2B)</summary>
+    <summary>📚 Topic-Matched Worked Practice Manual (${esc(t ? t.title : "Avionics EE")} · 10<sup>3n</sup> Step-by-Step Solutions)</summary>
     <div class="av-prof-bank-body">
-      <p style="margin-top:0;font-size:0.9rem;color:#334155;">Every problem below shows <strong>all prerequisites, metric prefix conversions, algebraic steps, intermediate arithmetic, and physical checks</strong> from zero background—specifically built for weak EE foundations and interview mastery.</p>
-      <div class="av-prof-filters" role="group" aria-label="Filter worked coursework problems">
+      <p style="margin-top:0;font-size:0.9rem;color:#334155;">Filtered directly to <strong>${esc(t ? t.title : "this topic")}</strong> by default—every problem shows <strong>10<sup>3n</sup> prefix conversions, full algebra, intermediate arithmetic, and bench resolution</strong>.</p>
+      <div class="av-prof-filters" role="group" aria-label="Filter worked Avionics problems">
         ${filters.map(([k, lbl]) => `<button type="button" class="av-prof-filter-btn ${activeCourseFilter === k ? "active" : ""}" data-av-cw-filter="${k}">${esc(lbl)}</button>`).join("")}
       </div>
       ${items.map(item => {
@@ -755,10 +830,10 @@ function renderCourseworkBankHTML(t) {
             <span class="av-prof-mini-status" data-av-cw-status="${esc(item.id)}"></span>
           </div>
           ${isOpen ? `<div class="av-prof-prob-sol">
-            <div><strong>Governing Formula:</strong></div>
+            <div><strong>Governing Formula (Stacked MathML):</strong></div>
             <div style="margin:4px 0;">${eq(item.formula)}</div>
             <ol>${item.steps.map(s => `<li>${rich(s)}</li>`).join("")}</ol>
-            <div style="font-weight:700;color:#065f46;">Verified Result: ${esc(fmt(item.expected))} ${esc(item.unit)}</div>
+            <div style="font-weight:700;color:#065f46;">Verified Result: ${esc(fmt(item.expected))} ${esc(item.unit)} · ${engVal(item.expected, item.unit)}</div>
           </div>` : ""}
         </article>`;
       }).join("")}
@@ -774,10 +849,10 @@ function renderAvionicsUnderstandLecture(q, t, f) {
     : `<p><em>Qualitative / conceptual question:</em> identify nodes, signal direction, and measurement reference before choosing any formula.</p>`;
 
   return `<section class="av-prof-box" aria-label="Professor zero-to-one lecture">
-    <h4><span class="av-prof-badge">Professor's Lecture</span> Ground-Up Intuition &amp; Prefix Anatomy for ${esc(q.id.toUpperCase())}</h4>
+    <h4><span class="av-prof-badge">Professor's Lecture</span> Ground-Up Intuition &amp; 10<sup>3n</sup> Prefix Anatomy for ${esc(q.id.toUpperCase())}</h4>
     <div class="av-prof-grid">
       <div class="av-prof-card">
-        <h5>1. Physical Intuition (No Prior EE Needed)</h5>
+        <h5>1. Physical Intuition (Zero Prerequisite)</h5>
         <p>${esc(note.intuition)}</p>
       </div>
       <div class="av-prof-card">
@@ -786,65 +861,66 @@ function renderAvionicsUnderstandLecture(q, t, f) {
       </div>
     </div>
     <div class="av-prof-card" style="margin-top:10px;">
-      <h5>3. Given Quantities &amp; Metric Prefix Table (Tech 60 10<sup>3n</sup> Rule)</h5>
+      <h5>3. Given Quantities &amp; 10<sup>3n</sup> Engineering Notation Table</h5>
       ${convRow}
     </div>
-    <div class="av-prof-trap"><strong>⚠️ Common Beginner &amp; Lab Trap:</strong> ${esc(note.trap)}</div>
-  </section>${renderCourseworkBankHTML(t)}`;
+    <div class="av-prof-trap"><strong>⚠️ Common Beginner &amp; Bench Trap:</strong> ${esc(note.trap)}</div>
+  </section>${renderHiringManagerInterviewScript(q, t, false)}${renderCourseworkBankHTML(t)}`;
 }
 
 function renderAvionicsVisualGuide(q, t) {
   const note = TOPIC_PROFESSOR_NOTES[t.id] || TOPIC_PROFESSOR_NOTES.ohm;
   const sp = window.PROFESSOR_NOTEBOOK_SPREADS;
-  return `<section class="av-prof-box" aria-label="Professor schematic and bench reading guide">
-    <h4><span class="av-prof-badge">Visual Reading Guide</span> How an EE Professor Reads These 3 Diagrams for ${esc(q.id.toUpperCase())}</h4>
+  return `${sp ? sp.renderQuestionNotebookSpread(q, t, false) : ""}<section class="av-prof-box" aria-label="Professor schematic and bench reading guide">
+    <h4><span class="av-prof-badge">Visual Reading Guide</span> How an Engineer Reads These Diagrams &amp; Applies Them on Hardware (${esc(q.id.toUpperCase())})</h4>
     <div class="av-prof-grid">
       <div class="av-prof-card">
         <h5>Diagram 1 — Schematic Nodes &amp; Loop Trace</h5>
-        <p>Start at the positive rail (+), trace every dot junction (shared node voltage), and verify the unbroken return path to ground (−). Series elements carry identical current; parallel elements share both top and bottom nodes.</p>
+        <p>Start at the positive rail (+), trace every dot junction (shared node voltage), and verify the unbroken return path to ground (−). Identify bank jumpers or series shunts BEFORE powering up.</p>
       </div>
       <div class="av-prof-card">
-        <h5>Diagram 2 — Scope Waveform &amp; Operating Curve</h5>
-        <p>Check horizontal (time or frequency) and vertical (V/div, mA, dB) axes first. Note whether signals are DC-coupled or AC-coupled, and check if the operating point sits in cutoff, active, saturation, or −3 dB roll-off.</p>
+        <h5>Diagram 2 — Operating Curve &amp; Scope Waveform</h5>
+        <p>Check horizontal and vertical 10<sup>3n</sup> axes first. Locate the magenta Operating Point (Q-pt) and slope (1/R, −3 dB cutoff, or A→B Δt) against safe design guardbands.</p>
       </div>
       <div class="av-prof-card">
-        <h5>Diagram 3 — Breadboard &amp; Probe Placement</h5>
-        <p>Remember 5-hole vertical terminal strips share one copper clip underneath. Never place both ends of a component in the same 5-hole column (short!), and remember: <strong>${esc(note.trap)}</strong></p>
+        <h5>Diagram 3 — Breadboard, DMM &amp; 4W Kelvin</h5>
+        <p>Verify 5-hole vertical strips, place voltmeters in PARALLEL, measure resistance POWER-OFF (use 4W Kelvin &lt;1 Ω), and guard against: <strong>${esc(note.trap)}</strong></p>
       </div>
     </div>
-  </section>${sp ? sp.renderFlagshipGallerySection("avionics") : ""}`;
+  </section>`;
 }
 
 function renderAvionicsChalkboard(q, t) {
+  const phys = inferTopicPhysicsModel(q, t, false);
   const convText = buildConversionExplanation(q.question);
-  const formulaStr = q.formula || "Apply Kirchhoff + physical unit reasoning (do not force an unrelated equation)";
-  const subStr = q.sub || (q.lesson && q.lesson.example) || "Compare expected healthy state against observed faulty reading.";
+  const formulaStr = (q.formula && !String(q.formula).includes("->")) ? q.formula : phys.formula;
+  const subStr = q.sub || phys.sub;
   const note = TOPIC_PROFESSOR_NOTES[t.id] || TOPIC_PROFESSOR_NOTES.ohm;
   const steps = Array.isArray(q.steps) ? q.steps : [];
   const sp = window.PROFESSOR_NOTEBOOK_SPREADS;
 
   return `${sp ? sp.renderQuestionNotebookSpread(q, t, false) : ""}<section class="av-prof-chalkboard" aria-label="Professor chalkboard full derivation">
-    <h4>🧮 Professor's Complete Chalkboard Solution (All Work &amp; Intermediate Steps Shown)</h4>
+    <h4>🧮 Complete Chalkboard Solution (10<sup>3n</sup> Engineering Notation &amp; Product Steps)</h4>
     <div class="av-prof-chalk-step">
-      <strong>STEP A · GIVEN INPUTS &amp; BASE-SI PREFIX CONVERSIONS</strong>
+      <strong>STEP A · GIVEN INPUTS &amp; 10^(3n) BASE-SI CONVERSIONS</strong>
       <div>${esc(convText)}</div>
     </div>
     <div class="av-prof-chalk-step">
-      <strong>STEP B · GOVERNING LAW &amp; SYMBOL DEFINITIONS</strong>
+      <strong>STEP B · GOVERNING LAW &amp; SYMBOL DEFINITIONS (STACKED MATHML)</strong>
       <div>${eq(formulaStr)}</div>
       <small style="color:#cbd5e1;">Why it applies: ${esc(note.lawWhy)}</small>
     </div>
     <div class="av-prof-chalk-step">
       <strong>STEP C · FULL SUBSTITUTION &amp; WORKED INTERMEDIATE ARITHMETIC</strong>
-      <div>${rich(subStr)}</div>
+      <div>${eq(subStr)}</div>
       ${steps.length ? `<ul style="margin:6px 0 0 18px;font-size:0.86rem;color:#e2e8f0;">${steps.map(s => `<li>${esc(s)}</li>`).join("")}</ul>` : ""}
     </div>
     <div class="av-prof-chalk-step">
-      <strong>STEP D · FINAL ANSWER &amp; DIMENSIONAL SANITY CHECK</strong>
-      <div>${q.expected !== undefined ? `<code>${esc(fmt(q.expected))} ${esc(q.unit)}</code> &nbsp;·&nbsp; Engineering Notation: ${engVal(q.expected, q.unit)}` : "Confirm observation + A-B-A control swap falsifiability."}</div>
+      <strong>STEP D · FINAL ANSWER, POST-MATH CHECK &amp; DIMENSIONAL SANITY</strong>
+      <div>${q.expected !== undefined ? `<code>${esc(fmt(q.expected))} ${esc(q.unit)}</code> &nbsp;·&nbsp; Engineering Notation: ${engVal(q.expected, q.unit)}` : "Compare observed telemetry against computed 10^(3n) baseline & verify via A-B-A swap."}</div>
       <small style="color:#fcd34d;">Guard against trap: ${esc(note.trap)}</small>
     </div>
-  </section>`;
+  </section>${renderHiringManagerInterviewScript(q, t, false)}`;
 }
 
 let activeAvHint = 0;
@@ -960,7 +1036,7 @@ const NVIDIA_TRACK_LECTURES = {
   },
   pvt: {
     physics: "Silicon propagation delay and leakage shift continuously across PVT corners: slower transistors (Slow Process, Low Voltage, High Temp for some nodes / Temp-Inversion at sub-nm) shrink setup slack, while fast corners (Fast Process, High V_DD, Cold Temp) provoke Hold races.",
-    instrument: "A 2D Shmoo plot sweeps Voltage (V_DD) on one axis vs. Frequency (f_clk) or temperature on the other to map the pass/fail cliff—and reveals ENGR 852's Setup vs. Hold distinction: Setup fails improve when f_clk slows down; Hold failures persist across ALL frequencies!",
+    instrument: "A 2D Shmoo plot sweeps Voltage (V_DD) on one axis vs. Frequency (f_clk) or temperature on the other to map the pass/fail cliff—and reveals the Setup vs. Hold distinction cleanly: Setup fails improve when f_clk slows down; Hold failures persist across ALL frequencies!",
     trap: "Stepping chamber voltage above Absolute Maximum Ratings destroys gate oxide; sweeping PVT before chamber thermal soak stabilizes creates fake corner shifts."
   },
   instruments: {
@@ -1022,7 +1098,7 @@ const NVIDIA_MASTER_STUDY_BANK = [
   {
     id: "NV-EQ-03",
     cat: "equations",
-    badge: "ENGR 852 · HW2 Setup & Hold STA (Critical Post-Silicon Knowledge)",
+    badge: "Fundamental Equation #7 & #8 (Static Timing Setup vs. Hold Margin)",
     title: "Why Slowing Clock Frequency Fixes Setup Violations (386.10 MHz) But NEVER Fixes Hold (-820 ps)",
     q: "Circuit timing: t_CQ(max)=950 ps, t_CQ(min)=300 ps, t_logic(max)=590 ps, fast path t_MUX_S(min)=30 ps, t_su=300 ps, t_h=400 ps, t_skew=750 ps. Derive f_max and prove why reducing f_clk to 1 MHz still fails Hold.",
     steps: [
@@ -1174,7 +1250,6 @@ let revealedNvSolutions = new Set(["NV-EQ-01", "NV-QA-01"]);
 function renderNvidiaUnderstand(q, t) {
   const lec = NVIDIA_TRACK_LECTURES[t.id] || NVIDIA_TRACK_LECTURES.electrical;
   const givens = parseGivenQuantities(q.question);
-  const sp = window.PROFESSOR_NOTEBOOK_SPREADS;
   const convBox = q.questionType === "number" && givens.length
     ? `<div class="nvs-prof-card" style="margin-top:10px;">
          <h5>3. Engineering Prefix &amp; Unit Conversion Check (10<sup>3n</sup> Rule)</h5>
@@ -1196,48 +1271,51 @@ function renderNvidiaUnderstand(q, t) {
     </div>
     ${convBox}
     <div class="nvs-prof-trap"><strong>⚠️ Post-Silicon &amp; SLT False-Conclusion Trap:</strong> ${esc(lec.trap)}</div>
-  </section>${sp ? sp.renderFlagshipGallerySection("all") : ""}`;
+  </section>${renderHiringManagerInterviewScript(q, t, true)}`;
 }
 
 function renderNvidiaWorkedDerivation(q, t) {
   const lec = NVIDIA_TRACK_LECTURES[t.id] || NVIDIA_TRACK_LECTURES.electrical;
+  const phys = inferTopicPhysicsModel(q, t, true);
   const convText = buildConversionExplanation(q.question);
   const isMath = q.questionType === "number";
   const sp = window.PROFESSOR_NOTEBOOK_SPREADS;
 
   return `${sp ? sp.renderQuestionNotebookSpread(q, t, true) : ""}<section class="nvs-prof-chalkboard" aria-label="NVIDIA Professor Complete Step-by-Step Chalkboard">
-    <h4>🧮 Professor's Complete Worked Walkthrough (${esc(q.skillName)} · ${esc(q.phase)})</h4>
+    <h4>🧮 Complete Worked Walkthrough (${esc(q.skillName)} · ${esc(q.phase)} · 10<sup>3n</sup> Engineering Notation)</h4>
     ${isMath ? `
       <div class="nvs-prof-chalk-step">
-        <strong>1. GIVEN INPUTS &amp; METRIC PREFIX CONVERSION</strong>
+        <strong>1. GIVEN INPUTS &amp; 10^(3n) METRIC PREFIX CONVERSION</strong>
         <div>${esc(convText)}</div>
       </div>
       <div class="nvs-prof-chalk-step">
-        <strong>2. GOVERNING PHYSICAL EQUATION</strong>
-        <div>${eq(q.formula || "")}</div>
+        <strong>2. GOVERNING PHYSICAL EQUATION (STACKED MATHML)</strong>
+        <div>${eq(phys.formula)}</div>
       </div>
       <div class="nvs-prof-chalk-step">
-        <strong>3. COMPLETE INTERMEDIATE SUBSTITUTION &amp; COMPUTATION</strong>
-        <div>${rich(q.sub || "")}</div>
-        <div><code>Result = ${esc(fmt(q.expected))} ${esc(q.unit)}</code></div>
+        <strong>3. COMPLETE 10^(3n) SUBSTITUTION &amp; COMPUTATION</strong>
+        <div>${eq(phys.sub)}</div>
+        <div><code>Result = ${esc(fmt(q.expected))} ${esc(q.unit)}</code> &nbsp;·&nbsp; ${engVal(q.expected, q.unit)}</div>
       </div>
       <div class="nvs-prof-chalk-step">
-        <strong>4. PHYSICAL MEANING &amp; PASS / FAIL / INVALID GUARD</strong>
+        <strong>4. POST-MATH BENCH EXECUTION &amp; PASS / FAIL / INVALID GUARD</strong>
         <div>${esc(q.math?.why || "")} · Check: ${esc(q.math?.check || lec.trap)}</div>
       </div>` : `
       <div class="nvs-prof-chalk-step">
-        <strong>1. UNDERLYING HARDWARE MECHANISM</strong>
-        <div>${esc(lec.physics)}</div>
+        <strong>1. GOVERNING EQUATION &amp; 10^(3n) BENCHMARK MODEL</strong>
+        <div>${eq(phys.formula)}</div>
+        <div style="margin-top:4px;">${eq(phys.sub)}</div>
+        <small style="color:#cbd5e1;">${esc(phys.unitConv)}</small>
       </div>
       <div class="nvs-prof-chalk-step">
-        <strong>2. SAFE EVIDENCE CAPTURE (BENCH / LINUX / SCOPE)</strong>
+        <strong>2. SAFE EVIDENCE CAPTURE ON HARDWARE / LINUX / 4-CH SCOPE</strong>
         <div>${esc(lec.instrument)}</div>
       </div>
       <div class="nvs-prof-chalk-step">
-        <strong>3. COMPLETE ${q.steps.length}-STEP AUDIT CHECKLIST</strong>
+        <strong>3. COMPLETE ${q.steps.length}-STEP AUDIT &amp; PRODUCT ISOLATION CHECKLIST</strong>
         <ul style="margin:4px 0 0 18px;font-size:0.86rem;color:#e2e8f0;">${q.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ul>
       </div>`}
-  </section>`;
+  </section>${renderHiringManagerInterviewScript(q, t, true)}`;
 }
 
 function renderNvidiaMasterStudyBank() {
@@ -1252,7 +1330,7 @@ function renderNvidiaMasterStudyBank() {
   return `<details class="nvs-prof-bank" id="nvsProfMasterBank" ${masterBankOpen ? "open" : ""}>
     <summary>📗 NVIDIA SLT Master 253-Box Study Bank (8 Equations · CPU2 Scope · DRAM Bug · Intel/Cisco · 25 Python Labs · 15-Step HLD)</summary>
     <div class="nvs-prof-bank-body">
-      <p style="margin-top:0;font-size:0.9rem;color:#334155;">Structured professor walkthroughs unifying the complete NVIDIA SLT Master Study Guide, ENGR 852 Setup/Hold STA, 4-Channel Keysight Scope methodology, Python edge-case grading, and Linux triage commands.</p>
+      <p style="margin-top:0;font-size:0.9rem;color:#334155;">Structured walkthroughs unifying the complete NVIDIA SLT Master Study Guide: 10<sup>3n</sup> PDN/DRAM/STA physics, 4-Channel Keysight Scope methodology, fail-closed Python grading, and Linux hardware triage.</p>
       <div class="nvs-prof-filters" role="group" aria-label="Filter NVIDIA Master Study modules">
         ${filters.map(([k, lbl]) => `<button type="button" class="nvs-prof-filter-btn ${activeNvFilter === k ? "active" : ""}" data-nv-filter="${k}">${esc(lbl)}</button>`).join("")}
       </div>
@@ -1331,6 +1409,8 @@ window.PROFESSOR_MASTERY_ENGINE = {
   version: "1.0.0",
   parseGivenQuantities,
   buildConversionExplanation,
+  inferTopicPhysicsModel,
+  renderHiringManagerInterviewScript,
   AVIONICS_WORKED_BANK,
   NVIDIA_MASTER_STUDY_BANK,
   TOPIC_PROFESSOR_NOTES,

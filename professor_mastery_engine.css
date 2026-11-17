@@ -563,3 +563,211 @@ dialog.nb-zoom-modal::backdrop {
  width: 100%;
  height: auto;
 }
+
+/* ==================== 36cfb47e-STYLE VISUAL SIDE PANEL (Key Equations + How to Read + Product Action) ==================== */
+.av-vis-stage-grid {
+ display: grid;
+ grid-template-columns: minmax(0, 1.55fr) minmax(270px, 1fr);
+ gap: 14px;
+ align-items: start;
+}
+
+.av-vis-stage-wide {
+ display: flex;
+ flex-direction: column;
+ gap: 14px;
+}
+
+.av-vis-stage-wide .av-vis-side {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+ gap: 12px;
+}
+
+.av-vis-fig-wrap svg {
+ width: 100%;
+ height: auto;
+ display: block;
+}
+
+.av-vis-side {
+ display: flex;
+ flex-direction: column;
+ gap: 10px;
+}
+
+.av-vis-card {
+ border: 1px solid #cbd5e1;
+ border-radius: 12px;
+ background: #ffffff;
+ overflow: hidden;
+ box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.av-vis-card-hdr {
+ padding: 8px 12px;
+ font-size: 0.85rem;
+ font-weight: 800;
+ color: #ffffff;
+ background: linear-gradient(90deg, #104578 0%, #1d5d96 100%);
+}
+
+.av-vis-card-body {
+ padding: 10px 12px;
+}
+
+.av-vis-eq-chip {
+ padding: 6px 8px;
+ margin-bottom: 6px;
+ border-radius: 8px;
+ background: #f0f9ff;
+ border: 1px solid #bae6fd;
+ overflow-x: auto;
+}
+
+.av-vis-pfx-note {
+ margin-top: 6px;
+ padding: 6px 8px;
+ border-radius: 7px;
+ background: #fefce8;
+ border: 1px solid #fde047;
+ font-size: 0.78rem;
+ color: #713f12;
+}
+
+.av-vis-read-row {
+ display: flex;
+ align-items: flex-start;
+ gap: 8px;
+ margin-bottom: 7px;
+ font-size: 0.83rem;
+ line-height: 1.44;
+ color: #1e293b;
+}
+
+.av-vis-num {
+ flex: 0 0 22px;
+ height: 22px;
+ border-radius: 999px;
+ background: #e0f2fe;
+ color: #0369a1;
+ font-weight: 800;
+ font-size: 0.76rem;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+}
+
+@media (max-width: 900px) {
+ .av-vis-stage-grid {
+  grid-template-columns: 1fr;
+ }
+}
+
+/* ==================== HIRING-MANAGER SPOKEN ANSWER & PRODUCT EXECUTION BLOCK ==================== */
+.prof-interview-say {
+ margin: 10px 0 12px 0;
+ padding: 12px 15px;
+ border-radius: 11px;
+ background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+ border: 1.5px solid #93c5fd;
+ color: #0f172a;
+}
+
+.prof-interview-say strong {
+ display: block;
+ font-size: 0.88rem;
+ color: #1e3a8a;
+ margin-bottom: 5px;
+}
+
+.prof-interview-say p {
+ margin: 0;
+ font-size: 0.93rem;
+ line-height: 1.56;
+ font-weight: 500;
+}
+
+.prof-interview-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+ gap: 10px;
+ margin: 10px 0;
+}
+
+.prof-interview-card {
+ background: #ffffff;
+ border: 1px solid #d5e0ee;
+ border-radius: 10px;
+ padding: 11px 13px;
+ min-width: 0;
+}
+
+.prof-interview-card > div {
+ overflow-x: auto;
+ max-width: 100%;
+ padding-bottom: 2px;
+}
+
+.prof-interview-card math {
+ font-size: 0.92rem;
+}
+
+.prof-interview-card h5 {
+ margin: 0 0 6px 0;
+ font-size: 0.86rem;
+ color: #0f4c81;
+}
+
+.prof-interview-card p {
+ margin: 0;
+ font-size: 0.86rem;
+ line-height: 1.48;
+ color: #1e293b;
+}
+
+details.prof-interview-defense {
+ margin-top: 10px;
+ border: 1px solid #fed7aa;
+ border-radius: 11px;
+ background: #fffbeb;
+ overflow: hidden;
+}
+
+details.prof-interview-defense > summary {
+ cursor: pointer;
+ padding: 10px 14px;
+ font-weight: 700;
+ font-size: 0.89rem;
+ color: #9a3412;
+ background: #ffedd5;
+ list-style-position: inside;
+}
+
+.prof-qa-list {
+ padding: 10px 14px;
+ display: grid;
+ gap: 9px;
+}
+
+.prof-qa-item {
+ background: #ffffff;
+ border: 1px solid #fde68a;
+ border-radius: 8px;
+ padding: 9px 12px;
+}
+
+.prof-qa-item strong {
+ display: block;
+ font-size: 0.86rem;
+ color: #991b1b;
+ margin-bottom: 4px;
+}
+
+.prof-qa-item p {
+ margin: 0;
+ font-size: 0.85rem;
+ line-height: 1.48;
+ color: #1e293b;
+}
+

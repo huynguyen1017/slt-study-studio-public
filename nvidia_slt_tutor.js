@@ -614,6 +614,10 @@
         </div>`;
       }
 
+      const pme = global.PROFESSOR_MASTERY_ENGINE || null;
+      const physMod = pme?.inferTopicPhysicsModel ? pme.inferTopicPhysicsModel(q, topicObj, true) : null;
+      const interviewHtml = pme?.renderHiringManagerInterviewScript ? pme.renderHiringManagerInterviewScript(q, topicObj, true) : "";
+
       const pageHtml = (() => {
         if (st.pageTab === 2) {
           const spreadHtml = global.PROFESSOR_NOTEBOOK_SPREADS?.renderQuestionNotebookSpread?.(q, topicObj, true) || "";
@@ -627,12 +631,19 @@
               <div class="nv-vis-card"><header>Panel 2 · Calibrated Waveform / Margin</header><div class="nv-svg-wrap">${renderVisual(q, 1)}</div></div>
               <div class="nv-vis-card"><header>Panel 3 · Probe & A-B-A Fix</header><div class="nv-svg-wrap">${renderVisual(q, 2)}</div></div>
             </div>
-            <div class="nv-lesson-box"><strong>Engineering Intuition:</strong> ${fmtTextMath(q.lesson)}</div>
+            <div class="nv-lesson-box"><strong>How to Read These 3 Panels &amp; Apply After Solving the Math:</strong> ${fmtTextMath(q.lesson)} · Step-by-step on SLT Bench: (1) Compare waveform/eye margin against the calculated 10^(3n) target below, (2) verify <5 mm ground spring / N7020A offset / 1169B deskew, and (3) run a single-variable A-B-A cross-swap before condemning the silicon.</div>
             ${renderEngMathPanel(q)}
             ${spreadHtml}`;
         }
         if (st.pageTab === 3) {
           const spreadHtml = global.PROFESSOR_NOTEBOOK_SPREADS?.renderQuestionNotebookSpread?.(q, topicObj, true) || "";
+          const engInfo = inferEngineeringPhysics(q);
+          const stepMathBlock = (idx) => {
+            if (idx === 1 && physMod?.prefixEq) return `<div style="margin-top:6px;">${fmtMath(physMod.prefixEq, true)}</div>`;
+            if (idx === 2) return `<div style="margin-top:6px;">${fmtMath(engInfo.formula, true)}</div>`;
+            if (idx === 3 && engInfo.sub) return `<div style="margin-top:6px;">${fmtMath(engInfo.sub, true)}</div>`;
+            return "";
+          };
           return `
             <div class="nv-q-banner">
               <div class="nv-q-meta"><span>All Worked Baby Steps (${steps.length} Steps)</span><span>${esc(q.id)}</span><span>10^(3n) Engineering Notation</span></div>
@@ -642,11 +653,12 @@
             <div class="nv-steps-list">
               ${steps.map((s, idx) => {
                 const parsed = parseStepItem(s, idx);
-                return `<div class="nv-step-card"><span class="nv-step-num">${idx + 1}</span><div class="nv-step-body"><strong style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:0.04em;color:#0f766e;margin-bottom:3px;">STEP ${idx + 1} · ${esc(parsed.tag)}</strong>${fmtTextMath(parsed.body)}</div></div>`;
+                return `<div class="nv-step-card"><span class="nv-step-num">${idx + 1}</span><div class="nv-step-body"><strong style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:0.04em;color:#0f766e;margin-bottom:3px;">STEP ${idx + 1} · ${esc(parsed.tag)}</strong>${fmtTextMath(parsed.body)}${stepMathBlock(idx)}</div></div>`;
               }).join("")}
             </div>
             <div class="nv-model-ans"><strong>Target Result / Benchmark Answer:</strong> ${fmtTextMath(q.modelAnswer)}</div>
-            ${spreadHtml}`;
+            ${spreadHtml}
+            ${interviewHtml}`;
         }
         if (st.pageTab === 4) {
           return `
@@ -683,6 +695,7 @@
             <div style="margin-top:6px"><strong>Plain-English Physics &amp; System Intuition:</strong> ${fmtTextMath(q.lesson)}</div>
           </div>
           ${renderEngMathPanel(q)}
+          ${interviewHtml}
           <div class="nv-vis-grid">
             <div class="nv-vis-card"><header>1 · Topology</header><div class="nv-svg-wrap">${renderVisual(q, 0)}</div></div>
             <div class="nv-vis-card"><header>2 · Signal / State</header><div class="nv-svg-wrap">${renderVisual(q, 1)}</div></div>

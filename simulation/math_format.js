@@ -18,6 +18,7 @@ function normalizeFormula(src){
   .replace(/\bGamma_S\b|\bGammaS\b/g,"Γ_S")
   .replace(/\bGamma\b/g,"Γ")
   .replace(/\bDelta_V\b|\bDeltaV\b/g,"ΔV")
+  .replace(/\bDelta_U\b|\bDeltaU\b/g,"ΔU")
   .replace(/\bDelta_I\b|\bDeltaI\b/g,"ΔI")
   .replace(/\bDelta_t\b|\bDeltat\b/g,"Δt")
   .replace(/\bDelta_f\b|\bDeltaf\b/g,"Δf")
