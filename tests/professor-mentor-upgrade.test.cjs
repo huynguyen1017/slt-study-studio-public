@@ -166,8 +166,15 @@ function startStaticServer(dir) {
       await page.locator('[data-av-cw-check="CW-852-01"]').click();
       assert((await page.locator('[data-av-cw-status="CW-852-01"]').textContent()).includes("Correct"));
 
+      await page.locator("#avTopicList").selectOption("ohm");
+      await page.locator('#avionicsView [data-qid="ohm-F1"]').click();
       await page.locator('[data-page="visual"]').click();
-      await page.locator("#avionicsView .av-prof-box").waitFor();
+      await page.locator("#avionicsView #avVisual-concept").waitFor();
+      const avVisText = await page.locator("#avionicsView #avVisual-concept").textContent();
+      assert(avVisText.includes("×10⁻³ A") && avVisText.includes("Parabolic Heat") && !avVisText.includes("I / P"), "ohm-F1 visual must show calibrated lab analyzer instead of bare I / P");
+      if (vp.width === 1280) {
+        await page.locator("#avionicsView #avVisual-concept").screenshot({ path: "/Users/huynguyen/.gemini/antigravity/brain/9abd734c-7786-4e8f-a3e8-35f2bdc2137b/ohm_f1_calibrated_visual.png" });
+      }
       await page.locator('[data-page="work"]').click();
       await page.locator("#avionicsView .av-prof-chalkboard").waitFor();
       assert.equal(await page.locator("#avionicsView .nb-spread-svg").count(), 1, "Avionics Baby Steps must show 3-Page Notebook Spread");
@@ -185,12 +192,35 @@ function startStaticServer(dir) {
 
       await page.locator('#nvidiaView [data-screen="steps"]').first().click();
       await page.locator("#nvidiaView .nvs-prof-chalkboard").waitFor();
+      assert((await page.locator("#nvidiaView math").count()) >= 1, "NVIDIA SLT view must render stacked MathML equations");
       assert.equal(await page.locator("#nvidiaView .nb-spread-svg").count(), 1, "NVIDIA Baby Steps must show 3-Page Notebook Spread");
       await page.locator('#nvidiaView [data-screen="practice"]').first().click();
       await page.locator('[data-nv-hint="1"]').click();
       assert((await page.locator(".nvs-prof-hint-panel").textContent()).includes("Hint 2"));
       await page.locator('#nvidiaView [data-screen="evidence"]').first().click();
       await page.locator("#nvidiaView #nvsProfMasterBank").waitFor();
+
+      // Test NVIDIA SLT Prep (#nvidia-sltView)
+      await page.locator('[data-mode="nvidia-slt"]').click();
+      await page.locator('#nvidia-sltView:visible [data-topic="ddr-lpddr"]').waitFor({ timeout: 25000 });
+      await page.locator('#nvidia-sltView [data-topic="ddr-lpddr"]').click();
+      await page.locator('#nvidia-sltView [data-qidx="1"]').click();
+      const nvSltMathHtml = await page.locator("#nvidia-sltView .nv-formula-box").first().innerHTML();
+      assert(nvSltMathHtml.includes("<math") && nvSltMathHtml.includes("<mfrac"), "NVIDIA SLT Prep must render stacked MathML <mfrac>");
+      const nvSltMathText = await page.locator("#nvidia-sltView .nv-formula-box").first().textContent();
+      assert(nvSltMathText.includes("10⁻¹⁵ F") && nvSltMathText.includes("55.0 × 10⁻³ V"), "ddr-lpddr-F1 must show 10^(3n) engineering notation");
+
+      await page.locator('#nvidia-sltView [data-ptab="2"]').click();
+      assert.equal(await page.locator("#nvidia-sltView .nv-vis-card .nv-svg-wrap svg").count(), 3, "NVIDIA SLT Prep 3-panel visuals must render 3 calibrated SVGs");
+      assert.equal(await page.locator("#nvidia-sltView .nb-spread-svg").count(), 1, "NVIDIA SLT Prep tab 2 must show 3-Page Notebook Spread");
+
+      await page.locator('#nvidia-sltView [data-ptab="3"]').click();
+      const stepBodyText = await page.locator("#nvidia-sltView .nv-step-card .nv-step-body").first().textContent();
+      assert(!stepBodyText.includes("Step 1 ("), "Baby steps must strip redundant Step 1 prefix from step body");
+      assert.equal(await page.locator("#nvidia-sltView .nb-spread-svg").count(), 1, "NVIDIA SLT Prep Baby Steps tab must show 3-Page Notebook Spread");
+      if (vp.width === 1280) {
+        await page.locator("#nvidia-sltView .nv-stage").screenshot({ path: "/Users/huynguyen/.gemini/antigravity/brain/9abd734c-7786-4e8f-a3e8-35f2bdc2137b/nvidia_slt_ddr_f1_upgraded.png" });
+      }
 
       assert.equal(errors.length, 0, `Errors at width ${vp.width}: ` + errors.join("; "));
       await page.close();

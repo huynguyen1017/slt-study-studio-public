@@ -370,10 +370,30 @@ function siUnitVisual(q,t,mode){
    text(54,282,"Volt (V)",20,P.blue,"start","700")+text(185,283,"= Watt (W) / Ampere (A)",18,P.ink)+
    text(54,302,"Not an eighth base unit (1 V = 1 J/C = 1 W/A)",11,P.muted);
  }else{
-  const blocks=[["BASE UNIT","ampere (A)","electric current"],["DERIVED UNIT","volt (V)","potential difference"],["PREFIX milli (m)","× 10⁻³","0.001 × base"],["PREFIX micro (µ)","× 10⁻⁶","0.000001 × base"]];
-  blocks.forEach((v,i)=>{const x=26+(i%2)*372,y=96+Math.floor(i/2)*114;out+=rect(x,y,354,96,i===0?"#e4f7ed":i===1?"#e9f5fc":"#fff8e9","#bbd3df",10)+text(x+18,y+24,v[0],11,P.muted,"start","700")+text(x+18,y+56,v[1],20,P.ink,"start","700")+text(x+18,y+80,v[2],12,P.muted);});
+  out+=rect(22,88,736,246,"#0b1628","#274469",10,1.5);
+  out+=text(40,112,"ENGINEERING NOTATION LOG-DECADE LADDER (10^(3n)) & SI DIMENSIONAL DERIVATION",11.5,"#7dd3fc","start","800");
+  const ladder=[
+   ["10⁻¹² (p)","pico","0.000000000001","#94a3b8"],
+   ["10⁻⁹ (n)","nano","ns, nF, nH","#38bdf8"],
+   ["10⁻⁶ (µ)","micro","µs, µF, µA","#22d3ee"],
+   ["10⁻³ (m)","milli","mV, mA, mΩ","#34d399"],
+   ["10⁰ (Base)","SI","m, kg, s, A, K","#fde047"],
+   ["10³ (k)","kilo","kΩ, kHz, kW","#fb923c"],
+   ["10⁶ (M)","mega","MΩ, MHz, MW","#f472b6"]
+  ];
+  ladder.forEach((b,i)=>{
+   const x=34+i*102;
+   out+=rect(x,126,95,86,i===4?"#134e4a":"#16253d",b[3],7,1.6)+
+    text(x+47,150,b[0],12.5,b[3],"middle","800")+
+    text(x+47,170,b[1],11,"#e2e8f0","middle","700")+
+    text(x+47,192,b[2],9.5,"#cbd5e1","middle","600");
+  });
+  out+=rect(34,224,710,96,"#111e33","#3b82f6",8,1.5)+
+   text(48,248,"DIMENSIONAL FORMULA (SI BASE -> DERIVED) · NEVER CONFUSE PREFIX DIRECTION:",11,"#93c5fd","start","800")+
+   text(48,274,"1 A = 1 C / s (6.25 × 10¹⁸ e⁻/s)   |   1 V = 1 J / C = 1 kg·m²·s⁻³·A⁻¹   |   1 Ω = 1 V / A = 1 kg·m²·s⁻³·A⁻²",12,"#e2e8f0","start","700")+
+   text(48,298,"TRAP: Dividing by milli (10⁻³) flips to ×10⁺³!   5 V / (2 × 10⁻³ A) = 2.5 × 10³ Ω = 2.5 kΩ (NOT 2.5 mΩ)",11.5,"#fde68a","start","700");
  }
- return svg(out,"SI base and derived units conceptual diagram for question "+q.id+"; ampere is base and volt is derived");
+ return svg(out,"SI base and derived units engineering notation ladder for question "+q.id+"; ampere is base and volt is derived");
 }
 
 function schematic(q,t){
@@ -395,90 +415,218 @@ function schematic(q,t){
  return svg(loopSchematic(q,t),"DC source, current loop and resistor schematic with DMM probe");
 }
 
-/* ---------- 2. QUESTION-TAILORED GRAPHS & WAVEFORMS ---------- */
+/* ---------- 2. LABORATORY-GRADE CALIBRATED GRAPHS & OSCILLOSCOPE GRATICULES ---------- */
+function engFmt(val, unit=""){
+ if(!Number.isFinite(val)||val===0)return "0"+(unit?" "+unit:"");
+ const exp3=Math.floor(Math.log10(Math.abs(val))/3)*3;
+ const mant=val/Math.pow(10,exp3);
+ const pfx={"-12":"p","-9":"n","-6":"µ","-3":"m","0":"","3":"k","6":"M","9":"G"}[String(exp3)];
+ const num=Number(mant.toPrecision(3));
+ if(pfx!==undefined&&unit)return num+" "+pfx+unit+" ("+num+"×10^"+exp3+")";
+ return num+"×10^"+exp3+(unit?" "+unit:"");
+}
+function gridFrame(x0,y1,x1,y0,cols=10,rows=6,dark=true){
+ let g=rect(x0,y1,x1-x0,y0-y1,dark?"#0a1526":"#f8fafc",dark?"#2a4a6b":"#cbd5e1",4,1.5);
+ const dx=(x1-x0)/cols,dy=(y0-y1)/rows;
+ for(let c=1;c<cols;c++){
+  const x=x0+c*dx;
+  g+=path("M"+x+" "+y1+" V"+y0,dark?"#172d47":"#e2e8f0",1,"none",c===cols/2?"":"4 3");
+ }
+ for(let r=1;r<rows;r++){
+  const y=y1+r*dy;
+  g+=path("M"+x0+" "+y+" H"+x1,dark?"#172d47":"#e2e8f0",1,"none",r===rows/2?"":"4 3");
+ }
+ g+=line(x0,y1,x0,y0,dark?"#648cb5":"#475569",2)+line(x0,y0,x1,y0,dark?"#648cb5":"#475569",2);
+ return g;
+}
 function curve(q,t){
  const id=t.id;
  if(id==="units")return siUnitVisual(q,t,"concept");
- let s=head(q,t)+known(q);
- const x0=84,x1=695,y0=262,y1=92;
- s+=line(x0,y1,x0,y0,P.muted,2)+line(x0,y0,x1,y0,P.muted,2);
- if(["ohm","units","power"].includes(id)){
-  // Plot linear Ohm's Law I vs V or P vs V with highlighted operating dot
-  const vNum=parseFloat(source(q))||5;
-  const rMatch=q.question.match(/(\d+(?:\.\d+)?)\s*(MΩ|kΩ|Ω)/i);
-  let labelPt="Operating Point";
-  if(rMatch)labelPt=vNum+" V across "+rMatch[0];
-  else if(q.expected!==undefined)labelPt="Answer: "+Number(q.expected.toPrecision(4))+" "+q.unit;
-  s+=line(x0,y0,x1-40,y1+18,P.blue,3.5);
-  const px=x0+0.55*(x1-x0),py=y0-0.52*(y0-y1);
-  s+=path("M"+px+" "+y0+" V"+py+" H"+x0,P.pink,1.8,"none","5 4");
-  s+=dot(px,py,P.pink,7)+text(px+12,py-8,labelPt,13,P.pink,"start","700");
-  s+=text(x0-10,y1+8,"I / P",12,P.muted,"end","700")+text(x1,y0+20,"Applied Voltage V",12,P.muted,"end","700");
-  s+=text(390,324,"Linear ohmic behavior: doubling V doubles current I = V/R (power P = V²/R grows 4×)",12,P.muted,"middle");
- }else if(["ac","timing","buses"].includes(id)){
-  const isAC=id==="ac";
-  let d="";
-  for(let i=0;i<=60;i++){
-   const x=x0+i*10;
-   const y=isAC?(y0+y1)/2-64*Math.sin(i/60*Math.PI*4):((Math.floor(i/6)%2===0)?y1+26:y0-28);
-   d+=(i===0?"M":"L")+x+" "+y;
+ const x0=84,x1=696,y0=276,y1=92;
+ const vNum=Math.max(0.5,parseFloat(source(q))||5);
+ const rawR=parseOhms(resistance(q)[0]||"100 Ω");
+ const rOhms=Math.max(0.1,rawR);
+ const iOpMa=(vNum/rOhms)*1000;
+ const pOpMw=vNum*iOpMa;
+ let s=text(22,26,"LAB ANALYZER · "+q.id.toUpperCase()+" · "+q.level.toUpperCase(),11.5,P.blue,"start","800")+
+       text(22,46,units[id]||"Calibrated Multi-Trace Response",15.5,P.ink,"start","700")+known(q);
+
+ if(["ohm","power"].includes(id)){
+  s+=gridFrame(x0,y1,x1,y0,10,6,true);
+  const vMax=Math.max(10,Math.ceil(vNum*1.6));
+  const iMaxMa=Math.max(1,(vMax/rOhms)*1000*1.35);
+  const mapX=v=>x0+(v/vMax)*(x1-x0);
+  const mapY=iMa=>y0-Math.min(1,iMa/iMaxMa)*(y0-y1);
+  // 3 Conductance Curves: 0.5R (steep), R_active (cyan), 2R (shallow)
+  const ptR={x:mapX(vMax),y:mapY((vMax/rOhms)*1000)};
+  const pt2R={x:mapX(vMax),y:mapY((vMax/(2*rOhms))*1000)};
+  const ptHalf={x:mapX(Math.min(vMax,vMax*0.65)),y:mapY((Math.min(vMax,vMax*0.65)/(0.5*rOhms))*1000)};
+  s+=line(x0,y0,ptHalf.x,ptHalf.y,"#475569",1.8)+text(ptHalf.x+4,ptHalf.y+12,"G=1/(0.5R)",10,"#94a3b8","start","600");
+  s+=line(x0,y0,pt2R.x,pt2R.y,"#64748b",1.8)+text(pt2R.x-6,pt2R.y-6,"G=1/(2R)",10,"#cbd5e1","end","600");
+  s+=line(x0,y0,ptR.x,ptR.y,"#38bdf8",3.2);
+  // Parabolic Power Curve P = V^2/R (scaled to fit plot)
+  let pPath="";
+  for(let k=0;k<=40;k++){
+   const vk=(k/40)*vMax, pkNorm=Math.pow(vk/vMax,2)*0.86;
+   pPath+=(k===0?"M":"L")+mapX(vk)+" "+(y0-pkNorm*(y0-y1));
   }
-  s+=path(d,P.blue,3.2);
-  if(isAC){
-   s+=line(x0,y1+21,x1,y1+21,P.pink,1.6,"none","4 4")+text(x1-5,y1+14,"V_peak",12,P.pink,"end","700");
-   s+=line(x0,y1+45,x1,y1+45,P.green,1.8,"none","6 3")+text(x1-5,y1+39,"V_rms = 0.707 V_peak",12,P.green,"end","700");
-  }else{
-   const tx=x0+180;
-   s+=line(tx,y1,tx,y0,P.pink,2)+text(tx+8,y1+16,id==="buses"?"Sample / Baud edge":"Setup/Hold window",12,P.pink,"start","700");
+  s+=path(pPath,"#f59e0b",2.4,"none","6 3");
+  // Operating Point + Slope Triangle + Crosshairs
+  const px=mapX(vNum),py=mapY(iOpMa),pxPrev=mapX(vNum*0.4),pyPrev=mapY(iOpMa*0.4);
+  s+=path("M"+pxPrev+" "+pyPrev+" H"+px+" V"+py,"#a7f3d0",1.6,"none","3 2");
+  s+=text((pxPrev+px)/2,pyPrev+13,"ΔV",10,"#a7f3d0","middle","700")+text(px+6,(pyPrev+py)/2,"ΔI",10,"#a7f3d0","start","700");
+  s+=path("M"+px+" "+y0+" V"+py+" H"+x0,"#f43f5e",1.8,"none","4 3");
+  s+=dot(px,py,"#f43f5e",7)+rect(Math.min(px+10,460),Math.max(y1+6,py-42),228,38,"#111c30","#f43f5e",6,1.5);
+  s+=text(Math.min(px+18,468),Math.max(y1+22,py-25),"Q-Pt: "+engFmt(iOpMa*1e-3,"A"),11,"#fda4af","start","800");
+  s+=text(Math.min(px+18,468),Math.max(y1+37,py-10),"P = "+engFmt(pOpMw*1e-3,"W")+" | Slope 1/R",10,"#fde68a","start","700");
+  // Calibrated X & Y ticks in engineering notation
+  for(let i=0;i<=5;i++){
+   const xv=Number(((i/5)*vMax).toPrecision(3)), tx=x0+(i/5)*(x1-x0);
+   const yi=Number(((i/5)*iMaxMa).toPrecision(3)), ty=y0-(i/5)*(y0-y1);
+   s+=text(tx,y0+15,xv+" V",10,P.ink,"middle","700");
+   s+=text(x0-8,ty+4,yi+"×10⁻³ A",10,P.ink,"end","700");
   }
-  s+=text(390,324,isAC?"Period T = 1/f · RMS equals equivalent DC heating":"Clock & serial bit timing aligned to rising sample edge",12,P.muted,"middle");
+  s+=text(390,313,"Applied Potential V (Volts · 10⁰ V)   |   Slope m = ΔI / ΔV = G = 1 / R",11.5,P.ink,"middle","700");
+  s+=text(390,342,"Cyan: I = V/R  |  Gold Dashed: Parabolic Heat P = V²/R (4× at 2V)  |  Pink: Q-Point ("+vNum+" V, R="+rOhms+" Ω)",11.5,P.muted,"middle");
+ }else if(["series","parallel","kcl-kvl","thevenin"].includes(id)){
+  s+=gridFrame(x0,y1,x1,y0,10,6,true);
+  // Dual Plot: Thevenin V_L Load Line (V_OC -> I_SC) + Bell Curve P_L peaking at R_L = R_TH (50% eff)
+  const vTh=vNum, rTh=rOhms, iScMa=(vTh/rTh)*1000;
+  let loadLine="", pwrCurve="";
+  for(let k=0;k<=40;k++){
+   const frac=k/40; // I / I_sc from 0 to 1
+   const x=x0+frac*(x1-x0);
+   const yV=y0-(1-frac)*0.85*(y0-y1);
+   const yP=y0-4*frac*(1-frac)*0.78*(y0-y1);
+   loadLine+=(k===0?"M":"L")+x+" "+yV;
+   pwrCurve+=(k===0?"M":"L")+x+" "+yP;
+  }
+  s+=path(loadLine,"#38bdf8",3.2)+path(pwrCurve,"#fbbf24",3);
+  const xm=x0+0.5*(x1-x0), yVm=y0-0.425*(y0-y1), yPm=y0-0.78*(y0-y1);
+  s+=line(xm,y1,xm,y0,"#f43f5e",1.8,"none","4 3")+dot(xm,yPm,"#fbbf24",6.5)+dot(xm,yVm,"#38bdf8",6);
+  s+=text(xm+8,yPm-4,"P_max = Vth²/(4Rth) @ RL=Rth (η=50%)",11,"#fde68a","start","800");
+  s+=text(xm+8,yVm+14,"Matched V_L = 0.5·Vth",11,"#7dd3fc","start","700");
+  s+=text(x0+6,y0-0.85*(y0-y1)-6,"V_OC = "+vTh+"×10⁰ V",10.5,"#7dd3fc","start","700");
+  s+=text(x1-8,y0-8,"I_SC = "+Number(iScMa.toPrecision(3))+"×10⁻³ A",10.5,"#7dd3fc","end","700");
+  for(let i=0;i<=4;i++){
+   const tx=x0+(i/4)*(x1-x0), ty=y0-(i/4)*(y0-y1);
+   s+=text(tx,y0+16,Number(((i/4)*iScMa).toPrecision(3))+" mA",10,P.ink,"middle","700");
+   s+=text(x0-8,ty+4,Number(((i/4)*vTh).toPrecision(3))+" V",10,P.ink,"end","700");
+  }
+  s+=text(390,302,"Load Current I_L (mA = 10⁻³ A)   ·   V_L = V_TH − I_L·R_TH",11.5,P.ink,"middle","700");
+  s+=text(390,336,"Blue: Thevenin DC Load Line  |  Gold: Load Power P_L(RL) peaking at RL = R_TH",11.5,P.muted,"middle");
  }else if(["rc","capacitors","inductors"].includes(id)){
-  let d="";
-  for(let i=0;i<=60;i++){
-   const x=x0+i*10,y=y0-(y0-y1)*(1-Math.exp(-i/12));
-   d+=(i===0?"M":"L")+x+" "+y;
+  s+=gridFrame(x0,y1,x1,y0,10,6,true);
+  let vChg="",iDec="",dvmLoad="";
+  for(let k=0;k<=60;k++){
+   const tTau=(k/60)*5.5, x=x0+(k/60)*(x1-x0);
+   const yc=y0-(y0-y1)*0.88*(1-Math.exp(-tTau));
+   const yi=y0-(y0-y1)*0.88*Math.exp(-tTau);
+   const yd=y0-(y0-y1)*0.88*(1-Math.exp(-tTau/0.68)); // 10M DVM loaded faster decay/charge
+   vChg+=(k===0?"M":"L")+x+" "+yc;
+   iDec+=(k===0?"M":"L")+x+" "+yi;
+   dvmLoad+=(k===0?"M":"L")+x+" "+yd;
   }
-  s+=path(d,P.blue,3.5);
-  const t1=x0+120,y1tau=y0-(y0-y1)*0.632;
-  s+=path("M"+t1+" "+y0+" V"+y1tau+" H"+x0,P.pink,2,"none","5 4")+dot(t1,y1tau,P.pink,6.5);
-  s+=text(t1+10,y1tau+14,"1τ (63.2%)",13,P.pink,"start","700");
-  const t5=x0+500;
-  s+=line(t5,y1,t5,y0,P.green,1.8)+text(t5-6,y1+16,"5τ (99.3% settled)",12,P.green,"end","700");
-  s+=text(390,324,"Exponential transient: reaches 63.2% at 1τ and settles >99% at 5τ",12,P.muted,"middle");
- }else if(["power-rails","schematics","instruments"].includes(id)){
-  // 4-Channel Keysight-style Power Rail Droop + Current Sense Capture
-  let vRail="",iStep="";
-  for(let i=0;i<=60;i++){
-   const x=x0+i*10;
-   const vr=(i<18)?122:(i<32)?178+(i-18)*0.6:122+55*Math.exp(-(i-32)/6);
-   const is=(i<18)?238:(i<36)?198:238;
-   vRail+=(i===0?"M":"L")+x+" "+vr;
-   iStep+=(i===0?"M":"L")+x+" "+is;
-  }
-  s+=path(vRail,P.blue,3.2)+path(iStep,P.pink,2.8);
-  s+=text(x0+14,114,"CH2: Rail V(t) (droop ΔV)",12,P.blue,"start","700");
-  s+=text(x0+14,190,"CH3: Shunt I(t) = V_sense / R_shunt",12,P.pink,"start","700");
-  s+=text(390,324,"Synchronized scope capture: rising current step triggers temporary rail droop",12,P.muted,"middle");
- }else if(["filters","rf"].includes(id)){
-  let d="";
-  for(let i=0;i<=60;i++){
-   const x=x0+i*10;
-   const y=id==="rf"?(y0-135*Math.exp(-Math.pow((i-26)/6,2))-45*Math.exp(-Math.pow((i-46)/3.5,2))):(y1+20+135/(1+Math.exp(-(i-30)/5.5)));
-   d+=(i===0?"M":"L")+x+" "+y;
-  }
-  s+=path(d,P.blue,3.4);
-  const fcX=x0+(id==="rf"?260:300),fcY=id==="rf"?y0-135:y1+88;
-  s+=dot(fcX,fcY,P.pink,6.5)+text(fcX+10,fcY-8,id==="rf"?"Carrier Peak (f₀)":"−3 dB Cutoff (f_c)",13,P.pink,"start","700");
-  s+=text(390,324,id==="rf"?"Spectrum power (dBm) vs Frequency (GHz)":"Filter gain (dB) vs Frequency (Hz)",12,P.muted,"middle");
- }else{
-  const valsArr=["R₁ / V₁","R₂ / V₂","R₃ / V₃","Total / Limit"];
-  [125,88,108,150].forEach((h,i)=>{
-   const bx=135+i*142;
-   s+=rect(bx,y0-h,74,h,[P.blue,P.teal,P.gold,P.pink][i],"none",4)+text(bx+37,y0+20,valsArr[i],12,P.ink,"middle","700");
+  s+=path(vChg,"#38bdf8",3.2)+path(iDec,"#f472b6",2.4,"none","5 3")+path(dvmLoad,"#34d399",2.4,"none","2 3");
+  const x1Tau=x0+(1/5.5)*(x1-x0), x5Tau=x0+(5/5.5)*(x1-x0);
+  s+=line(x0,y0,x1Tau,y0-(y0-y1)*0.88,"#fde047",1.6,"none","4 3"); // Initial tangent slope hits 100% at 1*tau
+  [1,2,3,5].forEach(n=>{
+   const xn=x0+(n/5.5)*(x1-x0), pct=[0,63.2,86.5,95.0,98.2,99.3][n];
+   const yn=y0-(y0-y1)*0.88*(pct/100);
+   s+=line(xn,y1,xn,y0,"#475569",1.2,"none","3 3")+dot(xn,yn,"#38bdf8",5);
+   s+=text(xn,y0+16,n+"τ ("+pct+"%)",10,P.ink,"middle","700");
   });
-  s+=text(390,324,"Relative branch / limit comparison chart for "+q.id.toUpperCase(),12,P.muted,"middle");
+  [0,25,50,63.2,75,100].forEach(pct=>{
+   const yv=y0-(y0-y1)*0.88*(pct/100);
+   s+=text(x0-8,yv+4,pct+"%",10,P.ink,"end","700");
+  });
+  s+=rect(370,188,314,76,"#0f1c31","#38bdf8",6,1.5);
+  s+=text(382,208,"— Ideal V_C(t) = V_S·(1 − e^(−t/τ))",10.5,"#38bdf8","start","700");
+  s+=text(382,226,"-- Current I(t) = (V_S/R)·e^(−t/τ)",10.5,"#f472b6","start","700");
+  s+=text(382,244,".. 10MΩ DMM Loaded (τ_eff = R∥R_DMM·C)",10.5,"#34d399","start","700");
+  s+=text(382,258,"Tangent @ t=0 hits 100% at t = 1τ (τ = 10³×10⁻⁶ = ms)",9.5,"#fde047","start","700");
+  s+=text(390,302,"Normalized Time (t / τ, τ = R·C = 10³ Ω × 10⁻⁶ F = 10⁻³ s)",11.5,P.ink,"middle","700");
+  s+=text(390,336,"First-Order Exponential Analyzer: Initial slope hits 100% at 1τ; DMM 10 MΩ lowers R_eq on high-Z nodes",11.5,P.muted,"middle");
+ }else if(["ac","magnetics"].includes(id)){
+  s+=gridFrame(x0,y1,x1,y0,8,6,true);
+  const midY=(y0+y1)/2, amp=74;
+  let vSin="",iSin="",pSin="";
+  for(let k=0;k<=80;k++){
+   const rad=(k/80)*2*Math.PI, x=x0+(k/80)*(x1-x0);
+   const yv=midY-amp*Math.sin(rad);
+   const yi=midY-0.65*amp*Math.sin(rad-Math.PI/4); // 45 deg lagging
+   const yp=midY-0.45*amp*Math.sin(rad)*Math.sin(rad-Math.PI/4);
+   vSin+=(k===0?"M":"L")+x+" "+yv;
+   iSin+=(k===0?"M":"L")+x+" "+yi;
+   pSin+=(k===0?"M":"L")+x+" "+yp;
+  }
+  s+=line(x0,midY,x1,midY,"#64748b",1.5)+path(vSin,"#38bdf8",3.2)+path(iSin,"#f472b6",2.5)+path(pSin,"#fbbf24",2,"none","4 3");
+  const yRms=midY-0.7071*amp, yAvg=midY-0.637*amp;
+  s+=line(x0,yRms,x1,yRms,"#34d399",1.6,"none","6 3")+text(x1-8,yRms-5,"V_rms = 0.7071 V_p",10.5,"#34d399","end","800");
+  s+=line(x0,midY-amp,x1,midY-amp,"#7dd3fc",1.4,"none","3 3")+text(x0+8,midY-amp-5,"+V_p = "+vNum+" V",10.5,"#7dd3fc","start","800");
+  [0,90,180,270,360].forEach((deg,i)=>s+=text(x0+(i/4)*(x1-x0),y0+16,deg+"°",10.5,P.ink,"middle","700"));
+  ["+Vp","0.7Vp","0V","-0.7Vp","-Vp"].forEach((lbl,i)=>s+=text(x0-8,y1+18+i*42,lbl,10,P.ink,"end","700"));
+  s+=text(390,302,"Electrical Phase θ (0°..360°, ω = 2πf)   |   V_pp = 2·V_p   |   f = 1 / T",11.5,P.ink,"middle","700");
+  s+=text(390,336,"Cyan: Voltage v(t)  |  Pink: Shifted I(t) (lag θ=45°)  |  Gold: Instantaneous Power p(t) = v·i",11.5,P.muted,"middle");
+ }else if(["filters","rf"].includes(id)){
+  s+=gridFrame(x0,y1,x1,y0,8,6,true);
+  let mag="",ph="";
+  for(let k=0;k<=60;k++){
+   const w=Math.pow(10,-2+(k/60)*4), x=x0+(k/60)*(x1-x0); // 0.01fc to 100fc
+   const db=id==="rf"?(-28*Math.exp(-Math.pow((k-30)/5,2))):(Math.max(-40,-10*Math.log10(1+w*w)));
+   const ym=id==="rf"?(y1+20-db*5):(y1+16+(-db/40)*(y0-y1-24));
+   const deg=Math.atan(w)*(180/Math.PI);
+   const yp=y1+16+(deg/90)*(y0-y1-24);
+   mag+=(k===0?"M":"L")+x+" "+ym;
+   ph+=(k===0?"M":"L")+x+" "+yp;
+  }
+  s+=path(mag,"#38bdf8",3.2)+path(ph,"#f472b6",2.4,"none","5 3");
+  const xm=x0+0.5*(x1-x0);
+  s+=line(xm,y1,xm,y0,"#fbbf24",1.6,"none","4 3");
+  s+=text(xm+8,y1+28,id==="rf"?"Resonant Notch (min |Γ| / S11)":"-3.01 dB Corner f_c = 1/(2πRC) & -45° Phase",11,"#fde047","start","800");
+  ["0.01 fc","0.1 fc","fc","10 fc","100 fc"].forEach((lbl,i)=>s+=text(x0+(i/4)*(x1-x0),y0+16,lbl,10.5,P.ink,"middle","700"));
+  ["0 dB","-10 dB","-20 dB","-30 dB","-40 dB"].forEach((lbl,i)=>s+=text(x0-8,y1+20+i*42,lbl,10,P.ink,"end","700"));
+  s+=text(390,302,"Log Frequency Axis (Decades 10^n · −20 dB/dec Asymptote)",11.5,P.ink,"middle","700");
+  s+=text(390,336,"Cyan: Magnitude |H(jω)| dB (20·log10)  |  Pink: Phase Lag ∠H(jω) (0° to −90°)",11.5,P.muted,"middle");
+ }else if(id==="components"){
+  s+=gridFrame(x0,y1,x1,y0,8,6,true);
+  const cx=(x0+x1)/2, cy=y0-68;
+  s+=line(x0,cy,x1,cy,"#64748b",1.5)+line(cx,y1,cx,y0,"#64748b",1.5);
+  // Silicon PN Diode / Zener Breakdown I-V Curve
+  const dCurve="M"+(cx-215)+" "+(y0-10)+" L"+(cx-195)+" "+cy+" H"+(cx+46)+" Q"+(cx+62)+" "+cy+" "+(cx+78)+" "+(y1+14);
+  s+=path(dCurve,"#38bdf8",3.2);
+  // Secondary BJT Load line / TTL transfer overlay
+  s+=line(cx+22,y1+22,x1-28,cy,"#fbbf24",2.2,"none","5 3");
+  s+=dot(cx+56,cy,"#34d399",6)+dot(cx-195,cy,"#f43f5e",6);
+  s+=text(cx+62,cy-10,"Si VF = +0.7 V (0.3V Ge)",11,"#34d399","start","800");
+  s+=text(cx-190,cy+16,"Zener -VZ Breakdown",11,"#fda4af","start","800");
+  s+=text(cx+110,y1+42,"Load Line: IC_sat = (VCC−0.2)/RC",10.5,"#fde68a","start","700");
+  s+=text(390,302,"Device Voltage (V_D / V_Z / V_CE)   vs.   Device Current (I_F / I_Z / I_C mA)",11.5,P.ink,"middle","700");
+  s+=text(390,336,"Forward bias conducts >0.7V; Reverse Zener regulates at -VZ; BJT saturates where load line meets VC_sat",11.5,P.muted,"middle");
+ }else{
+  // 4-Channel Keysight Scope Time-Domain Capture (CLK, CORE_VDD, 1169B I_SENSE, RESET_N)
+  s+=gridFrame(x0,y1,x1,y0,10,4,true);
+  let ch1="",ch2="",ch3="",ch4="";
+  for(let k=0;k<=80;k++){
+   const x=x0+(k/80)*(x1-x0);
+   const y1w=(Math.floor(k/4)%2===0)?(y1+10):(y1+34);
+   const y2w=(k<28)?(y1+62):(k<44)?(y1+92+Math.sin(k)*3):(y1+62+26*Math.exp(-(k-44)/8)); // Rail droop ΔV
+   const y3w=(k<28)?(y1+132):(k<50)?(y1+104):(y1+132); // Current pulse
+   const y4w=(k<58)?(y1+170):(y1+144); // Reset release after settling
+   ch1+=(k===0?"M":"L")+x+" "+y1w; ch2+=(k===0?"M":"L")+x+" "+y2w;
+   ch3+=(k===0?"M":"L")+x+" "+y3w; ch4+=(k===0?"M":"L")+x+" "+y4w;
+  }
+  s+=path(ch1,"#fde047",2.2)+path(ch2,"#38bdf8",2.8)+path(ch3,"#f472b6",2.6)+path(ch4,"#34d399",2.6);
+  const cAx=x0+0.35*(x1-x0), cBx=x0+0.725*(x1-x0);
+  s+=line(cAx,y1,cAx,y0,"#f59e0b",1.8,"none","4 3")+line(cBx,y1,cBx,y0,"#2dd4bf",1.8,"none","4 3");
+  s+=rect(cAx-12,y1-16,24,16,"#f59e0b","#fff",3,1)+text(cAx,y1-4,"A",10,"#0f172a","middle","900");
+  s+=rect(cBx-12,y1-16,24,16,"#2dd4bf","#fff",3,1)+text(cBx,y1-4,"B",10,"#0f172a","middle","900");
+  s+=text(x0-6,y1+26,"CH1 CLK",9.5,P.ink,"end","700")+text(x0-6,y1+74,"CH2 Vdd",9.5,P.ink,"end","700")+text(x0-6,y1+124,"CH3 I_sn",9.5,P.ink,"end","700")+text(x0-6,y1+164,"CH4 RST#",9.5,P.ink,"end","700");
+  ["0 ns","20 ns","40 ns","60 ns","80 ns","100 ns"].forEach((tLbl,i)=>s+=text(x0+(i/5)*(x1-x0),y0+16,tLbl,10,P.ink,"middle","700"));
+  s+=text(390,302,"4-Channel Keysight Oscilloscope Capture (Δt(B−A) = 37.5×10⁻⁹ s = 37.5 ns)",11.5,P.ink,"middle","700");
+  s+=text(390,336,"Yellow CH1 Clock  |  Blue CH2 Vdd (ΔV = IR + L·di/dt)  |  Pink CH3 I_shunt  |  Green CH4 RESET_N release",11.5,P.muted,"middle");
  }
- return svg(s,"Question "+q.id+" graph showing "+units[id]);
+ return svg(s,"Calibrated engineering analyzer graph for "+q.id+" showing "+units[id]);
 }
 
 /* ---------- 3. 3-PANEL BOARD + SOLDERLESS BREADBOARD + CIRCUIT SYMBOLS (28 Question-Tailored Topologies) ---------- */
