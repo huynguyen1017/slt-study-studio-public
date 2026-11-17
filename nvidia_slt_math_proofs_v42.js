@@ -132,6 +132,25 @@ function solved(q){
  if(c.check)limits.push(c.check);
  return {d,arr,limits};
 }
+function outputFigure(q){
+ const d=data(q);if(!d||!["current","parallel","droop"].includes(d.method))return "";
+ const base=d.method==="droop"?"V":"A",dst=d.method==="droop"?"mV":"mA";
+ const value=d.target/1000;
+ const f=fmt(value),ans=fmt(d.target);
+ const svg='<svg class="ne42-figure" viewBox="0 0 680 146" role="img" aria-label="'+e("Verified unit cancellation for "+q.id)+
+ '" xmlns="http://www.w3.org/2000/svg">'+
+ '<rect x="1" y="1" width="678" height="144" rx="12" fill="#f7fcff" stroke="#89b6d3"/>'+
+ '<text x="16" y="23" font-size="12" font-weight="700" fill="#20577d">REAL QUESTION • FROM BASE SI TO REQUESTED OUTPUT UNIT</text>'+
+ '<g fill="#153f64" font-family="Arial,sans-serif" font-weight="700" font-size="19">'+
+ '<text x="20" y="72">'+e(f)+'</text><text x="128" y="72">'+e(base)+'</text><text x="173" y="72">×</text>'+
+ '<text x="214" y="59">1000 '+e(dst)+'</text><text x="232" y="101">1 '+e(base)+'</text>'+
+ '<text x="351" y="78">=</text><text x="391" y="78">'+e(ans)+' '+e(dst)+'</text></g>'+
+ '<path d="M207 72 H332" stroke="#365b80" stroke-width="2.5"/>'+
+ '<path d="M126 55 L143 75 M249 83 L265 103" stroke="#d43e55" stroke-width="3"/>'+
+ '<text x="16" y="133" fill="#4e6374" font-size="11">The crossed-out '+e(base)+' units cancel. This illustration is a math derivation, NOT measured DUT data.</text>'+
+ '</svg>';
+ return svg;
+}
 function render(q,t,stage){
  if(!valid(q))return "";
  const d=data(q),info=solved(q),tryMode=stage==="try";
@@ -147,11 +166,14 @@ function render(q,t,stage){
   parts+=box("Engineering factor-label conversions (including OUTPUT units)",prefix(q));
   parts+=box("Independent engineering limits and sanity checks",'<ul>'+info.limits.map(s=>'<li>'+e(s)+'</li>').join("")+'</ul>');
  }
+ if((stage==="visual"||stage==="understand")&&!tryMode){
+  parts+=outputFigure(q);
+ }
  if(stage==="visual"&&!tryMode){
   // Exact math in the figure is a rendered MathML/SVG overlay from the same selected source; never imply measured traces.
   parts+='<p class="ne42-neutral">These quantities and derivations belong to the selected problem. Any other generic waveform/SVG elsewhere on this page is an illustrative schematic, not an acquired DUT measurement.</p>';
  }
- return '<section class="ne41-sheet ne42-proof ne42-'+e(stage)+'" aria-label="NVIDIA v42 original-question calculated proof"><header><small>QUESTION-VERIFIED WHITEBOARD · '+e((d.method||"").toUpperCase())+'</small><h4>Numerator / denominator · struck-out units · Kirchhoff/Ohm checks</h4><p>'+e(t?.title||"NVIDIA SLT")+' · uses canonical or selected dice values</p></header><div class="ne41-body">'+parts+'</div></section>';
+ return '<section class="ne41-sheet ne41-'+e(stage)+' ne42-proof ne42-'+e(stage)+'" aria-label="NVIDIA v42 original-question calculated proof"><header><small>QUESTION-VERIFIED WHITEBOARD · '+e((d.method||"").toUpperCase())+'</small><h4>Numerator / denominator · struck-out units · Kirchhoff/Ohm checks</h4><p>'+e(t?.title||"NVIDIA SLT")+' · uses canonical or selected dice values</p></header><div class="ne41-body">'+parts+'</div></section>';
 }
 function interview(q,t){
  if(!valid(q))return "";
@@ -161,5 +183,5 @@ function interview(q,t){
  '<p><b>Interpretation:</b> '+e(info.limits[0]||"Verify from source inputs, then compare against an independently specified target.")+'</p>'+
  '<p><b>Disposition:</b> The number is a theoretical teaching prediction, not a measured NVIDIA GPU result. I would record voltage, current reference, instrument setup, uncertainty and a suitable independent check before claiming a real hardware PASS/FAIL.</p></div></section>';
 }
-window.NVIDIA_SLT_MATH_PROOFS_V42={version:"42.0",valid,data,prefix,solved,render,interview,fracCon};
+window.NVIDIA_SLT_MATH_PROOFS_V42={version:"42.0",valid,data,prefix,solved,render,interview,fracCon,outputFigure};
 })();
