@@ -228,6 +228,7 @@
       <text x="448" y="20" fill="#6ee7b7" font-size="10.5" font-weight="700" text-anchor="end">${esc(shortTxt(subtitle, 24))}</text>
       <line x1="0" y1="32" x2="460" y2="32" stroke="${accent}" stroke-width="2.2"/>
       ${bodySvg}
+      <text x="448" y="246" text-anchor="end" font-size="8.5" font-weight="700" fill="#c7dbed">ILLUSTRATIVE • NOT MEASURED</text>
     </svg>`;
   }
 
