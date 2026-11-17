@@ -1,0 +1,23 @@
+/* Worked engineering diagnosis: every row states actual reasoning, algebra,
+ * measurement/observable, hypothesis and verification. Scoped to authored cases. */
+.eng-solved-case{margin:22px 0 28px;border:1px solid #a8c8e3;border-radius:15px;overflow:hidden;background:#fff;color:#16344e;box-shadow:0 7px 25px #1b446e11;text-align:left}
+.eng-solved-case header{background:linear-gradient(115deg,#123a63,#205987);padding:18px 22px;color:white}
+.eng-solved-case header>span{font-size:11px;font-weight:750;letter-spacing:.09em;color:#ccebf3}
+.eng-solved-case header h3{margin:6px 0;font-size:clamp(1.05rem,1.9vw,1.45rem);line-height:1.4;color:#fff}
+.eng-solved-case header p{font-size:13px;line-height:1.65;margin:5px 0;color:#e2eef8}
+.eng-case-givens{background:#f1f6fc;padding:16px 20px;border-bottom:1px solid #cadfed;font-size:13px}
+.eng-case-givens ul{margin:10px 0 0;padding-left:22px;display:grid;grid-template-columns:1fr 1fr;gap:7px 16px}
+.eng-case-steps{padding:13px 19px}
+.eng-case-step{display:grid;grid-template-columns:35px minmax(0,1fr);gap:13px;margin:0;padding:16px 0;border-bottom:1px solid #e0e9f2}
+.eng-case-step:last-child{border-bottom:0}
+.eng-case-badge{border-radius:50%;background:#117e88;color:white;font-weight:800;text-align:center;display:grid;place-items:center;width:31px;height:31px;font-size:14px}
+.eng-case-stepbody h4{margin:2px 0 8px;font-size:15px;font-weight:800;color:#174e80}
+.eng-case-stepbody p{font-size:13px;line-height:1.75;margin:4px 0 9px;max-width:100ch}
+.eng-case-equation{background:#eaf4fb;border-left:3px solid #2379a9;padding:10px 13px;border-radius:4px;overflow-x:auto;font-size:14px;line-height:1.5}
+.eng-case-equation math{max-width:100%}
+.eng-case-final{margin:8px 19px 14px;padding:15px;background:#e7f7f1;border:1px solid #a9ddc9;border-radius:10px;font-size:13px;line-height:1.8}
+.eng-case-final strong{color:#11634c}
+.eng-case-interview{margin:8px 19px 15px;padding:15px;background:#eff2fc;border:1px solid #cbd8ee;border-radius:11px;font-size:13px}
+.eng-case-interview blockquote{margin:9px 0 0;padding-left:15px;border-left:3px solid #5474b2;line-height:1.85;color:#274966;font-size:14px}
+.eng-solved-case>small{display:block;padding:12px 18px 16px;color:#597186;font-size:11px;line-height:1.7}
+@media(max-width:650px){.eng-case-givens ul{grid-template-columns:1fr}.eng-case-steps{padding:10px}.eng-case-step{grid-template-columns:28px 1fr;gap:8px}.eng-case-stepbody p{font-size:12px}.eng-solved-case header{padding:15px}.eng-case-final,.eng-case-interview{margin:10px}}
