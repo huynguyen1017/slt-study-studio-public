@@ -1,0 +1,46 @@
+/* Series–parallel + two-loop electrical engineering railroad tracks.
+   Standalone, accessible, no existing curriculum or scoring CSS replaced. */
+.rr-whiteboard{background:#fff;border:1px solid #bcd4e7;border-radius:16px;margin:19px 0;overflow:hidden;box-shadow:0 5px 22px #123f6512;color:#20435e;text-align:left}
+.rr-whiteboard>header{background:linear-gradient(105deg,#173e63,#1b6c80);padding:18px 20px;color:#fff}
+.rr-whiteboard>header small{color:#b1e9f2;font-size:11px;font-weight:800;letter-spacing:.09em}
+.rr-whiteboard>header h3{font-size:clamp(17px,2.5vw,23px);font-weight:850;margin:7px 0 5px;color:#fff}
+.rr-whiteboard>header p{font-size:13px;color:#e1f5f9;line-height:1.65;margin:6px 0}
+.rr-case-tabs{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;background:#f0f6fb;border-bottom:1px solid #d1e0ee}
+.rr-case-tabs button{font-size:12px;font-weight:760;border:1px solid #b9d3e6;border-radius:8px;padding:9px 12px;background:#fff;color:#215176;cursor:pointer}
+.rr-case-tabs button[aria-pressed=true]{background:#165a78;color:#fff;border-color:#165a78}
+.rr-case[hidden]{display:none!important}
+.rr-case{padding:17px}
+.rr-case-title h4{margin:0 0 7px;font-size:19px;color:#174d75}
+.rr-case-title p{font-size:13px;margin:5px 0;line-height:1.65}
+.rr-circuit-svg{display:block;width:100%;max-width:800px;max-height:350px;margin:14px auto 17px;background:#f9fcff;border:1px solid #d8e8f2;border-radius:10px}
+.rr-case h5{color:#1d5174;font-size:15px;margin:17px 0 10px}
+.rr-lessons{background-color:#fcfdff;background-image:linear-gradient(#e8f1fc 1px,transparent 1px);background-size:100% 30px;border:1px solid #c8d9e8;border-radius:12px;padding:11px 15px 17px}
+.rr-rails{display:grid;gap:11px}
+.rr-rail-step{border-left:4px solid #0c8b84;background:#fffefefa;box-shadow:0 2px 9px #153b550a;padding:12px 13px;border-radius:6px;overflow-x:auto}
+.rr-rail-step>strong{font-size:13px;color:#275375;display:block;margin-bottom:9px}
+.rr-rail-equation{font-size:clamp(15px,1.7vw,20px);font-family:"Cambria Math","STIX Two Math",Georgia,serif;color:#173e5b;white-space:nowrap;display:flex;align-items:center;gap:8px;min-width:max-content}
+.rr-rail-step>small{display:block;color:#536a7c;font-size:12px;line-height:1.6;margin-top:9px;white-space:normal}
+.rr-fraction{display:inline-flex;flex-direction:column;text-align:center;align-items:stretch;justify-content:center;vertical-align:middle;min-width:62px;font-variant-numeric:tabular-nums}
+.rr-top,.rr-bottom{display:block;min-height:25px;padding:2px 8px}
+.rr-rule{height:2px;background:#d85059;display:block}
+.rr-cancel{position:relative;display:inline-block;color:#647487}
+.rr-cancel::after{content:"";position:absolute;left:-4px;right:-4px;top:50%;border-top:2.5px solid #dd4453;transform:rotate(-16deg);pointer-events:none}
+.rr-step-stack{display:grid;gap:8px}
+.rr-step-stack details{border:1px solid #c7dce9;border-radius:9px;background:#fbfdff;overflow:hidden}
+.rr-step-stack summary{cursor:pointer;padding:11px 13px;background:#eff6fc;font-size:13px;color:#235576;font-weight:750;line-height:1.5}
+.rr-step-stack summary b{color:#0c8880;margin-right:7px}
+.rr-step-stack details>p{padding:10px 15px 3px;font-size:13px;line-height:1.8;color:#3a536a;margin:0}
+.rr-math{margin:9px 12px 14px;padding:12px 13px;background:#e9f5f6;border-left:3px solid #148c8d;border-radius:6px;overflow-x:auto}
+.rr-math math{max-width:100%;font-size:clamp(14px,1.6vw,19px)}
+.rr-answer{border:2px solid #2e946f;background:#f0fcf5;border-radius:10px;padding:14px;margin-top:15px}
+.rr-answer>b{color:#176245;display:block;font-size:15px}
+.rr-answer>div{display:flex;flex-wrap:wrap;gap:8px;margin:11px 0}
+.rr-answer>div span{border:2px solid #a82c47;background:#fff;padding:7px 10px;border-radius:5px;font-size:14px;font-weight:800;color:#1c4c65}
+.rr-answer>p{font-size:12px;line-height:1.6;margin-bottom:0;color:#315f51}
+.rr-whiteboard>footer{background:#f4f7fb;border-top:1px solid #cbdce9;padding:12px 17px;font-size:12px;line-height:1.7;color:#4c667a}
+@media(max-width:590px){.rr-case{padding:10px}.rr-rail-step{padding:10px}.rr-case-tabs button{flex:1 1 43%}.rr-rail-equation{font-size:15px}.rr-fraction{min-width:48px}.rr-top,.rr-bottom{padding:2px 4px}}
+
+.rr-topology-alert{margin:14px 0;padding:14px 16px;border:2px solid #d69d4d;border-radius:11px;background:#fff9ed;color:#714b23}
+.rr-topology-alert>strong{display:block;color:#944c23;font-size:15px}
+.rr-topology-alert p{font-size:13px;line-height:1.75;margin:8px 0}
+.rr-topology-alert .rr-math{border-left-color:#d78b30;background:#fff}

@@ -1609,7 +1609,7 @@ function renderAvionicsChalkboard(q, t) {
   const steps = Array.isArray(q.steps) ? q.steps : [];
   const sp = window.PROFESSOR_NOTEBOOK_SPREADS;
 
-  return `${sp ? sp.renderQuestionNotebookSpread(q, t, false) : ""}<section class="av-prof-chalkboard" aria-label="Professor chalkboard full derivation">
+  return `${sp ? sp.renderQuestionNotebookSpread(q, t, false) : ""}${!sp ? (window.CIRCUIT_RAILROAD_WHITEBOARD?.render(q,t,false)||"") : ""}<section class="av-prof-chalkboard" aria-label="Professor chalkboard full derivation">
     <h4>🧮 Complete Chalkboard Solution (10<sup>3n</sup> Engineering Notation &amp; Product Steps)</h4>
     <div class="av-prof-chalk-step">
       <strong>STEP A · GIVEN INPUTS &amp; 10^(3n) BASE-SI CONVERSIONS</strong>
