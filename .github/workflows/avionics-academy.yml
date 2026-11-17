@@ -19,6 +19,7 @@ on:
       - 'index.html'
       - 'app.js'
       - 'avionics_*.js'
+      - 'tests/avionics-array-math-v40.test.cjs'
       - 'avionics_*.css'
       - 'tests/avionics-academy.test.cjs'
       - 'tests/avionics-assessor.test.cjs'
@@ -71,6 +72,7 @@ jobs:
           node --check avionics_integrative_capstones_v11.js
           node --check avionics_mixed_networks_v11.js
           node --check avionics_advanced_50_v12.js
+          node --check avionics_array_math_v40.js
           node --check nvidia_slt_tracks.js
           node --check nvidia_slt_math.js
           node --check nvidia_slt_questions.js
@@ -110,6 +112,7 @@ jobs:
           node tests/circuit-railroad-whiteboard-v1.test.cjs
           node tests/circuit-question-railroad-v2.test.cjs
           node tests/four-tab-svg-math-v39.test.cjs
+          node tests/avionics-array-math-v40.test.cjs
       - name: Install headless browser for desktop and mobile smoke tests
         run: |
           npm install --no-save playwright@1.56.1
@@ -124,3 +127,5 @@ jobs:
           RUN_BROWSER=1 node tests/circuit-railroad-whiteboard-v1.test.cjs
           RUN_BROWSER=1 node tests/circuit-question-railroad-v2.test.cjs
           RUN_BROWSER=1 node tests/four-tab-svg-math-v39.test.cjs
+          RUN_BROWSER=1 node tests/avionics-array-math-v40.test.cjs
+          node tests/avionics-hw-debug-interview.test.cjs
