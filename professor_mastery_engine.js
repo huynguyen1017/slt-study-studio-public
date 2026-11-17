@@ -2020,7 +2020,7 @@ function renderNvidiaUnderstand(q, t) {
 
 function renderNvidiaWorkedDerivation(q, t) {
   const lec = NVIDIA_TRACK_LECTURES[t.id] || NVIDIA_TRACK_LECTURES.electrical;
-  const phys = inferTopicPhysicsModel(q, t, true);
+  const phys = {formula:window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.formula(q)||"",sub:window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.substitution(q)||"",unitConv:"Use only authored source units; verify each prefix."};
   const convText = buildConversionExplanation(q.question);
   const isMath = q.questionType === "number";
   const sp = window.PROFESSOR_NOTEBOOK_SPREADS;
@@ -2030,15 +2030,15 @@ function renderNvidiaWorkedDerivation(q, t) {
     ${isMath ? `
       <div class="nvs-prof-chalk-step">
         <strong>1. GIVEN INPUTS &amp; 10^(3n) METRIC PREFIX CONVERSION</strong>
-        <div>${esc(convText)}</div>
+        <div>${window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.numeratorRails(q)||esc(convText)}</div>
       </div>
       <div class="nvs-prof-chalk-step">
         <strong>2. GOVERNING PHYSICAL EQUATION (STACKED MATHML)</strong>
-        <div>${eq(phys.formula)}</div>
+        <div>${phys.formula?eq(phys.formula):"<p>Concept-only: question does not supply a numeric governing law.</p>"}</div>
       </div>
       <div class="nvs-prof-chalk-step">
         <strong>3. COMPLETE 10^(3n) SUBSTITUTION &amp; COMPUTATION</strong>
-        <div>${eq(phys.sub)}</div>
+        <div>${phys.sub?eq(phys.sub):"<p>No question-specific numeric substitution was authored.</p>"}</div>
         <div><code>Result = ${esc(fmt(q.expected))} ${esc(q.unit)}</code> &nbsp;·&nbsp; ${engVal(q.expected, q.unit)}</div>
       </div>
       <div class="nvs-prof-chalk-step">
@@ -2047,8 +2047,8 @@ function renderNvidiaWorkedDerivation(q, t) {
       </div>` : `
       <div class="nvs-prof-chalk-step">
         <strong>1. GOVERNING EQUATION &amp; 10^(3n) BENCHMARK MODEL</strong>
-        <div>${eq(phys.formula)}</div>
-        <div style="margin-top:4px;">${eq(phys.sub)}</div>
+        <div>${phys.formula?eq(phys.formula):"<p>Concept-only: question does not supply a numeric governing law.</p>"}</div>
+        <div style="margin-top:4px;">${phys.sub?eq(phys.sub):"<p>No question-specific numeric substitution was authored.</p>"}</div>
         <small style="color:#cbd5e1;">${esc(phys.unitConv)}</small>
       </div>
       <div class="nvs-prof-chalk-step">
