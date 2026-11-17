@@ -1184,6 +1184,7 @@ function inferTopicPhysicsModel(q, t, isNvidia) {
 }
 
 function renderHiringManagerInterviewScript(q, t, isNvidia) {
+  if(window.AVIONICS_ARRAY_MATH_V40?.isCase(q))return window.AVIONICS_ARRAY_MATH_V40.render("interview",q);
   // OHM-F1 receives a fully solved, evidence-driven interview case rather than the generic catch-all script.
   if (window.OHM_F1_ENGINEER_STUDIO?.isF1(q, isNvidia)) return window.OHM_F1_ENGINEER_STUDIO.renderReadiness(q);
   const tid = (t && t.id) || "";
@@ -1327,6 +1328,7 @@ function renderHiringManagerInterviewScript(q, t, isNvidia) {
    5. AVIONICS PROFESSOR STEPS BUILDER (Non-Repetitive, Zero-to-One Chalkboard)
    ============================================================================ */
 function buildAvionicsProfessorSteps(q, t, f, helpers) {
+  if(window.AVIONICS_ARRAY_MATH_V40?.isCase(q))return window.AVIONICS_ARRAY_MATH_V40.steps.map(s=>({title:s.title,body:s.body.replace(/<[^>]*>/g,""),kind:"text",formula:null,answer:null,engHtml:null}));
   const st = Array.isArray(q.steps) ? q.steps : [];
   const beginner = f && f.deep ? f.deep : null;
   const guided = q.lesson || null;
@@ -1552,6 +1554,7 @@ function renderCourseworkBankHTML(t) {
 }
 
 function renderAvionicsUnderstandLecture(q, t, f) {
+  if(window.AVIONICS_ARRAY_MATH_V40?.isCase(q))return window.AVIONICS_ARRAY_MATH_V40.render("lecture",q);
   const note = TOPIC_PROFESSOR_NOTES[t.id] || TOPIC_PROFESSOR_NOTES.ohm;
   const givens = parseGivenQuantities(q.question);
   const railroad = window.CIRCUIT_CURRENT_QUESTION_RAILROAD;
@@ -1603,6 +1606,7 @@ function renderAvionicsVisualGuide(q, t) {
 }
 
 function renderAvionicsChalkboard(q, t) {
+  if(window.AVIONICS_ARRAY_MATH_V40?.isCase(q))return window.AVIONICS_ARRAY_MATH_V40.render("worked",q);
   const phys = inferTopicPhysicsModel(q, t, false);
   const convText = buildConversionExplanation(q.question);
   const formulaStr = (q.formula && !String(q.formula).includes("->")) ? q.formula : phys.formula;
