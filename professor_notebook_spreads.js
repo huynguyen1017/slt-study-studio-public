@@ -1181,7 +1181,7 @@ function buildDynamicSpreadSpec(q, t, isNvidia) {
 
 function renderQuestionNotebookSpread(q, t, isNvidia) {
   // Match the OHM-F1 readiness math, operating-point graph and documented probe method exactly.
-  if (window.OHM_F1_ENGINEER_STUDIO?.isF1(q, isNvidia)) return window.OHM_F1_ENGINEER_STUDIO.renderSpread(q);
+  if (window.OHM_F1_ENGINEER_STUDIO?.isF1(q, isNvidia)) return window.OHM_F1_ENGINEER_STUDIO.renderSpread(q) + (window.CIRCUIT_CURRENT_QUESTION_RAILROAD?.render(q, t) || "");
   const spec = buildDynamicSpreadSpec(q, t, isNvidia);
   const svgMarkup = renderNotebookSpreadSVG(spec);
   const railroad = window.CIRCUIT_RAILROAD_WHITEBOARD?.render(q, t, isNvidia) || "";
