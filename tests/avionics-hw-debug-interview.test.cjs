@@ -34,7 +34,9 @@ assert.ok(Math.abs(healthy.rEqIdeal-0.01)<1e-12);
 assert.equal(healthy.iTotalHealthyNom,500);
 assert.equal(healthy.pTotalHealthyNom,2500);
 assert.ok(Math.abs(healthy.r2Wire-0.25)<1e-6,"2-wire DMM must reflect 0.24 Ohm lead error");
-assert.ok(Math.abs(healthy.rows[0].tempC-60)<1e-6,"1 V bias on healthy 1 Ohm warms to 60 C");
+assert.ok(healthy.benchI<=2.5+1e-9,"Even open-test mode MUST obey 2.5 A compliance");
+assert.ok(Math.abs(healthy.benchV-0.025)<1e-8,"100 healthy 1 Ω parallels need only 25 mV to carry 2.5 A");
+assert.ok(Math.abs(healthy.rows[0].tempC-25.021875)<1e-6,"Low-power current-limited bench cannot invent 60 °C IR image");
 
 // Phase B Pure Opens (4 opens: R12, R39, R71, R95)
 const pureOpens=lab.calcArrayState(lab.makeArrayFromPreset("pure_opens"),{irPhase:"open_bias"});
@@ -62,7 +64,8 @@ const liftBoth=lab.calcArrayState(mixedArr,{lifted:[14,62],irPhase:"open_bias"})
 assert.equal(liftBoth.activeShorts,0,"Lifting R14 and R62 clears all shorts");
 assert.ok(Math.abs(liftBoth.rEqIdeal-1/95)<1e-12,"95 healthy units remain in circuit");
 assert.equal(liftBoth.rows[26].tempC,25,"Open R27 stays cold at 25 C");
-assert.equal(liftBoth.rows[0].tempC,60,"Healthy R1 warms to 60 C");
+assert.ok(liftBoth.benchI<=2.5+1e-9,"After lifting both shorts, current limit must remain active");
+assert.ok(liftBoth.rows[0].tempC<26,"Real 2.5 A limit produces insufficient thermal power for a claimed 60 °C hotspot");
 
 // Bank half-split jumper JP2 (disables R11..R20 including R14)
 const jmpTest=lab.calcArrayState(mixedArr,{jumpers:[true,false,true,true,true,true,true,true,true,true]});
@@ -98,7 +101,7 @@ assert.equal(Q.find(x=>x.id==="parallel-X7").expected,6);
 
 // Offline & script wiring checks
 const idx=read("index.html"),sw=read("sw.js"),tut=read("avionics_tutor.js");
-assert(idx.includes("avionics_hw_debug_interview.js?v=1")&&idx.includes("avionics_hw_debug_interview.css?v=1"));
+assert(idx.includes("avionics_hw_debug_interview.js?v=4")&&idx.includes("avionics_hw_debug_interview.css?v=2"));
 assert(idx.indexOf("avionics_hw_debug_interview.js")<idx.indexOf("avionics_tutor.js"));
 assert(sw.includes("avionics_hw_debug_interview.js")&&sw.includes("avionics_hw_debug_interview.css"));
 assert(sw.includes("slt-study-studio-v35-nvidia-scenario-lab-r1"));
