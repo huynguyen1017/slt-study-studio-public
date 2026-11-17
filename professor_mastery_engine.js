@@ -536,6 +536,8 @@ function inferTopicPhysicsModel(q, t, isNvidia) {
 }
 
 function renderHiringManagerInterviewScript(q, t, isNvidia) {
+  // OHM-F1 receives a fully solved, evidence-driven interview case rather than the generic catch-all script.
+  if (window.OHM_F1_ENGINEER_STUDIO?.isF1(q, isNvidia)) return window.OHM_F1_ENGINEER_STUDIO.renderReadiness(q);
   const tid = (t && t.id) || "";
   const txt = ((q && q.id) || "") + " " + ((q && q.question) || "") + " " + tid;
   const note = isNvidia ? (NVIDIA_TRACK_LECTURES[tid] || NVIDIA_TRACK_LECTURES.electrical) : (TOPIC_PROFESSOR_NOTES[tid] || TOPIC_PROFESSOR_NOTES.ohm);
