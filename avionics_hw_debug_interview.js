@@ -512,7 +512,7 @@ function renderMatrixSvg(calc,viewMode,selectedId){
  const isIr=viewMode==="ir";
  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="100 parallel 1 ohm resistor PCB array and IR thermal view">`;
  s+=`<rect width="${W}" height="${H}" rx="8" fill="${isIr?"#07101f":"#f8fbff"}"/>`;
- s+=`<text x="16" y="23" font-size="13" font-weight="800" fill="${isIr?"#ffe38a":"#154866"}">${isIr?(calc.irPhase==="short_limit"?"IR CAMERA · CURRENT-LIMITED 1 V / 2.5 A SHORT HUNT (HOTSPOTS = 0 Ω SHORTS)":"IR CAMERA · SAFE 1.0 V BIAS OPEN HUNT (DARK BLUE COLD SPOTS = ∞ Ω OPENS)"):"PCB SCHEMATIC &amp; BANK MAP · +5V_MAIN (TOP BUS) TO GND (BOTTOM BUS) · R1..R100 PARALLEL"}</text>`;
+ s+=`<text x="16" y="23" font-size="13" font-weight="800" fill="${isIr?"#ffe38a":"#154866"}">${isIr?(calc.irPhase==="short_limit"?"SYNTHETIC IR · CC ≤2.5 A · ACTUAL "+(calc.benchV*1000).toFixed(2)+" mV (HOTSPOT NOT GUARANTEED)":"SYNTHETIC IR · CC ≤2.5 A · ACTUAL "+(calc.benchV*1000).toFixed(2)+" mV (CONTRAST NOT GUARANTEED)"):"PCB SCHEMATIC &amp; BANK MAP · +5V_MAIN (TOP BUS) TO GND (BOTTOM BUS) · R1..R100 PARALLEL"}</text>`;
  s+=`<text x="16" y="40" font-size="10.5" fill="${isIr?"#9ac1df":"#4b6b80"}">Click any resistor R1–R100 to probe it, cycle Healthy (1 Ω) / Short (0 Ω) / Open (∞ Ω), or lift 1 pad out-of-circuit.</text>`;
 
  // Top copper +5V bus bar (shows J1 injection + mV drop direction)
@@ -681,7 +681,7 @@ function renderLabHtml(topic,q){
        <tr><th>In-Circuit DMM (4-Wire)</th><td><code>${Number.isFinite(calc.r4Wire)?(calc.r4Wire*1000).toFixed(3)+" mΩ":"OL"}</code> ${calc.activeShorts>0?"(Masked by 0 Ω short!)":""}</td></tr>
        <tr><th>Out-of-Circuit DMM (1-Pad Lift)</th><td><strong><code>${esc(sel.isolatedDmm)}</code></strong></td></tr>
        <tr><th>DC Bus Drop @ Tap ${sel.id} (from J1)</th><td><code>${sel.busDropMv.toFixed(2)} mV</code> under ${calc.benchI.toFixed(2)} A bench test</td></tr>
-       <tr><th>IR Surface Temp (${esc(uiState.irPhase)})</th><td><strong>${sel.tempC.toFixed(1)} °C</strong> (P = ${(sel.pBench*1000).toFixed(1)} mW, I<sub>branch</sub> = ${(sel.iBench*1000).toFixed(1)} mA)</td></tr>
+       <tr><th>Modeled IR Surface Temp (35°C/W assumption · ${esc(uiState.irPhase)})</th><td><strong>${sel.tempC.toFixed(1)} °C</strong> (P = ${(sel.pBench*1000).toFixed(1)} mW, I<sub>branch</sub> = ${(sel.iBench*1000).toFixed(1)} mA)</td></tr>
        <tr><th>Diagnosis Rule</th><td>${calc.activeShorts>0?"Find &amp; isolate ALL 0 Ω hotspots first ("+calc.activeShorts+" remaining), then re-test for ∞ Ω opens.":calc.activeOpens>0?"0 shorts remain! Check "+calc.activeOpens+" IR cold spot(s) matching N_open = 100 − 1/R_eq.":"All in-circuit branches healthy: R_eq = 10.00 mΩ!"}</td></tr>
       </tbody>
      </table>
