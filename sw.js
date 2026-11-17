@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v36-ohmf1-engineer-interview-v2';
+const CACHE = 'slt-study-studio-v35-nvidia-scenario-lab-r1-prep-v2-engineering-cases-v36-ohmf1-engineer-interview';
 const CORE = [
   "./",
   "./index.html",
