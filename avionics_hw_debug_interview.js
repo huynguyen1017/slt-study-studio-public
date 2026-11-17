@@ -65,7 +65,7 @@ function calcArrayState(states,opts={}){
  const rSeg=Number.isFinite(opts.rSeg)?opts.rSeg:0.00025; // 0.25 mOhm copper segment per position
  const iLimit=Number.isFinite(opts.iLimit)?opts.iLimit:2.5; // Safe current-limited short-hunt bench limit (A)
  const vTest=Number.isFinite(opts.vTest)?opts.vTest:1.0; // Safe 1.0 V IR test bias after shorts cleared
- const tAmb=25.0, rTheta=35.0; // 35 degC/W thermal impedance for crisp IR lab signature
+ const tAmb=25.0, rTheta=35.0; // Illustrative thermal coefficient only; not verified surface temperature.
  const jumpers=Array.isArray(opts.jumpers)&&opts.jumpers.length===10?opts.jumpers:Array(10).fill(true);
  const lifted=new Set(opts.lifted||[]);
  const irPhase=opts.irPhase==="open_bias"?"open_bias":"short_limit";
@@ -114,7 +114,7 @@ function calcArrayState(states,opts={}){
 
  // BOTH thermal phases honor the same actual supply current limit.
  // An intact 10 mΩ array cannot sustain 1 V under a 2.5 A limit (needs ~100 A).
- const benchV=Number.isFinite(rEqPhys) ? Math.min(vTest, iLimit*rEqPhys) : Math.min(vTest, 0);
+ const benchV=Number.isFinite(rEqPhys) ? Math.min(vTest, iLimit*rEqPhys) : vTest;
  const benchI=Number.isFinite(rEqPhys)&&rEqPhys>0?benchV/rEqPhys:0;
 
  // Compute per-branch voltage, current, power, copper bus mV drop, and IR temp
@@ -392,9 +392,9 @@ const PROBLEMS=[
    "2) DEFINE BROKEN RESISTOR VALUES: A shorted resistor drops from 1 Ω → 0 Ω (bridge ~1–5 mΩ). An open resistor rises from 1 Ω → ∞ Ω (OL, 0 A, 0 W). Critically: 1/R_eq = Σ(1/R_i), so even ONE 0 Ω short makes overall R_eq ≈ 0 Ω (~1 mΩ), drawing massive current and MASKING all ∞ Ω opens!",
    "3) READ THE SCHEMATIC NEXT: Before probing, open the schematic & BOM to locate reference designators R1..R100, net names (+5V_MAIN, GND), copper feed entry (J1), and any bank isolation jumpers (JP1..JP10) or Kelvin test points.",
    "4) WHY 2-WIRE IN-CIRCUIT DMM FAILS: Probing across any single resistor in-circuit measures the entire parallel bank in parallel with R_x, plus ~0.24 Ω of probe leads — completely hiding 10 mΩ vs 1 mΩ! Therefore we use a 4-wire Kelvin milliohmmeter AND never accept an in-circuit measurement as proof of one component.",
-   "5) HUNT 0 Ω SHORTS FIRST (POWER-LIMITED + IR CAMERA + mV GRADIENT): Set a bench PSU safely to V_clamp ≤ 1.0 V, I_limit = 1–3 A (CC mode). Current divides almost 100% into the 0 Ω short(s), lighting them up as bright HOTSPOTS on the IR camera. Confirm by walking a DC mV DMM along the copper bus (voltage drop flattens right at the shorted tap).",
+   "5) HUNT 0 Ω SHORTS FIRST (POWER-LIMITED + IR CAMERA + mV GRADIENT): Set a bench PSU safely to V_clamp ≤ 1.0 V, I_limit = 1–3 A (CC mode). Most of the limited current may follow a low-resistance path, but its dissipated power can be only milliwatts, so a visible IR hotspot is NOT guaranteed. Confirm by walking a DC mV DMM along the copper bus (voltage drop flattens right at the shorted tap).",
    "6) ISOLATE & CONFIRM SHORTS OUT-OF-CIRCUIT: Power OFF. Desolder/lift one pad of the suspect resistor (or open bank jumper). Measure the lifted resistor directly with DMM: 0.000 Ω confirms SHORT! Re-check array with 4-wire Kelvin — if R_eq is still < 10.00 mΩ, another 0 Ω short exists (repeat hotspot hunt until R_eq ≥ 10.00 mΩ).",
-   "7) HUNT ∞ Ω OPENS NEXT (IR COLD SPOTS + PAPER MATH CHECK): Once 0 shorts remain, re-compute how many opens remain from 4-wire R_eq: N_open = 100 − (1.0 Ω / R_eq). Apply safe low bias (e.g., 1.0 V -> 1.0 W per healthy resistor -> ~60 °C). Every OPEN (∞ Ω) resistor dissipates 0 W and stands out as a COLD SPOT (~25 °C) on the IR camera!",
+   "7) HUNT ∞ Ω OPENS NEXT (IR COLD SPOTS + PAPER MATH CHECK): Once 0 shorts remain, re-compute how many opens remain from 4-wire R_eq: N_open = 100 − (1.0 Ω / R_eq). Apply safe low bias (e.g., 1 V would require ~100 A total and is NOT a 2.5 A bench test). An OPEN resistor dissipates zero, but a current-limited 10 mΩ bank may heat every healthy branch by less than 1 mW; camera contrast is NOT guaranteed!",
    "8) REWORK & FINAL PASS VERIFICATION: Power OFF, lift/inspect cracked solder fillets or open cold resistors (DMM reads OL / ∞ Ω), replace defective 0 Ω and ∞ Ω parts with verified 1.00 Ω resistors, and confirm final 4-wire R_eq = 10.00 mΩ ± tolerance and nominal bus current."
   ]
  },
