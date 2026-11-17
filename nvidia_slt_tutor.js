@@ -228,6 +228,7 @@
       <text x="448" y="20" fill="#6ee7b7" font-size="10.5" font-weight="700" text-anchor="end">${esc(shortTxt(subtitle, 24))}</text>
       <line x1="0" y1="32" x2="460" y2="32" stroke="${accent}" stroke-width="2.2"/>
       ${bodySvg}
+      <text x="448" y="246" text-anchor="end" font-size="8.5" font-weight="700" fill="#c7dbed">ILLUSTRATIVE • NOT MEASURED</text>
     </svg>`;
   }
 
@@ -526,75 +527,23 @@
       }
 
       function inferEngineeringPhysics(qObj) {
-        const rawFormula = String(qObj.formula || "").trim();
-        const txt = (qObj.id + " " + qObj.question + " " + (qObj.visualKind || "")).toLowerCase();
-        // If formula already contains '=' and no '->', use it directly AND add 10^(3n) breakdown
-        if (rawFormula.includes("=") && !rawFormula.includes("->")) {
-          const engBadge = (qObj.expected !== undefined && typeof global.formatEngineeringMath === "function")
-            ? global.formatEngineeringMath(qObj.expected, qObj.unit || "")
-            : "";
-          const pmeConv = global.PROFESSOR_MASTERY_ENGINE?.buildConversionExplanation?.(qObj.question || "") || "";
-          return {
-            formula: rawFormula,
-            sub: qObj.sub || "",
-            engExample: engBadge || (qObj.expected !== undefined ? `${qObj.expected} ${qObj.unit || ""}` : ""),
-            prefixNote: pmeConv || qObj.unitConv || "Convert prefixes to 10^(3n) base SI units BEFORE plugging numbers."
-          };
-        }
-        // Concept questions that had arrow strings (e.g. ddr-lpddr-F1 "ACT -> RD/WR -> PRE") get true physical equations + 10^(3n) example!
-        if (/1t1c|c_cell|charge sharing|bitline/i.test(txt)) {
-          return {
-            formula: "ΔV_BL = (V_cell - V_PRE) * (C_cell / (C_cell + C_BL))",
-            sub: "(1.10 - 0.55) * (25e-15 / (25e-15 + 225e-15)) = 55.0e-3 V",
-            engExample: "C_cell = 25 × 10⁻¹⁵ F (25 fF) · C_BL = 225 × 10⁻¹⁵ F (225 fF) · ΔV_BL = 55.0 × 10⁻³ V (55.0 mV)",
-            prefixNote: "1 fF = 10⁻¹⁵ F; ratio C_cell / (C_cell + C_BL) is dimensionless (~0.10), scaling 550 × 10⁻³ V down to 55.0 × 10⁻³ V (55 mV) before sense-amp restoration."
-          };
-        }
-        if (/refresh|trefi|trfc|retention|leakage/i.test(txt)) {
-          return {
-            formula: "t_REFI_hot = t_REFI_nom / 2",
-            sub: "(3.9e-6) / 2 = 1.95e-6 s",
-            engExample: "Nominal t_REFI = 3.9 × 10⁻⁶ s (3.9 µs) -> Hot (>85 °C 2×) = 1.95 × 10⁻⁶ s (1.95 µs)",
-            prefixNote: "Subthreshold leakage doubles roughly every 10 °C; above 85 °C, MR4 forces refresh interval down from 3.9 µs to 1.95 µs (10⁻⁶ s)."
-          };
-        }
-        if (/droop|pdn|induct|si-pi/i.test(txt)) {
-          return {
-            formula: "ΔV = I * R_PDN + L_pkg * (dI / dt)",
-            sub: "(40 * 2e-3) + (250e-12 * (40 / 20e-9)) = 580e-3 V",
-            engExample: "R = 2.0 × 10⁻³ Ω (2 mΩ) · L = 250 × 10⁻¹² H (250 pH) · ΔV = 580 × 10⁻³ V (580 mV)",
-            prefixNote: "pH (10⁻¹²) × A / ns (10⁻⁹) yields 10⁻³ V (mV)! Convert all inductances and rise times to 10^(3n) SI first."
-          };
-        }
-        if (/pcie|ltssm|serdes|eye|reflect/i.test(txt)) {
-          return {
-            formula: "Γ = (Z_L - Z_0) / (Z_L + Z_0)",
-            sub: "(100 - 85) / (100 + 85) = 81.1e-3",
-            engExample: "Z_0 = 85.0 × 10⁰ Ω · Gen5 UI = 31.25 × 10⁻¹² s (31.25 ps) · Efficiency = 128/130 = 98.46%",
-            prefixNote: "At 32 × 10⁹ transfers/s (Gen5), 1 Unit Interval = 1 / (32 × 10⁹) = 31.25 × 10⁻¹² s (31.25 ps)."
-          };
-        }
-        if (/kelvin|shunt|4-wire/i.test(txt)) {
-          return {
-            formula: "I_load = V_sense / R_shunt",
-            sub: "25e-3 / 5e-3 = 5.00e0 A",
-            engExample: "V_sense = 25.0 × 10⁻³ V (25 mV) · R_shunt = 5.0 × 10⁻³ Ω (5 mΩ) · I = 5.00 × 10⁰ A",
-            prefixNote: "Both milli (10⁻³) prefixes cancel cleanly in the ratio; high-Z Kelvin sense leads carry ~0 A so lead R = 0.24 Ω drops zero error."
-          };
-        }
-        if (/setup|hold|skew|timing|clock/i.test(txt)) {
-          return {
-            formula: "T_min = t_CQ + t_logic + t_su + t_skew",
-            sub: "(950e-12 + 590e-12 + 300e-12 + 750e-12) = 2.59e-9 s",
-            engExample: "T_min = 2.59 × 10⁻⁹ s (2.59 ns) => f_max = 386.1 × 10⁶ Hz (386.10 MHz)",
-            prefixNote: "Picoseconds (10⁻¹²) convert to megahertz (10⁶ Hz) via 1 / (2.59 × 10⁻⁹) = 386.1 × 10⁶ Hz."
-          };
-        }
+        // Never attach fixed DDR/PCIe/PDN numbers to a different question.
+        // An explicit q.formula/q.sub always wins, including the selected dice variant.
+        // Concept-only records without an authored equation stay conceptual.
+        const sourceFormula=String(qObj.formula || qObj.math?.formula || "").trim();
+        const sourceSub=String(qObj.sub || qObj.math?.sub || "").trim();
+        const rr=global.CIRCUIT_CURRENT_QUESTION_RAILROAD;
+        const converted=rr?.extractQuantities(qObj.question || "").filter(v=>v.power!==0) || [];
+        const engBadge=(qObj.expected!==undefined && typeof global.formatEngineeringMath==="function")
+          ?global.formatEngineeringMath(qObj.expected,qObj.unit||""):"";
         return {
-          formula: "Margin = Spec_limit - (Measured + Uncertainty)",
-          sub: "(3.30e0) - (3.18e0 + 20e-3) = 100e-3 V",
-          engExample: "Spec Margin = +100 × 10⁻³ V (+100 mV) · Guardband Uncertainty = ±20 × 10⁻³ V",
-          prefixNote: global.PROFESSOR_MASTERY_ENGINE?.buildConversionExplanation?.(qObj.question || "") || "Always express telemetry in 10^(3n) base SI engineering units (m, µ, n, p, k, M, G) with explicit uncertainty."
+          formula:sourceFormula.includes("=")&&!sourceFormula.includes("->")?sourceFormula:"",
+          sub:sourceSub,
+          engExample:engBadge || (qObj.expected!==undefined?String(qObj.expected)+" "+String(qObj.unit||""):""),
+          prefixNote:converted.length
+            ? "Use the source quantities in the railroad-track numerators; 10^(3n) powers cancel only with identical labels."
+            : "The current prompt has no unambiguous prefixed SI input; do not invent one.",
+          derivedFromCurrentQuestion:true
         };
       }
 
@@ -605,10 +554,10 @@
             <strong style="color:#0369a1;">📐 Governing Physics &amp; 10<sup>3n</sup> Engineering Notation Proof (Stacked MathML)</strong>
             <span style="font-size:11.5px;font-weight:700;color:#0f766e;background:#ccfbf1;padding:2px 8px;border-radius:999px;">p=10⁻¹² · n=10⁻⁹ · µ=10⁻⁶ · m=10⁻³ · k=10³ · M=10⁶ · G=10⁹</span>
           </div>
-          <div>${fmtMath(eng.formula, true)}</div>
+          <div>${eng.formula ? fmtMath(eng.formula, true) : '<p class="nv-visual-note">Concept-only question: no numerical law explicitly provided; derive the correct law from the actual case instead of unrelated example values.</p>'}</div>
           ${eng.sub ? `<div style="margin-top:8px;"><strong>Worked Substitution (10<sup>3n</sup>):</strong> ${fmtMath(eng.sub, true)}</div>` : ""}
           <div style="margin-top:6px;padding:7px 10px;border-radius:7px;background:#ffffff;border:1px solid #bae6fd;font-size:13px;color:#0f172a;">
-            <strong>Engineering Notation Values:</strong> <code>${esc(eng.engExample)}</code>
+            <strong>Source-authored engineering result (if given):</strong> ${eng.engExample || "Concept only — no computed target to claim."}
             <div style="margin-top:3px;font-size:12.5px;color:#334155;">${fmtTextMath(eng.prefixNote)}</div>
           </div>
         </div>`;
@@ -626,22 +575,23 @@
               <div class="nv-q-meta"><span>3-Panel Visual Breakdown</span><span>${esc(q.id)}</span><span>${esc(q.visualKind)}</span></div>
               <div class="nv-q-title">${esc(q.skillName)}</div>
             </div>
-          ${global.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,topicObj,"visual") || ""}
+          ${global.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.render(q,topicObj,"visual") || ""}
             <div class="nv-vis-grid">
               <div class="nv-vis-card"><header>Panel 1 · Hardware & Wiring</header><div class="nv-svg-wrap">${renderVisual(q, 0)}</div></div>
               <div class="nv-vis-card"><header>Panel 2 · Calibrated Waveform / Margin</header><div class="nv-svg-wrap">${renderVisual(q, 1)}</div></div>
               <div class="nv-vis-card"><header>Panel 3 · Probe & A-B-A Fix</header><div class="nv-svg-wrap">${renderVisual(q, 2)}</div></div>
             </div>
-            <div class="nv-lesson-box"><strong>How to Read These 3 Panels &amp; Apply After Solving the Math:</strong> ${fmtTextMath(q.lesson)} · Step-by-step on SLT Bench: (1) Compare waveform/eye margin against the calculated 10^(3n) target below, (2) verify <5 mm ground spring / N7020A offset / 1169B deskew, and (3) run a single-variable A-B-A cross-swap before condemning the silicon.</div>
+            <div class="nv-lesson-box"><strong>How to Read These 3 Panels &amp; Apply After Solving the Math:</strong> ${fmtTextMath(q.lesson)} · Step-by-step on SLT Bench: (1) Compare waveform/eye margin against the calculated 10^(3n) target below, (2) verify the approved probe reference, attenuation, compensation and channel calibration, and (3) run a single-variable A-B-A cross-swap before condemning the silicon.</div>
             ${renderEngMathPanel(q)}
+            <p class="nv-visual-note">Three SVG panels are illustrative teaching topologies or waveform sketches; numeric conclusions must use the selected problem and verified instrument settings, as shown in the source-specific equation notebook above.</p>
             ${spreadHtml}`;
         }
         if (st.pageTab === 3) {
           const spreadHtml = global.PROFESSOR_NOTEBOOK_SPREADS?.renderQuestionNotebookSpread?.(q, topicObj, true) || "";
           const engInfo = inferEngineeringPhysics(q);
           const stepMathBlock = (idx) => {
-            if (idx === 1 && physMod?.prefixEq) return `<div style="margin-top:6px;">${fmtMath(physMod.prefixEq, true)}</div>`;
-            if (idx === 2) return `<div style="margin-top:6px;">${fmtMath(engInfo.formula, true)}</div>`;
+            if (idx === 1) return global.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.numeratorRails(q) || "";
+            if (idx === 2 && engInfo.formula) return `<div style="margin-top:6px;">${fmtMath(engInfo.formula, true)}</div>`;
             if (idx === 3 && engInfo.sub) return `<div style="margin-top:6px;">${fmtMath(engInfo.sub, true)}</div>`;
             return "";
           };
@@ -650,7 +600,7 @@
               <div class="nv-q-meta"><span>All Worked Baby Steps (${steps.length} Steps)</span><span>${esc(q.id)}</span><span>10^(3n) Engineering Notation</span></div>
               <div class="nv-q-title">${esc(q.skillName)}</div>
             </div>
-          ${global.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,topicObj,"baby") || ""}
+          ${global.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.render(q,topicObj,"baby") || ""}
             ${renderEngMathPanel(q)}
             <div class="nv-steps-list">
               ${steps.map((s, idx) => {
@@ -669,12 +619,12 @@
               <div class="nv-q-title">${esc(q.skillName)}</div>
               <p class="nv-q-prompt">${fmtTextMath(q.question)}</p>
             </div>
-          ${global.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,topicObj,"try") || ""}
+          ${global.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.render(q,topicObj,"try") || ""}
             <div class="nv-try-box">
               ${q.kind === "calc"
                 ? `<label for="nvAnsInput"><strong>Enter Numeric Answer (10^(3n) unit optional, default <code>${esc(q.unit)}</code>):</strong></label>
                    <div class="nv-input-row">
-                     <input id="nvAnsInput" type="text" value="${esc(savedAns)}" placeholder="e.g. ${esc(q.expected)} ${esc(q.unit)}" />
+                     <input id="nvAnsInput" type="text" value="${esc(savedAns)}" placeholder="Enter your derived number (unit: ${esc(q.unit)})" />
                      <span>${esc(q.unit)}</span>
                      <button type="button" class="nv-btn nv-btn-primary" id="nvCheckBtn">✓ Check Answer</button>
                    </div>`
@@ -683,7 +633,7 @@
                    <button type="button" class="nv-btn nv-btn-primary" id="nvCheckBtn">✓ Grade Technical Response</button>`
               }
               ${fb ? `<div class="nv-feedback ${fb.ok ? "pass" : ""}"><strong>${fb.ok ? "PASS" : "CHECK AGAIN"}:</strong> ${esc(fb.reason)}</div>` : ""}
-              ${(fb && (fb.ok || st.retry[q.id])) ? `<div class="nv-model-ans"><strong>Verified NVIDIA SLT Model Answer:</strong> ${fmtTextMath(q.modelAnswer)}</div>` : ""}
+              ${(fb && (fb.ok || st.retry[q.id])) ? `<div class="nv-model-ans"><strong>Reference Answer From Educational Question Bank:</strong> ${fmtTextMath(q.modelAnswer)}</div>` : ""}
             </div>`;
         }
         // Default Tab 1: Understand
@@ -693,7 +643,7 @@
             <div class="nv-q-title">${esc(q.skillName)}</div>
             <p class="nv-q-prompt">${fmtTextMath(q.question)}</p>
           </div>
-          ${global.CIRCUIT_CURRENT_QUESTION_RAILROAD?.renderStage(q,topicObj,"understand") || ""}
+          ${global.NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.render(q,topicObj,"understand") || ""}
           <div class="nv-lesson-box">
             <strong>Learning Objective:</strong> ${esc(q.learningObjective)}<br/>
             <div style="margin-top:6px"><strong>Plain-English Physics &amp; System Intuition:</strong> ${fmtTextMath(q.lesson)}</div>

@@ -110,3 +110,17 @@ Source investigation from the four screenshots: old prose remains in the PARALLE
 - Updated older related X9 / power-X8 explanatory content to avoid unverified guarantees of IR hotspots or safe 1V testing. Updated the Muon guide to label examples as practice, not verified Glassdoor reports.
 - tests/avionics-array-math-v40.test.cjs checks core math, 1150 stable Avionics IDs, exact MathML/rail graphics across modes and simulator current/heat; the HWD browser regression now checks realistic temperature, not fabricated 60°C.
 - The curriculum-wide independent mathematical and illustration review across all remaining Avionics and NVIDIA Q IDs is still a separate remaining workstream. Do not claim 100% accuracy or a live GitHub Pages deployment solely from static CI. Keep progression/dice/score/privacy intact.
+
+## November 17, 2026 — v41 both NVIDIA tabs equation audit follow-up (PR #31)
+
+PR #31: https://github.com/huynguyen1017/slt-study-studio-public/pull/31. Confirm merge and CI before claiming release.
+
+The NVIDIA SLT Engineer (`#nvidiaView`, rendered by `nvidia_slt_ui.js`) and 🟢 NVIDIA SLT Prep (`#nvidia-sltView`, rendered by `nvidia_slt_tutor.js`) are different, independently scored interfaces. v40 only rewrote the Avionics question data and teaching UI; neither NVIDIA screen had received that source-level audit.
+
+- Shared `nvidia_slt_equations_v41.js/.css` adds question-source-only MathML equations, horizontally stacked numerator/denominator factors, crossed-out identical prefix units, and a source-specific native SVG factor-label illustration. It reads selected canonical or rerolled question without modifying identifiers, grades, answer models or localStorage.
+- NVIDIA SLT Engineer: same source workpad on Understand, Baby Steps, Try, Evidence. Read actual q.formula/q.sub instead of the generic physics model with unrelated fixed PDN/DDR values; preserve current source lessons, procedural steps and independent measurement checks.
+- NVIDIA SLT Prep: same source workpad on Understand, Visuals, Baby Steps, Try. Remove fixed example numerical substitutions from `inferEngineeringPhysics` fallback. Source-absent conceptual questions explicitly stay qualitative rather than guessing voltage/time data.
+- Both NVIDIA modes: interview/professor worked-derivation components use current question rather than an unrelated generic scripted 60-second speech or numeric result. `Try` workpad supplies symbolic law, not computed expected value; Prep input placeholder no longer echoes the correct answer.
+- Visually label illustrative NVIDIA Prep SVG mockups *inside the SVG* as `ILLUSTRATIVE • NOT MEASURED`; the separate factor-label SVG uses actual prefix quantities. Not all archived/third-party images have been regenerated, and schematic mockups must not be treated as flight DUT wiring.
+- Tests: `tests/nvidia-dual-math-v41.test.cjs` static and desktop/mobile Chromium for both NVIDIA screen pipelines, MathML, dimensioned prefixes, source SVG, dice updates, no Try answer leak. Existing v38/v39 test selectors updated only where replacement NVIDIA renderer requires it. Verify all mandatory Actions on final code before merge.
+- Outstanding: independent mathematical audit of every numeric formula and visual asset across both separate 600-question NVIDIA sets, as well as the full Avionics curriculum. Source-derived presentation is not a certification of all authored solution content.

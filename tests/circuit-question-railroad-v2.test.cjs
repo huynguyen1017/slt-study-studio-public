@@ -49,7 +49,7 @@ for(const file of ["circuit_question_railroad_v2.js","circuit_question_railroad_
 assert(shell.indexOf("circuit_question_railroad_v2.js")<shell.indexOf("professor_notebook_spreads.js"));
 assert(spread.includes("svgNotebookFactorLabel") && spread.includes("svgNotebookEquation"),"Native SVG pictures should draw fraction bars and canceled units");
 assert(read("avionics_tutor.js").includes("renderStage(q,t,\"visual\")"));
-assert(read("nvidia_slt_tutor.js").includes('renderStage(q,topicObj,"try")'));
+assert(read("nvidia_slt_tutor.js").includes('NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.render(q,topicObj,"try")'),"NVIDIA Prep uses the newer current-question equation renderer");
 assert(cache.includes("v38-current-question-railroad"));
 assert(shell.includes("circuit_railroad_whiteboard_v1.js"),"retain four reference whiteboards");
 console.log("PASS v38: prefix cancellation, current-question and dice-variant isolation, MathML, escaping, existing course and offline integration.");
