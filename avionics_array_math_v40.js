@@ -62,7 +62,7 @@ function render(mode,q){
      note("Illustrative 2 mΩ model: about 8.7 mW dissipates in the bridge at a total 2.5 A; an IR hotspot is not guaranteed. Real measurements require approved contact resistance, board/net current limits, thermal specifications and instrumentation."));
  case "try":
    return section("Try it independently · never use the 500 A prediction as a test setting",
-     note("Label all common nodes and every component. Write the reciprocal-parallel law. Convert Ω → mΩ with numerator/denominator units. Explain WHY 2-wire leads hide the result and why a current-limited rail does not necessarily warm a bridge. Do the arithmetic yourself before opening the worked reference."));
+     note("Label all common nodes and every component. Write the reciprocal-parallel law. Convert Ω → mΩ with numerator/denominator units. Explain WHY 2-wire leads hide the result and why a current-limited rail does not necessarily warm a bridge. Do the arithmetic yourself before opening the worked reference.")+mathGroup(["R_eq = R_nom / N_healthy","I_branch = V_s / R_nom","I_total = N_healthy * I_branch"]));
  default:return "";
  }
 }
