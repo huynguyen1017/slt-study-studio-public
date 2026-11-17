@@ -14,6 +14,10 @@ assert.equal(10+15+25,50);
 assert.equal(100/50,2);
 assert(Math.abs(1/(1/6+1/12+1/4)-2)<1e-10);
 assert.equal(12/2,6);
+// The supplied screenshot of the “parallel” example actually has a battery splitting the bottom rail.
+assert.equal(6+1/(1/12+1/4),9,"As-drawn network is series + parallel, not pure parallel");
+assert.equal(12/9,4/3);
+assert.equal(4/12+4/4,4/3);
 const rp=1/(1/2000+1/3000),rt=1000+rp,it=12/rt,va=12-it*1000,i2=va/2000,i3=va/3000;
 assert.equal(rp,1200);assert.equal(rt,2200);
 assert(Math.abs(it*1000-5.45454545)<1e-7);
@@ -35,6 +39,7 @@ for(const cc of wb.cases){
  assert(str.includes('rr-cancel') && str.includes('rr-fraction'));
  assert(str.includes('rr-math')&&str.includes('<math'),"Every circuit method needs actual MathML");
  assert(str.includes(cc.check),"Answer and check must match specific circuit "+cc.id);
+ if(cc.id==="parallel")assert(str.includes("rr-topology-alert")&&str.includes("9 Ω")&&str.includes("2 Ω"),"Highlight screenshot topology inconsistency and correctly solve both interpretations");
  assert.equal((str.match(/class="rr-case"/g)||[]).length,4);
  assert(str.includes('data-rr-panel="'+cc.id+'"'));
 }
