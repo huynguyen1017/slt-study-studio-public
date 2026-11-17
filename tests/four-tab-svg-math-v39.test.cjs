@@ -71,6 +71,8 @@ console.log("PASS v39 static: all 8 tab surfaces, source-specific SI conversions
    await page.locator("#avionicsView .rrq-stage-"+stage).first().waitFor({timeout:20000});
    if(stage==="try") assert(!(await page.locator(".rrq-stage-try").textContent()).includes("Expected answer stored"));
   }
+  // A basic concept does not necessarily have a division expression; choose a numeric Ohm case for SVG fraction verification.
+  await page.locator('#avionicsView [data-qid="ohm-C1"]').click();
   await page.locator('#avionicsView [data-page="visual"]').click();
   const svg=page.locator("#avionicsView .nb-spread-svg").first();
   await svg.waitFor({timeout:20000});
