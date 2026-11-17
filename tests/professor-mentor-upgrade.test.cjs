@@ -42,13 +42,21 @@ const scripts = [
   "nvidia_slt_questions.js",
   "nvidia_slt_visual_lab_v2.js",
   "professor_mastery_engine.js",
+  "professor_notebook_spreads.js",
   "avionics_tutor.js",
   "nvidia_slt_ui.js"
 ];
 for (const f of scripts) vm.runInContext(read(f), ctx, { filename: f });
 
 const PME = ctx.window.PROFESSOR_MASTERY_ENGINE;
+const PNS = ctx.window.PROFESSOR_NOTEBOOK_SPREADS;
 assert(PME && PME.version === "1.0.0", "Professor Mastery Engine must expose version 1.0.0");
+assert(PNS && PNS.FLAGSHIP_SPREAD_SPECS.length === 12, "Must expose all 12 flagship notebook spreads");
+for (const sp of PNS.FLAGSHIP_SPREAD_SPECS) {
+  assert(fs.existsSync(path.join(root, "figures", "notebook_spreads", sp.file)), "Missing repo PNG: " + sp.file);
+  const svgOut = PNS.renderNotebookSpreadSVG(sp);
+  assert(svgOut.includes("nb-spread-svg") && !svgOut.includes("[object Object]"));
+}
 
 const avTopics = ctx.window.AVIONICS_TOPICS;
 const avQuestions = ctx.window.AVIONICS_QUESTIONS;
@@ -162,6 +170,7 @@ function startStaticServer(dir) {
       await page.locator("#avionicsView .av-prof-box").waitFor();
       await page.locator('[data-page="work"]').click();
       await page.locator("#avionicsView .av-prof-chalkboard").waitFor();
+      assert.equal(await page.locator("#avionicsView .nb-spread-svg").count(), 1, "Avionics Baby Steps must show 3-Page Notebook Spread");
       await page.locator('[data-page="try"]').click();
       await page.locator('[data-av-hint="2"]').click();
       assert((await page.locator(".av-prof-hint-panel").textContent()).includes("Hint 3"));
@@ -176,6 +185,7 @@ function startStaticServer(dir) {
 
       await page.locator('#nvidiaView [data-screen="steps"]').first().click();
       await page.locator("#nvidiaView .nvs-prof-chalkboard").waitFor();
+      assert.equal(await page.locator("#nvidiaView .nb-spread-svg").count(), 1, "NVIDIA Baby Steps must show 3-Page Notebook Spread");
       await page.locator('#nvidiaView [data-screen="practice"]').first().click();
       await page.locator('[data-nv-hint="1"]').click();
       assert((await page.locator(".nvs-prof-hint-panel").textContent()).includes("Hint 2"));

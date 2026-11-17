@@ -795,6 +795,7 @@ function renderAvionicsUnderstandLecture(q, t, f) {
 
 function renderAvionicsVisualGuide(q, t) {
   const note = TOPIC_PROFESSOR_NOTES[t.id] || TOPIC_PROFESSOR_NOTES.ohm;
+  const sp = window.PROFESSOR_NOTEBOOK_SPREADS;
   return `<section class="av-prof-box" aria-label="Professor schematic and bench reading guide">
     <h4><span class="av-prof-badge">Visual Reading Guide</span> How an EE Professor Reads These 3 Diagrams for ${esc(q.id.toUpperCase())}</h4>
     <div class="av-prof-grid">
@@ -811,7 +812,7 @@ function renderAvionicsVisualGuide(q, t) {
         <p>Remember 5-hole vertical terminal strips share one copper clip underneath. Never place both ends of a component in the same 5-hole column (short!), and remember: <strong>${esc(note.trap)}</strong></p>
       </div>
     </div>
-  </section>`;
+  </section>${sp ? sp.renderFlagshipGallerySection("avionics") : ""}`;
 }
 
 function renderAvionicsChalkboard(q, t) {
@@ -820,8 +821,9 @@ function renderAvionicsChalkboard(q, t) {
   const subStr = q.sub || (q.lesson && q.lesson.example) || "Compare expected healthy state against observed faulty reading.";
   const note = TOPIC_PROFESSOR_NOTES[t.id] || TOPIC_PROFESSOR_NOTES.ohm;
   const steps = Array.isArray(q.steps) ? q.steps : [];
+  const sp = window.PROFESSOR_NOTEBOOK_SPREADS;
 
-  return `<section class="av-prof-chalkboard" aria-label="Professor chalkboard full derivation">
+  return `${sp ? sp.renderQuestionNotebookSpread(q, t, false) : ""}<section class="av-prof-chalkboard" aria-label="Professor chalkboard full derivation">
     <h4>🧮 Professor's Complete Chalkboard Solution (All Work &amp; Intermediate Steps Shown)</h4>
     <div class="av-prof-chalk-step">
       <strong>STEP A · GIVEN INPUTS &amp; BASE-SI PREFIX CONVERSIONS</strong>
@@ -866,6 +868,7 @@ function renderAvionicsTryCoach(q, t) {
 
 function bindAvionics(host, rerenderFn) {
   if (!host) return;
+  if (window.PROFESSOR_NOTEBOOK_SPREADS) window.PROFESSOR_NOTEBOOK_SPREADS.bindNotebookSpreads(host, rerenderFn);
   const cwDet = host.querySelector("#avProfCourseworkBank");
   if (cwDet) {
     cwDet.addEventListener("toggle", () => { courseBankOpen = cwDet.open; });
@@ -1171,6 +1174,7 @@ let revealedNvSolutions = new Set(["NV-EQ-01", "NV-QA-01"]);
 function renderNvidiaUnderstand(q, t) {
   const lec = NVIDIA_TRACK_LECTURES[t.id] || NVIDIA_TRACK_LECTURES.electrical;
   const givens = parseGivenQuantities(q.question);
+  const sp = window.PROFESSOR_NOTEBOOK_SPREADS;
   const convBox = q.questionType === "number" && givens.length
     ? `<div class="nvs-prof-card" style="margin-top:10px;">
          <h5>3. Engineering Prefix &amp; Unit Conversion Check (10<sup>3n</sup> Rule)</h5>
@@ -1192,15 +1196,16 @@ function renderNvidiaUnderstand(q, t) {
     </div>
     ${convBox}
     <div class="nvs-prof-trap"><strong>⚠️ Post-Silicon &amp; SLT False-Conclusion Trap:</strong> ${esc(lec.trap)}</div>
-  </section>`;
+  </section>${sp ? sp.renderFlagshipGallerySection("all") : ""}`;
 }
 
 function renderNvidiaWorkedDerivation(q, t) {
   const lec = NVIDIA_TRACK_LECTURES[t.id] || NVIDIA_TRACK_LECTURES.electrical;
   const convText = buildConversionExplanation(q.question);
   const isMath = q.questionType === "number";
+  const sp = window.PROFESSOR_NOTEBOOK_SPREADS;
 
-  return `<section class="nvs-prof-chalkboard" aria-label="NVIDIA Professor Complete Step-by-Step Chalkboard">
+  return `${sp ? sp.renderQuestionNotebookSpread(q, t, true) : ""}<section class="nvs-prof-chalkboard" aria-label="NVIDIA Professor Complete Step-by-Step Chalkboard">
     <h4>🧮 Professor's Complete Worked Walkthrough (${esc(q.skillName)} · ${esc(q.phase)})</h4>
     ${isMath ? `
       <div class="nvs-prof-chalk-step">
@@ -1293,6 +1298,7 @@ function renderNvidiaPracticeCoach(q, t) {
 
 function bindNvidia(root, rerenderFn) {
   if (!root) return;
+  if (window.PROFESSOR_NOTEBOOK_SPREADS) window.PROFESSOR_NOTEBOOK_SPREADS.bindNotebookSpreads(root, rerenderFn);
   const nvDet = root.querySelector("#nvsProfMasterBank");
   if (nvDet) {
     nvDet.addEventListener("toggle", () => { masterBankOpen = nvDet.open; });
