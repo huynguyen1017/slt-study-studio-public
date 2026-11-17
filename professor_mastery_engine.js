@@ -1554,9 +1554,11 @@ function renderCourseworkBankHTML(t) {
 function renderAvionicsUnderstandLecture(q, t, f) {
   const note = TOPIC_PROFESSOR_NOTES[t.id] || TOPIC_PROFESSOR_NOTES.ohm;
   const givens = parseGivenQuantities(q.question);
-  const convRow = givens.length
-    ? `<table class="av-prof-table"><thead><tr><th>Raw Value in Question</th><th>Prefix</th><th>Power of 10</th><th>Base SI Value</th></tr></thead><tbody>${givens.map(g => `<tr><td><code>${esc(g.raw)}</code></td><td>${esc(g.prefixName)}</td><td>10<sup>${g.exp}</sup></td><td><strong>${esc(fmt(g.baseVal))} ${esc(g.baseUnit)}</strong></td></tr>`).join("")}</tbody></table>`
-    : `<p><em>Qualitative / conceptual question:</em> identify nodes, signal direction, and measurement reference before choosing any formula.</p>`;
+  const railroad = window.CIRCUIT_CURRENT_QUESTION_RAILROAD;
+  const prefixed = railroad?.extractQuantities(q.question || "").filter(g => g.power !== 0) || [];
+  const convRow = prefixed.length
+    ? `<div class="rrq-rails-lecture">${prefixed.slice(0, 10).map(g => `<div class="rrq-lecture-given"><strong>${esc(g.raw)} · ${esc(g.name)} prefix</strong>${railroad.rail(g)}</div>`).join("")}</div>`
+    : `<p><em>Factor-label check:</em> ${givens.length?"the recognized quantities already use unprefixed SI units.":"this is a conceptual problem without an unambiguous SI-prefix conversion."} Label the nodes and do not invent a fraction.</p>`;
 
   return `<section class="av-prof-box" aria-label="Professor zero-to-one lecture">
     <h4><span class="av-prof-badge">Professor's Lecture</span> Ground-Up Intuition &amp; 10<sup>3n</sup> Prefix Anatomy for ${esc(q.id.toUpperCase())}</h4>
@@ -1571,7 +1573,7 @@ function renderAvionicsUnderstandLecture(q, t, f) {
       </div>
     </div>
     <div class="av-prof-card" style="margin-top:10px;">
-      <h5>3. Given Quantities &amp; 10<sup>3n</sup> Engineering Notation Table</h5>
+      <h5>3. Railroad-Track Unit Conversions · Numerator / Denominator / Cancel</h5>
       ${convRow}
     </div>
     <div class="av-prof-trap"><strong>⚠️ Common Beginner &amp; Bench Trap:</strong> ${esc(note.trap)}</div>
@@ -1985,10 +1987,12 @@ let revealedNvSolutions = new Set(["NV-EQ-01", "NV-QA-01"]);
 function renderNvidiaUnderstand(q, t) {
   const lec = NVIDIA_TRACK_LECTURES[t.id] || NVIDIA_TRACK_LECTURES.electrical;
   const givens = parseGivenQuantities(q.question);
-  const convBox = q.questionType === "number" && givens.length
+  const railroad = window.CIRCUIT_CURRENT_QUESTION_RAILROAD;
+  const prefixed = railroad?.extractQuantities(q.question || "").filter(g=>g.power!==0) || [];
+  const convBox = q.questionType === "number"
     ? `<div class="nvs-prof-card" style="margin-top:10px;">
-         <h5>3. Engineering Prefix &amp; Unit Conversion Check (10<sup>3n</sup> Rule)</h5>
-         <table class="nvs-prof-table"><thead><tr><th>Given Token</th><th>Prefix</th><th>Base SI Equivalent</th></tr></thead><tbody>${givens.map(g => `<tr><td><code>${esc(g.raw)}</code></td><td>${esc(g.prefixName)}</td><td><strong>${esc(fmt(g.baseVal))} ${esc(g.baseUnit)}</strong></td></tr>`).join("")}</tbody></table>
+         <h5>3. Railroad-Track Prefix Cancellation · 10<sup>3n</sup> Rule</h5>
+         ${prefixed.length ? prefixed.slice(0, 10).map(g=>`<div class="rrq-lecture-given"><strong>${esc(g.raw)}</strong>${railroad.rail(g)}</div>`).join("") : "<p>No unambiguous prefixed value in this question; do not manufacture a conversion.</p>"}
        </div>`
     : "";
 
