@@ -1198,7 +1198,7 @@ function renderQuestionNotebookSpread(q, t, isNvidia) {
       </div>
     </div>
     <div class="nb-spread-canvas">${svgMarkup}</div>
-  </section>`;
+  </section>${railroad}`;
 }
 
 let galleryOpen = false;
