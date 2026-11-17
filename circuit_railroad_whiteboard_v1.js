@@ -85,7 +85,7 @@ function circuitSvg(kind){
 }
 function matches(q,t,nvidia){
  const topic=String(t?.id||q?.topic||"").toLowerCase(),id=String(q?.id||"").toLowerCase(),title=String(t?.title||"").toLowerCase();
- if(["ohm","series","parallel","kirchhoff","electrical"].includes(topic))return true;
+ if(["ohm","series","parallel","kirchhoff","electrical","mixed","mesh"].includes(topic))return true;
  if(/^(ohm|series|parallel|kirchhoff)-/.test(id))return true;
  return /(?:electrical foundations|circuit analysis|series and parallel circuits|basic electrical)/.test(title);
 }
