@@ -36,12 +36,28 @@ const cases=[
 ["Re-solve as TWO MESHES using the shared resistor","Choose the left mesh clockwise and the right mesh counterclockwise; both traverse R₃ downward, so its branch current is i₁+i₂. KVL left: 2k i₁+1k(i₁+i₂)=12 V. Right: 1k i₂+1k(i₁+i₂)=6 V.","3*i_1 + i_2 = 12 ; i_1 + 2*i_2 = 6"],
 ["Show elimination, no skipped algebra","Multiply second equation by 3: 3i₁+6i₂=18. Subtract the first equation 3i₁+i₂=12, giving 5i₂=6, hence i₂=1.2 mA. Substitute: i₁=(12−1.2)/3=3.6 mA.","5*i_2 = 6 ; i_2 = 1.2 mA ; i_1 = 3.6 mA"],
 ["Verify current, voltage and POWER balances","KCL: 3.6+1.2=4.8 mA. Left KVL: 7.2+4.8=12 V; right KVL: 1.2+4.8=6 V. Supplied powers: 12×3.6+6×1.2=50.4 mW. Resistive losses: 25.92+1.44+23.04=50.4 mW.","P_{in} = 50.4 mW ; P_{resistors} = 50.4 mW"]],answers:["V_A = 4.80 V","I₁ = 3.60 mA","I₂ = 1.20 mA","I₃ = 4.80 mA"],check:"KCL 3.6+1.2=4.8 mA; KVL 7.2+4.8=12 V, 1.2+4.8=6 V; power in=out=50.4 mW",rail:"mesh"}
+,
+{id:"bridge",title:"05 · Five-resistor bridge / cross-link",goal:"Cannot reduce by ordinary series/parallel: solve two unknown node voltages and verify five branch currents.",givens:"Ideal 12 V source from GND to S. R₁ = 1 kΩ S→A; R₂ = 2 kΩ A→GND; R₃ = 2 kΩ S→C; R₄ = 1 kΩ C→GND; R₅ = 1 kΩ A→C.",steps:[
+["List knowns and define physical nodes","S = +12 V, return = 0 V. A and C are unknown. R₅ connects A and C; both ends are NOT the same voltage, so the left and right columns are not independent series branches.","V_S = 12 V ; V_G = 0 V ; V_A = ? ; V_C = ?"],
+["Draw the reference arrows before equations","Assume currents R₁: S→A, R₂: A→GND, R₃: S→C, R₄: C→GND, and R₅: A→C. A negative result means the real direction is opposite.","I_5 = (V_A - V_C) / R_5"],
+["Convert all kΩ to Ω with railroad tracks","1 kΩ = 1×10³ Ω = 1000 Ω; 2 kΩ = 2×10³ Ω = 2000 Ω. Keep resistances as kΩ and currents as mA for the actual equations: 1 kΩ × 1 mA = 1 V.","1 kΩ * 1 mA = 10^3 Ω * 10^(-3) A = 1 V"],
+["KCL at A and C; write one branch fraction for every resistor","At A: incoming (12−A)/1000 equals leaving A/2000 plus (A−C)/1000. At C: incoming (12−C)/2000 plus (A−C)/1000 equals leaving C/1000.","(12 - V_A)/1000 = V_A/2000 + (V_A - V_C)/1000 ; (12 - V_C)/2000 + (V_A - V_C)/1000 = V_C/1000"],
+["Clear A-node denominators carefully","Multiply every A term by 2000 Ω: 2(12−A)=A+2(A−C). Distribute: 24−2A=A+2A−2C. Move terms: 24=5A−2C.","5*V_A - 2*V_C = 24 V"],
+["Clear C-node denominators carefully","Multiply every C term by 2000 Ω: (12−C)+2(A−C)=2C. Distribute: 12−C+2A−2C=2C. Move terms: 2A−5C=−12.","-2*V_A + 5*V_C = 12 V"],
+["Eliminate C by multiplying both complete equations","Multiply 5A−2C=24 by FIVE: 25A−10C=120. Multiply −2A+5C=12 by TWO: −4A+10C=24. Add both rows: 21A=144. Divide: A=144/21=48/7 V.","21*V_A = 144 V ; V_A = 48/7 V = 6.8571429 V"],
+["Back-substitute using fractions rather than guessing","From 5A−2C=24: 2C=5×(48/7)−24=240/7−168/7=72/7. Divide by 2: C=36/7 V.","2*V_C = 72/7 V ; V_C = 36/7 V = 5.1428571 V"],
+["Calculate five currents, cancel units, convert A→mA","I₁=(12−48/7)/1k=36/7 mA; I₂=(48/7)/2k=24/7 mA; I₃=(12−36/7)/2k=24/7 mA; I₄=(36/7)/1k=36/7 mA; I₅=(48/7−36/7)/1k=12/7 mA.","I_1 = 36/7 mA ; I_2 = 24/7 mA ; I_3 = 24/7 mA ; I_4 = 36/7 mA ; I_5 = 12/7 mA"],
+["Independently verify BOTH nodes and total power","At A: 36/7 = 24/7 + 12/7 mA; at C: 24/7 + 12/7 = 36/7 mA. Source current = 60/7 = 8.5714 mA. Psource = 12×60/7 = 720/7 mW; all five resistor powers sum to 720/7 mW.","P_source = 720/7 mW = 102.8571 mW ; P_Rtotal = 720/7 mW"]],answers:["V_A = 6.857 V","V_C = 5.143 V","I_source = 8.571 mA","I_R5 = 1.714 mA (A→C)","P_source = P_diss = 102.857 mW"],check:"KCL A: 36/7=24/7+12/7; KCL C: 24/7+12/7=36/7; P_source=P_resistors=720/7 mW",rail:"bridge"}
 ];
 function rail(kind){
  const x=cancel, f=frac;
  let rows=[];
  const step=(title,body,why)=>'<div class="rr-rail-step"><strong>'+esc(title)+'</strong><div class="rr-rail-equation">'+body+'</div><small>'+esc(why)+'</small></div>';
- if(kind==="mixed"){
+ if(kind==="bridge"){
+ rows.push(step("1 · Convert one kΩ to Ω",f("1 "+x("kΩ"),"1")+" <b>×</b> "+f("10<sup>3</sup> Ω","1 "+x("kΩ"))+" <b>=</b> 1000 Ω","Unit cancellation is valid before applying any node equation."));
+ rows.push(step("2 · Bridge resistor V ÷ Ω gives A",f("(48/7 − 36/7) "+x("V"),"1000 "+x("Ω"))+" <b>×</b> "+f("1 A·"+x("Ω"),"1 "+x("V"))+" <b>=</b> 12/7000 A","Subtract node voltages FIRST: 48/7 − 36/7 = 12/7 V."));
+ rows.push(step("3 · Convert bridge current A to mA",f("(12/7000) "+x("A"),"1")+" <b>×</b> "+f("1000 mA","1 "+x("A"))+" <b>=</b> 12/7 mA = 1.7143 mA","Only the units cancel, not terms in a sum or difference."));
+ }else if(kind==="mixed"){
  rows.push(step("1 · kΩ → Ω. Put unwanted kΩ on the BOTTOM",f('2.2 '+x('kΩ'),'1')+' <b>×</b> '+f('1000 Ω','1 '+x('kΩ'))+' <b>=</b> 2200 Ω',"The same kΩ unit is crossed out diagonally. Multiply 2.2×1000=2200."));
  rows.push(step("2 · Voltage ÷ resistance → current",f('12 '+x('V'),'2200 '+x('Ω'))+' <b>×</b> '+f('1 A·'+x('Ω'),'1 '+x('V'))+' <b>=</b> 0.0054545 A',"Because 1 Ω = 1 V/A, the circuit equation leaves only amperes."));
  rows.push(step("3 · A → mA: cancel A then multiply numerators",f('0.0054545 '+x('A'),'1')+' <b>×</b> '+f('1000 mA','1 '+x('A'))+' <b>=</b> 5.4545 mA',"This rail is the unit-conversion stage; the current came from the circuit model."));
@@ -61,7 +77,12 @@ function circuitSvg(kind){
  const line=(d,c="#215d7f")=>'<path d="'+d+'" stroke="'+c+'" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
  const res=(x,y,w,s)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="28" rx="3" fill="#e8f8ed" stroke="#16866b" stroke-width="2.8"/>'+txt(x+6,y-7,s,"#12644c",15);
  let v=base+'<rect x="1" y="1" width="688" height="253" rx="12" fill="#f8fcff" stroke="#c5dbea"/>';
- if(kind==="series"){
+ if(kind==="bridge"){
+ v+=line("M80 33 H470 M80 33 V95 M80 155 V215 H470 M225 33 V60 M225 88 V125 M225 125 V160 M225 188 V215 M470 33 V60 M470 88 V125 M470 125 V160 M470 188 V215 M225 125 H320 M390 125 H470");
+ v+='<circle cx="80" cy="125" r="30" fill="#fff8e9" stroke="#ba8a39" stroke-width="3"/>'+txt(59,130,"12 V","#8b5924",14);
+ v+=res(197,60,56,"R₁ 1kΩ")+res(197,160,56,"R₂ 2kΩ")+res(442,60,56,"R₃ 2kΩ")+res(442,160,56,"R₄ 1kΩ")+res(320,111,70,"R₅ 1kΩ");
+ v+=txt(226,112,"A","#c03456",17)+txt(472,112,"C","#c03456",17)+txt(330,98,"1.714 mA →","#9c416c",13)+txt(295,28,"S = +12 V")+txt(311,239,"GND = 0 V");
+ }else if(kind==="series"){
  v+=line("M85 88 H139 M193 88 H257 M310 88 H374 M430 88 H534 V210 H85 V156");
  v+=res(139,74,54,"10 Ω")+res(257,74,53,"15 Ω")+res(374,74,56,"25 Ω");
  v+='<circle cx="85" cy="121" r="30" fill="#fff8e9" stroke="#ba8a39" stroke-width="3"/>'+txt(63,126,"100 V","#8b5924",14)+txt(325,52,"I = 2 A →","#a53e68",18)+txt(102,235,"B: return (0 V)");
@@ -85,13 +106,13 @@ function circuitSvg(kind){
 }
 function matches(q,t,nvidia){
  const topic=String(t?.id||q?.topic||"").toLowerCase(),id=String(q?.id||"").toLowerCase(),title=String(t?.title||"").toLowerCase();
- if(["ohm","series","parallel","kirchhoff","electrical","mixed","mesh"].includes(topic))return true;
+ if(["ohm","series","parallel","kirchhoff","electrical","mixed","mesh","bridge"].includes(topic))return true;
  if(/^(ohm|series|parallel|kirchhoff)-/.test(id))return true;
  return /(?:electrical foundations|circuit analysis|series and parallel circuits|basic electrical)/.test(title);
 }
 function render(q,t,nvidia=false){
  if(!matches(q,t,nvidia))return "";
- const topic=String(t?.id||q?.topic||"").toLowerCase(),cur=topic==="series"?"series":topic==="parallel"?"parallel":topic==="kirchhoff"?"mesh":"mixed";
+ const topic=String(t?.id||q?.topic||"").toLowerCase(),cur=topic==="series"?"series":topic==="parallel"?"parallel":topic==="kirchhoff"?"mesh":topic==="bridge"?"bridge":"mixed";
  return '<section class="rr-whiteboard" aria-label="Railroad Tracks plus node mesh circuit analysis reference lesson">'+
  '<header><small>ENGINEERING WHITEBOARD LAB · FACTOR-LABEL × KIRCHHOFF</small><h3>Write fractions. Cancel units. Solve circuit structure. Verify every branch.</h3><p>A separate worked-reference notebook based on your railroad-track chemistry technique; these examples do not replace the selected question or its answer.</p></header>'+
  '<div class="rr-case-tabs" role="group" aria-label="Select a fully worked circuit example">'+cases.map(c=>'<button type="button" data-rr-case="'+c.id+'" aria-pressed="'+(c.id===cur)+'">'+esc(c.title)+'</button>').join("")+'</div>'+

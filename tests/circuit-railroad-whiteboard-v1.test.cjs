@@ -7,9 +7,9 @@ vm.runInContext(load("simulation/math_format.js"),c);
 vm.runInContext(load("circuit_railroad_whiteboard_v1.js"),c);
 const wb=c.window.CIRCUIT_RAILROAD_WHITEBOARD;
 assert(wb,"Railroad module not loaded");
-assert.equal(wb.cases.length,4,"series, parallel, mixed, mesh/nodal needed");
+assert.equal(wb.cases.length,5,"series, parallel, mixed, mesh/nodal, non-reducible bridge needed");
 const names=wb.cases.map(x=>x.id);
-assert.deepEqual([...names],["series","parallel","mixed","mesh"]);
+assert.deepEqual([...names],["series","parallel","mixed","mesh","bridge"]);
 assert.equal(10+15+25,50);
 assert.equal(100/50,2);
 assert(Math.abs(1/(1/6+1/12+1/4)-2)<1e-10);
@@ -18,6 +18,16 @@ assert.equal(12/2,6);
 assert.equal(6+1/(1/12+1/4),9,"As-drawn network is series + parallel, not pure parallel");
 assert.equal(12/9,4/3);
 assert.equal(4/12+4/4,4/3);
+// Fifth case: bridge cross-link means simple series/parallel reduction is invalid.
+const bridgeVa=48/7,bridgeVc=36/7,br=[(12-bridgeVa),bridgeVa/2,(12-bridgeVc)/2,bridgeVc,bridgeVa-bridgeVc];
+assert(Math.abs(5*bridgeVa-2*bridgeVc-24)<1e-10);
+assert(Math.abs(-2*bridgeVa+5*bridgeVc-12)<1e-10);
+assert(Math.abs(br[0]-br[1]-br[4])<1e-10);
+assert(Math.abs(br[2]+br[4]-br[3])<1e-10);
+assert(Math.abs(br[0]+br[2]-60/7)<1e-10);
+const bridgePower=(br[0]**2 + 2*br[1]**2 + 2*br[2]**2 + br[3]**2 + br[4]**2);
+assert(Math.abs(bridgePower-720/7)<1e-9);
+
 const rp=1/(1/2000+1/3000),rt=1000+rp,it=12/rt,va=12-it*1000,i2=va/2000,i3=va/3000;
 assert.equal(rp,1200);assert.equal(rt,2200);
 assert(Math.abs(it*1000-5.45454545)<1e-7);
@@ -39,8 +49,9 @@ for(const cc of wb.cases){
  assert(str.includes('rr-cancel') && str.includes('rr-fraction'));
  assert(str.includes('rr-math')&&str.includes('<math'),"Every circuit method needs actual MathML");
  assert(str.includes(cc.check),"Answer and check must match specific circuit "+cc.id);
+ if(cc.id==="bridge")assert(str.includes("21*V_A")&&str.includes("12/7 mA")&&str.includes("102.857"),"Bridge lesson must show elimination, current direction and power");
  if(cc.id==="parallel")assert(str.includes("rr-topology-alert")&&str.includes("9 Ω")&&str.includes("2 Ω"),"Highlight screenshot topology inconsistency and correctly solve both interpretations");
- assert.equal((str.match(/class="rr-case"/g)||[]).length,4);
+ assert.equal((str.match(/class="rr-case"/g)||[]).length,5);
  assert(str.includes('data-rr-panel="'+cc.id+'"'));
 }
 let mesh=wb.render({id:"ohm-F1"},{id:"ohm"});
@@ -54,7 +65,7 @@ assert(load("professor_notebook_spreads.js").includes("CIRCUIT_RAILROAD_WHITEBOA
 assert(load("professor_mastery_engine.js").includes("CIRCUIT_RAILROAD_WHITEBOARD?.render(q,t,false)"));
 assert(load("sw.js").includes("v37-railroad-node-mesh"));
 for(const f of ["circuit_railroad_whiteboard_v1.js","circuit_railroad_whiteboard_v1.css"])assert(load("sw.js").includes(f));
-console.log("PASS: 4 circuits / proper fraction unit cancellation, MathML, 2-loop node = mesh, KCL/KVL and power, three-course integration, original data unchanged");
+console.log("PASS: 5 circuits / proper fraction unit cancellation, MathML, 2-loop node = mesh, KCL/KVL and power, three-course integration, original data unchanged");
 (async()=>{
  if(process.env.RUN_BROWSER!=="1")return;
  const {chromium}=require("playwright"),browser=await chromium.launch({headless:true});
@@ -76,6 +87,9 @@ console.log("PASS: 4 circuits / proper fraction unit cancellation, MathML, 2-loo
   assert((await box.locator('[data-rr-panel="mesh"]').textContent()).includes("50.4 mW"));
   assert((await box.locator('[data-rr-panel="mesh"] .rr-rail-step').first().textContent()).includes("2000 Ω"));
   assert(await box.locator('[data-rr-panel="mesh"] math').count()>0);
+  await box.locator('[data-rr-case="bridge"]').click();
+  assert(await box.locator('[data-rr-panel="bridge"]').isVisible());
+  assert((await box.locator('[data-rr-panel="bridge"]').textContent()).includes("102.857"));
   await page.setViewportSize({width:375,height:800});
   assert(await box.isVisible());
   assert.equal(errs.length,0,"Page JS errors: "+errs.join(", "));
