@@ -49,7 +49,7 @@ assert(!read("professor_notebook_spreads.js").includes("⬇️ Download Pre-Rend
 const av=read("avionics_tutor.js"),nv=read("nvidia_slt_tutor.js");
 for(const stage of ["understand","visual","baby","try"]){
  assert(av.includes('renderStage(q,t,"'+stage+'")'),"Avionics "+stage+" renderer missing");
- assert(nv.includes('renderStage(q,topicObj,"'+stage+'")'),"NVIDIA "+stage+" renderer missing");
+ assert(nv.includes('NVIDIA_SLT_EQUATION_NOTEBOOK_V41?.render(q,topicObj,"'+stage+'")'),"NVIDIA v41 "+stage+" renderer missing");
 }
 const html=read("index.html"),sw=read("sw.js");
 assert(html.includes("circuit_question_railroad_v2.css?v=3"));
@@ -84,7 +84,7 @@ console.log("PASS v39 static: all 8 tab surfaces, source-specific SI conversions
   await page.locator("#nvidia-sltView .nv-subtab").first().waitFor({timeout:30000});
   for(const [stage,index] of [["understand",1],["visual",2],["baby",3],["try",4]]){
    await page.locator('#nvidia-sltView [data-ptab="'+index+'"]').click();
-   await page.locator("#nvidia-sltView .rrq-stage-"+stage).first().waitFor({timeout:30000});
+   await page.locator("#nvidia-sltView .ne41-"+stage).first().waitFor({timeout:30000});
   }
   assert.equal(errors.length,0,errors.join("; "));
   console.log("PASS v39 browser: Avionics and NVIDIA four-tab visual/math/try layout, native SVG, mobile 375px.");
