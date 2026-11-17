@@ -61,7 +61,7 @@ for(const topic of T){
 }
 assert.equal(math,46);assert.equal(words,414);assert.equal(checks,46);
 const h=read("index.html"),sw=read("sw.js"),tutor=read("avionics_tutor.js"),practice=read("avionics_practice.js");
-assert(h.includes("avionics_advanced_50_v12.js?v=1"),"Missing script from page");
+assert(h.includes("avionics_advanced_50_v12.js?v=4"),"Missing script from page");
 assert(sw.includes('"./avionics_advanced_50_v12.js"'),"Missing expanded questions from offline list");
 assert(sw.includes("slt-study-studio-v35-nvidia-scenario-lab-r1"));
 assert(h.indexOf("avionics_mixed_networks_v11.js")<h.indexOf("avionics_advanced_50_v12.js"));

@@ -94,3 +94,19 @@ The study site's public repository is not a destination for confidential resumes
 - tests/four-tab-svg-math-v39.test.cjs checks all eight tab surfaces, no Try-answer leakage, prefixes/dice, source-derived SVG, canvas-ready primitives and mobile/desktop browser workflow. Verify latest-head Actions before merging.
 - Preserve stable IDs, original question models, offline progress, dice score isolation, existing schematics and simulator limitations.
 - Remaining: independent line-by-line correctness audit of all 690 original questions plus additional advanced Q31–Q50 and historical static visuals; display formatting and regression success are not proof of all mathematical correctness.
+
+## November 17, 2026 — v40 source-level math/layout/thermal corrections (PR #30)
+
+PR #30: https://github.com/huynguyen1017/slt-study-studio-public/pull/30
+
+Source investigation from the four screenshots: old prose remains in the PARALLEL-X8 saved question, q.steps, q.lesson, professor interview script and generic chalkboard, Muon hiring-manager guide, HWD-09 simulator and its synthetic IR/power model, and the reference schematic audit. A display overlay from v39 did not rewrite these source strings.
+
+- Added avionics_array_math_v40.js/.css. It creates a canonical eight-step, current-question-specific teaching proof for PARALLEL-X8, reused by Understand, Visuals, Baby Steps, Try It, Worked evidence, Post-math Engineer Resolution, Professor lecture, the Muon interview and HWD simulator. It draws native stacked MathML equations and Ω→mΩ cancellation (0.010 Ω × 1000 mΩ / Ω = 10 mΩ), and unitless branch count after isolating shorts.
+- Replaced the original PARALLEL-X8 question, formula, substitution, lesson summary/example/why and all eight original step bodies; fixed invalid N_short/0. Ideal zero-ohm shorts require separate case logic, while real bridges use finite resistance. Theoretically 100×1Ω at 5V draws 500A and 2.5kW; this is not a safe bench setting.
+- Physical 2 mΩ short with 99×1Ω healthy parallel: G=500+99=599 S; Req=1/599Ω=1.669449mΩ; at a compliant 2.5A, V=4.17362mV, bridge current=2.08681A and bridge dissipation≈8.71mW. IR hotspot cannot be guaranteed. Check current balance 2.08681A + 99×4.17362mA≈2.5A and P=V×I.
+- Physical open-count example after independent short isolation: Req=1/97Ω≈0.010309278Ω; Nhealthy≈(1Ω)/(0.010309278Ω)=97, Nopen=3. 1V across intact 97×1Ω parallel would demand ~97A and 97W: not compliant with 2.5A limit. Under 2.5A actual rail ≈25.77mV and each intact resistor dissipates≈0.664mW, making IR contrast weak/unreliable. If an ideal short has 0Ω, standard finite conductance arithmetic must not divide by 0.
+- HWD simulator previously generated false large IR thermal power using 0.18Ω instead of the modeled 0.002Ω bridge and allowed open-mode 1V to exceed a 2.5A limit. Both replaced with real P=I²R and I-limited benchV in BOTH phases. Synthetic thermal model is not real measured evidence.
+- Moved the schematic drawing-audit reference into five separate real stacked MathML boxes; as drawn 6Ω+(12Ω∥4Ω)=9Ω, I=1.333A, 8V on 6Ω, 4V across branches (0.3333A +1A =1.3333A). The separate pure parallel schematic remains 2Ω/6A.
+- Updated older related X9 / power-X8 explanatory content to avoid unverified guarantees of IR hotspots or safe 1V testing. Updated the Muon guide to label examples as practice, not verified Glassdoor reports.
+- tests/avionics-array-math-v40.test.cjs checks core math, 1150 stable Avionics IDs, exact MathML/rail graphics across modes and simulator current/heat; the HWD browser regression now checks realistic temperature, not fabricated 60°C.
+- The curriculum-wide independent mathematical and illustration review across all remaining Avionics and NVIDIA Q IDs is still a separate remaining workstream. Do not claim 100% accuracy or a live GitHub Pages deployment solely from static CI. Keep progression/dice/score/privacy intact.

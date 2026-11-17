@@ -65,7 +65,7 @@ function calcArrayState(states,opts={}){
  const rSeg=Number.isFinite(opts.rSeg)?opts.rSeg:0.00025; // 0.25 mOhm copper segment per position
  const iLimit=Number.isFinite(opts.iLimit)?opts.iLimit:2.5; // Safe current-limited short-hunt bench limit (A)
  const vTest=Number.isFinite(opts.vTest)?opts.vTest:1.0; // Safe 1.0 V IR test bias after shorts cleared
- const tAmb=25.0, rTheta=35.0; // 35 degC/W thermal impedance for crisp IR lab signature
+ const tAmb=25.0, rTheta=35.0; // Illustrative thermal coefficient only; not verified surface temperature.
  const jumpers=Array.isArray(opts.jumpers)&&opts.jumpers.length===10?opts.jumpers:Array(10).fill(true);
  const lifted=new Set(opts.lifted||[]);
  const irPhase=opts.irPhase==="open_bias"?"open_bias":"short_limit";
@@ -112,10 +112,9 @@ function calcArrayState(states,opts={}){
  const openEstimatedFromReq=(activeShorts===0&&Number.isFinite(rEqIdeal)&&inCircuitCount(branches)===n)?Math.round(n-rNom/rEqIdeal):null;
  const iTotalNominalIdeal=activeShorts>0?Infinity:(Number.isFinite(rEqIdeal)?vs/rEqIdeal:0);
 
- // Current-limited PSU (I_lim @ max 1 V) or Open-Hunt safe 1 V bias:
- const benchV=irPhase==="short_limit"
-  ?(Number.isFinite(rEqPhys)?Math.min(vTest,iLimit*rEqPhys):vTest)
-  :(activeShorts>0?Math.min(0.25,iLimit*rEqPhys):vTest);
+ // BOTH thermal phases honor the same actual supply current limit.
+ // An intact 10 mΩ array cannot sustain 1 V under a 2.5 A limit (needs ~100 A).
+ const benchV=Number.isFinite(rEqPhys) ? Math.min(vTest, iLimit*rEqPhys) : vTest;
  const benchI=Number.isFinite(rEqPhys)&&rEqPhys>0?benchV/rEqPhys:0;
 
  // Compute per-branch voltage, current, power, copper bus mV drop, and IR temp
@@ -127,8 +126,9 @@ function calcArrayState(states,opts={}){
    rBranch=b.st==="ok"?rNom:(b.st==="short"?rShortPhys:Infinity);
   }
   const iB=(b.inCircuit&&Number.isFinite(rBranch))?(benchV/rBranch):0;
-  // Distribute short bridge + local pad heating accurately:
-  const pB=b.st==="short"&&b.inCircuit?(iB*iB*0.18):(iB*iB*(Number.isFinite(rBranch)?rBranch:0));
+  // Physical resistor/bridge heat P=I²R. Do NOT invent a 0.18 Ω heater for a 2 mΩ short.
+  // Kelvin, jumper and IR drawings are synthetic; trace or pad heating beyond bridge R is not solved here.
+  const pB=iB*iB*(Number.isFinite(rBranch)?rBranch:0);
   const tempC=tAmb+pB*rTheta;
   // Trace mV gradient along +5V bus from J1 feed at left edge (idx 0 -> 99)
   cumDropMv+=(downstreamI*rSeg)*1000;
@@ -385,17 +385,17 @@ const PROBLEMS=[
   rubric:[
    {label:"Paper math & broken values (10 mΩ, 500 A, 0 Ω & ∞ Ω)",hint:"State healthy R_eq = 1/100 = 0.01 Ω (10 mΩ), I = 500 A, shorted R = 0 Ω drags bus to ~0 Ω and masks opens (∞ Ω).",tokens:["10","0.01","500","0","open","infinite","parallel"]},
    {label:"Schematic + DMM limitation (4-wire Kelvin / mV / lift pad)",hint:"Explain reading schematic for net/designators/jumpers, why 2-wire leads (0.24 Ω) swamp 10 mΩ, using 4-wire Kelvin & lifting one pad for out-of-circuit DMM check.",tokens:["schematic","kelvin","4-wire","lead","lift","isolate","dmm","multimeter"]},
-   {label:"Shorts first with current limit + IR hotspots, then opens via cold spots & KCL",hint:"Explain current-limiting PSU so 0 Ω short lights up as IR hotspot, removing shorts, then biasing safely to spot ∞ Ω opens as cold spots and verifying count N - 1/R_eq.",tokens:["ir","infrared","thermal","current limit","hot","cold","short","open"]}
+   {label:"Short isolation with Kelvin/IR as OPTIONAL evidence, then count opens using KCL",hint:"Explain current-limited low-voltage bench test, why heat may be insufficient for IR evidence, and how to calculate opens only after independent short isolation.",tokens:["ir","infrared","thermal","current limit","hot","cold","short","open"]}
   ],
   steps:[
-   "1) PAPER MATH FIRST (ZERO TOOLS YET): Compute healthy R_eq = R/N = 1 Ω / 100 = 0.01 Ω (10 mΩ). At V = 5 V, each healthy branch carries 5 V / 1 Ω = 5 A (P = 25 W), giving healthy I_total = 500 A and P_total = 2500 W.",
-   "2) DEFINE BROKEN RESISTOR VALUES: A shorted resistor drops from 1 Ω → 0 Ω (bridge ~1–5 mΩ). An open resistor rises from 1 Ω → ∞ Ω (OL, 0 A, 0 W). Critically: 1/R_eq = Σ(1/R_i), so even ONE 0 Ω short makes overall R_eq ≈ 0 Ω (~1 mΩ), drawing massive current and MASKING all ∞ Ω opens!",
-   "3) READ THE SCHEMATIC NEXT: Before probing, open the schematic & BOM to locate reference designators R1..R100, net names (+5V_MAIN, GND), copper feed entry (J1), and any bank isolation jumpers (JP1..JP10) or Kelvin test points.",
-   "4) WHY 2-WIRE IN-CIRCUIT DMM FAILS: Probing across any single resistor in-circuit measures the entire parallel bank in parallel with R_x, plus ~0.24 Ω of probe leads — completely hiding 10 mΩ vs 1 mΩ! Therefore we use a 4-wire Kelvin milliohmmeter AND never accept an in-circuit measurement as proof of one component.",
-   "5) HUNT 0 Ω SHORTS FIRST (POWER-LIMITED + IR CAMERA + mV GRADIENT): Set a bench PSU safely to V_clamp ≤ 1.0 V, I_limit = 1–3 A (CC mode). Current divides almost 100% into the 0 Ω short(s), lighting them up as bright HOTSPOTS on the IR camera. Confirm by walking a DC mV DMM along the copper bus (voltage drop flattens right at the shorted tap).",
-   "6) ISOLATE & CONFIRM SHORTS OUT-OF-CIRCUIT: Power OFF. Desolder/lift one pad of the suspect resistor (or open bank jumper). Measure the lifted resistor directly with DMM: 0.000 Ω confirms SHORT! Re-check array with 4-wire Kelvin — if R_eq is still < 10.00 mΩ, another 0 Ω short exists (repeat hotspot hunt until R_eq ≥ 10.00 mΩ).",
-   "7) HUNT ∞ Ω OPENS NEXT (IR COLD SPOTS + PAPER MATH CHECK): Once 0 shorts remain, re-compute how many opens remain from 4-wire R_eq: N_open = 100 − (1.0 Ω / R_eq). Apply safe low bias (e.g., 1.0 V -> 1.0 W per healthy resistor -> ~60 °C). Every OPEN (∞ Ω) resistor dissipates 0 W and stands out as a COLD SPOT (~25 °C) on the IR camera!",
-   "8) REWORK & FINAL PASS VERIFICATION: Power OFF, lift/inspect cracked solder fillets or open cold resistors (DMM reads OL / ∞ Ω), replace defective 0 Ω and ∞ Ω parts with verified 1.00 Ω resistors, and confirm final 4-wire R_eq = 10.00 mΩ ± tolerance and nominal bus current."
+   "Trace all 100 connected 1 Ω branches between +5V_MAIN and GND, with each bank jumper state labeled. Show that these are truly parallel only when BOTH physical nodes are shared.",
+   "Write 1/R_eq = 100/(1 Ω), invert to R_eq = 1 Ω/100 = 0.010 Ω = 10 mΩ, and calculate 5 V / 0.010 Ω = 500 A and 2500 W. This is an unsafe full-bias theoretical prediction; do not energize the board at this setting.",
+   "An ideal open contributes zero conductance and carries no current. An ideal 0 Ω short collapses the theoretical equivalent, but N_short/0 is undefined as ordinary arithmetic; use a separate case or finite physical bridge resistance.",
+   "Explain 4-wire Kelvin: an illustrative 0.24 Ω lead error turns a healthy 0.010 Ω 2-wire reading into 0.250 Ω, or 2400% relative error. Confirm measurement resolution and zero calibration with power OFF.",
+   "For a simulated 2 mΩ bridge with 99 nominal 1 Ω branches, equivalent resistance is 1/(500+99) Ω = 1.66945 mΩ. A 2.5 A limit yields ~4.17 mV, 2.087 A in the bridge, and only ~8.7 mW bridge dissipation—IR hotspot NOT guaranteed.",
+   "Use a power-OFF bank split, rated Kelvin probes and measured mV gradient. Disconnect one suspect branch at a time using approved rework rules, measure out-of-circuit, and exclude multiple shorts. R_eq ≥ 10 mΩ alone does not prove zero faulty branches.",
+   "Once shorts are independently ruled out, compute N_healthy = (1 Ω)/(0.010309278 Ω)=97 and N_open = 100−97=3. A 1 V source would demand ~97 A; under a 2.5 A limit the rail is only ~25.77 mV, so IR contrast can be negligible.",
+   "Power OFF, verify each suspected open out-of-circuit, replace only confirmed failed parts, restore bank configuration and check a calibrated final four-wire value near 10 mΩ subject to component tolerance."
   ]
  },
  {
@@ -512,7 +512,7 @@ function renderMatrixSvg(calc,viewMode,selectedId){
  const isIr=viewMode==="ir";
  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="100 parallel 1 ohm resistor PCB array and IR thermal view">`;
  s+=`<rect width="${W}" height="${H}" rx="8" fill="${isIr?"#07101f":"#f8fbff"}"/>`;
- s+=`<text x="16" y="23" font-size="13" font-weight="800" fill="${isIr?"#ffe38a":"#154866"}">${isIr?(calc.irPhase==="short_limit"?"IR CAMERA · CURRENT-LIMITED 1 V / 2.5 A SHORT HUNT (HOTSPOTS = 0 Ω SHORTS)":"IR CAMERA · SAFE 1.0 V BIAS OPEN HUNT (DARK BLUE COLD SPOTS = ∞ Ω OPENS)"):"PCB SCHEMATIC &amp; BANK MAP · +5V_MAIN (TOP BUS) TO GND (BOTTOM BUS) · R1..R100 PARALLEL"}</text>`;
+ s+=`<text x="16" y="23" font-size="13" font-weight="800" fill="${isIr?"#ffe38a":"#154866"}">${isIr?(calc.irPhase==="short_limit"?"SYNTHETIC IR · CC ≤2.5 A · ACTUAL "+(calc.benchV*1000).toFixed(2)+" mV (HOTSPOT NOT GUARANTEED)":"SYNTHETIC IR · CC ≤2.5 A · ACTUAL "+(calc.benchV*1000).toFixed(2)+" mV (CONTRAST NOT GUARANTEED)"):"PCB SCHEMATIC &amp; BANK MAP · +5V_MAIN (TOP BUS) TO GND (BOTTOM BUS) · R1..R100 PARALLEL"}</text>`;
  s+=`<text x="16" y="40" font-size="10.5" fill="${isIr?"#9ac1df":"#4b6b80"}">Click any resistor R1–R100 to probe it, cycle Healthy (1 Ω) / Short (0 Ω) / Open (∞ Ω), or lift 1 pad out-of-circuit.</text>`;
 
  // Top copper +5V bus bar (shows J1 injection + mV drop direction)
@@ -547,7 +547,7 @@ function renderMatrixSvg(calc,viewMode,selectedId){
   s+=`<text x="${x+(cellW-4)/2}" y="${y+30}" text-anchor="middle" font-size="9.5" font-weight="700" fill="${tColor}">${badge}</text>`;
   s+=`</g>`;
  }
- s+=`<text x="${padX}" y="${H-14}" font-size="10.5" font-weight="750" fill="${isIr?"#93bcd8":"#264c66"}">Legend: 0 Ω = Dead Short (IR Hotspot under CC) | ∞ Ω = Open Circuit (IR Cold Spot under Safe Bias) | Selected = R${selectedId}</text>`;
+ s+=`<text x="${padX}" y="${H-14}" font-size="10.5" font-weight="750" fill="${isIr?"#93bcd8":"#264c66"}">Legend: Ideal short = 0 Ω (IR NOT guaranteed) | Open = OL (contrast depends on power) | Selected = R${selectedId}</text>`;
  s+=`</svg>`;
  return s;
 }
@@ -604,7 +604,7 @@ function renderLabHtml(topic,q){
   <div class="av-hwd-studio" id="hwdStudio">
    <div class="av-hwd-banner">
     <h4>Interview Problem: 5.0 V Rail Feeding 100 Parallel 1.0 Ω Resistors (Mixed 0 Ω Shorts + ∞ Ω Opens)</h4>
-    <p><strong>Workflow Order:</strong> (1) <strong>Paper Math First</strong> (R<sub>eq,healthy</sub> = 1 Ω / 100 = <strong>10.00 mΩ</strong>, I<sub>total</sub> = <strong>500 A</strong>, 2500 W; broken: Short = <strong>0 Ω</strong>, Open = <strong>∞ Ω</strong>) → (2) <strong>Read Schematic</strong> (check net +5V_MAIN, R1..R100, jumpers) → (3) <strong>Hunt Shorts FIRST</strong> under safe CC limit via <strong>IR Camera Hotspot + mV Trace Gradient + Lift 1 Pad</strong> → (4) <strong>Hunt Opens SECOND</strong> via 4-Wire Kelvin (N<sub>open</sub> = 100 − 1/R<sub>eq</sub>) + <strong>IR Cold Spots</strong>.</p>
+    <p><strong>Model warning:</strong> 500 A / 2500 W is theoretical ONLY; supply current compliance applies in BOTH phases. A 2 mΩ bridge at a 2.5 A total limit may dissipate only milliwatts, so IR localization is NOT guaranteed. Temperatures are synthetic estimates, not camera measurements. <strong>Workflow Order:</strong> (1) <strong>Paper Math First</strong> (R<sub>eq,healthy</sub> = 1 Ω / 100 = <strong>10.00 mΩ</strong>, I<sub>total</sub> = <strong>500 A</strong>, 2500 W; broken: Short = <strong>0 Ω</strong>, Open = <strong>∞ Ω</strong>) → (2) <strong>Read Schematic</strong> (check net +5V_MAIN, R1..R100, jumpers) → (3) <strong>Hunt Shorts FIRST</strong> under safe CC limit via <strong>IR Camera Hotspot + mV Trace Gradient + Lift 1 Pad</strong> → (4) <strong>Hunt Opens SECOND</strong> via 4-Wire Kelvin (N<sub>open</sub> = 100 − 1/R<sub>eq</sub>) + <strong>IR Cold Spots</strong>.</p>
    </div>
 
    <div class="av-hwd-controls">
@@ -615,8 +615,8 @@ function renderLabHtml(topic,q){
     </label>
     <label class="av-hwd-ctl">IR Camera / Supply Excitation Mode
      <select id="hwdIrPhase">
-      <option value="short_limit" ${uiState.irPhase==="short_limit"?"selected":""}>Phase A: Current-Limited CC (1 V / 2.5 A max → Finds 0 Ω Hotspots)</option>
-      <option value="open_bias" ${uiState.irPhase==="open_bias"?"selected":""}>Phase B: Safe 1.0 V Bias (Clear Shorts First → Finds ∞ Ω Cold Spots)</option>
+      <option value="short_limit" ${uiState.irPhase==="short_limit"?"selected":""}>Phase A: Current-Limited CC (≤1 V / ≤2.5 A · hotspot NOT guaranteed)</option>
+      <option value="open_bias" ${uiState.irPhase==="open_bias"?"selected":""}>Phase B: 1.0 V setting with ≤2.5 A compliance · weak IR contrast possible</option>
      </select>
     </label>
     <div class="av-hwd-ctl">Selected R${sel.id} Bench Action
@@ -661,7 +661,7 @@ function renderLabHtml(topic,q){
 
    <div class="av-hwd-main">
     <div class="av-hwd-board">
-     <h5>${uiState.viewMode==="ir"?"Live FLIR IR Thermal View · 100 Parallel Resistors":uiState.viewMode==="dmm"?"Bus Copper mV Drop + Kelvin Node Probing":uiState.viewMode==="jumpers"?"Sub-Bank Half-Split Jumper Array (10 Resistors per Bank)":"Schematic Layout Map (R1–R100 across +5V_MAIN & GND)"}</h5>
+     <h5>${uiState.viewMode==="ir"?"Synthetic IR Model (Not a Real Camera) · 100 Parallel Resistors":uiState.viewMode==="dmm"?"Bus Copper mV Drop + Kelvin Node Probing":uiState.viewMode==="jumpers"?"Sub-Bank Half-Split Jumper Array (10 Resistors per Bank)":"Schematic Layout Map (R1–R100 across +5V_MAIN & GND)"}</h5>
      <div class="av-hwd-svgbox ${uiState.viewMode==="ir"?"":"light"}" id="hwdMatrixSvg">
       ${renderMatrixSvg(calc,uiState.viewMode==="dmm"?"schematic":uiState.viewMode,uiState.selectedId)}
      </div>
@@ -681,7 +681,7 @@ function renderLabHtml(topic,q){
        <tr><th>In-Circuit DMM (4-Wire)</th><td><code>${Number.isFinite(calc.r4Wire)?(calc.r4Wire*1000).toFixed(3)+" mΩ":"OL"}</code> ${calc.activeShorts>0?"(Masked by 0 Ω short!)":""}</td></tr>
        <tr><th>Out-of-Circuit DMM (1-Pad Lift)</th><td><strong><code>${esc(sel.isolatedDmm)}</code></strong></td></tr>
        <tr><th>DC Bus Drop @ Tap ${sel.id} (from J1)</th><td><code>${sel.busDropMv.toFixed(2)} mV</code> under ${calc.benchI.toFixed(2)} A bench test</td></tr>
-       <tr><th>IR Surface Temp (${esc(uiState.irPhase)})</th><td><strong>${sel.tempC.toFixed(1)} °C</strong> (P = ${(sel.pBench*1000).toFixed(1)} mW, I<sub>branch</sub> = ${(sel.iBench*1000).toFixed(1)} mA)</td></tr>
+       <tr><th>Modeled IR Surface Temp (35°C/W assumption · ${esc(uiState.irPhase)})</th><td><strong>${sel.tempC.toFixed(1)} °C</strong> (P = ${(sel.pBench*1000).toFixed(1)} mW, I<sub>branch</sub> = ${(sel.iBench*1000).toFixed(1)} mA)</td></tr>
        <tr><th>Diagnosis Rule</th><td>${calc.activeShorts>0?"Find &amp; isolate ALL 0 Ω hotspots first ("+calc.activeShorts+" remaining), then re-test for ∞ Ω opens.":calc.activeOpens>0?"0 shorts remain! Check "+calc.activeOpens+" IR cold spot(s) matching N_open = 100 − 1/R_eq.":"All in-circuit branches healthy: R_eq = 10.00 mΩ!"}</td></tr>
       </tbody>
      </table>
@@ -695,11 +695,12 @@ function renderLabHtml(topic,q){
 
    <div class="av-hwd-math">
     <h5>Paper-Math Formulas First (Stacked MathML) · Must Compute Before Touching Board</h5>
+    ${window.AVIONICS_ARRAY_MATH_V40?.render("studio",q)||""}
     <div class="av-hwd-math-grid">
-     ${mathBox("R_eq_healthy = R_nom / N = 1.0 / 100 = 0.01 Ω = 10 mΩ","1. Healthy Parallel Resistance")}
-     ${mathBox("I_total = N * (V_s / R_nom) = 100 * (5 / 1) = 500 A","2. Healthy Total Current & Power (2500 W)")}
-     ${mathBox("1 / R_eq = (k_ok / 1.0) + (k_open / ∞) + (k_short / 0)","3. Broken Values: Short = 0 Ω, Open = ∞ Ω")}
-     ${mathBox("N_open = N - (R_nom / R_eq) = N - (I_total / (V_s / R_nom))","4. Exact Open Count Once Shorts = 0")}
+     ${mathBox("R_eq_healthy = (1 Ω) / 100 = 0.010 Ω = 10 mΩ","1. Healthy Parallel Resistance")}
+     ${mathBox("I_total = 100 * ((5 V) / (1 Ω)) = 500 A","2. Hypothetical 5 V Draw (Do Not Apply Full Power)")}
+     ${mathBox("G_no_short = N_healthy / R_nom","3. No-Short Case (an ideal 0 Ω short must be treated separately)")}
+     ${mathBox("N_open = 100 - (1 Ω) / (0.010309278 Ω) = 3","4. Example: Count Opens ONLY After Shorts Cleared")}
     </div>
    </div>
 
@@ -719,7 +720,7 @@ function renderLabHtml(topic,q){
     <details open style="margin-top:10px">
      <summary style="cursor:pointer;font-weight:800;font-size:13px;color:#164a68">Baby-Step Completed Solution Walkthrough (All 8 Steps)</summary>
      <div class="av-hwd-steps">
-      ${prob.steps.map((st,k)=>`<div class="av-hwd-step"><b>Step ${k+1}:</b> ${esc(st)}</div>`).join("")}
+      ${prob.steps.map((st,k)=>`<div class="av-hwd-step"><b>Step ${k+1}:</b> ${prob.id==="HWD-09"?"Corrected circuit analysis: "+esc(window.AVIONICS_ARRAY_MATH_V40?.steps[k]?.title||st):esc(st)}${prob.id==="HWD-09"?(window.AVIONICS_ARRAY_MATH_V40?.renderStep({id:"parallel-X8"},k)||""):""}</div>`).join("")}
      </div>
     </details>
     <div class="av-hwd-grade-box">
