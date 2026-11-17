@@ -41,11 +41,15 @@ function rail(kind){
  const x=cancel, f=frac;
  let rows=[];
  const step=(title,body,why)=>'<div class="rr-rail-step"><strong>'+esc(title)+'</strong><div class="rr-rail-equation">'+body+'</div><small>'+esc(why)+'</small></div>';
- if(kind==="mixed"||kind==="mesh"){
+ if(kind==="mixed"){
  rows.push(step("1 · kΩ → Ω. Put unwanted kΩ on the BOTTOM",f('2.2 '+x('kΩ'),'1')+' <b>×</b> '+f('1000 Ω','1 '+x('kΩ'))+' <b>=</b> 2200 Ω',"The same kΩ unit is crossed out diagonally. Multiply 2.2×1000=2200."));
  rows.push(step("2 · Voltage ÷ resistance → current",f('12 '+x('V'),'2200 '+x('Ω'))+' <b>×</b> '+f('1 A·'+x('Ω'),'1 '+x('V'))+' <b>=</b> 0.0054545 A',"Because 1 Ω = 1 V/A, the circuit equation leaves only amperes."));
  rows.push(step("3 · A → mA: cancel A then multiply numerators",f('0.0054545 '+x('A'),'1')+' <b>×</b> '+f('1000 mA','1 '+x('A'))+' <b>=</b> 5.4545 mA',"This rail is the unit-conversion stage; the current came from the circuit model."));
- if(kind==="mesh")rows.push(step("4 · Current × resistance → voltage drop",f('3.6 '+x('mA'),'1')+' <b>×</b> '+f('1 A','1000 '+x('mA'))+' <b>×</b> '+f('2000 '+x('Ω'),'1')+' <b>×</b> '+f('1 V','1 '+x('A')+'·'+x('Ω'))+' <b>=</b> 7.2 V',"Here the current is 3.6 mA through 2 kΩ, so the drop is 7.2 V."));
+ }else if(kind==="mesh"){
+ rows.push(step("1 · Mesh R₁: kΩ to Ω",f('2.0 '+x('kΩ'),'1')+' <b>×</b> '+f('1000 Ω','1 '+x('kΩ'))+' <b>=</b> 2000 Ω',"The chosen mesh branch is 2.0 kΩ, not the 2.2 kΩ used in the separate mixed-network case."));
+ rows.push(step("2 · Difference of node potentials ÷ R₁",f('(12 − 4.8) '+x('V'),'2000 '+x('Ω'))+' <b>×</b> '+f('1 A·'+x('Ω'),'1 '+x('V'))+' <b>=</b> 0.0036 A',"KCL first establishes node A = 4.8 V. The left resistor therefore has 7.2 V across it."));
+ rows.push(step("3 · Convert 0.0036 A to mA",f('0.0036 '+x('A'),'1')+' <b>×</b> '+f('1000 mA','1 '+x('A'))+' <b>=</b> 3.6 mA',"Unit cancellation is independent of circuit topology."));
+ rows.push(step("4 · Current × resistance → voltage drop",f('3.6 '+x('mA'),'1')+' <b>×</b> '+f('1 A','1000 '+x('mA'))+' <b>×</b> '+f('2000 '+x('Ω'),'1')+' <b>×</b> '+f('1 V','1 '+x('A')+'·'+x('Ω'))+' <b>=</b> 7.2 V',"For R₁ only: 3.6 mA through 2 kΩ drops 7.2 V."));
  }else{
  rows.push(step("Volts / ohms yields amperes",f((kind==="series"?"100":"12")+' '+x('V'),(kind==="series"?"50":"2")+' '+x('Ω'))+' <b>×</b> '+f('1 A·'+x('Ω'),'1 '+x('V'))+' <b>=</b> '+(kind==="series"?"2":"6")+' A',"Use the physical identity 1 Ω = 1 V/A; it is not a chemical mole ratio."));
  }
@@ -99,7 +103,7 @@ function render(q,t,nvidia=false){
  '<div class="rr-answer"><b>Box the results</b><div>'+c.answers.map(s=>'<span>'+esc(s)+'</span>').join("")+'</div><p><strong>Independent check:</strong> '+esc(c.check)+'</p></div></section>').join("")+
  '<footer>Math method: factors cancel units; circuit method: KCL/KVL + Ohm. Mesh signs depend on the arrows you draw. Values are tutorial examples, not live avionics or NVIDIA measurements. Use an approved circuit diagram and instrument limits for real hardware.</footer></section>';
 }
-if(typeof document!=="undefined"){
+if(typeof document!=="undefined" && typeof document.addEventListener==="function"){
  document.addEventListener("click",ev=>{const btn=ev.target.closest?.("[data-rr-case]");if(!btn)return;const white=btn.closest(".rr-whiteboard");if(!white)return;white.querySelectorAll("[data-rr-case]").forEach(el=>el.setAttribute("aria-pressed",String(el===btn)));white.querySelectorAll("[data-rr-panel]").forEach(el=>el.hidden=el.dataset.rrPanel!==btn.dataset.rrCase);});
 }
 window.CIRCUIT_RAILROAD_WHITEBOARD={version:"1.0",cases,matches,render,circuitSvg,rail};
