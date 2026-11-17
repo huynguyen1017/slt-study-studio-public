@@ -30,8 +30,11 @@ for(const h of [av,nv]){
 assert.equal(E.render({id:"ohm-F1"},"nvidia"),"");
 assert.equal(E.render({id:"nvs-dram-14",variant:true},"nvidia"),"","No mismatch between rolled numbers and fixed worked example");
 assert.equal(E.render({id:"nvs-dram-15"},"nvidia"),"","Do not copy a solution onto an unrelated question");
-for(const p of ["index.html","avionics_tutor.js","nvidia_slt_ui.js","sw.js"]){
- const txt=load(p);assert(txt.includes("engineering_solved_cases_v1"),p+" missing authored integration");
+for(const p of ["index.html","sw.js"]){
+ const txt=load(p);assert(txt.includes("engineering_solved_cases_v1"),p+" missing authored asset");
+}
+for(const p of ["avionics_tutor.js","nvidia_slt_ui.js"]){
+ assert(load(p).includes("ENGINEERING_SOLVED_CASES.render"),p+" missing actual authored case render hook");
 }
 const html=load("index.html");
 assert(html.indexOf("engineering_solved_cases_v1.js")<html.indexOf("avionics_tutor.js"));
