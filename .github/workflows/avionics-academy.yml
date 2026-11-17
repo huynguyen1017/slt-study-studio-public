@@ -35,6 +35,9 @@ on:
       - 'nvidia_slt_*.js'
       - 'nvidia_slt.css'
       - 'ohmf1_engineer_studio_v2.js'
+      - 'circuit_question_railroad_v2.js'
+      - 'circuit_question_railroad_v2.css'
+      - 'tests/circuit-question-railroad-v2.test.cjs'
       - 'circuit_railroad_whiteboard_v1.js'
       - 'circuit_railroad_whiteboard_v1.css'
       - 'tests/circuit-railroad-whiteboard-v1.test.cjs'
@@ -74,6 +77,7 @@ jobs:
           node --check nvidia_slt_visual_lab_v2.js
           node --check ohmf1_engineer_studio_v2.js
           node --check circuit_railroad_whiteboard_v1.js
+          node --check circuit_question_railroad_v2.js
           node --check avionics_mixed_visuals_v11.js
           node --check avionics_practice.js
           node --check avionics_beginner_lessons.js
@@ -102,6 +106,7 @@ jobs:
           node tests/engineering-solved-cases-v1.test.cjs
           node tests/ohmf1-engineer-studio-v2.test.cjs
           node tests/circuit-railroad-whiteboard-v1.test.cjs
+          node tests/circuit-question-railroad-v2.test.cjs
       - name: Install headless browser for desktop and mobile smoke tests
         run: |
           npm install --no-save playwright@1.56.1
@@ -114,3 +119,4 @@ jobs:
           RUN_BROWSER=1 node tests/nvidia-slt-academy-v1.test.cjs
           RUN_BROWSER=1 node tests/ohmf1-engineer-studio-v2.test.cjs
           RUN_BROWSER=1 node tests/circuit-railroad-whiteboard-v1.test.cjs
+          RUN_BROWSER=1 node tests/circuit-question-railroad-v2.test.cjs
