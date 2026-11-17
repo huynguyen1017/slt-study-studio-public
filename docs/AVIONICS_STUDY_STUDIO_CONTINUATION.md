@@ -82,3 +82,15 @@ The study site's public repository is not a destination for confidential resumes
 6. Confirm both Avionics and NVIDIA visual/work/baby-step/notebook modes, mobile portrait no overflow, airplane offline load, and that user progress keys remain stable.
 7. Retain physical realism disclaimers (illustrative diagrams and safe currents/voltages); never claim real instrument/simulator behavior for unsupported configurations.
 8. Preserve private silicon logs, resumes, screenshots containing personal data, proprietary work documents, and full ChatGPT transcripts **outside the public repository**. Source references may guide privately authorized work without publishing source contents.
+
+## November 17, 2026 — v39 four-tab equation and SVG-picture follow-up
+
+- PR #29: https://github.com/huynguyen1017/slt-study-studio-public/pull/29 (branch feature/v39-four-tab-math-svg-consistency). Check merge state before claiming it is published.
+- All four sections (Understand, Visuals, Baby Steps, Try It) in Avionics EE and NVIDIA SLT Prep use the same selected question object, including currently selected dice rerolls. The new CIRCUIT_CURRENT_QUESTION_RAILROAD.renderStage adapts formulas and format by tab.
+- Understand: current question givens, prefix fractions, governing law. Visuals: diagram/node reading, real current source equation and substitution. Baby Steps: existing complete lesson plus original question factor-label, algebra reminder and unit proof. Try It: setup and formula hints, without disclosing the stored answer or completed substitution.
+- Both professor Understand lectures switch legacy multi-column SI conversion TABLES to stacked numerator/denominator factor-label fractions with red cancellation strokes.
+- professor_notebook_spreads.js draws native SVG numerator, fraction bar, denominator, and cross-out unit identity on the 2600×1400 picture for source-supported clean fractions; ambiguous multi-loop expressions are not guessed.
+- The live notebook SVG and its downloaded PNG now use these source-specific formula drawings; the twelve historical pre-rendered raster PNGs under figures/notebook_spreads/ have NOT been changed. Gallery now offers Download Updated Live PNG and describes the old PNG files as archives.
+- tests/four-tab-svg-math-v39.test.cjs checks all eight tab surfaces, no Try-answer leakage, prefixes/dice, source-derived SVG, canvas-ready primitives and mobile/desktop browser workflow. Verify latest-head Actions before merging.
+- Preserve stable IDs, original question models, offline progress, dice score isolation, existing schematics and simulator limitations.
+- Remaining: independent line-by-line correctness audit of all 690 original questions plus additional advanced Q31–Q50 and historical static visuals; display formatting and regression success are not proof of all mathematical correctness.
