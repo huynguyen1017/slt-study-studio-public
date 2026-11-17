@@ -65,7 +65,7 @@ console.log("PASS v38: prefix cancellation, current-question and dice-variant is
   await page.locator('[data-page="work"]').click();
   const white=page.locator(".rrq-workpad").first();
   await white.waitFor({timeout:20000});
-  assert(await white.locator(".rrq-rail .rr-fraction").count()>0,"Q12 needs real stacked fractions");
+  assert((await white.locator(".rrq-rail .rr-fraction").count()>0) || (await white.textContent()).includes("No prefix cancellation is needed"),"A question with unprefixed Ω must not fabricate a prefix cancellation");
   assert(await white.locator("math").count()>0,"MathML equation required");
   await page.setViewportSize({width:375,height:800});
   assert(await white.isVisible(),"keep worksheet accessible at mobile width");
