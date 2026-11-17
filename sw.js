@@ -1,5 +1,5 @@
 /* Offline-first public educational materials; no private data or cross-origin caches. */
-const CACHE = 'slt-study-studio-v35-nvidia-scenario-lab-r1-prep-v2-engineering-cases-v36-ohmf1-engineer-interview-v37-railroad-node-mesh-v38-current-question-railroad-v39-four-tabs-svg-equations';
+const CACHE = 'slt-study-studio-v35-nvidia-scenario-lab-r1-prep-v2-engineering-cases-v36-ohmf1-engineer-interview-v37-railroad-node-mesh-v38-current-question-railroad-v39-four-tabs-svg-equations-v40-source-proof-safety';
 const CORE = [
   "./",
   "./index.html",
@@ -44,6 +44,8 @@ const CORE = [
   "./avionics_si.css",
   "./avionics_tutor.js",
   "./avionics_hw_debug_interview.js",
+  "./avionics_array_math_v40.js",
+  "./avionics_array_math_v40.css",
   "./avionics_hw_debug_interview.css",
   "./professor_mastery_engine.js",
   "./professor_mastery_engine.css",
