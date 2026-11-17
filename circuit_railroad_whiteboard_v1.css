@@ -39,3 +39,8 @@
 .rr-answer>p{font-size:12px;line-height:1.6;margin-bottom:0;color:#315f51}
 .rr-whiteboard>footer{background:#f4f7fb;border-top:1px solid #cbdce9;padding:12px 17px;font-size:12px;line-height:1.7;color:#4c667a}
 @media(max-width:590px){.rr-case{padding:10px}.rr-rail-step{padding:10px}.rr-case-tabs button{flex:1 1 43%}.rr-rail-equation{font-size:15px}.rr-fraction{min-width:48px}.rr-top,.rr-bottom{padding:2px 4px}}
+
+.rr-topology-alert{margin:14px 0;padding:14px 16px;border:2px solid #d69d4d;border-radius:11px;background:#fff9ed;color:#714b23}
+.rr-topology-alert>strong{display:block;color:#944c23;font-size:15px}
+.rr-topology-alert p{font-size:13px;line-height:1.75;margin:8px 0}
+.rr-topology-alert .rr-math{border-left-color:#d78b30;background:#fff}
