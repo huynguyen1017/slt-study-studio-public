@@ -29,7 +29,7 @@ for(const s of ["understand","visual","baby","try"]){assert(prep.includes('NVIDI
 assert(!prep.includes("580e-3 V"),"generic fixed PDN numeric result must be gone");
 assert(!prep.includes('placeholder="e.g.'),"numeric Try answer placeholder must not leak exact expected");
 assert(pme.includes("return window.NVIDIA_SLT_EQUATION_NOTEBOOK_V41.renderInterview(q,t)"));
-assert(read("index.html").includes("nvidia_slt_equations_v41.js?v=1"));
+assert(read("index.html").includes("nvidia_slt_equations_v41.js?v=2"));
 assert(read("sw.js").includes('"./nvidia_slt_equations_v41.js"'));
 console.log("PASS v41 static: all eight NVIDIA screens, MathML, crossed units, SVG, dice, no invented numeric values, hidden Try.");
 
