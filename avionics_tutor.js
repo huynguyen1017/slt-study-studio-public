@@ -313,6 +313,7 @@ function activeBanner(q,t){
  return `<div class="av-question av-active-banner">
   <div class="av-q-head"><span>ACTIVE QUESTION ${(idx>=0?idx+1:currentIndex+1)} / ${total} · ${esc(q.id.toUpperCase())} · ${esc(q.level.toUpperCase())}${q.isCustomVariant?" · CUSTOM NUMBERS":""}</span>${variantBtn}</div>
   <p>${esc(q.question)}</p>
+  ${feedback.startsWith("No additional verified same-method")?`<p class="av-message" role="status">${esc(feedback)}</p>`:""}
  </div>`;
 }
 
