@@ -75,7 +75,7 @@ assert(!M.valid(absent)&&R.render(absent,{},"understand").includes("Conceptual p
 for(const f of ["nvidia_slt_ui.js","nvidia_slt_tutor.js","professor_mastery_engine.js","nvidia_slt_equations_v41.js","nvidia_slt_math_proofs_v42.js"])new Function(read(f));
 const engineer=read("nvidia_slt_ui.js"),professor=read("professor_mastery_engine.js");
 assert(engineer.includes("numericProof")&&professor.includes("NVIDIA_SLT_MATH_PROOFS_V42?.valid(q)"));
-assert(read("index.html").includes("nvidia_slt_math_proofs_v42.js?v=1"));
+assert(read("index.html").includes("nvidia_slt_math_proofs_v42.js?v=43"));
 assert(read("sw.js").includes('"./nvidia_slt_math_proofs_v42.js"'));
 console.log("PASS v42: Q21 output A→mA, real SVG/MathML, cross-cancellation, power check, numeric variants, all four screens and other circuit families.");
 
