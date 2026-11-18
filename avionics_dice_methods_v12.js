@@ -97,6 +97,60 @@
    default:throw Error("Missing curated same-method numerical generator: "+id);
   }
  }
+ 
+ // Author-verified same-operation on-demand variants. A scaled measurement is
+ // re-solved by the exact method-specific build() function above; never adjust
+ // expected numerically without re-evaluating its governing relationship.
+ // The first physical input changes on every roll, including one-item pools.
+ // Restrict the two cases with ordered physical values: cold 2-wire leads
+ // must remain below the strap reading, and increasing range must stay > start.
+ function freshInputs(id, roll) {
+  const seeds = configs[id];
+  if(!seeds || !seeds.length)return null;
+  const n = Math.max(1,Math.floor(Number(roll)||1));
+  const base = seeds[(n-1)%seeds.length].slice();
+  const cycle = Math.floor((n-1)/seeds.length)+1;
+  const a = base[0];
+  // Constrain the finite physical domain. Consecutive rolls produce distinct
+  // inputs; after 100+ rolls old exercises may recur but never as duplicates
+  // on adjacent clicks. Percentage rates are kept strictly within 0..100%.
+  const firstFieldIsProbability = id === "qualification-C7";
+  let step = Number.isInteger(a) ? (Math.abs(a)>=1000?Math.max(2,Math.round(Math.abs(a)*.01)):Math.abs(a)>=100?2:1)
+     : Math.abs(a)>=1?.01:Math.abs(a)>=.1?.001:.0001;
+  if(firstFieldIsProbability) step=.0004;
+  let capacity=113;
+  if(id==="schematics-C2"||id==="rf-C7"){
+    capacity=Math.max(1,Math.floor((base[1]-a)/(2*step)));
+  }
+  if(id==="timing-C7"&&base.length>1)capacity=113;
+  const advance=((cycle-1)%Math.min(113,capacity))+1;
+  let next=firstFieldIsProbability ? a-step*advance : a+step*advance;
+  if(firstFieldIsProbability)next=Math.max(.0001,Math.min(.9999,next));
+  base[0]=Number(next.toPrecision(9));
+  return base;
+ }
+ function freshVariant(id, roll, original) {
+  const inputs=freshInputs(id,roll);
+  if(!inputs)return null;
+  const [question,expr,answer,unit,unitCheck]=build(id,inputs);
+  if(!Number.isFinite(answer)||question===original.question)throw Error(id+" failed to create a fresh numeric question");
+  const rounded=num(answer);
+  const sub="Result = "+expr+" = "+s(rounded)+" "+unit;
+  return {
+   question,expected:rounded,unit,formula:original.formula,sub,
+   steps:[
+    "Identify the specific changed physical givens and the requested output.",
+    unitCheck,
+    "Write this slot's original solving law: "+original.formula,
+    "Substitute the new values (same numerical method): "+expr+" = "+s(rounded)+" "+unit,
+    "Independently check units, topology and expected magnitude."
+   ],
+   numericOperation:original.numericOperation,
+   sourceMethod:original.numericOperation,
+   topology:original.topology
+  };
+ }
+
  let safe=0, generated=0, removed=0;
  for(const q of Q.filter(q=>q.level==="Calculation"&&q.originalNumeric)){
   const key=q.topic+"::"+q.calcFamily, disallowed=baseByFamily.get(key)||new Set();
@@ -105,6 +159,9 @@
   removed+=before.length-q.variantPool.length;
   const cfg=configs[q.id];
   if(cfg){
+   // Existing curated pool remains for the historical workbook; new dice
+   // clicks obtain mathematically recalculated, method-locked fresh values.
+   q.variantGenerator=roll=>freshVariant(q.id,roll,q);
    for(const inputs of cfg){
     const [question,expr,answer,unit,unitCheck]=build(q.id,inputs);
     if(!Number.isFinite(answer))throw Error(q.id+" bad generated answer");
@@ -125,5 +182,5 @@
   }
   safe++;
  }
- window.AVIONICS_DICE_METHODS_V12={slots:safe,generated,removed};
+ window.AVIONICS_DICE_METHODS_V12={slots:safe,generated,removed,freshInputs,freshVariant,configuredSlots:Object.keys(configs).length};
 })();
