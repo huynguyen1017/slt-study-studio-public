@@ -155,7 +155,7 @@
    ],
    numericOperation:original.numericOperation,
    sourceMethod:original.numericOperation,
-   topology:original.topology
+   topology:null
   };
  }
 
@@ -170,7 +170,7 @@
  ]);
  function extraVariant(q,roll){
   if(!extraMethods.has(q.id))return null;
-  const n=Math.max(1,Math.floor(Number(roll)||1));
+  const n=((Math.max(1,Math.floor(Number(roll)||1))-1)%120)+1;
   const round=x=>Number(Number(x).toPrecision(10));
   let prompt,expr,value,unit=q.unit,check;
   switch(q.id){
@@ -250,7 +250,7 @@
   if(!Number.isFinite(value)||!Number.isFinite(Number(value.toPrecision(10))))throw Error(q.id+" invalid extra dice calculation");
   const expected=round(value);
   const sub="Result = "+expr+" = "+s(expected)+" "+unit;
-  return {question:prompt,expected,unit,formula:q.formula,sub,sourceMethod:q.numericOperation,numericOperation:q.numericOperation,topology:q.topology,
+  return {question:prompt,expected,unit,formula:q.formula,sub,sourceMethod:q.numericOperation,numericOperation:q.numericOperation,topology:null,
     steps:["Identify all NEW physical values and the requested result in "+unit+".",
      check,
      "Use the SAME governing relationship as the original: "+q.formula,
