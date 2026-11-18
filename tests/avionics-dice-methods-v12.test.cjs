@@ -38,7 +38,7 @@ for(const x of q.filter(q=>q.originalNumeric)){
 assert.equal(methodSafe,187);
 assert(crafted>=37,"All 37 previously uncovered solving methods now need >=2 calculated variants");
 const index=read("index.html"),sw=read("sw.js");
-assert(index.includes("avionics_dice_methods_v12.js?v=1"));
+assert(index.includes("avionics_dice_methods_v12.js?v=44"));
 assert(sw.includes('./avionics_dice_methods_v12.js'));
 assert(sw.includes("slt-study-studio-v35-nvidia-scenario-lab-r1"));
 assert(index.indexOf("avionics_distinct_math_v10.js")<index.indexOf("avionics_dice_methods_v12.js"));
