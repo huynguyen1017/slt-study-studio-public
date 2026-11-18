@@ -137,3 +137,12 @@ The user's exported live Q21 page (Electrical Foundations, 4 V across 175 Ω, ou
 - Exact canonical IDs, dice behavior, score isolation and browser localStorage remain untouched; the original separate NVIDIA SLT Prep question bank and scoring are not rewritten.
 - tests/nvidia-real-math-v42.test.cjs checks the current-Q21 solution, output conversion even when input prefixes absent, rerolled values, current/power/KVL and other numeric families, no answer leak in Try It, and desktop/mobile UI; full existing suite remains a gate.
 - Do not claim a complete independent mathematical audit of all 600+600 NVIDIA and 1150 Avionics questions or live GitHub Pages deployment from this patch alone.
+
+
+## November 17, 2026 — v43 MathML double-encoding / repeated interview regression
+
+Observed after v42 merged: NVIDIA SLT Engineer Q21 4 V/175 Ω displayed visible escaped XML such as `<math xmlns=...>` for all five paper-math steps and repeated the entire five-step answer in the hiring-manager interview section. Exact root cause in `nvidia_slt_math_proofs_v42.js`: `solved().make(label,s)` always called `studyMath(s)` on ALL strings even when `s` already contained complete native MathML returned by `studyMath()`, `equals()` or `fracCon()`. This re-tokenized XML into ordinary variables, escaped the `<math>` root and corrupted the rendered expressions. `interview()` separately repeated `info.arr.join('')` under the whole question, multiplying duplication.
+
+Fix branch `fix/v43-mathml-double-encoding-deduplicate` (PR #33): supply trusted already-built MathML fragments directly to `box()` and do not parse them again. The five expected Q21 proof cards have exactly one real `<math>` root each; Ohm and conversion stages have real `<mfrac>` children; two `<menclose notation="updiagonalstrike">` ampere labels; equality operators `<mo>=</mo>` and no escaped `&lt;math` tags. Interview displays concise final result and validation rather than a duplicate five-step proof. Q21 numerical answer remains 22.85714286 mA and power 0.09142857 W. No question bank, scores, dice, storage or Avionics changes.
+
+New `tests/nvidia-real-math-v42.test.cjs` assertions exercise each generated card, all specialized numeric families, actual browser MathML DOM namespace on desktop/mobile and a single concise interview result. Bump the script query and service-worker offline cache to v43; verify CI from final branch HEAD and GitHub Pages independently if possible. Full 600+600 NVIDIA mathematical curriculum audit remains outstanding.
