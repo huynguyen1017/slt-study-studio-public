@@ -34,11 +34,30 @@ for(const q of Q.filter(q=>q.originalNumeric&&typeof q.variantGenerator==="funct
  }
 }
 assert.equal(methods,37);
+assert.equal(D.extraSlots,12);
+const extraIds=["units-C9","units-C10","ohm-C4","ohm-C5","ohm-C7","ohm-C8","power-C3","power-C4","power-C5","parallel-C3","parallel-C4","parallel-C5"];
+let extraCases=0;
+for(const id of extraIds){
+ const q=Q.find(q=>q.id===id);
+ assert(q&&q.variantGenerator,id+" no method-anchored generator");
+ const seen=new Set();
+ for(let roll=1;roll<=60;roll++){
+  const v=q.variantGenerator(roll);
+  assert(v&&v.question!==q.question,id+" returned canonical or missing new given");
+  assert(!seen.has(v.question),id+" repeated after "+roll+" clicks");
+  assert.equal(v.sourceMethod,q.numericOperation,id+" switched calculation method");
+  assert(v.topology===null,id+" may display stale resistor/voltage values in topology drawing");
+  assert(close(evalSub(v.sub),v.expected),id+" wrong answer from new source numbers: "+v.sub);
+  seen.add(v.question);extraCases++;
+ }
+}
+assert.equal(extraCases,720);
+
 const unresolved=Q.filter(q=>q.originalNumeric&&(!q.variantGenerator)&&q.variantPool?.length<=1).map(q=>q.id);
 console.log("Dice audit: "+methods+" fully source-recomputed method slots, "+cases+" unique sequential verified rolls; pool-only <=1 with no generator: "+unresolved.length+" — "+unresolved.slice(0,60).join(","));
 assert(!read("avionics_tutor.js").includes("roll%2===1||!pool.length"),"Dice caller must not alternate with stale pool");
 assert(read("avionics_tutor.js").includes("No additional verified same-method number set"),"Exhausted pool must report rather than pretend to reroll");
-console.log("PASS v44 Avionics 37 methods x 60 distinct and independently recalculated dice variants, ID and method isolation.");
+console.log("PASS v44: "+cases+" audited configured dice rolls + "+extraCases+" new authored source numerics; method/topology/answers and canonical IDs protected.");
 
 (async()=>{
  if(process.env.RUN_BROWSER!=="1")return;
