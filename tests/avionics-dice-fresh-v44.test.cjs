@@ -39,3 +39,38 @@ console.log("Dice audit: "+methods+" fully source-recomputed method slots, "+cas
 assert(!read("avionics_tutor.js").includes("roll%2===1||!pool.length"),"Dice caller must not alternate with stale pool");
 assert(read("avionics_tutor.js").includes("No additional verified same-method number set"),"Exhausted pool must report rather than pretend to reroll");
 console.log("PASS v44 Avionics 37 methods x 60 distinct and independently recalculated dice variants, ID and method isolation.");
+
+(async()=>{
+ if(process.env.RUN_BROWSER!=="1")return;
+ const {chromium}=require("playwright");
+ const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
+ try{
+  for(const width of [1280,390]){
+   const page=await browser.newPage({viewport:{width,height:860}});
+   const errors=[];page.on("pageerror",e=>errors.push(e.message));
+   await page.goto("http://127.0.0.1:8765/#avionics",{waitUntil:"load"});
+   await page.locator("#avionicsView .av-workbook").waitFor({timeout:30000});
+   await page.locator('#avionicsView [data-qid="ohm-C3"]').first().click();
+   const prompts=new Set();
+   const readPrompt=()=>page.locator("#avionicsView .av-active-banner p").first().textContent();
+   const canonical=await readPrompt();
+   prompts.add(canonical);
+   for(let n=0;n<16;n++){
+    await page.locator("#avionicsView #avRandomize").click();
+    const prompt=await readPrompt();
+    assert(!prompts.has(prompt),"Browser dice repeat after click "+(n+1)+" at "+width+"px: "+prompt);
+    prompts.add(prompt);
+   }
+   const active=await readPrompt();
+   await page.locator('#avionicsView [data-page="try"]').click();
+   assert(await page.locator("#avionicsView #avTryNumber").count()>0);
+   await page.locator('#avionicsView [data-page="learn"]').click();
+   await page.locator("#avionicsView #avResetVariant").click();
+   assert.equal(await readPrompt(),canonical,"Restore Canonical changed the original question");
+   assert.notEqual(active,canonical);
+   assert.equal(errors.length,0,errors.join("; "));
+   console.log("PASS v44 browser "+width+"px: 16 distinct dice clicks, Try mode and canonical restore.");
+   await page.close();
+  }
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1});
