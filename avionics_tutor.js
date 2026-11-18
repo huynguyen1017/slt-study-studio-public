@@ -603,6 +603,19 @@ function show(){
 }
 
 function switchPage(p){page=p;stepIndex=0;feedback="";expanded=false;show();find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});}
+// A filtered index is not a stable question identity. Always hydrate the answer
+// from the newly selected canonical/dice question, never the previous question.
+function syncScopedDraft(){
+ const q=selected();
+ draftText=q?(state.responses[progressKey(q)]||""):"";
+ currentAnswer=draftText;
+ answerDirty=false;feedback="";expanded=false;
+ if(q){
+  const fullIndex=allTopicQuestions().findIndex(x=>x.id===q.id);
+  if(fullIndex>=0){state.lastTopic=topic;state.lastIndex=fullIndex;}
+ }
+}
+
 function moveQuestion(n,keepPage=false){
  currentIndex=Math.max(0,Math.min(qset().length-1,n));
  if(!keepPage)page="learn";
@@ -611,7 +624,10 @@ function moveQuestion(n,keepPage=false){
  const q=selected();
  draftText=q?(state.responses[progressKey(q)]||""):"";
  currentAnswer=draftText;answerDirty=false;
- state.lastTopic=topic;state.lastIndex=currentIndex;save();show();
+ state.lastTopic=topic;
+ const fullIndex=q?allTopicQuestions().findIndex(x=>x.id===q.id):-1;
+ state.lastIndex=fullIndex>=0?fullIndex:currentIndex;
+ save();show();
  const heading=find(".av-workbook-heading h2",host);
  if(heading){heading.setAttribute("tabindex","-1");heading.focus({preventScroll:true});}
  find(".av-workbook",host)?.scrollIntoView({block:"start",behavior:"smooth"});
@@ -628,15 +644,15 @@ function wire(){
  if(openHwd)openHwd.onclick=()=>{
   topic="parallel";filter="All";query="";page="learn";stepIndex=0;
   const idx=allTopicQuestions().findIndex(x=>x.id==="parallel-X8");
-  currentIndex=idx>=0?idx:37;state.lastTopic=topic;state.lastIndex=currentIndex;save();show();
+  currentIndex=idx>=0?idx:37;syncScopedDraft();save();show();
   const det=find("#avHwdDetails",host);if(det){det.open=true;det.scrollIntoView({block:"start",behavior:"smooth"});}
  };
  const el=find("#avTopicList",host);
- if(el)el.onchange=e=>{topic=e.target.value;currentIndex=0;page="learn";stepIndex=0;filter="All";query="";state.lastTopic=topic;state.lastIndex=0;save();show()};
+ if(el)el.onchange=e=>{topic=e.target.value;currentIndex=0;page="learn";stepIndex=0;filter="All";query="";syncScopedDraft();save();show()};
  const lev=find("#avLevelList",host);
- if(lev)lev.onchange=e=>{filter=e.target.value;currentIndex=0;page="learn";stepIndex=0;show()};
+ if(lev)lev.onchange=e=>{filter=e.target.value;currentIndex=0;page="learn";stepIndex=0;syncScopedDraft();save();show()};
  const search=find("#avQuestionSearch",host);
- if(search)search.onchange=e=>{query=e.target.value.toLowerCase().trim();currentIndex=0;page="learn";stepIndex=0;show()};
+ if(search)search.onchange=e=>{query=e.target.value.toLowerCase().trim();currentIndex=0;page="learn";stepIndex=0;syncScopedDraft();save();show()};
  const ex=find("#avExportLearning",host);
  if(ex)ex.onclick=()=>{
   const b=new Blob([JSON.stringify({version:3,exportedAt:new Date().toISOString(),...state},null,2)],{type:"application/json"});
@@ -666,7 +682,7 @@ function wire(){
  const resetVarBtn=find("#avResetVariant",host);
  if(resetVarBtn)resetVarBtn.onclick=()=>{
   const q=selected();if(!q)return;
-  delete customVariants[q.id];currentAnswer="";draftText=state.responses[q.id]||"";answerDirty=false;feedback="";show();
+  delete customVariants[q.id];draftText=state.responses[q.id]||"";currentAnswer=draftText;answerDirty=false;feedback="";show();
  };
  const prev=find("#avQuestionPrevious",host),next=find("#avQuestionNext",host);
  if(prev)prev.onclick=()=>moveQuestion(currentIndex-1,page==="visual"||page==="work");
