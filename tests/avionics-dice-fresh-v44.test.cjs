@@ -56,6 +56,7 @@ assert.equal(extraCases,720);
 const unresolved=Q.filter(q=>q.originalNumeric&&(!q.variantGenerator)&&q.variantPool?.length<=1).map(q=>q.id);
 console.log("Dice audit: "+methods+" fully source-recomputed method slots, "+cases+" unique sequential verified rolls; pool-only <=1 with no generator: "+unresolved.length+" — "+unresolved.slice(0,60).join(","));
 assert(!read("avionics_tutor.js").includes("roll%2===1||!pool.length"),"Dice caller must not alternate with stale pool");
+assert(read("avionics_tutor.js").includes("if(q.originalNumeric&&q.numericOperation)return null;"),"Progressive method cannot switch to obsolete numeric family on pool exhaustion");
 assert(read("avionics_tutor.js").includes("No additional verified same-method number set"),"Exhausted pool must report rather than pretend to reroll");
 console.log("PASS v44: "+cases+" audited configured dice rolls + "+extraCases+" new authored source numerics; method/topology/answers and canonical IDs protected.");
 
