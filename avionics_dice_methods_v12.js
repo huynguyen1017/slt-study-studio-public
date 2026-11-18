@@ -124,7 +124,15 @@
   }
   if(id==="timing-C7"&&base.length>1)capacity=113;
   const advance=((cycle-1)%Math.min(113,capacity))+1;
-  let next=firstFieldIsProbability ? a-step*advance : a+step*advance;
+  // Disjoint numeric grids prevent roll 25 of one seed from equalling
+  // roll 2 of a different seed (e.g. AC amplitude 12/24 V).
+  // Seed 0 always uses even grid coordinates; seed 1 uses odd coordinates.
+  const seedIndex=(n-1)%seeds.length;
+  const originalGrid=Math.round(a/step);
+  const parity=(Math.abs(originalGrid)%2);
+  const aligned=originalGrid+((seedIndex-parity+2)%2);
+  const grid=firstFieldIsProbability?aligned-2*advance:aligned+2*advance;
+  let next=grid*step;
   if(firstFieldIsProbability)next=Math.max(.0001,Math.min(.9999,next));
   base[0]=Number(next.toPrecision(9));
   return base;
