@@ -116,18 +116,34 @@ function makeRandomVariant(q){
  topology:extra.topology!==undefined?extra.topology:q.topology
 });
  const pool=Array.isArray(q.variantPool)?q.variantPool:[];
- if(typeof q.variantGenerator==="function"&&(roll%2===1||!pool.length)){
-  const v=q.variantGenerator(roll);
-  if(v&&v.question!==q.question){
-   return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:v.topology||q.topology});
+ // Use mathematically verified authored generators on EVERY click instead of
+ // alternating with the first static pool element. v12's two-item rotation
+ // silently repeated the same problem on roll 4, 6, 8, ...
+ if(typeof q.variantGenerator==="function"){
+  for(let attempt=0;attempt<6;attempt++){
+   const v=q.variantGenerator(roll+attempt*113);
+   if(v&&v.question&&v.question!==q.question&&
+      Number.isFinite(Number(v.expected))&&
+      (!v.sourceMethod||v.sourceMethod===q.numericOperation)){
+    return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:Object.prototype.hasOwnProperty.call(v,"topology")?v.topology:q.topology});
+   }
   }
  }
  if(pool.length){
-  const v=pool[(roll-1)%pool.length];
-  if(v&&v.question){
-   return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:v.topology||q.topology});
+  // A single pool value is not an infinite dice generator. Never claim a
+  // re-roll when it reproduces exactly the question already being studied.
+  for(let n=0;n<pool.length;n++){
+   const v=pool[((roll-1)+n)%pool.length];
+   if(v&&v.question&&v.question!==q.question&&Number.isFinite(Number(v.expected))&&
+      (!v.sourceMethod||v.sourceMethod===q.numericOperation)){
+    return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:Object.prototype.hasOwnProperty.call(v,"topology")?v.topology:q.topology});
+   }
   }
  }
+ // For authored progressive numeric methods, never fall back to an old
+ // calcFamily exercise if the last same-method pool choice was exhausted.
+ // Doing so would silently replace the current circuit-solving method.
+ if(q.originalNumeric&&q.numericOperation)return null;
  if(fam==="milli"){const x=randInt(3,850);return m(`Convert ${x} mA into amperes (A).`,x*1e-3,"A","I_A = I_mA * 10^(-3)",`I_A = ${x} * 10^(-3) = ${fmt(x*1e-3)}`,["Milli means 10^(-3).","Multiply "+x+" by 10^(-3) (move decimal 3 places left).","Report in amperes (A)."]);}
  if(fam==="micro"){const x=pick([1.5,3.3,6.8,15,22,33,68,220]);return m(`Express a ${x} µF capacitor in farads (F).`,x*1e-6,"F","C_F = C_uF * 10^(-6)",`C_F = ${x} * 10^(-6) = ${fmt(x*1e-6)}`,["Micro means 10^(-6).","Multiply "+x+" by 10^(-6) (shift decimal 6 places left).","Report in farads (F)."]);}
  if(fam==="ohmI"){const v=pick([1.8,3.3,5,9,12,15,24,28]);const r=pick([120,220,330,470,680,1000,1500,2200,4700]);const ia=v/r,ima=1000*ia;return m(`A ${r} Ω resistor has ${v} V across it. Find current in mA.`,ima,"mA","I = V / R",`I = ${v} / ${r} = ${fmt(ia)} = ${fmt(ima)} * 10^(-3)`,["Read V and R in base units.","Compute I = V / R in amperes.","Multiply by 10^(3) to report milliamps (mA)."]);}
@@ -301,6 +317,7 @@ function activeBanner(q,t){
  return `<div class="av-question av-active-banner">
   <div class="av-q-head"><span>ACTIVE QUESTION ${(idx>=0?idx+1:currentIndex+1)} / ${total} · ${esc(q.id.toUpperCase())} · ${esc(q.level.toUpperCase())}${q.isCustomVariant?" · CUSTOM NUMBERS":""}</span>${variantBtn}</div>
   <p>${esc(q.question)}</p>
+  ${feedback.startsWith("No additional verified same-method")?`<p class="av-message" role="status">${esc(feedback)}</p>`:""}
  </div>`;
 }
 
@@ -644,6 +661,7 @@ function wire(){
   const q=selected();if(!q)return;
   const v=makeRandomVariant(q);
   if(v){customVariants[q.id]=v;currentAnswer="";draftText="";answerDirty=false;feedback="";delete state.assessments[progressKey(v)];delete state.ratings[progressKey(v)];delete state.responses[progressKey(v)];save();show();}
+  else{feedback='No additional verified same-method number set is available for this question. Restore Canonical or choose a different calculation instead of repeating the same values.';show();}
  };
  const resetVarBtn=find("#avResetVariant",host);
  if(resetVarBtn)resetVarBtn.onclick=()=>{

@@ -30,6 +30,7 @@ on:
       - 'tests/avionics-curriculum-distinct-v10.test.cjs'
       - 'tests/avionics-integrated-v11.test.cjs'
       - 'tests/avionics-dice-methods-v12.test.cjs'
+      - 'tests/avionics-dice-fresh-v44.test.cjs'
       - 'tests/avionics-advanced-50-v12.test.cjs'
       - 'tests/nvidia-slt-academy-v1.test.cjs'
       - 'tests/nvidia-slt-visual-lab-v2.test.cjs'
@@ -108,6 +109,7 @@ jobs:
           node tests/avionics-curriculum-distinct-v10.test.cjs
           node tests/avionics-integrated-v11.test.cjs
           node tests/avionics-dice-methods-v12.test.cjs
+          node tests/avionics-dice-fresh-v44.test.cjs
           node tests/avionics-advanced-50-v12.test.cjs
           node tests/nvidia-slt-academy-v1.test.cjs
           node tests/nvidia-slt-visual-lab-v2.test.cjs
@@ -128,6 +130,7 @@ jobs:
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/avionics-site.log 2>&1 &
           sleep 2
           RUN_BROWSER=1 node tests/avionics-academy.test.cjs
+          RUN_BROWSER=1 node tests/avionics-dice-fresh-v44.test.cjs
           RUN_BROWSER=1 node tests/nvidia-slt-academy-v1.test.cjs
           RUN_BROWSER=1 node tests/ohmf1-engineer-studio-v2.test.cjs
           RUN_BROWSER=1 node tests/circuit-railroad-whiteboard-v1.test.cjs

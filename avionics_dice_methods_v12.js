@@ -97,6 +97,167 @@
    default:throw Error("Missing curated same-method numerical generator: "+id);
   }
  }
+ 
+ // Author-verified same-operation on-demand variants. A scaled measurement is
+ // re-solved by the exact method-specific build() function above; never adjust
+ // expected numerically without re-evaluating its governing relationship.
+ // The first physical input changes on every roll, including one-item pools.
+ // Restrict the two cases with ordered physical values: cold 2-wire leads
+ // must remain below the strap reading, and increasing range must stay > start.
+ function freshInputs(id, roll) {
+  const seeds = configs[id];
+  if(!seeds || !seeds.length)return null;
+  const n = Math.max(1,Math.floor(Number(roll)||1));
+  const base = seeds[(n-1)%seeds.length].slice();
+  const cycle = Math.floor((n-1)/seeds.length)+1;
+  const a = base[0];
+  // Constrain the finite physical domain. Consecutive rolls produce distinct
+  // inputs; after 100+ rolls old exercises may recur but never as duplicates
+  // on adjacent clicks. Percentage rates are kept strictly within 0..100%.
+  const firstFieldIsProbability = id === "qualification-C7";
+  let step = Number.isInteger(a) ? (Math.abs(a)>=1000?Math.max(2,Math.round(Math.abs(a)*.01)):Math.abs(a)>=100?2:1)
+     : Math.abs(a)>=1?.01:Math.abs(a)>=.1?.001:.0001;
+  if(firstFieldIsProbability) step=.0004;
+  let capacity=113;
+  if(id==="schematics-C2"||id==="rf-C7"){
+    capacity=Math.max(1,Math.floor((base[1]-a)/(2*step)));
+  }
+  if(id==="timing-C7"&&base.length>1)capacity=113;
+  const advance=((cycle-1)%Math.min(113,capacity))+1;
+  // Disjoint numeric grids prevent roll 25 of one seed from equalling
+  // roll 2 of a different seed (e.g. AC amplitude 12/24 V).
+  // Seed 0 always uses even grid coordinates; seed 1 uses odd coordinates.
+  const seedIndex=(n-1)%seeds.length;
+  const originalGrid=Math.round(a/step);
+  const parity=(Math.abs(originalGrid)%2);
+  const aligned=originalGrid+((seedIndex-parity+2)%2);
+  const grid=firstFieldIsProbability?aligned-2*advance:aligned+2*advance;
+  let next=grid*step;
+  if(firstFieldIsProbability)next=Math.max(.0001,Math.min(.9999,next));
+  base[0]=Number(next.toPrecision(9));
+  return base;
+ }
+ function freshVariant(id, roll, original) {
+  const inputs=freshInputs(id,roll);
+  if(!inputs)return null;
+  const [question,expr,answer,unit,unitCheck]=build(id,inputs);
+  if(!Number.isFinite(answer)||question===original.question)throw Error(id+" failed to create a fresh numeric question");
+  const rounded=num(answer);
+  const sub="Result = "+expr+" = "+s(rounded)+" "+unit;
+  return {
+   question,expected:rounded,unit,formula:original.formula,sub,
+   steps:[
+    "Identify the specific changed physical givens and the requested output.",
+    unitCheck,
+    "Write this slot's original solving law: "+original.formula,
+    "Substitute the new values (same numerical method): "+expr+" = "+s(rounded)+" "+unit,
+    "Independently check units, topology and expected magnitude."
+   ],
+   numericOperation:original.numericOperation,
+   sourceMethod:original.numericOperation,
+   topology:null
+  };
+ }
+
+
+ // Twelve additional audited original calculation slots previously had no
+ // useful fresh generator after the method-safe filtering pass. These are
+ // authored problem families, not guessed generic numeric string rewrites.
+ // All branches use the SAME physical law as their canonical question.
+ const extraMethods=new Set([
+  "units-C9","units-C10","ohm-C4","ohm-C5","ohm-C7","ohm-C8",
+  "power-C3","power-C4","power-C5","parallel-C3","parallel-C4","parallel-C5"
+ ]);
+ function extraVariant(q,roll){
+  if(!extraMethods.has(q.id))return null;
+  const n=((Math.max(1,Math.floor(Number(roll)||1))-1)%120)+1;
+  const round=x=>Number(Number(x).toPrecision(10));
+  let prompt,expr,value,unit=q.unit,check;
+  switch(q.id){
+   case "units-C9": {
+    const micro=800+2*n,milli=1.15;
+    prompt="A common avionics rail feeds a "+micro+" µA transducer and a "+milli+" mA RTC. Find total load current in mA.";
+    expr=micro+" / 1000 + "+milli;value=micro/1000+milli;
+    check="Convert microamperes to milliamperes first (µA/1000), then add the two loads using KCL.";break;
+   }
+   case "units-C10": {
+    const i=1+n*.02,t=20;
+    prompt="A latching actuator draws "+s(i)+" mA during a "+t+" ms pulse. Find total electric charge in µC.";
+    expr=s(i)+" * "+t;value=i*t;
+    check="mA × ms = (10^-3 A)(10^-3 s)=10^-6 C=µC; multiply current by duration.";break;
+   }
+   case "ohm-C4": {
+    const v=3.3,vf=2.1,ma=4+n*.1;
+    prompt="A 3.3 V microcontroller output drives an LED (Vf=2.1 V) and a resistor in series at "+s(ma)+" mA. Determine required ideal resistor in Ω.";
+    expr="("+v+" - "+vf+") / ("+s(ma)+" / 1000)";value=(v-vf)/(ma/1000);
+    check="Subtract Vf before using Ohm's law; convert the target milliampere current to amperes.";break;
+   }
+   case "ohm-C5": {
+    const i=12+n*.1,res=.035;
+    prompt="An actuator harness carries "+s(i)+" A through "+res+" Ω total conductor resistance. Calculate unwanted resistive voltage drop in mV.";
+    expr=s(i)+" * "+res+" * 1000";value=i*res*1000;
+    check="Compute IR in volts first, then multiply by 1000 to report millivolts.";break;
+   }
+   case "ohm-C7": {
+    const v=12,rs=10,rl=100+2*n;
+    prompt="A "+v+" V supply has "+rs+" Ω internal series resistance and feeds a "+rl+" Ω load. Calculate actual loop current in mA.";
+    expr="1000 * "+v+" / ("+rs+" + "+rl+")";value=1000*v/(rs+rl);
+    check="Add source and load series resistances before dividing by V; convert A to mA.";break;
+   }
+   case "ohm-C8": {
+    const mv=135+n*.3,shunt=.015;
+    prompt="A powered-down, isolated Kelvin test model corresponds to "+s(mv)+" mV across a "+shunt+" Ω shunt. Calculate operating current in A.";
+    expr="("+s(mv)+" / 1000) / "+shunt;value=(mv/1000)/shunt;
+    check="Voltage in mV must be scaled by 10^-3, then use I = V/R; never measure resistance on a powered rail.";break;
+   }
+   case "power-C3": {
+    const i=2+n*.1,r=.05;
+    prompt="A PCB copper return carries "+s(i)+" A through "+r+" Ω trace resistance. Calculate trace I²R heat dissipation in W.";
+    expr=s(i)+" * "+s(i)+" * "+r;value=i*i*r;
+    check="Square current in amperes and multiply by ohms; verify trace-temperature and current limits separately.";break;
+   }
+   case "power-C4": {
+    const vin=12,vout=3.3,ia=.1+n*.004;
+    prompt="An idealized LDO drops "+vin+" V to "+vout+" V at "+s(ia)+" A load current. Compute regulator dissipation in W.";
+    expr="("+vin+" - "+vout+") * "+s(ia);value=(vin-vout)*ia;
+    check="The LDO loses (Vin−Vout)×I; regulator thermal rating must be verified independently.";break;
+   }
+   case "power-C5": {
+    const v=5,i=1+n*.03,eff=.8;
+    prompt="An idealized buck supplies "+v+" V at "+s(i)+" A output with "+s(eff*100)+"% efficiency. Calculate required INPUT power in W.";
+    expr="("+v+" * "+s(i)+") / "+eff;value=v*i/eff;
+    check="First calculate output power V×I, then divide by efficiency expressed as a 0–1 fraction.";break;
+   }
+   case "parallel-C3": {
+    const r1=300,req=180+n*.5;
+    prompt="A "+r1+" Ω branch is already connected across two copper nodes. To achieve equivalent resistance "+s(req)+" Ω, what SECOND parallel resistor (Ω) is needed?";
+    expr="("+r1+" * "+s(req)+") / ("+r1+" - "+s(req)+")";value=r1*req/(r1-req);
+    check="Rearrange 1/Req=1/R1+1/R2; Req must be smaller than either finite resistor.";break;
+   }
+   case "parallel-C4": {
+    const ga=.02,gb=.018+n*.0003;
+    prompt="Two physical parallel paths have conductances "+ga+" S and "+s(gb)+" S. Determine total equivalent resistance in Ω.";
+    expr="1 / ("+ga+" + "+s(gb)+")";value=1/(ga+gb);
+    check="Add conductances in siemens and invert to obtain ohms.";break;
+   }
+   case "parallel-C5": {
+    const it=90+n*.5,r1=200,r2=400;
+    prompt="A constant "+s(it)+" mA source splits between two parallel "+r1+" Ω and "+r2+" Ω branches. Find current through the "+r1+" Ω branch in mA.";
+    expr=s(it)+" * ("+r2+" / ("+r1+" + "+r2+"))";value=it*r2/(r1+r2);
+    check="Current division gives branch-1 current I_total × R2/(R1+R2); check that the two currents add back to total.";break;
+   }
+  }
+  if(!Number.isFinite(value)||!Number.isFinite(Number(value.toPrecision(10))))throw Error(q.id+" invalid extra dice calculation");
+  const expected=round(value);
+  const sub="Result = "+expr+" = "+s(expected)+" "+unit;
+  return {question:prompt,expected,unit,formula:q.formula,sub,sourceMethod:q.numericOperation,numericOperation:q.numericOperation,topology:null,
+    steps:["Identify all NEW physical values and the requested result in "+unit+".",
+     check,
+     "Use the SAME governing relationship as the original: "+q.formula,
+     "Substitute the new inputs: "+expr+" = "+s(expected)+" "+unit,
+     "Check dimensions, source/loading and numerical plausibility before any real bench action."]};
+ }
+
  let safe=0, generated=0, removed=0;
  for(const q of Q.filter(q=>q.level==="Calculation"&&q.originalNumeric)){
   const key=q.topic+"::"+q.calcFamily, disallowed=baseByFamily.get(key)||new Set();
@@ -105,6 +266,9 @@
   removed+=before.length-q.variantPool.length;
   const cfg=configs[q.id];
   if(cfg){
+   // Existing curated pool remains for the historical workbook; new dice
+   // clicks obtain mathematically recalculated, method-locked fresh values.
+   q.variantGenerator=roll=>freshVariant(q.id,roll,q);
    for(const inputs of cfg){
     const [question,expr,answer,unit,unitCheck]=build(q.id,inputs);
     if(!Number.isFinite(answer))throw Error(q.id+" bad generated answer");
@@ -118,6 +282,7 @@
     generated++;
    }
   }
+  if(extraMethods.has(q.id)&&typeof q.variantGenerator!=="function")q.variantGenerator=roll=>extraVariant(q,roll);
   if(!q.variantPool.length&&typeof q.variantGenerator!=="function")throw Error("No verified dice variant for "+q.id);
   for(const v of q.variantPool){
    v.sourceMethod=q.numericOperation;
@@ -125,5 +290,5 @@
   }
   safe++;
  }
- window.AVIONICS_DICE_METHODS_V12={slots:safe,generated,removed};
+ window.AVIONICS_DICE_METHODS_V12={slots:safe,generated,removed,freshInputs,freshVariant,extraVariant,configuredSlots:Object.keys(configs).length,extraSlots:extraMethods.size};
 })();
