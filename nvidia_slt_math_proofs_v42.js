@@ -58,7 +58,11 @@ const match=(p,re)=>String(p||"").match(re);
 function solved(q){
  const d=data(q);if(!d)return null;
  const {c,method,target,u}=d,p=c.prompt||q.question||"",arr=[],limits=[];
- const make=(lbl,s)=>arr.push(box(lbl,typeof s==="string"?m(s):s));
+ // Raw algebra source strings must be typeset ONCE. All calls to make that
+ // already supply m()/equals()/fracCon() return complete trusted MathML HTML.
+ // Never pass completed '<math ...>' markup into the MathML tokenizer again:
+ // that encodes XML and displays literal tags instead of engineering equations.
+ const make=(lbl,markup)=>arr.push(box(lbl,markup));
  if(method==="current"){
   const g=match(p,/([\d.]+)\s*V rail drives a\s*([\d.]+)\s*Ω load/i);
   if(g){
@@ -178,10 +182,14 @@ function render(q,t,stage){
 function interview(q,t){
  if(!valid(q))return "";
  const info=solved(q);
- return '<section class="ne41-sheet ne42-interview"><header><small>INTERVIEW · EXPLAIN THIS ACTUAL CALCULATION</small><h4>Problem → mathematical proof → safe bench validation</h4></header><div class="ne41-body"><p><b>Prompt:</b> '+e(q.question)+'</p>'+
- info.arr.join("")+
- '<p><b>Interpretation:</b> '+e(info.limits[0]||"Verify from source inputs, then compare against an independently specified target.")+'</p>'+
- '<p><b>Disposition:</b> The number is a theoretical teaching prediction, not a measured NVIDIA GPU result. I would record voltage, current reference, instrument setup, uncertainty and a suitable independent check before claiming a real hardware PASS/FAIL.</p></div></section>';
+ const sourceLaw=String(q.formula||info.d.c.formula||"").split(";")[0].trim();
+ const resultName=({current:"I",parallel:"I",power:"P",droop:"ΔV",rc:"τ",shunt:"I"})[info.d.method]||"Result";
+ return '<section class="ne41-sheet ne42-interview"><header><small>INTERVIEW · EXPLAIN THIS ACTUAL CALCULATION</small><h4>Concise answer · physical check · evidence boundary</h4></header><div class="ne41-body"><p><b>Prompt:</b> '+e(q.question)+'</p>'+
+ '<p><b>Governing principle:</b> '+e(sourceLaw||"Derive and confirm the relevant physical relationship.")+'</p>'+
+ box("Result to communicate, not a duplicate of the five worked stages",
+   m(resultName+" = "+fmt(info.d.target)+" "+info.d.u))+
+ '<p><b>Physical interpretation:</b> '+e(info.limits[0]||"Verify from source inputs and independently specified limits.")+'</p>'+
+ '<p><b>Engineering disposition:</b> This is a theoretical teaching result, not a measured NVIDIA GPU value. I would check rated components, the correct measurement reference and calibrated instruments before claiming a hardware PASS/FAIL. The detailed derivation remains in the worked whiteboard above.</p></div></section>';
 }
 window.NVIDIA_SLT_MATH_PROOFS_V42={version:"42.0",valid,data,prefix,solved,render,interview,fracCon,outputFigure};
 })();
