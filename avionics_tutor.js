@@ -140,6 +140,10 @@ function makeRandomVariant(q){
    }
   }
  }
+ // For authored progressive numeric methods, never fall back to an old
+ // calcFamily exercise if the last same-method pool choice was exhausted.
+ // Doing so would silently replace the current circuit-solving method.
+ if(q.originalNumeric&&q.numericOperation)return null;
  if(fam==="milli"){const x=randInt(3,850);return m(`Convert ${x} mA into amperes (A).`,x*1e-3,"A","I_A = I_mA * 10^(-3)",`I_A = ${x} * 10^(-3) = ${fmt(x*1e-3)}`,["Milli means 10^(-3).","Multiply "+x+" by 10^(-3) (move decimal 3 places left).","Report in amperes (A)."]);}
  if(fam==="micro"){const x=pick([1.5,3.3,6.8,15,22,33,68,220]);return m(`Express a ${x} µF capacitor in farads (F).`,x*1e-6,"F","C_F = C_uF * 10^(-6)",`C_F = ${x} * 10^(-6) = ${fmt(x*1e-6)}`,["Micro means 10^(-6).","Multiply "+x+" by 10^(-6) (shift decimal 6 places left).","Report in farads (F)."]);}
  if(fam==="ohmI"){const v=pick([1.8,3.3,5,9,12,15,24,28]);const r=pick([120,220,330,470,680,1000,1500,2200,4700]);const ia=v/r,ima=1000*ia;return m(`A ${r} Ω resistor has ${v} V across it. Find current in mA.`,ima,"mA","I = V / R",`I = ${v} / ${r} = ${fmt(ia)} = ${fmt(ima)} * 10^(-3)`,["Read V and R in base units.","Compute I = V / R in amperes.","Multiply by 10^(3) to report milliamps (mA)."]);}
