@@ -125,7 +125,7 @@ function makeRandomVariant(q){
    if(v&&v.question&&v.question!==q.question&&
       Number.isFinite(Number(v.expected))&&
       (!v.sourceMethod||v.sourceMethod===q.numericOperation)){
-    return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:v.topology||q.topology});
+    return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:Object.prototype.hasOwnProperty.call(v,"topology")?v.topology:q.topology});
    }
   }
  }
@@ -136,7 +136,7 @@ function makeRandomVariant(q){
    const v=pool[((roll-1)+n)%pool.length];
    if(v&&v.question&&v.question!==q.question&&Number.isFinite(Number(v.expected))&&
       (!v.sourceMethod||v.sourceMethod===q.numericOperation)){
-    return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:v.topology||q.topology});
+    return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:Object.prototype.hasOwnProperty.call(v,"topology")?v.topology:q.topology});
    }
   }
  }
