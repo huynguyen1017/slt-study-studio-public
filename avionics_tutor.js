@@ -116,16 +116,28 @@ function makeRandomVariant(q){
  topology:extra.topology!==undefined?extra.topology:q.topology
 });
  const pool=Array.isArray(q.variantPool)?q.variantPool:[];
- if(typeof q.variantGenerator==="function"&&(roll%2===1||!pool.length)){
-  const v=q.variantGenerator(roll);
-  if(v&&v.question!==q.question){
-   return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:v.topology||q.topology});
+ // Use mathematically verified authored generators on EVERY click instead of
+ // alternating with the first static pool element. v12's two-item rotation
+ // silently repeated the same problem on roll 4, 6, 8, ...
+ if(typeof q.variantGenerator==="function"){
+  for(let attempt=0;attempt<6;attempt++){
+   const v=q.variantGenerator(roll+attempt*113);
+   if(v&&v.question&&v.question!==q.question&&
+      Number.isFinite(Number(v.expected))&&
+      (!v.sourceMethod||v.sourceMethod===q.numericOperation)){
+    return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:v.topology||q.topology});
+   }
   }
  }
  if(pool.length){
-  const v=pool[(roll-1)%pool.length];
-  if(v&&v.question){
-   return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:v.topology||q.topology});
+  // A single pool value is not an infinite dice generator. Never claim a
+  // re-roll when it reproduces exactly the question already being studied.
+  for(let n=0;n<pool.length;n++){
+   const v=pool[((roll-1)+n)%pool.length];
+   if(v&&v.question&&v.question!==q.question&&Number.isFinite(Number(v.expected))&&
+      (!v.sourceMethod||v.sourceMethod===q.numericOperation)){
+    return m(v.question,v.expected,v.unit,v.formula,v.sub,v.steps,{topology:v.topology||q.topology});
+   }
   }
  }
  if(fam==="milli"){const x=randInt(3,850);return m(`Convert ${x} mA into amperes (A).`,x*1e-3,"A","I_A = I_mA * 10^(-3)",`I_A = ${x} * 10^(-3) = ${fmt(x*1e-3)}`,["Milli means 10^(-3).","Multiply "+x+" by 10^(-3) (move decimal 3 places left).","Report in amperes (A)."]);}
@@ -644,6 +656,7 @@ function wire(){
   const q=selected();if(!q)return;
   const v=makeRandomVariant(q);
   if(v){customVariants[q.id]=v;currentAnswer="";draftText="";answerDirty=false;feedback="";delete state.assessments[progressKey(v)];delete state.ratings[progressKey(v)];delete state.responses[progressKey(v)];save();show();}
+  else{feedback='No additional verified same-method number set is available for this question. Restore Canonical or choose a different calculation instead of repeating the same values.';show();}
  };
  const resetVarBtn=find("#avResetVariant",host);
  if(resetVarBtn)resetVarBtn.onclick=()=>{
